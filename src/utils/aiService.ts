@@ -11,11 +11,16 @@ export async function getAIResponse(prompt: string, systemPrompt?: string): Prom
 
     if (systemPrompt) {
       messages.push({ role: 'system', content: systemPrompt });
+    } else {
+      messages.push({
+        role: 'system',
+        content: 'You are an intelligent mentor and recruitment assistant.'
+      });
     }
 
     messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    const response = await fetch('https://api.opensource.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -25,7 +30,6 @@ export async function getAIResponse(prompt: string, systemPrompt?: string): Prom
         model: 'deepseek-chat',
         messages,
         temperature: 0.7,
-        max_tokens: 2000,
       }),
     });
 
@@ -37,8 +41,8 @@ export async function getAIResponse(prompt: string, systemPrompt?: string): Prom
     const data = await response.json();
     return data.choices?.[0]?.message?.content || 'No response generated.';
   } catch (error) {
-    console.error('AI Service Error:', error);
-    throw error;
+    console.error('AI error:', error);
+    return 'Sorry, I couldn\'t generate a response.';
   }
 }
 
