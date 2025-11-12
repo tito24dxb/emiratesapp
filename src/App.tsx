@@ -8,6 +8,7 @@ import CoursesPage from './pages/CoursesPage';
 import MessagesPage from './pages/MessagesPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
+import CoachDashboard from './pages/CoachDashboard';
 import UsersControl from './pages/governor/UsersControl';
 import GlobalAlerts from './pages/governor/GlobalAlerts';
 import MaintenanceMode from './pages/governor/MaintenanceMode';
@@ -58,10 +59,10 @@ function AppContent() {
           path="/students"
           element={<PlaceholderPage icon={Users} title="Students" description="View and manage your student roster" />}
         />
-        <Route
-          path="/upload"
-          element={<PlaceholderPage icon={Upload} title="Upload Content" description="Upload courses and educational materials" />}
-        />
+
+        {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
+          <Route path="/coach-dashboard" element={<CoachDashboard />} />
+        )}
 
         {currentUser.role === 'governor' && (
           <>

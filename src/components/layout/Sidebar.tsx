@@ -10,7 +10,8 @@ import {
   BarChart3,
   Shield,
   FolderOpen,
-  MessagesSquare
+  MessagesSquare,
+  GraduationCap
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -30,13 +31,14 @@ export default function Sidebar() {
 
   const mentorLinks = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/students', icon: Users, label: 'Students' },
-    { path: '/upload', icon: Upload, label: 'Upload' },
     { path: '/messages', icon: MessageCircle, label: 'Messages' },
   ];
 
   const governorLinks = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
+    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/users', icon: Users, label: 'Users' },
     { path: '/alerts', icon: Bell, label: 'Alerts' },
     { path: '/maintenance', icon: Settings, label: 'Maintenance' },
