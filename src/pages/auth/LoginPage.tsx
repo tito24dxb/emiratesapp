@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { demoUsers } from '../../data/mockData';
 import { Plane, Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -22,43 +21,42 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const demoUser = demoUsers.find(
-        (u) => u.email === email && u.password === password
-      );
-
-      if (demoUser) {
-        const { password: _, ...userWithoutPassword } = demoUser;
-        setCurrentUser(userWithoutPassword);
-        navigate('/dashboard');
-        setLoading(false);
-        return;
-      }
-
+      console.log('Attempting login with email:', email);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log('Firebase Auth successful, user:', user.uid);
 
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userDocRef);
+      console.log('Firestore user doc exists:', userDoc.exists());
 
       if (!userDoc.exists()) {
+        console.error('User document not found in Firestore for uid:', user.uid);
         throw new Error('User profile not found. Please contact support.');
       }
 
       const userData = userDoc.data();
+      console.log('User data from Firestore:', userData);
+
       const currentUser = {
         uid: user.uid,
-        email: userData.email,
-        name: userData.name,
-        role: userData.role as 'student' | 'mentor' | 'governor',
+        email: userData.email || user.email,
+        name: userData.name || userData.displayName || 'User',
+        role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
-        country: userData.country,
+        country: userData.country || '',
         bio: userData.bio || '',
         photoURL: userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
       };
 
+      console.log('Setting current user:', currentUser);
       setCurrentUser(currentUser);
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+
       let errorMessage = 'Invalid email or password';
 
       if (err.code === 'auth/user-not-found') {
@@ -69,6 +67,10 @@ export default function LoginPage() {
         errorMessage = 'Please enter a valid email address.';
       } else if (err.code === 'auth/too-many-requests') {
         errorMessage = 'Too many failed attempts. Please try again later.';
+      } else if (err.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password.';
+      } else if (err.message) {
+        errorMessage = err.message;
       }
 
       setError(errorMessage);
@@ -77,16 +79,6 @@ export default function LoginPage() {
     }
   };
 
-  const quickLogin = (email: string, password: string) => {
-    setEmail(email);
-    setPassword(password);
-    setTimeout(() => {
-      const form = document.querySelector('form');
-      if (form) {
-        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-      }
-    }, 100);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] via-[#F5E6D3] to-white flex items-center justify-center p-4">
@@ -173,48 +165,6 @@ export default function LoginPage() {
                 Register
               </Link>
             </p>
-          </div>
-
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm font-bold text-gray-700 mb-3">Test Accounts (Dev Only):</p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => quickLogin('governor@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-[#FFD700] hover:bg-[#D4AF37] text-[#000000] rounded-lg transition text-xs font-bold"
-              >
-                Governor (VIP): governor@crewsacademy.com
-              </button>
-              <button
-                type="button"
-                onClick={() => quickLogin('mentor@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-[#D71921] hover:bg-[#B91518] text-white rounded-lg transition text-xs font-bold"
-              >
-                Mentor (Pro): mentor@crewsacademy.com
-              </button>
-              <button
-                type="button"
-                onClick={() => quickLogin('student@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition text-xs font-bold"
-              >
-                Student Free: student@crewsacademy.com
-              </button>
-              <button
-                type="button"
-                onClick={() => quickLogin('pro@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-xs font-bold"
-              >
-                Student Pro: pro@crewsacademy.com
-              </button>
-              <button
-                type="button"
-                onClick={() => quickLogin('vip@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-gradient-to-r from-[#FFD700] to-[#D4AF37] hover:shadow-lg text-[#000000] rounded-lg transition text-xs font-bold"
-              >
-                Student VIP: vip@crewsacademy.com
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-3 text-center">Password: test123</p>
           </div>
         </div>
       </motion.div>
