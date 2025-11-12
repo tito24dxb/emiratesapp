@@ -1,10 +1,8 @@
-import { Timestamp } from 'firebase/firestore';
-
 interface MessageBubbleProps {
   text: string;
   senderName?: string;
   senderRole: 'student' | 'mentor' | 'governor';
-  createdAt: Timestamp;
+  createdAt: string;
   isOwn: boolean;
 }
 
@@ -15,10 +13,10 @@ export default function MessageBubble({
   createdAt,
   isOwn,
 }: MessageBubbleProps) {
-  const formatTime = (timestamp: Timestamp | null) => {
+  const formatTime = (timestamp: string) => {
     if (!timestamp) return '';
     try {
-      const date = timestamp.toDate();
+      const date = new Date(timestamp);
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch {
       return '';

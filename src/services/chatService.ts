@@ -1,44 +1,31 @@
-import {
-  collection,
-  addDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  serverTimestamp,
-  getDocs,
-  where,
-  doc,
-  setDoc,
-  updateDoc,
-  Timestamp,
-} from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 export interface GroupMessage {
   id: string;
-  senderId: string;
-  senderName: string;
-  senderRole: 'student' | 'mentor' | 'governor';
+  sender_id: string;
+  sender_name: string;
+  sender_role: 'student' | 'mentor' | 'governor';
   text: string;
-  createdAt: Timestamp;
+  created_at: string;
 }
 
 export interface PrivateMessage {
   id: string;
-  senderId: string;
-  senderRole: 'student' | 'mentor' | 'governor';
+  conversation_id: string;
+  sender_id: string;
+  sender_role: 'student' | 'mentor' | 'governor';
   text: string;
-  createdAt: Timestamp;
+  created_at: string;
 }
 
 export interface Conversation {
   id: string;
   participants: string[];
-  participantNames: Record<string, string>;
-  participantRoles: Record<string, string>;
-  startedAt: Timestamp;
-  lastUpdated: Timestamp;
-  lastMessage?: string;
+  participant_names: Record<string, string>;
+  participant_roles: Record<string, string>;
+  started_at: string;
+  last_updated: string;
+  last_message?: string;
 }
 
 export interface User {
@@ -56,31 +43,58 @@ export const sendGroupMessage = async (
   senderRole: 'student' | 'mentor' | 'governor',
   text: string
 ): Promise<void> => {
-  const messagesRef = collection(db, 'groupChats', 'publicRoom', 'messages');
-  await addDoc(messagesRef, {
-    senderId,
-    senderName,
-    senderRole,
-    text: text.trim(),
-    createdAt: serverTimestamp(),
-  });
+  const { error } = await supabase
+    .from('group_messages')
+    .insert({
+      sender_id: senderId,
+      sender_name: senderName,
+      sender_role: senderRole,
+      text: text.trim(),
+    });
+
+  if (error) {
+    console.error('Error sending message:', error);
+    throw error;
+  }
 };
 
 export const subscribeToGroupMessages = (
   callback: (messages: GroupMessage[]) => void
 ): (() => void) => {
-  const messagesRef = collection(db, 'groupChats', 'publicRoom', 'messages');
-  const q = query(messagesRef, orderBy('createdAt', 'asc'));
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('group_messages')
+      .select('*')
+      .order('created_at', { ascending: true });
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const messages: GroupMessage[] = [];
-    snapshot.forEach((doc) => {
-      messages.push({ id: doc.id, ...doc.data() } as GroupMessage);
-    });
-    callback(messages);
-  });
+    if (error) {
+      console.error('Error fetching messages:', error);
+      return;
+    }
 
-  return unsubscribe;
+    callback(data || []);
+  };
+
+  fetchMessages();
+
+  const subscription = supabase
+    .channel('group_messages_changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'group_messages',
+      },
+      () => {
+        fetchMessages();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    subscription.unsubscribe();
+  };
 };
 
 export const getOrCreateConversation = async (
@@ -91,46 +105,41 @@ export const getOrCreateConversation = async (
   targetUserName: string,
   targetUserRole: string
 ): Promise<string> => {
-  const conversationsRef = collection(db, 'conversations');
+  const conversationId = [currentUserId, targetUserId].sort().join('_');
 
-  const q1 = query(
-    conversationsRef,
-    where('participants', 'array-contains', currentUserId)
-  );
+  const { data: existingConv } = await supabase
+    .from('conversations')
+    .select('id')
+    .eq('id', conversationId)
+    .maybeSingle();
 
-  const snapshot = await getDocs(q1);
-  let existingConversation: string | null = null;
-
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    if (data.participants.includes(targetUserId)) {
-      existingConversation = doc.id;
-    }
-  });
-
-  if (existingConversation) {
-    return existingConversation;
+  if (existingConv) {
+    return existingConv.id;
   }
 
-  const conversationId = [currentUserId, targetUserId].sort().join('_');
-  const conversationRef = doc(db, 'conversations', conversationId);
+  const { data, error } = await supabase
+    .from('conversations')
+    .insert({
+      id: conversationId,
+      participants: [currentUserId, targetUserId],
+      participant_names: {
+        [currentUserId]: currentUserName,
+        [targetUserId]: targetUserName,
+      },
+      participant_roles: {
+        [currentUserId]: currentUserRole,
+        [targetUserId]: targetUserRole,
+      },
+    })
+    .select()
+    .single();
 
-  await setDoc(conversationRef, {
-    participants: [currentUserId, targetUserId],
-    participantNames: {
-      [currentUserId]: currentUserName,
-      [targetUserId]: targetUserName,
-    },
-    participantRoles: {
-      [currentUserId]: currentUserRole,
-      [targetUserId]: targetUserRole,
-    },
-    startedAt: serverTimestamp(),
-    lastUpdated: serverTimestamp(),
-    lastMessage: '',
-  });
+  if (error) {
+    console.error('Error creating conversation:', error);
+    throw error;
+  }
 
-  return conversationId;
+  return data.id;
 };
 
 export const sendPrivateMessage = async (
@@ -139,88 +148,133 @@ export const sendPrivateMessage = async (
   senderRole: 'student' | 'mentor' | 'governor',
   text: string
 ): Promise<void> => {
-  const messagesRef = collection(
-    db,
-    'conversations',
-    conversationId,
-    'messages'
-  );
+  const { error: messageError } = await supabase
+    .from('private_messages')
+    .insert({
+      conversation_id: conversationId,
+      sender_id: senderId,
+      sender_role: senderRole,
+      text: text.trim(),
+    });
 
-  await addDoc(messagesRef, {
-    senderId,
-    senderRole,
-    text: text.trim(),
-    createdAt: serverTimestamp(),
-  });
+  if (messageError) {
+    console.error('Error sending message:', messageError);
+    throw messageError;
+  }
 
-  const conversationRef = doc(db, 'conversations', conversationId);
-  await updateDoc(conversationRef, {
-    lastUpdated: serverTimestamp(),
-    lastMessage: text.trim().substring(0, 50),
-  });
+  const { error: updateError } = await supabase
+    .from('conversations')
+    .update({
+      last_updated: new Date().toISOString(),
+      last_message: text.trim().substring(0, 50),
+    })
+    .eq('id', conversationId);
+
+  if (updateError) {
+    console.error('Error updating conversation:', updateError);
+  }
 };
 
 export const subscribeToPrivateMessages = (
   conversationId: string,
   callback: (messages: PrivateMessage[]) => void
 ): (() => void) => {
-  const messagesRef = collection(
-    db,
-    'conversations',
-    conversationId,
-    'messages'
-  );
-  const q = query(messagesRef, orderBy('createdAt', 'asc'));
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('private_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true });
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const messages: PrivateMessage[] = [];
-    snapshot.forEach((doc) => {
-      messages.push({ id: doc.id, ...doc.data() } as PrivateMessage);
-    });
-    callback(messages);
-  });
+    if (error) {
+      console.error('Error fetching messages:', error);
+      return;
+    }
 
-  return unsubscribe;
+    callback(data || []);
+  };
+
+  fetchMessages();
+
+  const subscription = supabase
+    .channel(`private_messages_${conversationId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'private_messages',
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      () => {
+        fetchMessages();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    subscription.unsubscribe();
+  };
 };
 
 export const subscribeToUserConversations = (
   userId: string,
   callback: (conversations: Conversation[]) => void
 ): (() => void) => {
-  const conversationsRef = collection(db, 'conversations');
-  const q = query(
-    conversationsRef,
-    where('participants', 'array-contains', userId),
-    orderBy('lastUpdated', 'desc')
-  );
+  const fetchConversations = async () => {
+    const { data, error } = await supabase
+      .from('conversations')
+      .select('*')
+      .contains('participants', [userId])
+      .order('last_updated', { ascending: false });
 
-  const unsubscribe = onSnapshot(q, (snapshot) => {
-    const conversations: Conversation[] = [];
-    snapshot.forEach((doc) => {
-      conversations.push({ id: doc.id, ...doc.data() } as Conversation);
-    });
-    callback(conversations);
-  });
+    if (error) {
+      console.error('Error fetching conversations:', error);
+      return;
+    }
 
-  return unsubscribe;
+    callback(data || []);
+  };
+
+  fetchConversations();
+
+  const subscription = supabase
+    .channel('conversations_changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'conversations',
+      },
+      () => {
+        fetchConversations();
+      }
+    )
+    .subscribe();
+
+  return () => {
+    subscription.unsubscribe();
+  };
 };
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const usersRef = collection(db, 'users');
-  const snapshot = await getDocs(usersRef);
-  const users: User[] = [];
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('name');
 
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    users.push({
-      uid: doc.id,
-      name: data.name || data.displayName || 'Unknown User',
-      email: data.email,
-      role: data.role || 'student',
-      country: data.country,
-      isOnline: data.isOnline || false,
-    });
-  });
+  if (error) {
+    console.error('Error fetching users:', error);
+    return [];
+  }
 
-  return users;
+  return (data || []).map((user) => ({
+    uid: user.id,
+    name: user.name || user.display_name || 'Unknown User',
+    email: user.email,
+    role: user.role || 'student',
+    country: user.country,
+    isOnline: false,
+  }));
 };

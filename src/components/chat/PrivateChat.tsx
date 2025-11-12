@@ -237,9 +237,9 @@ export default function PrivateChat() {
                     <MessageBubble
                       key={message.id}
                       text={message.text}
-                      senderRole={message.senderRole}
-                      createdAt={message.createdAt}
-                      isOwn={message.senderId === currentUser?.uid}
+                      senderRole={message.sender_role}
+                      createdAt={message.created_at}
+                      isOwn={message.sender_id === currentUser?.uid}
                     />
                   ))}
                   <div ref={messagesEndRef} />
