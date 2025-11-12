@@ -16,7 +16,9 @@ import {
   Plane,
   Briefcase,
   Crown,
-  Lock
+  Lock,
+  Calendar,
+  UserCircle
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -49,22 +51,23 @@ export default function Sidebar() {
     }
 
     baseLinks.push(
-      { path: '/chat', icon: MessageCircle, label: 'Chat' }
+      { path: '/chat', icon: MessageCircle, label: 'Chat' },
+      { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
+      { path: '/open-days', icon: Calendar, label: 'Open Days' }
     );
 
     if (isVip) {
       baseLinks.push(
-        { path: '/messages', icon: MessagesSquare, label: 'Messages', badge: 'VIP' },
-        { path: '/recruiters', icon: Briefcase, label: 'Recruiters', badge: 'VIP' }
+        { path: '/messages', icon: MessagesSquare, label: 'Messages', badge: 'VIP' }
       );
     } else {
       baseLinks.push(
-        { path: '/messages', icon: MessagesSquare, label: 'Messages', locked: true },
-        { path: '/recruiters', icon: Briefcase, label: 'Recruiters', locked: true }
+        { path: '/messages', icon: MessagesSquare, label: 'Messages', locked: true }
       );
     }
 
     baseLinks.push(
+      { path: '/profile', icon: UserCircle, label: 'Profile' },
       { path: '/support', icon: HelpCircle, label: 'Support' },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip' }
     );
@@ -80,6 +83,9 @@ export default function Sidebar() {
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/messages', icon: MessagesSquare, label: 'Messages' },
+    { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
+    { path: '/open-days', icon: Calendar, label: 'Open Days' },
+    { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
   const governorLinks = [
@@ -87,11 +93,14 @@ export default function Sidebar() {
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/users', icon: Users, label: 'Users' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
+    { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
+    { path: '/open-days', icon: Calendar, label: 'Open Days' },
     { path: '/alerts', icon: Bell, label: 'Alerts' },
     { path: '/maintenance', icon: Settings, label: 'Maintenance' },
     { path: '/hub', icon: FolderOpen, label: 'Hub' },
     { path: '/conversations', icon: MessagesSquare, label: 'Conversations' },
     { path: '/analytics', icon: BarChart3, label: 'Analytics' },
+    { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
   const links =
