@@ -48,14 +48,18 @@ export default function Sidebar() {
       );
     }
 
+    baseLinks.push(
+      { path: '/chat', icon: MessageCircle, label: 'Chat' }
+    );
+
     if (isVip) {
       baseLinks.push(
-        { path: '/messages', icon: MessageCircle, label: 'Messages', badge: 'VIP' },
+        { path: '/messages', icon: MessagesSquare, label: 'Messages', badge: 'VIP' },
         { path: '/recruiters', icon: Briefcase, label: 'Recruiters', badge: 'VIP' }
       );
     } else {
       baseLinks.push(
-        { path: '/messages', icon: MessageCircle, label: 'Messages', locked: true },
+        { path: '/messages', icon: MessagesSquare, label: 'Messages', locked: true },
         { path: '/recruiters', icon: Briefcase, label: 'Recruiters', locked: true }
       );
     }
@@ -74,13 +78,15 @@ export default function Sidebar() {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/students', icon: Users, label: 'Students' },
-    { path: '/messages', icon: MessageCircle, label: 'Messages' },
+    { path: '/chat', icon: MessageCircle, label: 'Chat' },
+    { path: '/messages', icon: MessagesSquare, label: 'Messages' },
   ];
 
   const governorLinks = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/users', icon: Users, label: 'Users' },
+    { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/alerts', icon: Bell, label: 'Alerts' },
     { path: '/maintenance', icon: Settings, label: 'Maintenance' },
     { path: '/hub', icon: FolderOpen, label: 'Hub' },

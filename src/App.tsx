@@ -6,6 +6,7 @@ import RegisterPage from './pages/auth/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
 import MessagesPage from './pages/MessagesPage';
+import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
 import CoachDashboard from './pages/CoachDashboard';
@@ -56,6 +57,7 @@ function AppContent() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/ai-trainer" element={<AITrainerPage />} />
