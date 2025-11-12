@@ -55,7 +55,7 @@ export default function RegisterPage() {
       setCurrentUser(newUser);
       navigate('/dashboard');
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error('Registration error details:', err);
       let errorMessage = 'Registration failed. Please try again.';
 
       if (err.code === 'auth/email-already-in-use') {
@@ -64,6 +64,8 @@ export default function RegisterPage() {
         errorMessage = 'Password should be at least 6 characters.';
       } else if (err.code === 'auth/invalid-email') {
         errorMessage = 'Please enter a valid email address.';
+      } else if (err.message) {
+        errorMessage = `Error: ${err.message}`;
       }
 
       setError(errorMessage);
