@@ -1,31 +1,44 @@
-import { supabase } from '../lib/supabase';
+import {
+  collection,
+  addDoc,
+  query,
+  orderBy,
+  onSnapshot,
+  serverTimestamp,
+  getDocs,
+  where,
+  doc,
+  setDoc,
+  updateDoc,
+  Timestamp,
+} from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export interface GroupMessage {
   id: string;
-  sender_id: string;
-  sender_name: string;
-  sender_role: 'student' | 'mentor' | 'governor';
+  senderId: string;
+  senderName: string;
+  senderRole: 'student' | 'mentor' | 'governor';
   text: string;
-  created_at: string;
+  createdAt: Timestamp;
 }
 
 export interface PrivateMessage {
   id: string;
-  conversation_id: string;
-  sender_id: string;
-  sender_role: 'student' | 'mentor' | 'governor';
+  senderId: string;
+  senderRole: 'student' | 'mentor' | 'governor';
   text: string;
-  created_at: string;
+  createdAt: Timestamp;
 }
 
 export interface Conversation {
   id: string;
   participants: string[];
-  participant_names: Record<string, string>;
-  participant_roles: Record<string, string>;
-  started_at: string;
-  last_updated: string;
-  last_message?: string;
+  participantNames: Record<string, string>;
+  participantRoles: Record<string, string>;
+  startedAt: Timestamp;
+  lastUpdated: Timestamp;
+  lastMessage?: string;
 }
 
 export interface User {
@@ -43,58 +56,31 @@ export const sendGroupMessage = async (
   senderRole: 'student' | 'mentor' | 'governor',
   text: string
 ): Promise<void> => {
-  const { error } = await supabase
-    .from('group_messages')
-    .insert({
-      sender_id: senderId,
-      sender_name: senderName,
-      sender_role: senderRole,
-      text: text.trim(),
-    });
-
-  if (error) {
-    console.error('Error sending message:', error);
-    throw error;
-  }
+  const messagesRef = collection(db, 'groupChats', 'publicRoom', 'messages');
+  await addDoc(messagesRef, {
+    senderId,
+    senderName,
+    senderRole,
+    text: text.trim(),
+    createdAt: serverTimestamp(),
+  });
 };
 
 export const subscribeToGroupMessages = (
   callback: (messages: GroupMessage[]) => void
 ): (() => void) => {
-  const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from('group_messages')
-      .select('*')
-      .order('created_at', { ascending: true });
+  const messagesRef = collection(db, 'groupChats', 'publicRoom', 'messages');
+  const q = query(messagesRef, orderBy('createdAt', 'asc'));
 
-    if (error) {
-      console.error('Error fetching messages:', error);
-      return;
-    }
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const messages: GroupMessage[] = [];
+    snapshot.forEach((doc) => {
+      messages.push({ id: doc.id, ...doc.data() } as GroupMessage);
+    });
+    callback(messages);
+  });
 
-    callback(data || []);
-  };
-
-  fetchMessages();
-
-  const subscription = supabase
-    .channel('group_messages_changes')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'group_messages',
-      },
-      () => {
-        fetchMessages();
-      }
-    )
-    .subscribe();
-
-  return () => {
-    subscription.unsubscribe();
-  };
+  return unsubscribe;
 };
 
 export const getOrCreateConversation = async (
@@ -105,41 +91,46 @@ export const getOrCreateConversation = async (
   targetUserName: string,
   targetUserRole: string
 ): Promise<string> => {
+  const conversationsRef = collection(db, 'conversations');
+
+  const q1 = query(
+    conversationsRef,
+    where('participants', 'array-contains', currentUserId)
+  );
+
+  const snapshot = await getDocs(q1);
+  let existingConversation: string | null = null;
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    if (data.participants.includes(targetUserId)) {
+      existingConversation = doc.id;
+    }
+  });
+
+  if (existingConversation) {
+    return existingConversation;
+  }
+
   const conversationId = [currentUserId, targetUserId].sort().join('_');
+  const conversationRef = doc(db, 'conversations', conversationId);
 
-  const { data: existingConv } = await supabase
-    .from('conversations')
-    .select('id')
-    .eq('id', conversationId)
-    .maybeSingle();
+  await setDoc(conversationRef, {
+    participants: [currentUserId, targetUserId],
+    participantNames: {
+      [currentUserId]: currentUserName,
+      [targetUserId]: targetUserName,
+    },
+    participantRoles: {
+      [currentUserId]: currentUserRole,
+      [targetUserId]: targetUserRole,
+    },
+    startedAt: serverTimestamp(),
+    lastUpdated: serverTimestamp(),
+    lastMessage: '',
+  });
 
-  if (existingConv) {
-    return existingConv.id;
-  }
-
-  const { data, error } = await supabase
-    .from('conversations')
-    .insert({
-      id: conversationId,
-      participants: [currentUserId, targetUserId],
-      participant_names: {
-        [currentUserId]: currentUserName,
-        [targetUserId]: targetUserName,
-      },
-      participant_roles: {
-        [currentUserId]: currentUserRole,
-        [targetUserId]: targetUserRole,
-      },
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Error creating conversation:', error);
-    throw error;
-  }
-
-  return data.id;
+  return conversationId;
 };
 
 export const sendPrivateMessage = async (
@@ -148,133 +139,88 @@ export const sendPrivateMessage = async (
   senderRole: 'student' | 'mentor' | 'governor',
   text: string
 ): Promise<void> => {
-  const { error: messageError } = await supabase
-    .from('private_messages')
-    .insert({
-      conversation_id: conversationId,
-      sender_id: senderId,
-      sender_role: senderRole,
-      text: text.trim(),
-    });
+  const messagesRef = collection(
+    db,
+    'conversations',
+    conversationId,
+    'messages'
+  );
 
-  if (messageError) {
-    console.error('Error sending message:', messageError);
-    throw messageError;
-  }
+  await addDoc(messagesRef, {
+    senderId,
+    senderRole,
+    text: text.trim(),
+    createdAt: serverTimestamp(),
+  });
 
-  const { error: updateError } = await supabase
-    .from('conversations')
-    .update({
-      last_updated: new Date().toISOString(),
-      last_message: text.trim().substring(0, 50),
-    })
-    .eq('id', conversationId);
-
-  if (updateError) {
-    console.error('Error updating conversation:', updateError);
-  }
+  const conversationRef = doc(db, 'conversations', conversationId);
+  await updateDoc(conversationRef, {
+    lastUpdated: serverTimestamp(),
+    lastMessage: text.trim().substring(0, 50),
+  });
 };
 
 export const subscribeToPrivateMessages = (
   conversationId: string,
   callback: (messages: PrivateMessage[]) => void
 ): (() => void) => {
-  const fetchMessages = async () => {
-    const { data, error } = await supabase
-      .from('private_messages')
-      .select('*')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true });
+  const messagesRef = collection(
+    db,
+    'conversations',
+    conversationId,
+    'messages'
+  );
+  const q = query(messagesRef, orderBy('createdAt', 'asc'));
 
-    if (error) {
-      console.error('Error fetching messages:', error);
-      return;
-    }
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const messages: PrivateMessage[] = [];
+    snapshot.forEach((doc) => {
+      messages.push({ id: doc.id, ...doc.data() } as PrivateMessage);
+    });
+    callback(messages);
+  });
 
-    callback(data || []);
-  };
-
-  fetchMessages();
-
-  const subscription = supabase
-    .channel(`private_messages_${conversationId}`)
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'private_messages',
-        filter: `conversation_id=eq.${conversationId}`,
-      },
-      () => {
-        fetchMessages();
-      }
-    )
-    .subscribe();
-
-  return () => {
-    subscription.unsubscribe();
-  };
+  return unsubscribe;
 };
 
 export const subscribeToUserConversations = (
   userId: string,
   callback: (conversations: Conversation[]) => void
 ): (() => void) => {
-  const fetchConversations = async () => {
-    const { data, error } = await supabase
-      .from('conversations')
-      .select('*')
-      .contains('participants', [userId])
-      .order('last_updated', { ascending: false });
+  const conversationsRef = collection(db, 'conversations');
+  const q = query(
+    conversationsRef,
+    where('participants', 'array-contains', userId),
+    orderBy('lastUpdated', 'desc')
+  );
 
-    if (error) {
-      console.error('Error fetching conversations:', error);
-      return;
-    }
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const conversations: Conversation[] = [];
+    snapshot.forEach((doc) => {
+      conversations.push({ id: doc.id, ...doc.data() } as Conversation);
+    });
+    callback(conversations);
+  });
 
-    callback(data || []);
-  };
-
-  fetchConversations();
-
-  const subscription = supabase
-    .channel('conversations_changes')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'conversations',
-      },
-      () => {
-        fetchConversations();
-      }
-    )
-    .subscribe();
-
-  return () => {
-    subscription.unsubscribe();
-  };
+  return unsubscribe;
 };
 
 export const getAllUsers = async (): Promise<User[]> => {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .order('name');
+  const usersRef = collection(db, 'users');
+  const snapshot = await getDocs(usersRef);
+  const users: User[] = [];
 
-  if (error) {
-    console.error('Error fetching users:', error);
-    return [];
-  }
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    users.push({
+      uid: doc.id,
+      name: data.name || data.displayName || 'Unknown User',
+      email: data.email,
+      role: data.role || 'student',
+      country: data.country,
+      isOnline: data.isOnline || false,
+    });
+  });
 
-  return (data || []).map((user) => ({
-    uid: user.id,
-    name: user.name || user.display_name || 'Unknown User',
-    email: user.email,
-    role: user.role || 'student',
-    country: user.country,
-    isOnline: false,
-  }));
+  return users;
 };
