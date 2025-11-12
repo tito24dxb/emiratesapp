@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
-import { Star, Brain, FileText, Target, ChevronDown, CheckCircle, Lock } from 'lucide-react';
+import { Star, Brain, FileText, Target, ChevronDown, CheckCircle, Lock, Upload, Sparkles } from 'lucide-react';
 import PremiumCard from '../components/PremiumCard';
 import ProgressTracker from '../components/ProgressTracker';
 import AICVAnalyzerPlaceholder from '../components/AICVAnalyzerPlaceholder';
 import { motion } from 'framer-motion';
+
+const mockCVReport = {
+  score: 82,
+  suggestions: [
+    "Add more detail to your hospitality achievements with specific metrics",
+    "Show measurable teamwork impact and leadership examples",
+    "Emphasize customer empathy and calmness under pressure",
+    "Include international experience or cultural awareness examples",
+    "Highlight language skills and communication abilities"
+  ]
+};
 
 const mockInterviewModules = [
   {
@@ -21,55 +32,55 @@ const mockInterviewModules = [
 🧠 AI Practice Mode: Get personalized feedback on your group interaction style (coming soon)`
   },
   {
-    title: 'Teamwork Evaluation Scenarios',
-    content: `Navigate complex team challenges with confidence:
+    title: 'Communication & Listening',
+    content: `Perfect your communication skills for Emirates standards:
 
-• Handling disagreements professionally
-• Supporting struggling team members
-• Taking initiative without overstepping
-• Cultural sensitivity in diverse groups
-• Conflict resolution techniques
+• Active listening demonstration techniques
+• Clear articulation and professional vocabulary
+• Non-verbal communication mastery
+• Cultural sensitivity in diverse conversations
+• Handling language barriers with passengers
 
-Example scenarios with model responses and recruiter insights included.`
+Recruiters evaluate: clarity, empathy, respect, and cultural awareness.`
   },
   {
-    title: 'English Proficiency & Communication',
-    content: `Perfect your communication for Emirates standards:
+    title: 'Handling a Customer Complaint',
+    content: `Learn the Emirates approach to service recovery:
 
-• Clear articulation and professional vocabulary
-• Active listening demonstration techniques
-• Non-verbal communication mastery
-• Handling language barriers with passengers
-• Cultural communication styles
+• Listen actively and acknowledge concerns
+• Apologize sincerely without admitting fault
+• Offer solutions within company policy
+• Follow up to ensure satisfaction
+• Turn complaints into loyalty opportunities
 
-Practice with AI-powered pronunciation feedback (coming soon)`
+Recruiters look for empathy, active listening, and respectful communication.`
   }
 ];
 
 const strategySteps = [
   {
-    title: 'Pre-Open Day Preparation',
-    description: 'Complete checklist and mindset preparation',
+    title: 'Pre-Open Day Checklist',
+    description: 'Essential preparation and document checklist',
     completed: true
   },
   {
-    title: 'Energy & First Impressions',
-    description: 'Master the art of positive presence',
+    title: 'Grooming & Confidence',
+    description: 'Perfect your professional appearance and posture',
     completed: true
   },
   {
-    title: 'Common Recruiter Red Flags',
+    title: 'Common Red Flags',
     description: 'Avoid the mistakes that eliminate candidates',
     completed: false
   },
   {
-    title: 'Emirates Communication Style',
-    description: 'Speak the language recruiters want to hear',
+    title: 'Emirates Communication Tone',
+    description: 'Master the communication style recruiters expect',
     completed: false
   },
   {
-    title: 'Confidence Mastery',
-    description: 'Project authentic confidence under pressure',
+    title: 'Mindset Before Interview',
+    description: 'Mental preparation and confidence building techniques',
     completed: false
   }
 ];

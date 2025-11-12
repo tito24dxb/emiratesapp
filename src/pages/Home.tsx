@@ -129,15 +129,19 @@ export default function Home({ onNavigate }: HomeProps) {
         {hasStepProgram ? (
           <button
             onClick={() => onNavigate('onestep')}
-            className="w-full bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition transform hover:-translate-y-1"
+            className="w-full bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition transform hover:-translate-y-1 border-2 border-[#D4AF37]"
           >
             <div className="flex items-center gap-3 mb-2">
               <Crown className="w-6 h-6" />
-              <h3 className="text-xl font-bold">One Step Program</h3>
+              <h3 className="text-xl font-bold">⭐ One Step Program</h3>
             </div>
-            <p className="text-sm text-yellow-100">
+            <p className="text-sm text-yellow-100 mb-2">
               Access your premium AI tools, advanced practice modules, and success strategies
             </p>
+            <div className="flex items-center gap-2 text-sm">
+              <CheckCircle className="w-4 h-4" />
+              <span className="text-yellow-100">Premium Member</span>
+            </div>
           </button>
         ) : (
           <button

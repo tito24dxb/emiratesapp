@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload, FileText, CheckCircle, AlertCircle, Sparkles } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface AICVAnalyzerPlaceholderProps {
@@ -7,18 +7,19 @@ interface AICVAnalyzerPlaceholderProps {
 }
 
 const mockCVReport = {
-  score: 78,
+  score: 82,
   suggestions: [
-    "Add customer service achievements with specific metrics",
-    "Include measurable results in your hospitality experience",
-    "Highlight international teamwork and cultural exposure",
-    "Emphasize language skills and communication abilities",
-    "Add volunteer work or community involvement"
+    "Add more detail to your hospitality achievements with specific metrics",
+    "Show measurable teamwork impact and leadership examples", 
+    "Emphasize customer empathy and calmness under pressure",
+    "Include international experience or cultural awareness examples",
+    "Highlight language skills and communication abilities"
   ],
   strengths: [
-    "Strong educational background",
-    "Relevant work experience in service industry",
-    "Professional presentation and formatting"
+    "Strong educational background in hospitality",
+    "Relevant work experience in customer service",
+    "Professional presentation and clear formatting",
+    "Good use of action verbs and achievements"
   ]
 };
 
@@ -117,29 +118,29 @@ export default function AICVAnalyzerPlaceholder({ hasAccess }: AICVAnalyzerPlace
           className="space-y-4"
         >
           <div className="bg-white rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-[#C8A14B] p-3 rounded-full">
-                <FileText className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] p-3 rounded-full">
+                <BarChart3 className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h4 className="text-xl font-bold text-[#2C2C2C]">CV Analysis Complete</h4>
-                <p className="text-gray-600">Emirates Compatibility Score</p>
+                <p className="text-gray-600">Emirates Recruitment Compatibility</p>
               </div>
             </div>
             
-            <div className="bg-[#F5F3EF] rounded-xl p-6 mb-4">
-              <div className="flex items-center justify-between mb-2">
+            <div className="bg-gradient-to-r from-[#F5F3EF] to-[#F8F6F2] rounded-xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-[#2C2C2C] font-semibold">Overall Score</span>
-                <span className="text-3xl font-bold text-[#C8A14B]">{mockCVReport.score}%</span>
+                <span className="text-4xl font-bold text-[#C8A14B]">{mockCVReport.score}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
+              <div className="w-full bg-white rounded-full h-4 shadow-inner">
                 <div
-                  className="bg-[#C8A14B] h-3 rounded-full transition-all duration-1000"
+                  className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] h-4 rounded-full transition-all duration-1000 shadow-sm"
                   style={{ width: `${mockCVReport.score}%` }}
                 />
               </div>
               <p className="text-sm text-gray-600 mt-2">
-                Good foundation! With improvements, you can reach 90%+
+                Excellent foundation! With targeted improvements, you can reach 95%+
               </p>
             </div>
 
@@ -175,11 +176,24 @@ export default function AICVAnalyzerPlaceholder({ hasAccess }: AICVAnalyzerPlace
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
-              <button className="flex-1 bg-[#C8A14B] text-white py-3 rounded-xl font-semibold hover:bg-[#B8914B] transition">
-                Generate Improved CV (Coming Soon)
+            <div className="bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-xl p-4 mb-6 text-white">
+              <h5 className="font-bold mb-2 flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                AI Enhancement Available
+              </h5>
+              <p className="text-red-100 text-sm mb-3">
+                Get a personalized, Emirates-optimized version of your CV with targeted improvements
+              </p>
+              <button className="bg-white text-[#D71920] px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-100 transition">
+                Generate Enhanced CV (Coming Soon)
               </button>
-              <button className="flex-1 bg-gray-200 text-[#2C2C2C] py-3 rounded-xl font-semibold hover:bg-gray-300 transition">
+            </div>
+
+            <div className="flex gap-3">
+              <button className="flex-1 bg-[#C8A14B] text-white py-3 rounded-xl font-semibold hover:bg-[#B8914B] transition shadow-lg">
+                Download Report
+              </button>
+              <button className="flex-1 bg-gray-100 text-[#2C2C2C] py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
                 Save Report
               </button>
             </div>
