@@ -53,20 +53,7 @@ export default function Sidebar() {
     baseLinks.push(
       { path: '/chat', icon: MessageCircle, label: 'Chat' },
       { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
-      { path: '/open-days', icon: Calendar, label: 'Open Days' }
-    );
-
-    if (isVip) {
-      baseLinks.push(
-        { path: '/messages', icon: MessagesSquare, label: 'Messages', badge: 'VIP' }
-      );
-    } else {
-      baseLinks.push(
-        { path: '/messages', icon: MessagesSquare, label: 'Messages', locked: true }
-      );
-    }
-
-    baseLinks.push(
+      { path: '/open-days', icon: Calendar, label: 'Open Days' },
       { path: '/profile', icon: UserCircle, label: 'Profile' },
       { path: '/support', icon: HelpCircle, label: 'Support' },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip' }
@@ -82,7 +69,6 @@ export default function Sidebar() {
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
-    { path: '/messages', icon: MessagesSquare, label: 'Messages' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },

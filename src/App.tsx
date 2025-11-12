@@ -58,7 +58,6 @@ function AppContent() {
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
-        <Route path="/messages" element={<MessagesPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
