@@ -10,37 +10,37 @@ export default function Navbar() {
   if (!currentUser) return null;
 
   return (
-    <nav className="bg-gradient-to-r from-[#D71920] to-[#B91518] text-white shadow-lg sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#B9975B] rounded-lg flex items-center justify-center font-bold text-lg">
-              EA
+    <nav className="bg-gradient-to-r from-[#D71921] to-[#B91518] text-white shadow-lg sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 md:h-16">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-[#FFD700] rounded-lg flex items-center justify-center font-bold text-sm md:text-lg text-[#000000]">
+              CA
             </div>
-            <h1 className="text-xl font-bold">Emirates Academy</h1>
+            <h1 className="text-base md:text-xl font-bold">Crew's Academy</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button className="relative p-2 hover:bg-white/10 rounded-lg transition">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#B9975B] rounded-full"></span>
+          <div className="flex items-center gap-2 md:gap-4">
+            <button className="relative p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition">
+              <Bell className="w-4 h-4 md:w-5 md:h-5" />
+              <span className="absolute top-0.5 right-0.5 md:top-1 md:right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-[#FFD700] rounded-full"></span>
             </button>
 
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-3 hover:bg-white/10 rounded-lg px-3 py-2 transition"
+                className="flex items-center gap-1 md:gap-3 hover:bg-white/10 rounded-lg px-2 md:px-3 py-1.5 md:py-2 transition"
               >
                 <img
                   src={currentUser.photoURL}
                   alt={currentUser.name}
-                  className="w-8 h-8 rounded-full object-cover border-2 border-white"
+                  className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover border-2 border-white"
                 />
                 <div className="text-left hidden md:block">
                   <div className="text-sm font-bold">{currentUser.name}</div>
                   <div className="text-xs text-red-100 capitalize">{currentUser.role}</div>
                 </div>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3 md:w-4 md:h-4" />
               </button>
 
               <AnimatePresence>

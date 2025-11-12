@@ -46,16 +46,16 @@ export default function RegisterPage() {
       >
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-2xl flex items-center justify-center shadow-lg">
               <Plane className="w-8 h-8 text-white" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-center text-[#1C1C1C] mb-2">
+          <h1 className="text-3xl font-bold text-center text-[#000000] mb-2">
             Create Account
           </h1>
           <p className="text-center text-gray-600 mb-8">
-            Join Emirates Academy today
+            Join Crew's Academy today
           </p>
 
           <form onSubmit={handleRegister} className="space-y-5">
@@ -70,7 +70,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                   placeholder="John Smith"
                 />
               </div>
@@ -87,7 +87,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -105,7 +105,7 @@ export default function RegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                   placeholder="Minimum 6 characters"
                 />
               </div>
@@ -122,7 +122,7 @@ export default function RegisterPage() {
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                   placeholder="Your country"
                 />
               </div>
@@ -138,7 +138,7 @@ export default function RegisterPage() {
                   onClick={() => setRole('student')}
                   className={`py-3 rounded-xl font-bold transition ${
                     role === 'student'
-                      ? 'bg-[#D71920] text-white shadow-lg'
+                      ? 'bg-[#D71921] text-white shadow-lg'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -149,7 +149,7 @@ export default function RegisterPage() {
                   onClick={() => setRole('mentor')}
                   className={`py-3 rounded-xl font-bold transition ${
                     role === 'mentor'
-                      ? 'bg-[#D71920] text-white shadow-lg'
+                      ? 'bg-[#D71921] text-white shadow-lg'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -160,7 +160,7 @@ export default function RegisterPage() {
                   onClick={() => setRole('governor')}
                   className={`py-3 rounded-xl font-bold transition ${
                     role === 'governor'
-                      ? 'bg-[#B9975B] text-white shadow-lg'
+                      ? 'bg-[#FFD700] text-[#000000] shadow-lg'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -193,7 +193,7 @@ export default function RegisterPage() {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-[#D71920] font-bold hover:underline"
+                className="text-[#D71921] font-bold hover:underline"
               >
                 Sign In
               </Link>

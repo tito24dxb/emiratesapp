@@ -1,6 +1,6 @@
-# Emirates Academy
+# Crew's Academy
 
-A luxurious, role-based educational platform for Emirates cabin crew training.
+A luxurious, role-based educational platform for Emirates cabin crew training with complete Layer 1 free courses.
 
 ## Quick Start
 
@@ -16,13 +16,28 @@ Visit `http://localhost:5173` and log in with:
 
 ## Features
 
+### Layer 1: Free Source (6 Complete Courses)
+1. Welcome to Crew's Academy
+2. Dress Code & Grooming
+3. Open Day Strategy
+4. Assessment Day Process
+5. English Proficiency & Communication
+6. Final Interview Tips
+
+### Platform Features
 - Role-based dashboards (Student, Mentor, Governor)
+- Fully responsive mobile-first design
 - Course management and progress tracking
 - Encrypted messaging system
 - Governor admin panel with user control
 - Global alerts and maintenance mode
 - Editable user profiles
-- Responsive design with Emirates branding
+
+### Design
+- Emirates color palette: Red (#D71921), Gold (#FFD700), Jet Black (#000000)
+- Lato font family
+- Smooth animations and transitions
+- Mobile-optimized (375px+)
 
 See `EMIRATES_ACADEMY_README.md` for full documentation.
 

@@ -48,16 +48,16 @@ export default function LoginPage() {
       >
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-2xl flex items-center justify-center shadow-lg">
               <Plane className="w-8 h-8 text-white" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-center text-[#1C1C1C] mb-2">
+          <h1 className="text-3xl font-bold text-center text-[#000000] mb-2">
             Welcome Back
           </h1>
           <p className="text-center text-gray-600 mb-8">
-            Sign in to Emirates Academy
+            Sign in to Crew's Academy
           </p>
 
           <form onSubmit={handleLogin} className="space-y-6">
@@ -72,7 +72,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                   placeholder="Enter your password"
                 />
               </div>
@@ -108,7 +108,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#D71920] to-[#B91518] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FFD700]/30 transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
@@ -119,7 +119,7 @@ export default function LoginPage() {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-[#D71920] font-bold hover:underline"
+                className="text-[#D71921] font-bold hover:underline"
               >
                 Register
               </Link>
@@ -132,14 +132,14 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => quickLogin('governor@emirates.com', 'Governor123')}
-                className="w-full text-left px-4 py-2 bg-[#B9975B] hover:bg-[#A8865A] text-white rounded-lg transition text-sm"
+                className="w-full text-left px-4 py-2 bg-[#FFD700] hover:bg-[#D4AF37] text-[#000000] rounded-lg transition text-sm font-bold"
               >
                 Governor Account
               </button>
               <button
                 type="button"
                 onClick={() => quickLogin('coach@emirates.com', 'Coach123')}
-                className="w-full text-left px-4 py-2 bg-[#D71920] hover:bg-[#B91518] text-white rounded-lg transition text-sm"
+                className="w-full text-left px-4 py-2 bg-[#D71921] hover:bg-[#B91518] text-white rounded-lg transition text-sm font-bold"
               >
                 Mentor Account
               </button>
