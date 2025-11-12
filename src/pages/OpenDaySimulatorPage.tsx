@@ -14,11 +14,24 @@ import {
   deleteSimulation,
   SimulationData,
 } from '../services/simulationService';
+import { checkFeatureAccess } from '../utils/featureAccess';
+import FeatureLock from '../components/FeatureLock';
 
 type Phase = 'welcome' | 'presentation' | 'quiz' | 'english' | 'results';
 
 export default function OpenDaySimulatorPage() {
   const { currentUser } = useApp();
+  const access = checkFeatureAccess(currentUser, 'simulator');
+
+  if (!access.allowed) {
+    return (
+      <FeatureLock
+        requiredPlan={access.requiresPlan || 'vip'}
+        featureName="Open Day Simulator"
+        description={access.message || 'Upgrade to access the Open Day Simulator'}
+      />
+    );
+  }
   const navigate = useNavigate();
   const isPro = currentUser?.plan === 'pro' || currentUser?.plan === 'vip';
 

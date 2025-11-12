@@ -22,42 +22,71 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
+import { checkFeatureAccess, Feature } from '../../utils/featureAccess';
+import UpgradePrompt from '../UpgradePrompt';
 
 export default function Sidebar() {
   const { currentUser } = useApp();
   const location = useLocation();
+  const [upgradePrompt, setUpgradePrompt] = useState<{ isOpen: boolean; feature: Feature; featureName: string } | null>(null);
 
   if (!currentUser) return null;
 
   const getStudentLinks = () => {
+    const aiTrainerAccess = checkFeatureAccess(currentUser, 'ai-trainer');
+    const simulatorAccess = checkFeatureAccess(currentUser, 'simulator');
+    const recruitersAccess = checkFeatureAccess(currentUser, 'recruiters');
+    const openDaysAccess = checkFeatureAccess(currentUser, 'opendays');
+    const chatAccess = checkFeatureAccess(currentUser, 'chat');
+
     const baseLinks = [
-      { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { path: '/courses', icon: BookOpen, label: 'Courses' },
+      { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', feature: null },
+      { path: '/courses', icon: BookOpen, label: 'Courses', feature: null },
+      {
+        path: '/ai-trainer',
+        icon: Brain,
+        label: 'AI Trainer',
+        locked: !aiTrainerAccess.allowed,
+        feature: 'ai-trainer' as Feature,
+        badge: aiTrainerAccess.allowed && currentUser.plan === 'vip' ? 'VIP' : undefined
+      },
+      {
+        path: '/open-day',
+        icon: Plane,
+        label: 'Open Day Sim',
+        locked: !simulatorAccess.allowed,
+        feature: 'simulator' as Feature,
+        badge: simulatorAccess.allowed && currentUser.plan === 'vip' ? 'VIP' : undefined
+      },
+      {
+        path: '/chat',
+        icon: MessageCircle,
+        label: 'Chat',
+        locked: !chatAccess.allowed,
+        feature: 'chat' as Feature,
+        badge: chatAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
+      },
+      {
+        path: '/recruiters',
+        icon: Briefcase,
+        label: 'Recruiters',
+        locked: !recruitersAccess.allowed,
+        feature: 'recruiters' as Feature,
+        badge: recruitersAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
+      },
+      {
+        path: '/open-days',
+        icon: Calendar,
+        label: 'Open Days',
+        locked: !openDaysAccess.allowed,
+        feature: 'opendays' as Feature,
+        badge: openDaysAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
+      },
+      { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
+      { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
+      { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null }
     ];
-
-    const isPro = currentUser.plan === 'pro' || currentUser.plan === 'vip';
-    const isVip = currentUser.plan === 'vip';
-
-    if (isPro) {
-      baseLinks.push(
-        { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: currentUser.plan === 'pro' ? 'PRO' : undefined },
-        { path: '/open-day', icon: Plane, label: 'Open Day Sim', badge: currentUser.plan === 'pro' ? 'PRO' : undefined }
-      );
-    } else {
-      baseLinks.push(
-        { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', locked: true },
-        { path: '/open-day', icon: Plane, label: 'Open Day Sim', locked: true }
-      );
-    }
-
-    baseLinks.push(
-      { path: '/chat', icon: MessageCircle, label: 'Chat' },
-      { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
-      { path: '/open-days', icon: Calendar, label: 'Open Days' },
-      { path: '/profile', icon: UserCircle, label: 'Profile' },
-      { path: '/support', icon: HelpCircle, label: 'Support' },
-      { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip' }
-    );
 
     return baseLinks;
   };
@@ -120,9 +149,9 @@ export default function Sidebar() {
                 key={link.path}
                 to={isLocked ? '#' : link.path}
                 onClick={(e) => {
-                  if (isLocked) {
+                  if (isLocked && 'feature' in link && link.feature) {
                     e.preventDefault();
-                    alert('Upgrade your plan to unlock this feature');
+                    setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
                   }
                 }}
                 className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl transition whitespace-nowrap md:whitespace-normal relative ${
@@ -152,6 +181,15 @@ export default function Sidebar() {
           })}
         </nav>
       </div>
+      {upgradePrompt && (
+        <UpgradePrompt
+          isOpen={upgradePrompt.isOpen}
+          onClose={() => setUpgradePrompt(null)}
+          requiredPlan={checkFeatureAccess(currentUser, upgradePrompt.feature).requiresPlan || 'pro'}
+          message={checkFeatureAccess(currentUser, upgradePrompt.feature).message || ''}
+          feature={upgradePrompt.featureName}
+        />
+      )}
     </aside>
   );
 }

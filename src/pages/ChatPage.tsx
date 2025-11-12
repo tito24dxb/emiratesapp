@@ -3,9 +3,35 @@ import { MessageCircle, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import GroupChat from '../components/chat/GroupChat';
 import PrivateChat from '../components/chat/PrivateChat';
+import { useApp } from '../context/AppContext';
+import { checkFeatureAccess } from '../utils/featureAccess';
+import FeatureLock from '../components/FeatureLock';
 
 export default function ChatPage() {
+  const { currentUser } = useApp();
+  const chatAccess = checkFeatureAccess(currentUser, 'chat');
+  const messagesAccess = checkFeatureAccess(currentUser, 'messages');
   const [activeTab, setActiveTab] = useState<'group' | 'private'>('group');
+
+  if (!chatAccess.allowed && activeTab === 'group') {
+    return (
+      <FeatureLock
+        requiredPlan={chatAccess.requiresPlan || 'pro'}
+        featureName="Group Chat"
+        description={chatAccess.message || 'Upgrade to access group chat'}
+      />
+    );
+  }
+
+  if (!messagesAccess.allowed && activeTab === 'private') {
+    return (
+      <FeatureLock
+        requiredPlan={messagesAccess.requiresPlan || 'pro'}
+        featureName="Private Messages"
+        description={messagesAccess.message || 'Upgrade to send private messages'}
+      />
+    );
+  }
 
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col">

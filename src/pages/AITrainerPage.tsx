@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState, useRef, useEffect } from 'react';
 import { analyzeCVForEmirates, getCabinCrewGuidance } from '../utils/aiService';
+import { checkFeatureAccess } from '../utils/featureAccess';
+import FeatureLock from '../components/FeatureLock';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -12,6 +14,18 @@ interface ChatMessage {
 
 export default function AITrainerPage() {
   const { currentUser } = useApp();
+  const access = checkFeatureAccess(currentUser, 'ai-trainer');
+
+  if (!access.allowed) {
+    return (
+      <FeatureLock
+        requiredPlan={access.requiresPlan || 'vip'}
+        featureName="AI Trainer"
+        description={access.message || 'Upgrade to access the AI Trainer'}
+      />
+    );
+  }
+
   const isPro = currentUser?.plan === 'pro' || currentUser?.plan === 'vip';
   const [activeTab, setActiveTab] = useState<'cv' | 'chat'>('cv');
 
