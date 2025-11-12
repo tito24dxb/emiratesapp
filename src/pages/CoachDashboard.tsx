@@ -69,7 +69,12 @@ export default function CoachDashboard() {
   const loadCourses = () => {
     const savedCourses = localStorage.getItem('coachCourses');
     if (savedCourses) {
-      setCourses(JSON.parse(savedCourses));
+      try {
+        setCourses(JSON.parse(savedCourses));
+      } catch (error) {
+        localStorage.removeItem('coachCourses');
+        setCourses([]);
+      }
     }
   };
 

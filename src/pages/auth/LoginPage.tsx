@@ -127,28 +127,28 @@ export default function LoginPage() {
           </div>
 
           <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm font-bold text-gray-700 mb-3">Quick Login:</p>
+            <p className="text-sm font-bold text-gray-700 mb-3">Test Accounts (Dev Only):</p>
             <div className="space-y-2">
               <button
                 type="button"
-                onClick={() => quickLogin('governor@emirates.com', 'Governor123')}
+                onClick={() => quickLogin('governor@crewsacademy.com', 'test123')}
                 className="w-full text-left px-4 py-2 bg-[#FFD700] hover:bg-[#D4AF37] text-[#000000] rounded-lg transition text-sm font-bold"
               >
-                Governor Account
+                Governor: governor@crewsacademy.com / test123
               </button>
               <button
                 type="button"
-                onClick={() => quickLogin('coach@emirates.com', 'Coach123')}
+                onClick={() => quickLogin('mentor@crewsacademy.com', 'test123')}
                 className="w-full text-left px-4 py-2 bg-[#D71921] hover:bg-[#B91518] text-white rounded-lg transition text-sm font-bold"
               >
-                Mentor Account
+                Mentor: mentor@crewsacademy.com / test123
               </button>
               <button
                 type="button"
-                onClick={() => quickLogin('student@emirates.com', 'Student123')}
-                className="w-full text-left px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-sm"
+                onClick={() => quickLogin('student@crewsacademy.com', 'test123')}
+                className="w-full text-left px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-sm font-bold"
               >
-                Student Account
+                Student: student@crewsacademy.com / test123
               </button>
             </div>
           </div>
