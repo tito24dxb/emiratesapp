@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 export type Role = 'student' | 'mentor' | 'governor';
+export type Plan = 'free' | 'pro' | 'vip';
 
 export interface User {
   uid: string;
   email: string;
   name: string;
   role: Role;
+  plan: Plan;
   country: string;
   bio: string;
   photoURL: string;

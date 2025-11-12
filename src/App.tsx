@@ -13,6 +13,10 @@ import UsersControl from './pages/governor/UsersControl';
 import GlobalAlerts from './pages/governor/GlobalAlerts';
 import MaintenanceMode from './pages/governor/MaintenanceMode';
 import PlaceholderPage from './pages/PlaceholderPage';
+import AITrainerPage from './pages/AITrainerPage';
+import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
+import RecruiterListPage from './pages/RecruiterListPage';
+import UpgradePlanPage from './pages/UpgradePlanPage';
 import { Users, Upload, FolderOpen, MessagesSquare, BarChart3 } from 'lucide-react';
 
 function MaintenanceScreen({ message }: { message: string }) {
@@ -54,6 +58,10 @@ function AppContent() {
         <Route path="/messages" element={<MessagesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/ai-trainer" element={<AITrainerPage />} />
+        <Route path="/open-day" element={<OpenDaySimulatorPage />} />
+        <Route path="/recruiters" element={<RecruiterListPage />} />
+        <Route path="/upgrade" element={<UpgradePlanPage />} />
 
         <Route
           path="/students"

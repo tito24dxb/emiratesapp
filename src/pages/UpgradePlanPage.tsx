@@ -1,0 +1,184 @@
+import { Check, Crown, Shield, Circle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useApp } from '../context/AppContext';
+
+export default function UpgradePlanPage() {
+  const { currentUser } = useApp();
+
+  const plans = [
+    {
+      name: 'Free',
+      plan: 'free' as const,
+      icon: Circle,
+      price: '0',
+      color: 'gray',
+      features: [
+        'Access to dashboard',
+        'Basic profile management',
+        'Free courses',
+        'Support chat',
+        'Community access',
+      ],
+      disabled: ['AI Trainer', 'Open Day Simulator', 'Recruiter Intelligence', 'E2E Encrypted Chat'],
+    },
+    {
+      name: 'Pro',
+      plan: 'pro' as const,
+      icon: Shield,
+      price: '29',
+      color: 'blue',
+      popular: true,
+      features: [
+        'Everything in Free',
+        'AI CV Optimization',
+        'Open Day Simulator',
+        'English B2 Test',
+        'Priority support',
+        'Progress tracking',
+      ],
+      disabled: ['AI Chat Coach', 'Recruiter Intelligence', 'E2E Encrypted Chat'],
+    },
+    {
+      name: 'VIP',
+      plan: 'vip' as const,
+      icon: Crown,
+      price: '79',
+      color: 'gold',
+      features: [
+        'Everything in Pro',
+        'AI Chat Coach',
+        'Recruiter Intelligence',
+        'E2E Encrypted Chat',
+        'Past open day data',
+        'Success candidate profiles',
+        '1-on-1 mentor sessions',
+        'VIP badge',
+      ],
+      disabled: [],
+    },
+  ];
+
+  return (
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-12"
+      >
+        <h1 className="text-4xl font-bold text-[#000000] mb-3">Choose Your Plan</h1>
+        <p className="text-gray-600 text-lg">
+          Select the perfect plan for your Emirates cabin crew journey
+        </p>
+      </motion.div>
+
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {plans.map((planItem, index) => {
+          const Icon = planItem.icon;
+          const isCurrentPlan = currentUser?.plan === planItem.plan;
+
+          return (
+            <motion.div
+              key={planItem.name}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`relative bg-white rounded-2xl shadow-xl p-6 border-4 ${
+                planItem.popular ? 'border-[#D71921]' : 'border-transparent'
+              }`}
+            >
+              {planItem.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white text-sm font-bold rounded-full">
+                  Most Popular
+                </div>
+              )}
+
+              <div className="text-center mb-6">
+                <div
+                  className={`w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center ${
+                    planItem.color === 'gray'
+                      ? 'bg-gray-500'
+                      : planItem.color === 'blue'
+                      ? 'bg-blue-600'
+                      : 'bg-gradient-to-br from-[#FFD700] to-[#D4AF37]'
+                  }`}
+                >
+                  <Icon className={`w-8 h-8 ${planItem.color === 'gold' ? 'text-[#000000]' : 'text-white'}`} />
+                </div>
+                <h3 className="text-2xl font-bold text-[#000000] mb-2">{planItem.name}</h3>
+                <div className="flex items-baseline justify-center gap-1 mb-4">
+                  <span className="text-4xl font-bold text-[#000000]">${planItem.price}</span>
+                  <span className="text-gray-500">/month</span>
+                </div>
+
+                {isCurrentPlan ? (
+                  <div className="px-6 py-3 bg-gray-200 text-gray-600 rounded-xl font-bold">
+                    Current Plan
+                  </div>
+                ) : (
+                  <button
+                    className={`w-full px-6 py-3 rounded-xl font-bold transition ${
+                      planItem.color === 'gray'
+                        ? 'bg-gray-500 hover:bg-gray-600 text-white'
+                        : planItem.color === 'blue'
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37] hover:shadow-lg text-[#000000]'
+                    }`}
+                  >
+                    {planItem.plan === 'free' ? 'Current Plan' : 'Upgrade Now'}
+                  </button>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <div className="font-bold text-sm text-gray-700 mb-2">Includes:</div>
+                {planItem.features.map((feature, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-gradient-to-r from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8"
+      >
+        <h2 className="text-2xl font-bold text-[#000000] mb-6 text-center">
+          Frequently Asked Questions
+        </h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="font-bold text-[#000000] mb-2">Can I change plans later?</h3>
+            <p className="text-sm text-gray-700">
+              Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-[#000000] mb-2">Is there a refund policy?</h3>
+            <p className="text-sm text-gray-700">
+              We offer a 7-day money-back guarantee on all paid plans. No questions asked.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-[#000000] mb-2">What payment methods do you accept?</h3>
+            <p className="text-sm text-gray-700">
+              We accept all major credit cards, PayPal, and Apple Pay for your convenience.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-[#000000] mb-2">Can I cancel anytime?</h3>
+            <p className="text-sm text-gray-700">
+              Absolutely! Cancel your subscription anytime with no penalties or fees.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}

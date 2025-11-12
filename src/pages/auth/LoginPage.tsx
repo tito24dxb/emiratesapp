@@ -49,6 +49,7 @@ export default function LoginPage() {
         email: userData.email,
         name: userData.name,
         role: userData.role as 'student' | 'mentor' | 'governor',
+        plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
         country: userData.country,
         bio: userData.bio || '',
         photoURL: userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
@@ -180,25 +181,40 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => quickLogin('governor@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-[#FFD700] hover:bg-[#D4AF37] text-[#000000] rounded-lg transition text-sm font-bold"
+                className="w-full text-left px-4 py-2 bg-[#FFD700] hover:bg-[#D4AF37] text-[#000000] rounded-lg transition text-xs font-bold"
               >
-                Governor: governor@crewsacademy.com / test123
+                Governor (VIP): governor@crewsacademy.com
               </button>
               <button
                 type="button"
                 onClick={() => quickLogin('mentor@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-[#D71921] hover:bg-[#B91518] text-white rounded-lg transition text-sm font-bold"
+                className="w-full text-left px-4 py-2 bg-[#D71921] hover:bg-[#B91518] text-white rounded-lg transition text-xs font-bold"
               >
-                Mentor: mentor@crewsacademy.com / test123
+                Mentor (Pro): mentor@crewsacademy.com
               </button>
               <button
                 type="button"
                 onClick={() => quickLogin('student@crewsacademy.com', 'test123')}
-                className="w-full text-left px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition text-sm font-bold"
+                className="w-full text-left px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition text-xs font-bold"
               >
-                Student: student@crewsacademy.com / test123
+                Student Free: student@crewsacademy.com
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('pro@crewsacademy.com', 'test123')}
+                className="w-full text-left px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition text-xs font-bold"
+              >
+                Student Pro: pro@crewsacademy.com
+              </button>
+              <button
+                type="button"
+                onClick={() => quickLogin('vip@crewsacademy.com', 'test123')}
+                className="w-full text-left px-4 py-2 bg-gradient-to-r from-[#FFD700] to-[#D4AF37] hover:shadow-lg text-[#000000] rounded-lg transition text-xs font-bold"
+              >
+                Student VIP: vip@crewsacademy.com
               </button>
             </div>
+            <p className="text-xs text-gray-500 mt-3 text-center">Password: test123</p>
           </div>
         </div>
       </motion.div>
