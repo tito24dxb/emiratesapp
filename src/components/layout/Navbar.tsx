@@ -1,11 +1,13 @@
 import { Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Navbar() {
   const { currentUser, logout } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const navigate = useNavigate();
 
   if (!currentUser) return null;
 
@@ -21,7 +23,10 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <button className="relative p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition">
+            <button
+              onClick={() => alert('No new notifications')}
+              className="relative p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
+            >
               <Bell className="w-4 h-4 md:w-5 md:h-5" />
               <span className="absolute top-0.5 right-0.5 md:top-1 md:right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-[#FFD700] rounded-full"></span>
             </button>
@@ -51,23 +56,31 @@ export default function Navbar() {
                     exit={{ opacity: 0, y: -10 }}
                     className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl py-2 text-[#1C1C1C]"
                   >
-                    <a
-                      href="/profile"
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowProfileMenu(false)}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-[#EADBC8] transition"
                     >
                       <User className="w-4 h-4" />
                       <span>My Profile</span>
-                    </a>
-                    <a
-                      href="/settings"
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#EADBC8] transition"
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        alert('Settings page coming soon!');
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#EADBC8] transition w-full text-left"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
-                    </a>
+                    </button>
                     <hr className="my-2 border-gray-200" />
                     <button
-                      onClick={logout}
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        logout();
+                        navigate('/login');
+                      }}
                       className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition w-full text-left text-red-600"
                     >
                       <LogOut className="w-4 h-4" />

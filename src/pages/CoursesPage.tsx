@@ -82,7 +82,13 @@ export default function CoursesPage() {
                 </div>
               </div>
 
-              <button className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] hover:from-[#B91518] hover:to-[#D71921] text-white py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold text-sm md:text-base shadow-md hover:shadow-lg hover:shadow-[#FFD700]/30 transition-all duration-300">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedCourse(course);
+                }}
+                className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] hover:from-[#B91518] hover:to-[#D71921] text-white py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold text-sm md:text-base shadow-md hover:shadow-lg hover:shadow-[#FFD700]/30 transition-all duration-300"
+              >
                 Start Lesson
               </button>
             </div>
@@ -147,13 +153,22 @@ export default function CoursesPage() {
                   className="w-full h-full object-cover opacity-60"
                 />
                 <button
-                  onClick={() => setSelectedCourse(null)}
-                  className="absolute top-3 right-3 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-lg"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCourse(null);
+                  }}
+                  className="absolute top-3 right-3 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition shadow-lg z-10"
                 >
                   <X className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <button className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      alert('Video player coming soon! This will launch the course content.');
+                    }}
+                    className="w-14 h-14 md:w-16 md:h-16 bg-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition"
+                  >
                     <Play className="w-6 h-6 md:w-8 md:h-8 text-[#D71921] ml-1" />
                   </button>
                 </div>
@@ -217,7 +232,13 @@ export default function CoursesPage() {
                   </ul>
                 </div>
 
-                <button className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] hover:from-[#B91518] hover:to-[#D71921] text-white py-3 md:py-4 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl hover:shadow-[#FFD700]/30 transition-all duration-300">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    alert(`Starting ${selectedCourse.title}!\n\nCourse content and video lessons will be available soon.`);
+                  }}
+                  className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] hover:from-[#B91518] hover:to-[#D71921] text-white py-3 md:py-4 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-xl hover:shadow-[#FFD700]/30 transition-all duration-300"
+                >
                   Start Learning Now
                 </button>
               </div>
