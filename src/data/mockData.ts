@@ -13,6 +13,17 @@ export const demoUsers: Array<User & { password: string }> = [
     photoURL: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200',
   },
   {
+    uid: 'gov-002',
+    email: 'crisdoraodxb@gmail.com',
+    password: 'Messi24@',
+    name: 'Cristian Rolando Dorao',
+    role: 'governor',
+    plan: 'vip',
+    country: 'United Arab Emirates',
+    bio: '',
+    photoURL: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200',
+  },
+  {
     uid: 'mentor-001',
     email: 'mentor@crewsacademy.com',
     password: 'test123',
