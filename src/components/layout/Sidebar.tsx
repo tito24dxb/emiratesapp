@@ -124,7 +124,7 @@ export default function Sidebar() {
     studentLinks;
 
   return (
-    <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 shadow-sm md:h-[calc(100vh-4rem)] md:sticky md:top-16 overflow-y-auto">
+    <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 shadow-sm md:h-[calc(100vh-5rem)] md:sticky md:top-20 overflow-y-auto">
       <div className="p-3 md:p-4">
         {currentUser.role === 'governor' && (
           <div className="mb-3 md:mb-4 p-2 md:p-3 bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white rounded-lg md:rounded-xl">

@@ -1,0 +1,271 @@
+import { useState } from 'react';
+import { Upload, FileText, X } from 'lucide-react';
+import { createCourse, CreateCourseData } from '../services/courseService';
+import { validatePDFFile } from '../services/storageService';
+
+interface CourseUploadFormProps {
+  coachId: string;
+  onSuccess: () => void;
+  onCancel: () => void;
+}
+
+export default function CourseUploadForm({ coachId, onSuccess, onCancel }: CourseUploadFormProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+
+  const [formData, setFormData] = useState<CreateCourseData>({
+    title: '',
+    description: '',
+    instructor: '',
+    thumbnail: 'https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=400',
+    duration: '',
+    level: 'beginner',
+    plan: 'free',
+    category: 'grooming',
+    lessons: 1,
+    allow_download: false,
+    content_type: 'pdf',
+  });
+
+  const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validatePDFFile(file);
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid file');
+      return;
+    }
+
+    setPdfFile(file);
+    setError('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!pdfFile) {
+      setError('Please select a PDF file to upload');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      await createCourse(
+        {
+          ...formData,
+          pdfFile,
+        },
+        coachId
+      );
+
+      onSuccess();
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      setError(err.message || 'Failed to upload course. Please try again.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white p-6 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-2xl font-bold">Upload New Course</h2>
+          <button
+            onClick={onCancel}
+            className="p-2 hover:bg-white/10 rounded-lg transition"
+          >
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Course Title *
+            </label>
+            <input
+              type="text"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+              placeholder="e.g., Cabin Crew Interview Preparation"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              required
+              rows={4}
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
+              placeholder="Describe what students will learn..."
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Instructor Name *
+              </label>
+              <input
+                type="text"
+                value={formData.instructor}
+                onChange={(e) => setFormData({ ...formData, instructor: e.target.value })}
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                placeholder="Your name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Duration *
+              </label>
+              <input
+                type="text"
+                value={formData.duration}
+                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                required
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                placeholder="e.g., 2 hours"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Level *
+              </label>
+              <select
+                value={formData.level}
+                onChange={(e) => setFormData({ ...formData, level: e.target.value as any })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+              >
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Category *
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+              >
+                <option value="grooming">Grooming</option>
+                <option value="service">Service</option>
+                <option value="safety">Safety</option>
+                <option value="interview">Interview</option>
+                <option value="language">Language</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Access Level *
+              </label>
+              <select
+                value={formData.plan}
+                onChange={(e) => setFormData({ ...formData, plan: e.target.value as any })}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+              >
+                <option value="free">Free</option>
+                <option value="pro">Pro</option>
+                <option value="vip">VIP</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              PDF File *
+            </label>
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#FF3B3F] transition">
+              <input
+                type="file"
+                accept=".pdf,application/pdf"
+                onChange={handlePDFUpload}
+                className="hidden"
+                id="pdf-upload"
+              />
+              <label htmlFor="pdf-upload" className="cursor-pointer">
+                <FileText className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                {pdfFile ? (
+                  <p className="text-sm font-medium text-gray-700">{pdfFile.name}</p>
+                ) : (
+                  <>
+                    <p className="text-sm font-medium text-gray-700 mb-1">
+                      Click to upload PDF
+                    </p>
+                    <p className="text-xs text-gray-500">Maximum file size: 50MB</p>
+                  </>
+                )}
+              </label>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.allow_download}
+                onChange={(e) => setFormData({ ...formData, allow_download: e.target.checked })}
+                className="w-5 h-5 text-[#FF3B3F] border-gray-300 rounded focus:ring-[#FF3B3F]"
+              />
+              <div>
+                <span className="text-sm font-bold text-gray-700">Allow Download</span>
+                <p className="text-xs text-gray-500">Enable students to download this PDF</p>
+              </div>
+            </label>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isUploading}
+              className="flex-1 px-6 py-3 bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUploading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Upload className="w-5 h-5 animate-pulse" />
+                  Uploading...
+                </span>
+              ) : (
+                'Upload Course'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

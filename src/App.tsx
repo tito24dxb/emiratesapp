@@ -20,6 +20,7 @@ import RecruiterListPage from './pages/RecruiterListPage';
 import RecruitersPage from './pages/RecruitersPage';
 import OpenDaysPage from './pages/OpenDaysPage';
 import UpgradePlanPage from './pages/UpgradePlanPage';
+import CourseViewerPage from './pages/CourseViewerPage';
 import { Users, Upload, FolderOpen, MessagesSquare, BarChart3 } from 'lucide-react';
 
 function MaintenanceScreen({ message }: { message: string }) {
@@ -58,6 +59,7 @@ function AppContent() {
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/courses/:courseId" element={<CourseViewerPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />

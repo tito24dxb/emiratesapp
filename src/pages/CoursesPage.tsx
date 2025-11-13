@@ -1,11 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Course } from '../data/coursesData';
 import { BookOpen, Clock, BarChart3, Lock, Crown, Zap } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { motion } from 'framer-motion';
-import { db } from '../lib/firebase';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { getAllCourses, Course } from '../services/courseService';
 
 export default function CoursesPage() {
   const { currentUser } = useApp();
@@ -22,15 +20,7 @@ export default function CoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const coursesRef = collection(db, 'courses');
-      const q = query(coursesRef, orderBy('created_at', 'desc'));
-      const querySnapshot = await getDocs(q);
-
-      const coursesData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Course[];
-
+      const coursesData = await getAllCourses();
       setCourses(coursesData);
     } catch (error) {
       console.error('Error fetching courses:', error);
@@ -220,7 +210,7 @@ export default function CoursesPage() {
                     if (!isAvailable) {
                       navigate('/upgrade');
                     } else {
-                      alert(`Course "${course.title}" will be available soon!`);
+                      navigate(`/courses/${course.id}`);
                     }
                   }}
                   className={`mt-4 w-full py-2 rounded-lg font-bold transition ${

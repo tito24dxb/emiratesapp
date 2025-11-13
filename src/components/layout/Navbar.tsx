@@ -15,14 +15,14 @@ export default function Navbar() {
   return (
     <nav className="bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white shadow-lg sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 md:h-16">
-          <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          <Link to="/dashboard" className="flex items-center">
             <img
               src="/Crews.png"
               alt="The Crew Academy"
-              className="h-8 md:h-10 w-auto"
+              className="h-12 md:h-16 w-auto object-contain"
             />
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2 md:gap-4">
             <div className="hidden md:block">
@@ -65,7 +65,7 @@ export default function Navbar() {
                     <Link
                       to="/profile"
                       onClick={() => setShowProfileMenu(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#EADBC8] transition"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F5F5] transition"
                     >
                       <User className="w-4 h-4" />
                       <span>My Profile</span>
@@ -75,7 +75,7 @@ export default function Navbar() {
                         setShowProfileMenu(false);
                         alert('Settings page coming soon!');
                       }}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#EADBC8] transition w-full text-left"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F5F5] transition w-full text-left"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
