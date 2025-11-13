@@ -3,15 +3,12 @@ import { useApp } from '../context/AppContext';
 import { Camera, MapPin, Mail, Shield, Save, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db, storage } from '../lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '../lib/firebase';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -19,7 +16,7 @@ export default function ProfilePage() {
     email: currentUser?.email || '',
     country: currentUser?.country || '',
     bio: currentUser?.bio || '',
-    photoURL: currentUser?.photoURL || '',
+    photo_base64: currentUser?.photoURL || '',
   });
 
   if (!currentUser) return null;
@@ -28,15 +25,14 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Image size should be less than 2MB');
+    if (file.size > 500 * 1024) {
+      alert('Image size should be less than 500KB');
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setPhotoPreview(reader.result as string);
-      setSelectedFile(file);
+      setFormData({ ...formData, photo_base64: reader.result as string });
     };
     reader.readAsDataURL(file);
   };
@@ -46,22 +42,13 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
-      let photoURL = formData.photoURL;
-      
-      // Upload new photo to Firebase Storage if a file was selected
-      if (selectedFile) {
-        const storageRef = ref(storage, `profile-photos/${currentUser.uid}/${Date.now()}-${selectedFile.name}`);
-        const snapshot = await uploadBytes(storageRef, selectedFile);
-        photoURL = await getDownloadURL(snapshot.ref);
-      }
-
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
         name: formData.name,
         country: formData.country,
         bio: formData.bio,
-        photoURL: photoURL,
-        updatedAt: new Date().toISOString(),
+        photo_base64: formData.photo_base64,
+        updated_at: new Date().toISOString(),
       });
 
       setCurrentUser({
@@ -69,12 +56,10 @@ export default function ProfilePage() {
         name: formData.name,
         country: formData.country,
         bio: formData.bio,
-        photoURL: photoURL,
+        photoURL: formData.photo_base64,
       });
 
       setIsEditing(false);
-      setPhotoPreview(null);
-      setSelectedFile(null);
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
@@ -83,7 +68,7 @@ export default function ProfilePage() {
     }
   };
 
-  const displayPhoto = photoPreview || formData.photoURL || currentUser.photoURL;
+  const displayPhoto = formData.photo_base64 || currentUser.photoURL;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -192,14 +177,12 @@ export default function ProfilePage() {
                   <button
                     onClick={() => {
                       setIsEditing(false);
-                      setPhotoPreview(null);
-                      setSelectedFile(null);
                       setFormData({
                         name: currentUser.name,
                         email: currentUser.email,
                         country: currentUser.country,
                         bio: currentUser.bio,
-                        photoURL: currentUser.photoURL,
+                        photo_base64: currentUser.photoURL,
                       });
                     }}
                     className="px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-bold hover:bg-gray-300 transition"
