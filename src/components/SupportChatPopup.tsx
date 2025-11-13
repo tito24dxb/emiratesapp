@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, MessageCircle, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { X, Send, MessageCircle, CheckCircle, Clock, AlertCircle, Minus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   createSupportTicket,
@@ -24,6 +24,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
   const [subject, setSubject] = useState('');
   const [sending, setSending] = useState(false);
   const [ticket, setTicket] = useState<SupportTicket | null>(existingTicket || null);
+  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -141,18 +142,26 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={handleClose}
-          />
+          {!isMinimized && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={handleClose}
+            />
+          )}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              height: isMinimized ? '64px' : '600px'
+            }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-4 right-4 w-96 bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white p-4 flex items-center justify-between">
@@ -162,22 +171,32 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                 </div>
                 <div>
                   <h3 className="font-bold">Support Chat</h3>
-                  {ticket && (
+                  {ticket && !isMinimized && (
                     <div className="flex items-center gap-2 mt-1">
                       {getStatusBadge(ticket.status)}
                     </div>
                   )}
                 </div>
               </div>
-              <button
-                onClick={handleClose}
-                className="p-2 hover:bg-white/10 rounded-lg transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setIsMinimized(!isMinimized)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition"
+                  title={isMinimized ? "Maximize" : "Minimize"}
+                >
+                  <Minus className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleClose}
+                  className="p-2 hover:bg-white/10 rounded-lg transition"
+                  title="Close"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            {!ticket ? (
+            {!isMinimized && !ticket ? (
               <div className="flex-1 p-4 overflow-y-auto">
                 <h4 className="font-bold text-gray-900 mb-4">Start a new support conversation</h4>
                 <div className="space-y-4">
@@ -214,7 +233,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : !isMinimized ? (
               <>
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
                   {messages.map((message) => {
@@ -268,7 +287,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                   </div>
                 </div>
               </>
-            )}
+            ) : null}
           </motion.div>
         </>
       )}
