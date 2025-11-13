@@ -2,6 +2,8 @@ import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, MessageCircle, Users, TrendingUp, Award, GraduationCap, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
 import OnboardingCard from '../components/OnboardingCard';
@@ -15,6 +17,18 @@ export default function Dashboard() {
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState({
+    totalUsers: 0,
+    totalCourses: 0,
+    activeSessions: 0,
+    supportRequests: 0,
+    activeStudents: 0,
+    coursesCreated: 0,
+    messages: 0,
+    coursesEnrolled: 0,
+    overallProgress: 0,
+    certificatesEarned: 0
+  });
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
@@ -38,6 +52,75 @@ export default function Dashboard() {
 
     checkOnboardingStatus();
   }, [currentUser]);
+
+  useEffect(() => {
+    if (currentUser) {
+      loadDashboardData();
+    }
+  }, [currentUser]);
+
+  const loadDashboardData = async () => {
+    if (!currentUser) return;
+
+    try {
+      // Load users count
+      const usersRef = collection(db, 'users');
+      const usersSnapshot = await getDocs(usersRef);
+      const totalUsers = usersSnapshot.size;
+
+      // Load courses count
+      const coursesRef = collection(db, 'courses');
+      const coursesSnapshot = await getDocs(coursesRef);
+      const totalCourses = coursesSnapshot.size;
+
+      // Load active simulations (as active sessions)
+      const simulationsRef = collection(db, 'open_day_simulations');
+      const activeSimsQuery = query(simulationsRef, where('completed', '==', false));
+      const activeSimsSnapshot = await getDocs(activeSimsQuery);
+      const activeSessions = activeSimsSnapshot.size;
+
+      // For now, set support requests to 0 (can be implemented later)
+      const supportRequests = 0;
+
+      // Role-specific data
+      let roleSpecificData = {};
+      
+      if (currentUser.role === 'mentor') {
+        // Count students (for mentors)
+        const studentsQuery = query(usersRef, where('role', '==', 'student'));
+        const studentsSnapshot = await getDocs(studentsQuery);
+        const activeStudents = studentsSnapshot.size;
+
+        // Count courses created by this mentor
+        const mentorCoursesQuery = query(coursesRef, where('coach_id', '==', currentUser.uid));
+        const mentorCoursesSnapshot = await getDocs(mentorCoursesQuery);
+        const coursesCreated = mentorCoursesSnapshot.size;
+
+        roleSpecificData = {
+          activeStudents,
+          coursesCreated,
+          messages: 0 // Can be implemented later
+        };
+      } else if (currentUser.role === 'student') {
+        // For students, we can add enrollment tracking later
+        roleSpecificData = {
+          coursesEnrolled: 0,
+          overallProgress: 0,
+          certificatesEarned: 0
+        };
+      }
+
+      setDashboardData({
+        totalUsers,
+        totalCourses,
+        activeSessions,
+        supportRequests,
+        ...roleSpecificData
+      });
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    }
+  };
 
   const handleCompleteOnboarding = async () => {
     if (!currentUser) return;
@@ -127,7 +210,7 @@ export default function Dashboard() {
           >
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Courses Enrolled</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.coursesEnrolled}</p>
           </motion.div>
 
           <motion.div
@@ -136,7 +219,7 @@ export default function Dashboard() {
           >
             <TrendingUp className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Overall Progress</p>
-            <p className="text-3xl md:text-4xl font-bold">0%</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.overallProgress}%</p>
           </motion.div>
 
           <motion.div
@@ -145,7 +228,7 @@ export default function Dashboard() {
           >
             <Award className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Certificates Earned</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.certificatesEarned}</p>
           </motion.div>
         </div>
 
@@ -192,7 +275,7 @@ export default function Dashboard() {
           >
             <Users className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Active Students</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.activeStudents}</p>
           </motion.div>
 
           <motion.div
@@ -201,7 +284,7 @@ export default function Dashboard() {
           >
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Courses Created</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.coursesCreated}</p>
           </motion.div>
 
           <motion.div
@@ -210,7 +293,7 @@ export default function Dashboard() {
           >
             <MessageCircle className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Messages</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.messages}</p>
           </motion.div>
         </div>
 
@@ -256,7 +339,7 @@ export default function Dashboard() {
           >
             <Users className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Total Users</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.totalUsers}</p>
           </motion.div>
 
           <motion.div
@@ -265,7 +348,7 @@ export default function Dashboard() {
           >
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Total Courses</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.totalCourses}</p>
           </motion.div>
 
           <motion.div
@@ -274,7 +357,7 @@ export default function Dashboard() {
           >
             <TrendingUp className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Active Sessions</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.activeSessions}</p>
           </motion.div>
 
           <motion.div
@@ -283,7 +366,7 @@ export default function Dashboard() {
           >
             <MessageCircle className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Support Requests</p>
-            <p className="text-3xl md:text-4xl font-bold">0</p>
+            <p className="text-3xl md:text-4xl font-bold">{dashboardData.supportRequests}</p>
           </motion.div>
         </div>
 
