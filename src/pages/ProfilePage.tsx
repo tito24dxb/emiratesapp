@@ -16,12 +16,12 @@ export default function ProfilePage() {
     email: currentUser?.email || '',
     country: currentUser?.country || '',
     bio: currentUser?.bio || '',
-    photo_base64: (currentUser as any)?.photo_base64 || currentUser?.photoURL || '',
+    photo_base64: currentUser?.photoURL || '',
   });
 
   if (!currentUser) return null;
 
-  const displayPhoto = formData.photo_base64 || currentUser.photoURL || '';
+  const displayPhoto = formData.photo_base64 || currentUser.photoURL;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
