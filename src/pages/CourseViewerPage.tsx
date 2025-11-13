@@ -44,6 +44,13 @@ export default function CourseViewerPage() {
   };
 
   const getYouTubeEmbedUrl = (url: string) => {
+    if (!url) {
+      console.error('No video URL provided');
+      return '';
+    }
+
+    console.log('Original URL:', url);
+
     try {
       let videoId = '';
 
@@ -51,16 +58,24 @@ export default function CourseViewerPage() {
         const urlParams = new URLSearchParams(new URL(url).search);
         videoId = urlParams.get('v') || '';
       } else if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+        videoId = url.split('youtu.be/')[1]?.split('?')[0]?.split('/')[0] || '';
       } else if (url.includes('youtube.com/embed/')) {
-        videoId = url.split('youtube.com/embed/')[1]?.split('?')[0] || '';
+        videoId = url.split('youtube.com/embed/')[1]?.split('?')[0]?.split('/')[0] || '';
+      } else if (url.includes('youtube.com/shorts/')) {
+        videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0]?.split('/')[0] || '';
       }
 
-      if (videoId) {
-        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+      videoId = videoId.trim();
+
+      if (videoId && videoId.length === 11) {
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+        console.log('Embed URL:', embedUrl);
+        return embedUrl;
+      } else {
+        console.error('Invalid video ID extracted:', videoId);
       }
     } catch (error) {
-      console.error('Error parsing YouTube URL:', error);
+      console.error('Error parsing YouTube URL:', error, url);
     }
     return url;
   };
@@ -154,15 +169,21 @@ export default function CourseViewerPage() {
 
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
             <div className="aspect-video w-full bg-black">
-              <iframe
-                src={getYouTubeEmbedUrl(course.video_url)}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                title={course.title}
-                frameBorder="0"
-                loading="lazy"
-              />
+              {course.video_url ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(course.video_url)}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  title={course.title}
+                  frameBorder="0"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-white">
+                  <p>No video available</p>
+                </div>
+              )}
             </div>
           </div>
 
