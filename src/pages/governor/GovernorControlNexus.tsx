@@ -12,6 +12,7 @@ import UserManager from '../../components/governor/nexus/UserManager';
 import SystemFlags from '../../components/governor/nexus/SystemFlags';
 import CourseManager from '../../components/governor/nexus/CourseManager';
 import SupportChatManager from '../../components/governor/nexus/SupportChatManager';
+import FinancePanel from '../../components/governor/nexus/FinancePanel';
 
 interface Announcement {
   active: boolean;
@@ -90,6 +91,8 @@ export default function GovernorControlNexus() {
         </motion.div>
 
         <MetricsCards />
+
+        <FinancePanel />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <RealtimeLogs />

@@ -101,12 +101,18 @@ export default function Sidebar() {
 
   const governorLinks = [
     { path: '/governor/nexus', icon: Zap, label: 'Control Nexus', highlight: true },
-    { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
-    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/courses', icon: BookOpen, label: 'Courses' },
+    { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: 'ALL' },
+    { path: '/open-day', icon: Plane, label: 'Open Day Sim', badge: 'ALL' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
+    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
+    { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
+    { path: '/students', icon: Users, label: 'Students' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
+    { path: '/support', icon: HelpCircle, label: 'Support' },
   ];
 
   const links =
