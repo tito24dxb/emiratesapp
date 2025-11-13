@@ -18,16 +18,16 @@ export default function PlanBadge({ plan, size = 'md' }: PlanBadgeProps) {
     pro: {
       label: 'Pro',
       icon: Shield,
-      bgColor: 'bg-blue-600',
+      bgColor: 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C]',
       textColor: 'text-white',
-      borderColor: 'border-blue-700',
+      borderColor: 'border-[#E6282C]',
     },
     vip: {
       label: 'VIP',
       icon: Crown,
-      bgColor: 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37]',
-      textColor: 'text-[#000000]',
-      borderColor: 'border-[#D4AF37]',
+      bgColor: 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439]',
+      textColor: 'text-white',
+      borderColor: 'border-[#2A3439]',
     },
   };
 

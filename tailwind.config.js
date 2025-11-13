@@ -4,13 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        emirates: {
-          red: '#D71920',
-          'red-dark': '#B91518',
-          gold: '#B9975B',
-          'gold-dark': '#A8865A',
-          sand: '#EADBC8',
-          black: '#1C1C1C',
+        crew: {
+          red: '#FF3B3F',
+          'red-dark': '#E6282C',
+          'red-darker': '#CC2428',
+          charcoal: '#3D4A52',
+          'charcoal-dark': '#2A3439',
+          'charcoal-light': '#5A6B75',
+          white: '#FFFFFF',
+          'gray-light': '#F5F5F5',
         },
       },
     },

@@ -25,7 +25,7 @@ export default function MaintenanceMode() {
             </div>
           </div>
 
-          <div className="bg-[#EADBC8]/30 rounded-xl p-6 mb-6">
+          <div className="bg-[#F5F5F5]/30 rounded-xl p-6 mb-6">
             <div className="flex items-center gap-4 mb-4">
               <Settings className="w-10 h-10 text-[#B9975B]" />
               <div>
@@ -106,24 +106,24 @@ export default function MaintenanceMode() {
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-[#1C1C1C] mb-4">Impact Summary</h3>
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-[#EADBC8]/30 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-[#F5F5F5]/30 rounded-lg">
                 <span className="text-[#1C1C1C]">Total Users</span>
                 <span className="font-bold text-[#D71920]">127</span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-[#EADBC8]/30 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-[#F5F5F5]/30 rounded-lg">
                 <span className="text-[#1C1C1C]">Affected Users</span>
                 <span className="font-bold text-orange-600">
                   {maintenanceMode ? '124' : '0'}
                 </span>
               </div>
-              <div className="flex items-center justify-between p-3 bg-[#EADBC8]/30 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-[#F5F5F5]/30 rounded-lg">
                 <span className="text-[#1C1C1C]">Governors (Unaffected)</span>
                 <span className="font-bold text-green-600">3</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-2xl shadow-lg p-6 text-white">
+          <div className="bg-gradient-to-r from-[#D71920] to-[#E6282C] rounded-2xl shadow-lg p-6 text-white">
             <h4 className="font-bold mb-2 flex items-center gap-2">
               <AlertCircle className="w-5 h-5" />
               Important Notice

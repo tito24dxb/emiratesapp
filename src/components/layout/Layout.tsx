@@ -13,7 +13,7 @@ export default function Layout({ children }: LayoutProps) {
   const { banners } = useApp();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] to-white">
       <Navbar />
 
       <AnimatePresence>

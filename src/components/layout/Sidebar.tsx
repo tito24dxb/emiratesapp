@@ -127,12 +127,12 @@ export default function Sidebar() {
     <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 shadow-sm md:h-[calc(100vh-4rem)] md:sticky md:top-16 overflow-y-auto">
       <div className="p-3 md:p-4">
         {currentUser.role === 'governor' && (
-          <div className="mb-3 md:mb-4 p-2 md:p-3 bg-gradient-to-r from-[#FFD700] to-[#D4AF37] text-[#000000] rounded-lg md:rounded-xl">
+          <div className="mb-3 md:mb-4 p-2 md:p-3 bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white rounded-lg md:rounded-xl">
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-3 h-3 md:w-4 md:h-4" />
               <span className="text-xs md:text-sm font-bold">Governor Access</span>
             </div>
-            <p className="text-xs text-yellow-900 hidden md:block">Full system control</p>
+            <p className="text-xs text-gray-300 hidden md:block">Full system control</p>
           </div>
         )}
 
@@ -156,12 +156,12 @@ export default function Sidebar() {
                 }}
                 className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl transition whitespace-nowrap md:whitespace-normal relative ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#D71921] to-[#B91518] text-white shadow-md'
+                    ? 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white shadow-md'
                     : highlight
-                    ? 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37] text-[#000000] font-bold hover:shadow-lg'
+                    ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white font-bold hover:shadow-lg'
                     : isLocked
                     ? 'text-gray-400 hover:bg-gray-50 opacity-60'
-                    : 'text-gray-700 hover:bg-[#EADBC8]'
+                    : 'text-gray-700 hover:bg-[#F5F5F5]'
                 }`}
               >
                 <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
@@ -170,8 +170,8 @@ export default function Sidebar() {
                 {badge && (
                   <span className={`px-2 py-0.5 text-[10px] md:text-xs font-bold rounded-full ${
                     badge === 'VIP'
-                      ? 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37] text-[#000000]'
-                      : 'bg-blue-600 text-white'
+                      ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
+                      : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
                   }`}>
                     {badge}
                   </span>

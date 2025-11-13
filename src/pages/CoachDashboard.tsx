@@ -195,7 +195,7 @@ export default function CoachDashboard() {
 
       <div className="bg-white rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 mb-6 md:mb-8">
         <div className="flex items-center gap-3 mb-4 md:mb-6">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-xl flex items-center justify-center">
+          <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-[#FF3B3F] to-[#E6282C] rounded-xl flex items-center justify-center">
             {editingCourse ? <Edit2 className="w-5 h-5 md:w-6 md:h-6 text-white" /> : <Plus className="w-5 h-5 md:w-6 md:h-6 text-white" />}
           </div>
           <div>
@@ -219,7 +219,7 @@ export default function CoachDashboard() {
                 required
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
                 placeholder="e.g., Advanced Interview Techniques"
               />
             </div>
@@ -232,7 +232,7 @@ export default function CoachDashboard() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={4}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
                 placeholder="Describe what students will learn..."
               />
             </div>
@@ -245,7 +245,7 @@ export default function CoachDashboard() {
                 required
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
               >
                 <option>Free Source (Layer 1)</option>
                 <option>One Step Program (Layer 2)</option>
@@ -265,7 +265,7 @@ export default function CoachDashboard() {
                     value="free"
                     checked={formData.visibility === 'free'}
                     onChange={(e) => setFormData({ ...formData, visibility: 'free' })}
-                    className="w-4 h-4 text-[#D71921] focus:ring-[#D71921]"
+                    className="w-4 h-4 text-[#FF3B3F] focus:ring-[#FF3B3F]"
                   />
                   <span className="text-sm font-medium">Free</span>
                 </label>
@@ -276,7 +276,7 @@ export default function CoachDashboard() {
                     value="premium"
                     checked={formData.visibility === 'premium'}
                     onChange={(e) => setFormData({ ...formData, visibility: 'premium' })}
-                    className="w-4 h-4 text-[#D71921] focus:ring-[#D71921]"
+                    className="w-4 h-4 text-[#FF3B3F] focus:ring-[#FF3B3F]"
                   />
                   <span className="text-sm font-medium">Subscribers Only</span>
                 </label>
@@ -297,7 +297,7 @@ export default function CoachDashboard() {
                 />
                 <label
                   htmlFor="pdf-upload"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D71921] transition cursor-pointer"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#FF3B3F] transition cursor-pointer"
                 >
                   <FileText className="w-5 h-5 text-gray-400" />
                   <span className="text-sm text-gray-600">
@@ -318,7 +318,7 @@ export default function CoachDashboard() {
                     onClick={() => setFormData({ ...formData, videoType: 'link' })}
                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition ${
                       formData.videoType === 'link'
-                        ? 'bg-[#D71921] text-white'
+                        ? 'bg-[#FF3B3F] text-white'
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
@@ -330,7 +330,7 @@ export default function CoachDashboard() {
                     onClick={() => setFormData({ ...formData, videoType: 'file' })}
                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition ${
                       formData.videoType === 'file'
-                        ? 'bg-[#D71921] text-white'
+                        ? 'bg-[#FF3B3F] text-white'
                         : 'bg-gray-100 text-gray-600'
                     }`}
                   >
@@ -343,7 +343,7 @@ export default function CoachDashboard() {
                     type="url"
                     value={formData.videoLink}
                     onChange={(e) => setFormData({ ...formData, videoLink: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
                     placeholder="https://youtube.com/watch?v=..."
                   />
                 ) : (
@@ -357,7 +357,7 @@ export default function CoachDashboard() {
                     />
                     <label
                       htmlFor="video-upload"
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D71921] transition cursor-pointer"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#FF3B3F] transition cursor-pointer"
                     >
                       <Video className="w-5 h-5 text-gray-400" />
                       <span className="text-sm text-gray-600">
@@ -377,7 +377,7 @@ export default function CoachDashboard() {
                 type="text"
                 value={formData.tags}
                 onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
                 placeholder="interview, grooming, etiquette"
               />
             </div>
@@ -387,7 +387,7 @@ export default function CoachDashboard() {
             <button
               type="submit"
               disabled={isUploading}
-              className="flex-1 sm:flex-none bg-gradient-to-r from-[#D71921] to-[#B91518] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FFD700]/30 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 sm:flex-none bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#3D4A52]/30 transition disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isUploading ? (
                 <>
@@ -435,7 +435,7 @@ export default function CoachDashboard() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition"
             >
-              <div className="relative h-40 bg-gradient-to-br from-[#D71921] to-[#B91518] flex items-center justify-center">
+              <div className="relative h-40 bg-gradient-to-br from-[#FF3B3F] to-[#E6282C] flex items-center justify-center">
                 {course.videoURL ? (
                   <Video className="w-16 h-16 text-white opacity-80" />
                 ) : (
@@ -444,8 +444,8 @@ export default function CoachDashboard() {
                 <div className="absolute top-3 right-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                     course.visibility === 'free'
-                      ? 'bg-[#FFD700] text-[#000000]'
-                      : 'bg-white text-[#D71921]'
+                      ? 'bg-[#3D4A52] text-[#000000]'
+                      : 'bg-white text-[#FF3B3F]'
                   }`}>
                     {course.visibility === 'free' ? 'FREE' : 'PREMIUM'}
                   </span>
@@ -469,7 +469,7 @@ export default function CoachDashboard() {
                     {course.tags.slice(0, 3).map((tag, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-1 bg-[#EADBC8] text-[#000000] rounded-full text-xs"
+                        className="px-2 py-1 bg-[#F5F5F5] text-[#000000] rounded-full text-xs"
                       >
                         {tag}
                       </span>
@@ -480,14 +480,14 @@ export default function CoachDashboard() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setViewingCourse(course)}
-                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-[#D71921] text-white rounded-lg hover:bg-[#B91518] transition text-sm font-bold"
+                    className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-[#FF3B3F] text-white rounded-lg hover:bg-[#E6282C] transition text-sm font-bold"
                   >
                     <Eye className="w-4 h-4" />
                     View
                   </button>
                   <button
                     onClick={() => handleEdit(course)}
-                    className="flex items-center justify-center gap-1 px-3 py-2 bg-[#FFD700] text-[#000000] rounded-lg hover:bg-[#D4AF37] transition text-sm font-bold"
+                    className="flex items-center justify-center gap-1 px-3 py-2 bg-[#3D4A52] text-[#000000] rounded-lg hover:bg-[#2A3439] transition text-sm font-bold"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -537,8 +537,8 @@ export default function CoachDashboard() {
                   <div className="flex flex-wrap items-center gap-3 mb-4">
                     <span className={`px-3 py-1 rounded-full text-sm font-bold ${
                       viewingCourse.visibility === 'free'
-                        ? 'bg-[#FFD700] text-[#000000]'
-                        : 'bg-[#D71921] text-white'
+                        ? 'bg-[#3D4A52] text-[#000000]'
+                        : 'bg-[#FF3B3F] text-white'
                     }`}>
                       {viewingCourse.visibility === 'free' ? 'FREE COURSE' : 'PREMIUM'}
                     </span>
@@ -552,7 +552,7 @@ export default function CoachDashboard() {
                   {viewingCourse.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {viewingCourse.tags.map((tag, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-[#EADBC8] text-[#000000] rounded-full text-xs">
+                        <span key={idx} className="px-3 py-1 bg-[#F5F5F5] text-[#000000] rounded-full text-xs">
                           #{tag}
                         </span>
                       ))}
@@ -584,12 +584,12 @@ export default function CoachDashboard() {
                   <div className="mb-6">
                     <h3 className="text-lg font-bold text-[#000000] mb-3">PDF Materials</h3>
                     <div className="bg-gray-50 rounded-xl p-6 flex items-center gap-4">
-                      <FileText className="w-12 h-12 text-[#D71921]" />
+                      <FileText className="w-12 h-12 text-[#FF3B3F]" />
                       <div className="flex-1">
                         <p className="font-bold text-[#000000]">{viewingCourse.pdfName}</p>
                         <p className="text-sm text-gray-600">PDF Document</p>
                       </div>
-                      <button className="px-4 py-2 bg-[#D71921] text-white rounded-lg hover:bg-[#B91518] transition text-sm font-bold">
+                      <button className="px-4 py-2 bg-[#FF3B3F] text-white rounded-lg hover:bg-[#E6282C] transition text-sm font-bold">
                         Download
                       </button>
                     </div>
@@ -599,7 +599,7 @@ export default function CoachDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <button
                     onClick={() => alert('Group chat feature coming soon!')}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white rounded-xl font-bold hover:shadow-lg transition"
                   >
                     <MessageCircle className="w-5 h-5" />
                     Chat about this
@@ -609,7 +609,7 @@ export default function CoachDashboard() {
                       setViewingCourse(null);
                       setShowSupportModal(true);
                     }}
-                    className="flex items-center justify-center gap-2 px-4 py-3 bg-[#FFD700] text-[#000000] rounded-xl font-bold hover:bg-[#D4AF37] transition"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-[#3D4A52] text-[#000000] rounded-xl font-bold hover:bg-[#2A3439] transition"
                   >
                     <HelpCircle className="w-5 h-5" />
                     Contact Support
@@ -647,13 +647,13 @@ export default function CoachDashboard() {
               <h3 className="text-2xl font-bold text-[#000000] mb-4">Contact Support</h3>
               <textarea
                 rows={4}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none mb-4"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none mb-4"
                 placeholder="Describe your issue or question..."
               />
               <div className="flex gap-3">
                 <button
                   onClick={handleSupportRequest}
-                  className="flex-1 bg-[#D71921] text-white py-3 rounded-xl font-bold hover:bg-[#B91518] transition"
+                  className="flex-1 bg-[#FF3B3F] text-white py-3 rounded-xl font-bold hover:bg-[#E6282C] transition"
                 >
                   Submit Request
                 </button>
@@ -685,7 +685,7 @@ export default function CoachDashboard() {
               <h3 className="text-2xl font-bold text-[#000000] mb-4">Report a Problem</h3>
               <textarea
                 rows={4}
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none mb-4"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none mb-4"
                 placeholder="Describe the problem you encountered..."
               />
               <div className="flex gap-3">

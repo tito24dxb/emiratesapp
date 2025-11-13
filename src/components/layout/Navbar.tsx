@@ -13,14 +13,15 @@ export default function Navbar() {
   if (!currentUser) return null;
 
   return (
-    <nav className="bg-gradient-to-r from-[#D71921] to-[#B91518] text-white shadow-lg sticky top-0 z-40">
+    <nav className="bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white shadow-lg sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 md:h-16">
           <div className="flex items-center gap-2 md:gap-3">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-[#FFD700] rounded-lg flex items-center justify-center font-bold text-sm md:text-lg text-[#000000]">
-              CA
-            </div>
-            <h1 className="text-base md:text-xl font-bold">Crew's Academy</h1>
+            <img
+              src="/Crews.png"
+              alt="The Crew Academy"
+              className="h-8 md:h-10 w-auto"
+            />
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -33,7 +34,7 @@ export default function Navbar() {
               className="relative p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
             >
               <Bell className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="absolute top-0.5 right-0.5 md:top-1 md:right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-[#FFD700] rounded-full"></span>
+              <span className="absolute top-0.5 right-0.5 md:top-1 md:right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full"></span>
             </button>
 
             <div className="relative">

@@ -77,7 +77,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] via-[#F5E6D3] to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] via-white to-[#E8E8E8] flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -85,13 +85,15 @@ export default function RegisterPage() {
       >
         <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
           <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-2xl flex items-center justify-center shadow-lg">
-              <Plane className="w-8 h-8 text-white" />
-            </div>
+            <img
+              src="/Crews.png"
+              alt="The Crew Academy"
+              className="h-16 w-auto"
+            />
           </div>
 
           <h1 className="text-2xl md:text-3xl font-bold text-center text-[#000000] mb-2">
-            Join Crew's Academy
+            Join The Crew Academy
           </h1>
           <p className="text-center text-sm md:text-base text-gray-600 mb-6 md:mb-8">
             Start your Emirates cabin crew journey
@@ -109,7 +111,7 @@ export default function RegisterPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
                   placeholder="John Smith"
                 />
               </div>
@@ -126,7 +128,7 @@ export default function RegisterPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -144,7 +146,7 @@ export default function RegisterPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
                   placeholder="Minimum 6 characters"
                 />
               </div>
@@ -160,7 +162,7 @@ export default function RegisterPage() {
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition appearance-none bg-white"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition appearance-none bg-white"
                 >
                   <option value="">Select your country</option>
                   {countries.map((c) => (
@@ -181,7 +183,7 @@ export default function RegisterPage() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
                   placeholder="Tell us a bit about yourself..."
                 />
               </div>
@@ -196,7 +198,7 @@ export default function RegisterPage() {
                   value={expectations}
                   onChange={(e) => setExpectations(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
                   placeholder="What are your goals and expectations?"
                 />
               </div>
@@ -215,7 +217,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FFD700]/30 transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FF3B3F]/30 transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
@@ -226,7 +228,7 @@ export default function RegisterPage() {
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-[#D71921] font-bold hover:underline"
+                className="text-[#FF3B3F] font-bold hover:underline"
               >
                 Sign In
               </Link>

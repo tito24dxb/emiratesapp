@@ -49,21 +49,21 @@ export default function UpgradePrompt({ isOpen, onClose, requiredPlan, message, 
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
             >
-              <div className={`p-6 ${requiredPlan === 'vip' ? 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37]' : 'bg-gradient-to-r from-[#D71921] to-[#B91518]'}`}>
+              <div className={`p-6 ${requiredPlan === 'vip' ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439]' : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C]'}`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     {requiredPlan === 'vip' ? (
-                      <Crown className="w-8 h-8 text-[#000000]" />
+                      <Crown className="w-8 h-8 text-white" />
                     ) : (
                       <Zap className="w-8 h-8 text-white" />
                     )}
-                    <h3 className={`text-2xl font-bold ${requiredPlan === 'vip' ? 'text-[#000000]' : 'text-white'}`}>
+                    <h3 className={`text-2xl font-bold text-white`}>
                       Upgrade to {requiredPlan.toUpperCase()}
                     </h3>
                   </div>
                   <button
                     onClick={onClose}
-                    className={`p-2 rounded-full hover:bg-black hover:bg-opacity-10 transition ${requiredPlan === 'vip' ? 'text-[#000000]' : 'text-white'}`}
+                    className={`p-2 rounded-full hover:bg-black hover:bg-opacity-10 transition text-white`}
                   >
                     <X className="w-6 h-6" />
                   </button>
@@ -78,11 +78,11 @@ export default function UpgradePrompt({ isOpen, onClose, requiredPlan, message, 
                   {message}
                 </p>
 
-                <div className={`rounded-xl p-4 mb-6 ${requiredPlan === 'vip' ? 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37]' : 'bg-gradient-to-r from-[#D71921] to-[#B91518]'}`}>
-                  <h5 className={`font-bold mb-2 ${requiredPlan === 'vip' ? 'text-[#000000]' : 'text-white'}`}>
+                <div className={`rounded-xl p-4 mb-6 ${requiredPlan === 'vip' ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439]' : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C]'}`}>
+                  <h5 className={`font-bold mb-2 text-white`}>
                     {requiredPlan === 'vip' ? 'VIP Plan Benefits:' : 'Pro Plan Benefits:'}
                   </h5>
-                  <ul className={`space-y-1 text-sm ${requiredPlan === 'vip' ? 'text-[#000000]' : 'text-white'}`}>
+                  <ul className={`space-y-1 text-sm text-white`}>
                     {requiredPlan === 'vip' ? (
                       <>
                         <li>• Access to all features including AI Trainer</li>
@@ -114,8 +114,8 @@ export default function UpgradePrompt({ isOpen, onClose, requiredPlan, message, 
                     onClick={handleUpgrade}
                     className={`flex-1 px-6 py-3 rounded-xl font-bold text-white hover:shadow-lg transition ${
                       requiredPlan === 'vip'
-                        ? 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37] text-[#000000]'
-                        : 'bg-gradient-to-r from-[#D71921] to-[#B91518]'
+                        ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439]'
+                        : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C]'
                     }`}
                   >
                     Upgrade Now

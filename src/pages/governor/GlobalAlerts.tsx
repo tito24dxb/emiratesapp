@@ -48,7 +48,7 @@ export default function GlobalAlerts() {
 
       <button
         onClick={() => setShowCreateForm(!showCreateForm)}
-        className="mb-6 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition flex items-center gap-2"
+        className="mb-6 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition flex items-center gap-2"
       >
         <Plus className="w-5 h-5" />
         Create New Alert
@@ -87,7 +87,7 @@ export default function GlobalAlerts() {
                     onClick={() => setFormData({ ...formData, color: option.value })}
                     className={`p-3 rounded-xl border-2 transition ${
                       formData.color === option.value
-                        ? 'border-[#D71920] bg-[#EADBC8]/30'
+                        ? 'border-[#D71920] bg-[#F5F5F5]/30'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -145,7 +145,7 @@ export default function GlobalAlerts() {
               <button
                 onClick={handleCreate}
                 disabled={!formData.title || !formData.expiration}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50"
               >
                 Create Alert
               </button>

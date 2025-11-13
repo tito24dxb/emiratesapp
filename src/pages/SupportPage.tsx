@@ -10,7 +10,7 @@ export default function SupportPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition cursor-pointer">
-          <div className="w-16 h-16 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-[#D71920] to-[#E6282C] rounded-full flex items-center justify-center mx-auto mb-4">
             <Mail className="w-8 h-8 text-white" />
           </div>
           <h3 className="text-xl font-bold text-[#1C1C1C] mb-2">Email Support</h3>

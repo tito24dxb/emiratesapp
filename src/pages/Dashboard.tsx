@@ -206,7 +206,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#FF3B3F] to-[#E6282C] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Courses Enrolled</p>
@@ -215,7 +215,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#FFD700] to-[#D4AF37] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-[#000000]"
+            className="bg-gradient-to-br from-[#3D4A52] to-[#2A3439] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <TrendingUp className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Overall Progress</p>
@@ -224,7 +224,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#000000] to-[#2C2C2C] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#5A6B75] to-[#3D4A52] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <Award className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Certificates Earned</p>
@@ -271,7 +271,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#FF3B3F] to-[#E6282C] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <Users className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Active Students</p>
@@ -280,7 +280,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#FFD700] to-[#D4AF37] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-[#000000]"
+            className="bg-gradient-to-br from-[#3D4A52] to-[#2A3439] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Courses Created</p>
@@ -289,7 +289,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#000000] to-[#2C2C2C] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#5A6B75] to-[#3D4A52] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <MessageCircle className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Messages</p>
@@ -335,7 +335,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#FF3B3F] to-[#E6282C] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <Users className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Total Users</p>
@@ -344,7 +344,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#FFD700] to-[#D4AF37] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-[#000000]"
+            className="bg-gradient-to-br from-[#3D4A52] to-[#2A3439] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Total Courses</p>
@@ -353,7 +353,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-[#000000] to-[#2C2C2C] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#5A6B75] to-[#3D4A52] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <TrendingUp className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Active Sessions</p>
@@ -362,7 +362,7 @@ export default function Dashboard() {
 
           <motion.div
             variants={itemVariants}
-            className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
+            className="bg-gradient-to-br from-[#E6282C] to-[#CC2428] rounded-xl md:rounded-2xl shadow-lg p-4 md:p-6 text-white"
           >
             <MessageCircle className="w-8 h-8 md:w-10 md:h-10 mb-3 md:mb-4 opacity-80" />
             <p className="text-xs md:text-sm opacity-90 mb-1">Support Requests</p>
