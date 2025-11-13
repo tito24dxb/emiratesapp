@@ -12,7 +12,8 @@ import {
   Lock,
   Calendar,
   UserCircle,
-  Zap
+  Zap,
+  Shield
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
