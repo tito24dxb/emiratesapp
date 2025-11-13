@@ -52,28 +52,28 @@ export default function MetricsCards() {
       label: 'Active Users',
       value: loading ? '...' : `${activeUsers}/${totalUsers}`,
       icon: Users,
-      color: 'from-blue-500 to-blue-600',
+      color: 'from-blue-600 to-blue-700',
       change: totalUsers > 0 ? `${Math.round((activeUsers / totalUsers) * 100)}%` : '0%',
     },
     {
       label: 'Conversations',
       value: loading ? '...' : activeConversations.toString(),
       icon: MessageCircle,
-      color: 'from-purple-500 to-purple-600',
+      color: 'from-purple-600 to-purple-700',
       change: activeConversations > 0 ? 'Active' : 'None',
     },
     {
       label: 'System Health',
       value: `${systemHealth}%`,
       icon: Activity,
-      color: 'from-emerald-500 to-emerald-600',
+      color: 'from-emerald-600 to-emerald-700',
       change: systemHealth === 100 ? 'Optimal' : 'Degraded',
     },
     {
       label: 'AI Assistant',
       value: loading ? '...' : (systemStatus.aiEnabled ? 'Online' : 'Offline'),
       icon: Brain,
-      color: 'from-orange-500 to-orange-600',
+      color: 'from-orange-600 to-orange-700',
       change: systemStatus.aiEnabled ? 'Active' : 'Disabled',
     },
   ];
@@ -88,18 +88,18 @@ export default function MetricsCards() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="backdrop-blur-lg bg-white/80 rounded-xl p-6 shadow-lg border border-gray-200/50"
+            className="bg-slate-800 border border-slate-700 rounded-lg p-6 shadow-xl hover:border-slate-600 transition"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center`}>
+              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${metric.color} flex items-center justify-center border border-slate-600 shadow-lg`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-semibold text-gray-600 px-2 py-1 bg-gray-100 rounded-full">
+              <span className="text-xs font-bold text-slate-300 px-3 py-1 bg-slate-700/50 rounded border border-slate-600 uppercase tracking-wide">
                 {metric.change}
               </span>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-1">{metric.value}</div>
-            <div className="text-sm text-gray-600">{metric.label}</div>
+            <div className="text-3xl font-bold text-slate-100 mb-1 tracking-tight">{metric.value}</div>
+            <div className="text-sm text-slate-400 font-medium uppercase tracking-wide">{metric.label}</div>
           </motion.div>
         );
       })}

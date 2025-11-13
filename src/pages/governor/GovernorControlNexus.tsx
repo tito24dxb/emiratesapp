@@ -45,18 +45,18 @@ export default function GovernorControlNexus() {
   const getBannerColor = (type: string) => {
     switch (type) {
       case 'warning':
-        return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+        return 'bg-yellow-900 border-yellow-700 text-yellow-100';
       case 'error':
-        return 'bg-red-50 border-red-200 text-red-800';
+        return 'bg-red-900 border-red-700 text-red-100';
       case 'success':
-        return 'bg-green-50 border-green-200 text-green-800';
+        return 'bg-green-900 border-green-700 text-green-100';
       default:
-        return 'bg-blue-50 border-blue-200 text-blue-800';
+        return 'bg-blue-900 border-blue-700 text-blue-100';
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {!loading && announcement && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -65,7 +65,7 @@ export default function GovernorControlNexus() {
         >
           <div className="flex items-center gap-2 max-w-7xl mx-auto">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <p className="text-sm font-medium">{announcement.message}</p>
+            <p className="text-sm font-semibold">{announcement.message}</p>
           </div>
         </motion.div>
       )}
@@ -74,15 +74,15 @@ export default function GovernorControlNexus() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="backdrop-blur-lg bg-white/60 rounded-2xl p-6 shadow-xl border border-gray-200/50"
+          className="bg-slate-800 border border-slate-700 rounded-lg p-6 shadow-2xl"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl flex items-center justify-center">
-              <Shield className="w-7 h-7 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex items-center justify-center border border-slate-600">
+              <Shield className="w-8 h-8 text-slate-300" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Governor Control Nexus</h1>
-              <p className="text-gray-600">Central command system for platform management</p>
+              <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Governor Control Nexus</h1>
+              <p className="text-slate-400 text-sm mt-1">Central command system for platform management</p>
             </div>
           </div>
         </motion.div>
