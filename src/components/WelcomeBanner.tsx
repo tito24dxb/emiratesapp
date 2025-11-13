@@ -5,19 +5,22 @@ import { Sparkles } from 'lucide-react';
 interface WelcomeBannerProps {
   userName: string;
   isFirstLogin: boolean;
+  onDismiss: () => void;
 }
 
-export default function WelcomeBanner({ userName, isFirstLogin }: WelcomeBannerProps) {
+export default function WelcomeBanner({ userName, isFirstLogin, onDismiss }: WelcomeBannerProps) {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsVisible(false);
+      onDismiss();
     }, 5000);
 
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setIsVisible(false);
+        onDismiss();
       }
     };
 
@@ -27,7 +30,7 @@ export default function WelcomeBanner({ userName, isFirstLogin }: WelcomeBannerP
       clearTimeout(timer);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [onDismiss]);
 
   return (
     <AnimatePresence>
@@ -37,7 +40,7 @@ export default function WelcomeBanner({ userName, isFirstLogin }: WelcomeBannerP
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -100, opacity: 0 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed top-16 left-0 right-0 z-40 flex justify-center px-4 pointer-events-none"
+          className="fixed top-16 left-0 right-0 z-[60] flex justify-center px-4 pointer-events-none"
         >
           <div className="w-full max-w-4xl pointer-events-auto">
             <div className="bg-gradient-to-r from-[#D71920] via-[#D4AF37] to-[#D71920] text-white rounded-b-xl shadow-2xl overflow-hidden">
