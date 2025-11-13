@@ -1,0 +1,9 @@
+name = "emirates-ai-worker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://your-firebase-app.web.app"
+
+# To set the OpenAI API key secret, run:
+# wrangler secret put OPENAI_API_KEY

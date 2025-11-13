@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Send, AlertCircle, Loader2 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '../../../lib/firebase';
+import { db } from '../../../lib/firebase';
+import { openaiClient } from '../../../utils/openaiClient';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -51,43 +51,82 @@ export default function AIAssistantPanel() {
     setPrompt('');
     setLoading(true);
 
-    try {
-      const aiAssistantProxy = httpsCallable(functions, 'aiAssistantProxy');
+    const assistantMessage: Message = {
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+    };
 
-      const result = await aiAssistantProxy({
-        prompt: userMessage.content,
+    setMessages((prev) => [...prev, assistantMessage]);
+
+    try {
+      const chatMessages = [
+        {
+          role: 'system' as const,
+          content: 'You are an AI assistant for the Emirates Academy Governor Control Nexus. Provide helpful, concise responses about system operations, analytics, and management tasks.',
+        },
+        ...messages.map(m => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+        })),
+        {
+          role: 'user' as const,
+          content: userMessage.content,
+        },
+      ];
+
+      let streamedContent = '';
+
+      await openaiClient.streamChat(chatMessages, {
+        onChunk: (content) => {
+          streamedContent += content;
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastMessage = updated[updated.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+              lastMessage.content = streamedContent;
+            }
+            return updated;
+          });
+        },
+        onComplete: (totalTokens) => {
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastMessage = updated[updated.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+              lastMessage.tokensUsed = totalTokens;
+            }
+            return updated;
+          });
+        },
+        onError: (error) => {
+          console.error('AI Assistant Error:', error);
+          setMessages((prev) => {
+            const updated = [...prev];
+            const lastMessage = updated[updated.length - 1];
+            if (lastMessage && lastMessage.role === 'assistant') {
+              lastMessage.content = error.message?.includes('disabled')
+                ? 'AI features are currently disabled. Enable them in the AI Control Panel below.'
+                : `Failed to get AI response: ${error.message}`;
+            }
+            return updated;
+          });
+        },
         context: {
           role: 'governor',
           section: 'control_nexus',
         },
       });
-
-      const data = result.data as { success: boolean; reply: string; tokensUsed?: number };
-
-      if (data.success) {
-        const assistantMessage: Message = {
-          role: 'assistant',
-          content: data.reply,
-          timestamp: new Date(),
-          tokensUsed: data.tokensUsed,
-        };
-
-        setMessages((prev) => [...prev, assistantMessage]);
-      } else {
-        throw new Error('AI request failed');
-      }
     } catch (error: any) {
       console.error('AI Assistant Error:', error);
-
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: error.message?.includes('disabled')
-          ? 'AI features are currently disabled. Enable them in the AI Control Panel below.'
-          : 'Failed to get AI response. Please try again.',
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const lastMessage = updated[updated.length - 1];
+        if (lastMessage && lastMessage.role === 'assistant') {
+          lastMessage.content = 'Failed to get AI response. Please check your Cloudflare Worker configuration.';
+        }
+        return updated;
+      });
     } finally {
       setLoading(false);
     }
