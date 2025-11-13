@@ -12,6 +12,13 @@ export interface User {
   country: string;
   bio: string;
   photoURL: string;
+  expectations: string;
+  hasCompletedOnboarding: boolean;
+  hasSeenWelcomeBanner: boolean;
+  onboardingCompletedAt?: string;
+  welcomeBannerSeenAt?: string;
+  createdAt: string;
+  updatedAt: string;
   banned?: boolean;
   muted?: boolean;
 }

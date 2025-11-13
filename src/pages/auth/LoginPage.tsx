@@ -41,12 +41,19 @@ export default function LoginPage() {
       const currentUser = {
         uid: user.uid,
         email: userData.email || user.email,
-        name: userData.name || userData.displayName || 'User',
+        name: userData.name || 'User',
         role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
         country: userData.country || '',
         bio: userData.bio || '',
+        expectations: userData.expectations || '',
         photoURL: userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+        hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+        onboardingCompletedAt: userData.onboardingCompletedAt,
+        welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+        createdAt: userData.createdAt || new Date().toISOString(),
+        updatedAt: userData.updatedAt || new Date().toISOString(),
       };
 
       console.log('Setting current user:', currentUser);

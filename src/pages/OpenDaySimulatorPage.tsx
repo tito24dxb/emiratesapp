@@ -103,10 +103,19 @@ export default function OpenDaySimulatorPage() {
   };
 
   const handlePresentationComplete = async () => {
-    if (!simulation) return;
+    if (!simulation || !simulation.id) {
+      console.error('No simulation available');
+      return;
+    }
 
-    await updateSimulation(simulation.id!, { current_phase: 2 });
-    setPhase('quiz');
+    console.log('Completing presentation, updating to phase 2');
+    const updated = await updateSimulation(simulation.id, { current_phase: 2 });
+    if (updated) {
+      setPhase('quiz');
+    } else {
+      console.error('Failed to update simulation phase');
+      alert('Failed to proceed. Please try again.');
+    }
   };
 
   const handleQuizComplete = async (

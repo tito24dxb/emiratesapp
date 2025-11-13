@@ -24,18 +24,28 @@ export interface AnswerData {
 
 export async function getOrCreateSimulation(userId: string): Promise<SimulationData | null> {
   try {
+    console.log('getOrCreateSimulation called for userId:', userId);
     const simulationsRef = collection(db, 'open_day_simulations');
     const q = query(simulationsRef, where('user_id', '==', userId));
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      const doc = querySnapshot.docs[0];
+      const docData = querySnapshot.docs[0];
+      const data = docData.data();
+      console.log('Found existing simulation:', docData.id);
       return {
-        id: doc.id,
-        ...doc.data()
-      } as SimulationData;
+        id: docData.id,
+        user_id: data.user_id,
+        current_phase: data.current_phase || 1,
+        quiz_score: data.quiz_score || 0,
+        english_score: data.english_score || 0,
+        completed: data.completed || false,
+        started_at: data.started_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+        last_updated: data.last_updated?.toDate?.()?.toISOString() || new Date().toISOString()
+      };
     }
 
+    console.log('Creating new simulation for user:', userId);
     const newSimDoc = await addDoc(simulationsRef, {
       user_id: userId,
       current_phase: 1,
@@ -46,6 +56,7 @@ export async function getOrCreateSimulation(userId: string): Promise<SimulationD
       last_updated: Timestamp.now()
     });
 
+    console.log('New simulation created with ID:', newSimDoc.id);
     return {
       id: newSimDoc.id,
       user_id: userId,
@@ -119,10 +130,19 @@ export async function getAllSimulations(): Promise<SimulationData[]> {
     const q = query(simulationsRef, orderBy('last_updated', 'desc'));
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as SimulationData[];
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        user_id: data.user_id,
+        current_phase: data.current_phase || 1,
+        quiz_score: data.quiz_score || 0,
+        english_score: data.english_score || 0,
+        completed: data.completed || false,
+        started_at: data.started_at?.toDate?.()?.toISOString() || new Date().toISOString(),
+        last_updated: data.last_updated?.toDate?.()?.toISOString() || new Date().toISOString()
+      };
+    });
   } catch (error) {
     console.error('Error fetching all simulations:', error);
     return [];
