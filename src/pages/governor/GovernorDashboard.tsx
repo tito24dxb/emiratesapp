@@ -1,13 +1,60 @@
 import { Activity, Users, BookOpen, MessageCircle, TrendingUp, AlertCircle, Shield, Terminal, Database } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { collection, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
+import { getAllCourses } from '../../services/courseService';
+
+interface DashboardMetrics {
+  activeUsers: number;
+  activeCourses: number;
+  activeChats: number;
+  systemHealth: number;
+}
 
 export default function GovernorDashboard() {
-  const metrics = [
-    { label: 'Active Users', value: '247', change: '+12%', icon: Users, color: 'from-blue-500 to-blue-600' },
-    { label: 'Active Courses', value: '38', change: '+3', icon: BookOpen, color: 'from-green-500 to-green-600' },
-    { label: 'Active Chats', value: '52', change: '+8', icon: MessageCircle, color: 'from-purple-500 to-purple-600' },
-    { label: 'System Health', value: '98%', change: 'Healthy', icon: Activity, color: 'from-emerald-500 to-emerald-600' },
+  const [metrics, setMetrics] = useState<DashboardMetrics>({
+    activeUsers: 0,
+    activeCourses: 0,
+    activeChats: 0,
+    systemHealth: 100,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadMetrics = async () => {
+      try {
+        const usersSnapshot = await getDocs(collection(db, 'users'));
+        const activeUsers = usersSnapshot.size;
+
+        const courses = await getAllCourses();
+        const activeCourses = courses.length;
+
+        const chatsSnapshot = await getDocs(collection(db, 'chats'));
+        const activeChats = chatsSnapshot.size;
+
+        setMetrics({
+          activeUsers,
+          activeCourses,
+          activeChats,
+          systemHealth: 100,
+        });
+      } catch (error) {
+        console.error('Error loading metrics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMetrics();
+  }, []);
+
+  const metricCards = [
+    { label: 'Active Users', value: loading ? '...' : metrics.activeUsers.toString(), change: '—', icon: Users, color: 'from-blue-500 to-blue-600' },
+    { label: 'Active Courses', value: loading ? '...' : metrics.activeCourses.toString(), change: '—', icon: BookOpen, color: 'from-green-500 to-green-600' },
+    { label: 'Active Chats', value: loading ? '...' : metrics.activeChats.toString(), change: '—', icon: MessageCircle, color: 'from-purple-500 to-purple-600' },
+    { label: 'System Health', value: `${metrics.systemHealth}%`, change: 'Healthy', icon: Activity, color: 'from-emerald-500 to-emerald-600' },
   ];
 
   const modules = [
@@ -45,7 +92,7 @@ export default function GovernorDashboard() {
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {metrics.map((metric, index) => {
+        {metricCards.map((metric, index) => {
           const Icon = metric.icon;
           return (
             <motion.div
@@ -120,19 +167,19 @@ export default function GovernorDashboard() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-3">Recent Activity</h3>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
-                <span>System backup completed - 2 min ago</span>
+            <h3 className="font-semibold text-gray-900 mb-3">Database Status</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Users Collection</span>
+                <span className="font-semibold text-green-600">Active</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
-                <span>New user registered - 15 min ago</span>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Courses Collection</span>
+                <span className="font-semibold text-green-600">Active</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
-                <span>Course uploaded - 1 hour ago</span>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600">Chats Collection</span>
+                <span className="font-semibold text-green-600">Active</span>
               </div>
             </div>
           </div>
