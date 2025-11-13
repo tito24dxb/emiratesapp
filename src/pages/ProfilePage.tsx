@@ -16,7 +16,7 @@ export default function ProfilePage() {
     email: currentUser?.email || '',
     country: currentUser?.country || '',
     bio: currentUser?.bio || '',
-    photo_base64: currentUser?.photoURL || '',
+    photo_base64: (currentUser as any)?.photo_base64 || currentUser?.photoURL || '',
   });
 
   if (!currentUser) return null;
@@ -31,7 +31,7 @@ export default function ProfilePage() {
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
+        photo_base64: (currentUser as any)?.photo_base64 || currentUser.photoURL,
       setFormData({ ...formData, photo_base64: reader.result as string });
     };
     reader.readAsDataURL(file);
@@ -68,7 +68,7 @@ export default function ProfilePage() {
     }
   };
 
-  const displayPhoto = formData.photo_base64 || currentUser.photoURL;
+  const displayPhoto = formData.photo_base64 || (currentUser as any)?.photo_base64 || currentUser.photoURL;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
