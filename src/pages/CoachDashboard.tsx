@@ -27,7 +27,8 @@ export default function CoachDashboard() {
     setLoading(true);
     try {
       const coursesData = await getCoursesByCoach(currentUser.uid);
-      setCourses(coursesData);
+      const visibleCourses = coursesData.filter(course => !course.suppressed);
+      setCourses(visibleCourses);
     } catch (error) {
       console.error('Error loading courses:', error);
     } finally {

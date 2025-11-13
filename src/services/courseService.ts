@@ -30,6 +30,8 @@ export interface Course {
   video_url?: string;
   allow_download: boolean;
   content_type: 'pdf' | 'video' | 'text';
+  suppressed?: boolean;
+  suppressed_at?: string;
   created_at: string;
   updated_at: string;
 }

@@ -10,6 +10,7 @@ import BackupControl from '../../components/governor/nexus/BackupControl';
 import AIAssistantPanel from '../../components/governor/nexus/AIAssistantPanel';
 import UserManager from '../../components/governor/nexus/UserManager';
 import SystemFlags from '../../components/governor/nexus/SystemFlags';
+import CourseManager from '../../components/governor/nexus/CourseManager';
 
 interface Announcement {
   active: boolean;
@@ -103,6 +104,8 @@ export default function GovernorControlNexus() {
           <UserManager />
           <SystemFlags />
         </div>
+
+        <CourseManager />
       </div>
     </div>
   );

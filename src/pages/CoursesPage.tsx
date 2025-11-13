@@ -21,7 +21,8 @@ export default function CoursesPage() {
   const fetchCourses = async () => {
     try {
       const coursesData = await getAllCourses();
-      setCourses(coursesData);
+      const visibleCourses = coursesData.filter(course => !course.suppressed);
+      setCourses(visibleCourses);
     } catch (error) {
       console.error('Error fetching courses:', error);
       setCourses([]);
