@@ -40,6 +40,7 @@ export default function OpenDaySimulatorPage() {
   const [quizScore, setQuizScore] = useState(0);
   const [englishScore, setEnglishScore] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     if (currentUser && isPro) {
@@ -52,7 +53,9 @@ export default function OpenDaySimulatorPage() {
   const loadSimulation = async () => {
     if (!currentUser) return;
 
+    console.log('Loading simulation for user:', currentUser.uid);
     const sim = await getOrCreateSimulation(currentUser.uid);
+    console.log('Simulation loaded:', sim);
     if (sim) {
       setSimulation(sim);
       if (sim.completed) {
@@ -65,21 +68,37 @@ export default function OpenDaySimulatorPage() {
   };
 
   const startSimulation = async () => {
-    if (!currentUser) return;
+    if (!currentUser || isStarting) return;
 
+    setIsStarting(true);
     try {
+      console.log('Starting simulation for user:', currentUser.uid);
       let sim = simulation;
       if (!sim) {
+        console.log('Creating new simulation...');
         sim = await getOrCreateSimulation(currentUser.uid);
+        console.log('Simulation created:', sim);
         setSimulation(sim);
       }
 
       if (sim && sim.id) {
-        await updateSimulation(sim.id, { current_phase: 1 });
-        setPhase('presentation');
+        console.log('Updating simulation phase...');
+        const updated = await updateSimulation(sim.id, { current_phase: 1 });
+        console.log('Simulation updated:', updated);
+        if (updated) {
+          setPhase('presentation');
+        } else {
+          alert('Failed to start simulation. Please try again.');
+        }
+      } else {
+        console.error('No simulation available');
+        alert('Failed to create simulation. Please try again.');
       }
     } catch (error) {
       console.error('Error starting simulation:', error);
+      alert('An error occurred while starting the simulation. Please try again.');
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -272,11 +291,21 @@ export default function OpenDaySimulatorPage() {
 
             <button
               onClick={startSimulation}
-              className="w-full px-8 py-4 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition flex items-center justify-center gap-3"
+              disabled={isStarting}
+              className="w-full px-8 py-4 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Sparkles className="w-6 h-6" />
-              {simulation?.completed ? 'Start New Simulation' : 'Begin Simulation'}
-              <Sparkles className="w-6 h-6" />
+              {isStarting ? (
+                <>
+                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-6 h-6" />
+                  {simulation?.completed ? 'Start New Simulation' : 'Begin Simulation'}
+                  <Sparkles className="w-6 h-6" />
+                </>
+              )}
             </button>
           </div>
         </motion.div>
