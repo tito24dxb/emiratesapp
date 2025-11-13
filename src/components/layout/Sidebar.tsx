@@ -21,7 +21,8 @@ import {
   UserCircle,
   Terminal,
   Megaphone,
-  Database
+  Database,
+  Zap
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -107,6 +108,7 @@ export default function Sidebar() {
   ];
 
   const governorLinks = [
+    { path: '/governor/nexus', icon: Zap, label: 'Control Nexus', highlight: true },
     { path: '/governor', icon: Shield, label: 'Control Center' },
     { path: '/governor/commands', icon: Terminal, label: 'Commands' },
     { path: '/governor/announcements', icon: Megaphone, label: 'Announcements' },

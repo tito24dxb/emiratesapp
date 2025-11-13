@@ -15,6 +15,7 @@ import GlobalAlerts from './pages/governor/GlobalAlerts';
 import MaintenanceMode from './pages/governor/MaintenanceMode';
 import SystemControl from './pages/governor/SystemControl';
 import GovernorDashboard from './pages/governor/GovernorDashboard';
+import GovernorControlNexus from './pages/governor/GovernorControlNexus';
 import CommandConsole from './pages/governor/CommandConsole';
 import AnnouncementManager from './pages/governor/AnnouncementManager';
 import BackupManager from './pages/governor/BackupManager';
@@ -86,6 +87,7 @@ function AppContent() {
         {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
           <>
             <Route path="/governor" element={<GovernorDashboard />} />
+            <Route path="/governor/nexus" element={<GovernorControlNexus />} />
             <Route path="/governor/commands" element={<CommandConsole />} />
             <Route path="/governor/announcements" element={<AnnouncementManager />} />
             <Route path="/governor/backups" element={<BackupManager />} />
