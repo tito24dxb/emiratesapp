@@ -19,6 +19,7 @@ import RecruitersPage from './pages/RecruitersPage';
 import OpenDaysPage from './pages/OpenDaysPage';
 import UpgradePlanPage from './pages/UpgradePlanPage';
 import CourseViewerPage from './pages/CourseViewerPage';
+import DocumentationPage from './pages/DocumentationPage';
 import { Users } from 'lucide-react';
 
 function MaintenanceScreen({ message }: { message: string }) {
@@ -61,6 +62,7 @@ function AppContent() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="/ai-trainer" element={<AITrainerPage />} />
         <Route path="/open-day" element={<OpenDaySimulatorPage />} />
         <Route path="/recruiters" element={<RecruitersPage />} />

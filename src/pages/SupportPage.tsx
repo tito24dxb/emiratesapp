@@ -1,6 +1,12 @@
-import { HelpCircle, Mail, MessageCircle, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { HelpCircle, Mail, MessageCircle, FileText, BookOpen } from 'lucide-react';
+import SupportChatPopup from '../components/SupportChatPopup';
+import { useNavigate } from 'react-router-dom';
 
 export default function SupportPage() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const navigate = useNavigate();
+
   return (
     <div>
       <div className="mb-8">
@@ -15,12 +21,15 @@ export default function SupportPage() {
           </div>
           <h3 className="text-xl font-bold text-[#1C1C1C] mb-2">Email Support</h3>
           <p className="text-gray-600 mb-4">Get help via email within 24 hours</p>
-          <button className="text-[#D71920] font-bold hover:underline">
+          <a href="mailto:support@emirates.academy" className="text-[#D71920] font-bold hover:underline">
             support@emirates.academy
-          </button>
+          </a>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition cursor-pointer">
+        <div
+          onClick={() => setIsChatOpen(true)}
+          className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition cursor-pointer"
+        >
           <div className="w-16 h-16 bg-gradient-to-br from-[#B9975B] to-[#A8865A] rounded-full flex items-center justify-center mx-auto mb-4">
             <MessageCircle className="w-8 h-8 text-white" />
           </div>
@@ -31,9 +40,12 @@ export default function SupportPage() {
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition cursor-pointer">
+        <div
+          onClick={() => navigate('/documentation')}
+          className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition cursor-pointer"
+        >
           <div className="w-16 h-16 bg-gradient-to-br from-[#1C1C1C] to-[#2C2C2C] rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-white" />
+            <BookOpen className="w-8 h-8 text-white" />
           </div>
           <h3 className="text-xl font-bold text-[#1C1C1C] mb-2">Documentation</h3>
           <p className="text-gray-600 mb-4">Browse help articles and guides</p>
@@ -42,6 +54,8 @@ export default function SupportPage() {
           </button>
         </div>
       </div>
+
+      <SupportChatPopup isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-2xl font-bold text-[#1C1C1C] mb-6">Frequently Asked Questions</h2>
