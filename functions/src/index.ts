@@ -1,11 +1,15 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import Stripe from 'stripe';
-import axios from 'axios';
+import OpenAI from 'openai';
 
 admin.initializeApp();
 
 const db = admin.firestore();
+
+const openai = new OpenAI({
+  apiKey: functions.config().openai?.key || process.env.OPENAI_API_KEY,
+});
 
 interface GovernorCommandRequest {
   command: string;
@@ -350,55 +354,66 @@ export const aiAssistantProxy = functions.https.onCall(async (data: { prompt: st
 
   const { uid } = context.auth;
 
-  const canUseAI = await hasPermission(uid, 'manageSystem');
-  if (!canUseAI) {
-    throw new functions.https.HttpsError('permission-denied', 'Insufficient permissions');
-  }
+  const aiControlDoc = await db.collection('systemControl').doc('ai').get();
+  const aiEnabled = aiControlDoc.exists ? aiControlDoc.data()?.enabled !== false : true;
 
-  const apiKey = functions.config().deepseek?.api_key || process.env.DEEPSEEK_API_KEY;
-
-  if (!apiKey) {
-    throw new functions.https.HttpsError('failed-precondition', 'AI API key not configured');
+  if (!aiEnabled) {
+    throw new functions.https.HttpsError('failed-precondition', 'AI features are currently disabled by system administrator');
   }
 
   try {
     const { prompt, context: userContext } = data;
 
+    if (!prompt || prompt.trim().length === 0) {
+      throw new functions.https.HttpsError('invalid-argument', 'Prompt cannot be empty');
+    }
+
     const systemPrompt = `You are an operations assistant for Crews Academy, a flight crew training platform.
 You help governors manage the system, analyze data, and make informed decisions.
 Provide concise, actionable insights. Current context: ${JSON.stringify(userContext || {})}`;
 
-    const response = await axios.post(
-      'https://api.deepseek.com/v1/chat/completions',
-      {
-        model: 'deepseek-chat',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt },
-        ],
-        max_tokens: 500,
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-        },
-      }
-    );
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4-turbo-preview',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    });
 
-    const reply = response.data.choices[0].message.content;
+    const reply = completion.choices[0].message.content || 'No response generated';
 
-    await logAuditEvent('ai_assistant_query', uid, 'governor', { prompt, reply });
+    await db.collection('aiUsageLogs').add({
+      userId: uid,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      promptLength: prompt.length,
+      modelUsed: completion.model,
+      tokensUsed: completion.usage?.total_tokens || 0,
+      success: true,
+    });
+
+    await logAuditEvent('ai_assistant_query', uid, 'user', { promptLength: prompt.length, tokensUsed: completion.usage?.total_tokens });
 
     return {
       success: true,
       reply,
-      tokensUsed: response.data.usage?.total_tokens || 0,
+      tokensUsed: completion.usage?.total_tokens || 0,
     };
   } catch (error: any) {
     console.error('AI Assistant Error:', error);
-    throw new functions.https.HttpsError('internal', 'AI request failed');
+
+    await db.collection('aiUsageLogs').add({
+      userId: uid,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      promptLength: data.prompt?.length || 0,
+      modelUsed: 'gpt-4-turbo-preview',
+      tokensUsed: 0,
+      success: false,
+      error: error.message,
+    });
+
+    throw new functions.https.HttpsError('internal', 'AI request failed: ' + error.message);
   }
 });
 
