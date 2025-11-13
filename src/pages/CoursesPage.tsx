@@ -1,22 +1,57 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { courses, getCoursesByPlan, Course } from '../data/coursesData';
+import { Course } from '../data/coursesData';
 import { BookOpen, Clock, BarChart3, Lock, Crown, Zap } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 export default function CoursesPage() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<'all' | Course['category']>('all');
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const userPlan = currentUser?.plan || 'free';
-  const availableCourses = useMemo(() => getCoursesByPlan(userPlan), [userPlan]);
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  const fetchCourses = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setCourses(data || []);
+    } catch (error) {
+      console.error('Error fetching courses:', error);
+      setCourses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCoursesByPlan = (userPlan: 'free' | 'pro' | 'vip'): Course[] => {
+    const planHierarchy = { 'free': 0, 'pro': 1, 'vip': 2 };
+    const userPlanLevel = planHierarchy[userPlan];
+
+    return courses.filter(course => {
+      const coursePlanLevel = planHierarchy[course.plan as 'free' | 'pro' | 'vip'];
+      return coursePlanLevel <= userPlanLevel;
+    });
+  };
+
+  const availableCourses = useMemo(() => getCoursesByPlan(userPlan), [userPlan, courses]);
 
   const displayCourses = useMemo(() => {
     if (selectedCategory === 'all') return courses;
     return courses.filter(course => course.category === selectedCategory);
-  }, [selectedCategory]);
+  }, [selectedCategory, courses]);
 
   const isCourseAvailable = (course: Course) => {
     return availableCourses.some(c => c.id === course.id);
@@ -96,8 +131,22 @@ export default function CoursesPage() {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {displayCourses.map((course) => {
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D71921] mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading courses...</p>
+          </div>
+        </div>
+      ) : displayCourses.length === 0 ? (
+        <div className="text-center py-12">
+          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Courses Available</h3>
+          <p className="text-gray-600">Courses will be uploaded by coaches soon.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {displayCourses.map((course) => {
           const isAvailable = isCourseAvailable(course);
 
           return (
@@ -183,6 +232,7 @@ export default function CoursesPage() {
           );
         })}
       </div>
+      )}
     </div>
   );
 }

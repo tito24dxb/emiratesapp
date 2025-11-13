@@ -65,10 +65,22 @@ export default function OpenDaySimulatorPage() {
   };
 
   const startSimulation = async () => {
-    if (!currentUser || !simulation) return;
+    if (!currentUser) return;
 
-    await updateSimulation(simulation.id!, { current_phase: 1 });
-    setPhase('presentation');
+    try {
+      let sim = simulation;
+      if (!sim) {
+        sim = await getOrCreateSimulation(currentUser.uid);
+        setSimulation(sim);
+      }
+
+      if (sim && sim.id) {
+        await updateSimulation(sim.id, { current_phase: 1 });
+        setPhase('presentation');
+      }
+    } catch (error) {
+      console.error('Error starting simulation:', error);
+    }
   };
 
   const handlePresentationComplete = async () => {
