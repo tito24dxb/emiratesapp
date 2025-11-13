@@ -4,13 +4,6 @@ import {
   MessageCircle,
   HelpCircle,
   Users,
-  Upload,
-  Bell,
-  Settings,
-  BarChart3,
-  Shield,
-  FolderOpen,
-  MessagesSquare,
   GraduationCap,
   Brain,
   Plane,
@@ -19,9 +12,6 @@ import {
   Lock,
   Calendar,
   UserCircle,
-  Terminal,
-  Megaphone,
-  Database,
   Zap
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -109,22 +99,11 @@ export default function Sidebar() {
 
   const governorLinks = [
     { path: '/governor/nexus', icon: Zap, label: 'Control Nexus', highlight: true },
-    { path: '/governor', icon: Shield, label: 'Control Center' },
-    { path: '/governor/commands', icon: Terminal, label: 'Commands' },
-    { path: '/governor/announcements', icon: Megaphone, label: 'Announcements' },
-    { path: '/governor/backups', icon: Database, label: 'Backups' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
-    { path: '/users', icon: Users, label: 'Users' },
-    { path: '/system-control', icon: Settings, label: 'System Control' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
-    { path: '/alerts', icon: Bell, label: 'Alerts' },
-    { path: '/maintenance', icon: Settings, label: 'Maintenance' },
-    { path: '/hub', icon: FolderOpen, label: 'Hub' },
-    { path: '/conversations', icon: MessagesSquare, label: 'Conversations' },
-    { path: '/analytics', icon: BarChart3, label: 'Analytics' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 

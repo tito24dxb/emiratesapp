@@ -10,15 +10,7 @@ import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
 import CoachDashboard from './pages/CoachDashboard';
-import UsersControl from './pages/governor/UsersControl';
-import GlobalAlerts from './pages/governor/GlobalAlerts';
-import MaintenanceMode from './pages/governor/MaintenanceMode';
-import SystemControl from './pages/governor/SystemControl';
-import GovernorDashboard from './pages/governor/GovernorDashboard';
 import GovernorControlNexus from './pages/governor/GovernorControlNexus';
-import CommandConsole from './pages/governor/CommandConsole';
-import AnnouncementManager from './pages/governor/AnnouncementManager';
-import BackupManager from './pages/governor/BackupManager';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AITrainerPage from './pages/AITrainerPage';
 import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
@@ -27,7 +19,7 @@ import RecruitersPage from './pages/RecruitersPage';
 import OpenDaysPage from './pages/OpenDaysPage';
 import UpgradePlanPage from './pages/UpgradePlanPage';
 import CourseViewerPage from './pages/CourseViewerPage';
-import { Users, Upload, FolderOpen, MessagesSquare, BarChart3 } from 'lucide-react';
+import { Users } from 'lucide-react';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -85,34 +77,7 @@ function AppContent() {
         )}
 
         {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
-          <>
-            <Route path="/governor" element={<GovernorDashboard />} />
-            <Route path="/governor/nexus" element={<GovernorControlNexus />} />
-            <Route path="/governor/commands" element={<CommandConsole />} />
-            <Route path="/governor/announcements" element={<AnnouncementManager />} />
-            <Route path="/governor/backups" element={<BackupManager />} />
-          </>
-        )}
-
-        {currentUser.role === 'governor' && (
-          <>
-            <Route path="/users" element={<UsersControl />} />
-            <Route path="/alerts" element={<GlobalAlerts />} />
-            <Route path="/maintenance" element={<MaintenanceMode />} />
-            <Route path="/system-control" element={<SystemControl />} />
-            <Route
-              path="/hub"
-              element={<PlaceholderPage icon={FolderOpen} title="Hub Management" description="Manage educational content library" />}
-            />
-            <Route
-              path="/conversations"
-              element={<PlaceholderPage icon={MessagesSquare} title="Conversations Control" description="Monitor and manage platform conversations" />}
-            />
-            <Route
-              path="/analytics"
-              element={<PlaceholderPage icon={BarChart3} title="Analytics" description="View platform statistics and insights" />}
-            />
-          </>
+          <Route path="/governor/nexus" element={<GovernorControlNexus />} />
         )}
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
