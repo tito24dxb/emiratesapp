@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import SystemAnnouncementBanner from '../SystemAnnouncementBanner';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +16,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] to-white">
       <Navbar />
+      <SystemAnnouncementBanner />
 
       <AnimatePresence>
         {banners.map((banner) => (

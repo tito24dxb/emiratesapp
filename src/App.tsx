@@ -13,6 +13,7 @@ import CoachDashboard from './pages/CoachDashboard';
 import UsersControl from './pages/governor/UsersControl';
 import GlobalAlerts from './pages/governor/GlobalAlerts';
 import MaintenanceMode from './pages/governor/MaintenanceMode';
+import SystemControl from './pages/governor/SystemControl';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AITrainerPage from './pages/AITrainerPage';
 import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
@@ -83,6 +84,7 @@ function AppContent() {
             <Route path="/users" element={<UsersControl />} />
             <Route path="/alerts" element={<GlobalAlerts />} />
             <Route path="/maintenance" element={<MaintenanceMode />} />
+            <Route path="/system-control" element={<SystemControl />} />
             <Route
               path="/hub"
               element={<PlaceholderPage icon={FolderOpen} title="Hub Management" description="Manage educational content library" />}

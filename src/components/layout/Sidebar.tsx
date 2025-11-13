@@ -107,6 +107,7 @@ export default function Sidebar() {
     { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/users', icon: Users, label: 'Users' },
+    { path: '/system-control', icon: Shield, label: 'System Control' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },

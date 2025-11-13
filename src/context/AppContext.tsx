@@ -2,6 +2,13 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
+import {
+  getSystemControl,
+  subscribeToSystemControl,
+  SystemControl,
+  SystemFeatures,
+  SystemAnnouncement,
+} from '../services/systemControlService';
 
 export type Role = 'student' | 'mentor' | 'governor';
 export type Plan = 'free' | 'pro' | 'vip';
@@ -42,6 +49,9 @@ interface AppContextType {
   setMaintenanceMessage: (message: string) => void;
   banners: Banner[];
   setBanners: (banners: Banner[]) => void;
+  systemFeatures: SystemFeatures;
+  systemAnnouncement: SystemAnnouncement;
+  isFeatureEnabled: (feature: keyof SystemFeatures) => boolean;
   logout: () => void;
 }
 
@@ -52,6 +62,40 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState('System under maintenance. Please check back soon.');
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [systemFeatures, setSystemFeatures] = useState<SystemFeatures>({
+    chat: true,
+    quiz: true,
+    englishTest: true,
+    profileEdit: true,
+    openDayModule: true,
+  });
+  const [systemAnnouncement, setSystemAnnouncement] = useState<SystemAnnouncement>({
+    active: false,
+    message: '',
+    type: 'info',
+    timestamp: null,
+  });
+
+  useEffect(() => {
+    const loadSystemControl = async () => {
+      const control = await getSystemControl();
+      if (control) {
+        setSystemFeatures(control.features);
+        setSystemAnnouncement(control.announcement);
+      }
+    };
+
+    loadSystemControl();
+
+    const unsubscribe = subscribeToSystemControl((control) => {
+      if (control) {
+        setSystemFeatures(control.features);
+        setSystemAnnouncement(control.announcement);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     console.log('Setting up Firebase auth listener');
@@ -121,6 +165,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('currentUser');
   };
 
+  const isFeatureEnabled = (feature: keyof SystemFeatures): boolean => {
+    return systemFeatures[feature] === true;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -132,6 +180,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setMaintenanceMessage,
         banners,
         setBanners,
+        systemFeatures,
+        systemAnnouncement,
+        isFeatureEnabled,
         logout,
       }}
     >
