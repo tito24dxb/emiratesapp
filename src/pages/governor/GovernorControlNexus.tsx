@@ -8,6 +8,7 @@ import RealtimeLogs from '../../components/governor/nexus/RealtimeLogs';
 import CommandConsole from '../../components/governor/nexus/CommandConsole';
 import BackupControl from '../../components/governor/nexus/BackupControl';
 import AIAssistantPanel from '../../components/governor/nexus/AIAssistantPanel';
+import AILogsViewer from '../../components/governor/nexus/AILogsViewer';
 import UserManager from '../../components/governor/nexus/UserManager';
 import SystemFlags from '../../components/governor/nexus/SystemFlags';
 import CourseManager from '../../components/governor/nexus/CourseManager';
@@ -103,6 +104,8 @@ export default function GovernorControlNexus() {
           <BackupControl />
           <AIAssistantPanel />
         </div>
+
+        <AILogsViewer />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <UserManager />

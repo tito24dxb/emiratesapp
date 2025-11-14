@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, Send, AlertCircle, Loader2 } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../../lib/firebase';
+import { db, auth } from '../../../lib/firebase';
 import { openaiClient } from '../../../utils/openaiClient';
 
 interface Message {
@@ -75,9 +75,15 @@ export default function AIAssistantPanel() {
         },
       ];
 
+      const userId = auth.currentUser?.uid;
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
+
       let streamedContent = '';
 
       await openaiClient.streamChat(chatMessages, {
+        userId,
         onChunk: (content) => {
           streamedContent += content;
           setMessages((prev) => {
@@ -111,10 +117,6 @@ export default function AIAssistantPanel() {
             }
             return updated;
           });
-        },
-        context: {
-          role: 'governor',
-          section: 'control_nexus',
         },
       });
     } catch (error: any) {

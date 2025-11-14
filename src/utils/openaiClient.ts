@@ -1,134 +1,95 @@
+import { supabase } from '../lib/supabase';
+
 interface Message {
   role: 'system' | 'user' | 'assistant';
   content: string;
 }
 
-interface OpenAIStreamResponse {
-  content?: string;
-  done?: boolean;
-  totalTokens?: number;
-}
-
-interface OpenAIClientOptions {
-  workerUrl: string;
-  onChunk?: (content: string) => void;
-  onComplete?: (totalTokens?: number) => void;
-  onError?: (error: Error) => void;
+interface AIResponse {
+  output_text: string;
+  tokens_used?: number;
 }
 
 export class OpenAIClient {
-  private workerUrl: string;
-
-  constructor(workerUrl: string) {
-    this.workerUrl = workerUrl;
-  }
-
-  async streamChat(
-    messages: Message[],
-    options: {
-      onChunk?: (content: string) => void;
-      onComplete?: (totalTokens?: number) => void;
-      onError?: (error: Error) => void;
-      context?: Record<string, any>;
-    } = {}
-  ): Promise<string> {
-    const { onChunk, onComplete, onError, context } = options;
-    let fullResponse = '';
-    let totalTokens: number | undefined;
-
+  async sendMessage(
+    prompt: string,
+    userId: string,
+    messages?: Message[]
+  ): Promise<{ reply: string; tokensUsed?: number }> {
     try {
-      const response = await fetch(`${this.workerUrl}/api/openai`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages,
-          context,
-        }),
-      });
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('No active session. Please log in.');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({
+            prompt,
+            userId,
+            messages,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
-      if (!response.body) {
-        throw new Error('Response body is null');
-      }
+      const data: AIResponse = await response.json();
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || !trimmed.startsWith('data: ')) continue;
-
-          try {
-            const jsonData: OpenAIStreamResponse = JSON.parse(trimmed.slice(6));
-
-            if (jsonData.content) {
-              fullResponse += jsonData.content;
-              if (onChunk) {
-                onChunk(jsonData.content);
-              }
-            }
-
-            if (jsonData.done) {
-              totalTokens = jsonData.totalTokens;
-            }
-          } catch (e) {
-            console.error('Failed to parse SSE data:', e);
-          }
-        }
-      }
-
-      if (onComplete) {
-        onComplete(totalTokens);
-      }
-
-      return fullResponse;
-
+      return {
+        reply: data.output_text,
+        tokensUsed: data.tokens_used,
+      };
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Unknown error occurred');
-      if (onError) {
-        onError(err);
-      }
+      console.error('AI Client Error:', err);
       throw err;
     }
   }
 
-  async sendMessage(
+  async streamChat(
     messages: Message[],
-    context?: Record<string, any>
-  ): Promise<{ reply: string; tokensUsed?: number }> {
-    let reply = '';
-    let tokensUsed: number | undefined;
+    options: {
+      userId: string;
+      onChunk?: (content: string) => void;
+      onComplete?: (totalTokens?: number) => void;
+      onError?: (error: Error) => void;
+    }
+  ): Promise<string> {
+    try {
+      const lastUserMessage = messages.filter(m => m.role === 'user').pop();
+      const prompt = lastUserMessage?.content || '';
 
-    await this.streamChat(messages, {
-      onChunk: (content) => {
-        reply += content;
-      },
-      onComplete: (tokens) => {
-        tokensUsed = tokens;
-      },
-      context,
-    });
+      const result = await this.sendMessage(prompt, options.userId, messages);
 
-    return { reply, tokensUsed };
+      if (options.onChunk) {
+        options.onChunk(result.reply);
+      }
+
+      if (options.onComplete) {
+        options.onComplete(result.tokensUsed);
+      }
+
+      return result.reply;
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error('Unknown error occurred');
+      if (options.onError) {
+        options.onError(err);
+      }
+      throw err;
+    }
   }
 }
 
-export const openaiClient = new OpenAIClient(
-  import.meta.env.VITE_CLOUDFLARE_WORKER_URL || 'https://your-worker.workers.dev'
-);
+export const openaiClient = new OpenAIClient();
