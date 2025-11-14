@@ -30,10 +30,15 @@ export class OpenAIClient {
       console.log('AI Endpoint:', aiEndpoint);
       console.log('Sending request with userId:', userId);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY;
+
       const response = await fetch(aiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
         body: JSON.stringify({ messages, userId }),
       });
