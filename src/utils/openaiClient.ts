@@ -32,6 +32,8 @@ export class OpenAIClient {
       }
 
       const aiEndpoint = this.getAIEndpoint();
+      console.log('AI Endpoint:', aiEndpoint);
+      console.log('Sending request with userId:', userId);
 
       const response = await fetch(aiEndpoint, {
         method: 'POST',
@@ -41,8 +43,11 @@ export class OpenAIClient {
         body: JSON.stringify({ messages, userId }),
       });
 
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('Error response:', errorData);
         const errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
 
         if (errorMessage.includes('OpenAI API key not configured')) {
@@ -53,6 +58,7 @@ export class OpenAIClient {
       }
 
       const data: AIResponse = await response.json();
+      console.log('Success response:', data);
 
       return {
         reply: data.output_text,
@@ -61,6 +67,7 @@ export class OpenAIClient {
     } catch (error) {
       const err = error instanceof Error ? error : new Error('Unknown error occurred');
       console.error('AI Client Error:', err);
+      console.error('Error details:', error);
       throw err;
     }
   }
