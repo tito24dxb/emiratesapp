@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useApp, AppProvider } from './context/AppContext';
 import Layout from './components/layout/Layout';
+import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import Dashboard from './pages/Dashboard';
@@ -13,6 +14,7 @@ import SupportChatManagerPage from './pages/SupportChatManagerPage';
 import CoachDashboard from './pages/CoachDashboard';
 import GovernorControlNexus from './pages/governor/GovernorControlNexus';
 import PlaceholderPage from './pages/PlaceholderPage';
+import NotificationsPage from './pages/NotificationsPage';
 import AITrainerPage from './pages/AITrainerPage';
 import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
 import RecruiterListPage from './pages/RecruiterListPage';
@@ -47,9 +49,10 @@ function AppContent() {
   if (!currentUser) {
     return (
       <Routes>
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
   }
@@ -63,6 +66,7 @@ function AppContent() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="/ai-trainer" element={<AITrainerPage />} />
         <Route path="/open-day" element={<OpenDaySimulatorPage />} />
