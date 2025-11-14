@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 interface RequestBody {
-  prompt: string;
+  prompt?: string;
   userId: string;
   messages?: Array<{ role: string; content: string }>;
 }
@@ -30,9 +30,19 @@ Deno.serve(async (req: Request) => {
     const body: RequestBody = await req.json();
     const { prompt, userId, messages } = body;
 
-    if (!prompt || !userId) {
+    if (!userId) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: prompt, userId" }),
+        JSON.stringify({ error: "Missing required field: userId" }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    if (!messages && !prompt) {
+      return new Response(
+        JSON.stringify({ error: "Missing required field: messages or prompt" }),
         {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -94,11 +104,15 @@ Deno.serve(async (req: Request) => {
     const outputText = aiResult.choices?.[0]?.message?.content || "No response";
     const tokensUsed = aiResult.usage?.total_tokens || 0;
 
+    const logPrompt = prompt || (messages && messages.length > 0
+      ? messages.map(m => `${m.role}: ${m.content}`).join('\n')
+      : 'No prompt provided');
+
     const { error: insertError } = await supabaseClient
       .from("ai_logs")
       .insert({
         user_id: userId,
-        prompt: prompt,
+        prompt: logPrompt,
         response: outputText,
         model: "gpt-4o-mini",
         tokens_used: tokensUsed,
