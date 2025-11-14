@@ -20,7 +20,18 @@ export async function getAIResponse(prompt: string, userId: string, systemPrompt
     return result.reply;
   } catch (error) {
     console.error('AI error:', error);
-    throw error;
+
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+
+    if (errorMessage.includes('OpenAI API key') || errorMessage.includes('AI service is not configured')) {
+      throw new Error('The AI service is currently unavailable. Please ensure the OpenAI API key is configured in your Supabase project settings.');
+    }
+
+    if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+      throw new Error('Unable to connect to the AI service. Please check your internet connection and try again.');
+    }
+
+    throw new Error(errorMessage);
   }
 }
 

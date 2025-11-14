@@ -21,14 +21,21 @@ export class OpenAIClient {
         throw new Error('User ID is required. Please log in.');
       }
 
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase configuration is missing. Please check your environment variables.');
+      }
+
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai`,
+        `${supabaseUrl}/functions/v1/ai`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey,
           },
           body: JSON.stringify({
             prompt,
@@ -40,7 +47,13 @@ export class OpenAIClient {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        const errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+
+        if (errorMessage.includes('OpenAI API key not configured')) {
+          throw new Error('AI service is not configured. Please contact the administrator to set up the OpenAI API key.');
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data: AIResponse = await response.json();

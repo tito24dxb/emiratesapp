@@ -41,6 +41,17 @@ Visit `http://localhost:5173` and log in with:
 
 See `EMIRATES_ACADEMY_README.md` for full documentation.
 
+## AI Configuration
+
+The AI Trainer feature requires an OpenAI API key to be configured in your Supabase project:
+
+1. Go to your Supabase Dashboard
+2. Navigate to Project Settings > Edge Functions
+3. Add a secret named `OPENAI_API_KEY` with your OpenAI API key
+4. The AI edge function will automatically use this key
+
+Without this configuration, the AI Trainer will show an error message asking users to contact the administrator.
+
 ## Tech Stack
 
-React 18 • TypeScript • React Router • Tailwind CSS • Framer Motion
+React 18 • TypeScript • React Router • Tailwind CSS • Framer Motion • Supabase • Firebase
