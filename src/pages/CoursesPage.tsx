@@ -28,11 +28,15 @@ export default function CoursesPage() {
   const fetchData = async () => {
     try {
       console.log('CoursesPage: Fetching modules with content...');
-      const modulesData = await getAllModules();
-      console.log('CoursesPage: Modules fetched:', modulesData.length, modulesData);
+      const allModules = await getAllModules();
+      console.log('CoursesPage: All modules fetched:', allModules.length, allModules);
+
+      // Filter only visible modules for students
+      const modulesData = allModules.filter(module => module.visible === true);
+      console.log('CoursesPage: Visible modules:', modulesData.length, modulesData);
 
       if (modulesData.length === 0) {
-        console.log('CoursesPage: No modules found');
+        console.log('CoursesPage: No visible modules found');
         setModulesWithContent([]);
         setLoading(false);
         return;
@@ -94,25 +98,10 @@ export default function CoursesPage() {
       ) : modulesWithContent.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl shadow-lg p-8">
           <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-800 mb-2">No Training Modules Found</h3>
-          <p className="text-gray-600 mb-4">
-            No modules have been created yet.
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Training Modules Available</h3>
+          <p className="text-gray-600">
+            Training modules will be available soon. Check back later!
           </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-2xl mx-auto">
-            <p className="text-sm text-blue-900 mb-2">
-              <strong>For Administrators:</strong> To create training modules:
-            </p>
-            <ol className="text-sm text-blue-800 space-y-1 ml-4">
-              <li>1. Go to Coach Dashboard</li>
-              <li>2. Click "Create Module" button</li>
-              <li>3. Fill in the module details and create it</li>
-              <li>4. Add courses to your module</li>
-              <li>5. Your modules will appear here for students</li>
-            </ol>
-            <p className="text-xs text-blue-700 mt-3">
-              Note: Check browser console for debugging information.
-            </p>
-          </div>
         </div>
       ) : (
         <div className="space-y-6">
