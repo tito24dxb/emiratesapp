@@ -4,6 +4,8 @@ import { BookOpen, MessageCircle, Users, TrendingUp, Award, GraduationCap, BarCh
 import { motion } from 'framer-motion';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getUserEnrollments } from '../services/courseService';
+import { getUserPoints } from '../services/rewardsService';
 import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
 import OnboardingCard from '../components/OnboardingCard';
@@ -109,15 +111,19 @@ export default function Dashboard() {
           messages: 0
         };
       } else if (currentUser.role === 'student') {
-        // For students, only load their own data
-        const simulationsRef = collection(db, 'open_day_simulations');
-        const userSimsQuery = query(simulationsRef, where('user_id', '==', currentUser.uid));
-        const userSimsSnapshot = await getDocs(userSimsQuery);
+        const enrollments = await getUserEnrollments(currentUser.uid);
+        const completedEnrollments = enrollments.filter(e => e.completed);
+
+        let overallProgress = 0;
+        if (enrollments.length > 0) {
+          const totalProgress = enrollments.reduce((sum, e) => sum + e.progress, 0);
+          overallProgress = Math.round(totalProgress / enrollments.length);
+        }
 
         roleSpecificData = {
-          coursesEnrolled: 0,
-          overallProgress: 0,
-          certificatesEarned: 0
+          coursesEnrolled: enrollments.length,
+          overallProgress: overallProgress,
+          certificatesEarned: completedEnrollments.length
         };
       }
 
@@ -243,21 +249,23 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        <motion.div variants={itemVariants}>
-          <EmptyState
-            icon={BookOpen}
-            title="No Courses Yet"
-            description="You haven't enrolled in any courses yet. Explore our free lessons or browse courses to get started on your Emirates cabin crew journey."
-            action={{
-              label: 'Explore Free Lessons',
-              onClick: () => navigate('/courses'),
-            }}
-            secondaryAction={{
-              label: 'View All Courses',
-              onClick: () => navigate('/courses'),
-            }}
-          />
-        </motion.div>
+        {dashboardData.coursesEnrolled === 0 && (
+          <motion.div variants={itemVariants}>
+            <EmptyState
+              icon={BookOpen}
+              title="No Courses Yet"
+              description="You haven't enrolled in any courses yet. Explore our free lessons or browse courses to get started on your Emirates cabin crew journey."
+              action={{
+                label: 'Explore Courses',
+                onClick: () => navigate('/courses'),
+              }}
+              secondaryAction={{
+                label: 'View Leaderboard',
+                onClick: () => navigate('/leaderboard'),
+              }}
+            />
+          </motion.div>
+        )}
         </motion.div>
       </>
     );

@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { Trophy, Medal, Award, TrendingUp } from 'lucide-react';
 import { getLeaderboard, UserPoints } from '../services/rewardsService';
 import BadgeDisplay from '../components/BadgeDisplay';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
+interface UserWithName extends UserPoints {
+  userName: string;
+}
+
 export default function LeaderboardPage() {
-  const [leaderboard, setLeaderboard] = useState<UserPoints[]>([]);
-  const [userNames, setUserNames] = useState<Record<string, string>>({});
+  const [leaderboard, setLeaderboard] = useState<UserWithName[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,19 +19,40 @@ export default function LeaderboardPage() {
 
   const loadLeaderboard = async () => {
     setLoading(true);
-    const data = await getLeaderboard(100);
-    setLeaderboard(data);
+    try {
+      const data = await getLeaderboard(100);
 
-    const names: Record<string, string> = {};
-    for (const entry of data) {
-      const userDoc = await getDocs(query(collection(db, 'users'), where('__name__', '==', entry.user_id)));
-      if (!userDoc.empty) {
-        const userData = userDoc.docs[0].data();
-        names[entry.user_id] = userData.displayName || userData.email || 'Unknown User';
-      }
+      const leaderboardWithNames = await Promise.all(
+        data.map(async (entry) => {
+          try {
+            const userDoc = await getDoc(doc(db, 'users', entry.user_id));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              return {
+                ...entry,
+                userName: userData.name || userData.email || 'Unknown User'
+              };
+            }
+            return {
+              ...entry,
+              userName: 'Unknown User'
+            };
+          } catch (error) {
+            console.error('Error fetching user name:', error);
+            return {
+              ...entry,
+              userName: 'Unknown User'
+            };
+          }
+        })
+      );
+
+      setLeaderboard(leaderboardWithNames);
+    } catch (error) {
+      console.error('Error loading leaderboard:', error);
+    } finally {
+      setLoading(false);
     }
-    setUserNames(names);
-    setLoading(false);
   };
 
   const getRankIcon = (index: number) => {
@@ -83,7 +107,7 @@ export default function LeaderboardPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
                     <h3 className="font-bold text-lg text-gray-800">
-                      {userNames[entry.user_id] || 'Loading...'}
+                      {entry.userName}
                     </h3>
                     <BadgeDisplay
                       rank={entry.current_rank}

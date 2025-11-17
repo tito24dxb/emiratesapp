@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock, CheckCircle } from 'lucide-react';
-import { getCourseById, Course } from '../services/courseService';
+import { getCourseById, Course, updateCourseProgress } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 import PDFViewer from '../components/PDFViewer';
 import UpgradePrompt from '../components/UpgradePrompt';
 import CourseQuiz from '../components/CourseQuiz';
 import { getQuizByCourseId } from '../data/quizData';
+import { markLessonWatched, handleQuizPass } from '../services/rewardsService';
 
 export default function CourseViewerPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -25,6 +26,12 @@ export default function CourseViewerPage() {
       loadCourse();
     }
   }, [courseId]);
+
+  useEffect(() => {
+    if (currentUser && courseId && course) {
+      markLessonWatched(currentUser.uid, courseId);
+    }
+  }, [currentUser, courseId, course]);
 
   const loadCourse = async () => {
     if (!courseId) return;
@@ -161,9 +168,17 @@ export default function CourseViewerPage() {
     );
   }
 
-  const handleQuizComplete = (passed: boolean, score: number) => {
+  const handleQuizComplete = async (passed: boolean, score: number) => {
     setQuizCompleted(true);
     setQuizPassed(passed);
+
+    if (currentUser && courseId) {
+      await handleQuizPass(currentUser.uid, courseId, score);
+
+      if (passed) {
+        await updateCourseProgress(currentUser.uid, courseId, 100);
+      }
+    }
   };
 
   const quiz = courseId ? getQuizByCourseId(courseId) : null;

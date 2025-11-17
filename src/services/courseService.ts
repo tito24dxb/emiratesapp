@@ -21,7 +21,8 @@ export const enrollInCourse = async (userId: string, courseId: string): Promise<
     course_id: courseId,
     enrolled_at: new Date().toISOString(),
     progress: 0,
-    completed: false
+    completed: false,
+    last_accessed: new Date().toISOString()
   });
 };
 
@@ -31,11 +32,43 @@ export const isEnrolledInCourse = async (userId: string, courseId: string): Prom
   return enrollmentSnap.exists();
 };
 
-export const getUserEnrollments = async (userId: string): Promise<any[]> => {
+export interface Enrollment {
+  id: string;
+  user_id: string;
+  course_id: string;
+  enrolled_at: string;
+  progress: number;
+  completed: boolean;
+  last_accessed?: string;
+}
+
+export const getUserEnrollments = async (userId: string): Promise<Enrollment[]> => {
   const enrollmentsRef = collection(db, 'course_enrollments');
-  const q = query(enrollmentsRef, where('user_id', '==', userId));
+  const q = query(enrollmentsRef, where('user_id', '==', userId), orderBy('enrolled_at', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Enrollment[];
+};
+
+export const getEnrolledCourses = async (userId: string): Promise<Course[]> => {
+  try {
+    const enrollments = await getUserEnrollments(userId);
+    const courseIds = enrollments.map(e => e.course_id);
+
+    if (courseIds.length === 0) return [];
+
+    const courses: Course[] = [];
+    for (const courseId of courseIds) {
+      const course = await getCourseById(courseId);
+      if (course) {
+        courses.push(course);
+      }
+    }
+
+    return courses;
+  } catch (error) {
+    console.error('Error fetching enrolled courses:', error);
+    return [];
+  }
 };
 
 export const updateCourseProgress = async (userId: string, courseId: string, progress: number): Promise<void> => {

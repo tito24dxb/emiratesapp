@@ -10,6 +10,7 @@ import {
   SystemFeatures,
   SystemAnnouncement,
 } from '../services/systemControlService';
+import { handleDailyLogin, initializeUserPoints } from '../services/rewardsService';
 
 export type Role = 'student' | 'mentor' | 'governor';
 export type Plan = 'free' | 'pro' | 'vip';
@@ -144,6 +145,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
               setCurrentUser(updatedUser);
               localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+
+              initializeUserPoints(firebaseUser.uid).catch(console.error);
+              handleDailyLogin(firebaseUser.uid).catch(console.error);
             } else {
               console.warn('User document not found in Firestore. User may need to complete registration.');
               // Force logout if user document doesn't exist

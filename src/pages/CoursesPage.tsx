@@ -1,106 +1,102 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Play, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getAllMainModules, MainModule, getSubmodulesByParent, Submodule } from '../services/mainModuleService';
-import { getCoursesByModule, getCoursesBySubmodule, Course } from '../services/courseService';
+import { BookOpen, Play, Clock, Award, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { getAllCourses, Course, enrollInCourse, isEnrolledInCourse } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 
-interface ModuleWithContent extends MainModule {
-  courses: Course[];
-  submodules: (Submodule & { courses: Course[] })[];
+interface CourseWithEnrollment extends Course {
+  isEnrolled: boolean;
 }
 
 export default function CoursesPage() {
   const navigate = useNavigate();
   const { currentUser } = useApp();
-  const [modulesWithContent, setModulesWithContent] = useState<ModuleWithContent[]>([]);
-  const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  const [courses, setCourses] = useState<CourseWithEnrollment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [enrollingCourseId, setEnrollingCourseId] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentUser && (currentUser.role === 'mentor' || currentUser.role === 'governor')) {
       navigate('/coach-dashboard');
       return;
     }
-    fetchData();
+    fetchCourses();
   }, [currentUser, navigate]);
 
-  const fetchData = async () => {
+  const fetchCourses = async () => {
     try {
-      console.log('CoursesPage: Fetching modules with content...');
-      const allModules = await getAllMainModules();
-      console.log('CoursesPage: All modules fetched:', allModules.length, allModules);
+      const allCourses = await getAllCourses();
+      const visibleCourses = allCourses.filter(course => course.visible !== false);
 
-      // Filter only visible modules for students
-      const modulesData = allModules.filter(module => module.visible === true);
-      console.log('CoursesPage: Visible modules:', modulesData.length, modulesData);
-
-      if (modulesData.length === 0) {
-        console.log('CoursesPage: No visible modules found');
-        setModulesWithContent([]);
-        setLoading(false);
-        return;
+      if (currentUser) {
+        const coursesWithEnrollment = await Promise.all(
+          visibleCourses.map(async (course) => {
+            const isEnrolled = await isEnrolledInCourse(currentUser.uid, course.id);
+            return { ...course, isEnrolled };
+          })
+        );
+        setCourses(coursesWithEnrollment);
+      } else {
+        setCourses(visibleCourses.map(course => ({ ...course, isEnrolled: false })));
       }
-
-      const modulesWithContentData = await Promise.all(
-        modulesData.map(async (module) => {
-          console.log(`CoursesPage: Fetching content for module ${module.id}...`);
-          const [courses, submodules] = await Promise.all([
-            getCoursesByModule(module.id),
-            getSubmodulesByParent(module.id)
-          ]);
-
-          const mainModuleCourses = courses.filter(course => !course.submodule_id);
-
-          const submodulesWithCourses = await Promise.all(
-            submodules.map(async (submodule) => {
-              const submoduleCourses = await getCoursesBySubmodule(submodule.id);
-              return {
-                ...submodule,
-                courses: submoduleCourses
-              };
-            })
-          );
-
-          return {
-            ...module,
-            courses: mainModuleCourses,
-            submodules: submodulesWithCourses
-          };
-        })
-      );
-
-      console.log('CoursesPage: Modules with content loaded:', modulesWithContentData.length, modulesWithContentData);
-      setModulesWithContent(modulesWithContentData);
     } catch (error) {
-      console.error('CoursesPage: Error fetching data:', error);
-      setModulesWithContent([]);
+      console.error('Error fetching courses:', error);
+      setCourses([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const toggleModule = (moduleId: string) => {
-    setExpandedModules(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(moduleId)) {
-        newSet.delete(moduleId);
-      } else {
-        newSet.add(moduleId);
-      }
-      return newSet;
-    });
+  const handleEnroll = async (courseId: string) => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setEnrollingCourseId(courseId);
+      await enrollInCourse(currentUser.uid, courseId);
+      await fetchCourses();
+      alert('Successfully enrolled in the course!');
+    } catch (error) {
+      console.error('Error enrolling in course:', error);
+      alert('Failed to enroll in course. Please try again.');
+    } finally {
+      setEnrollingCourseId(null);
+    }
+  };
+
+  const handleViewCourse = (courseId: string) => {
+    navigate(`/course/${courseId}`);
+  };
+
+  const getLevelColor = (level: string) => {
+    switch (level) {
+      case 'beginner': return 'bg-green-100 text-green-800';
+      case 'intermediate': return 'bg-yellow-100 text-yellow-800';
+      case 'advanced': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getPlanBadge = (plan: string) => {
+    switch (plan) {
+      case 'free': return { color: 'bg-gray-500', label: 'FREE' };
+      case 'pro': return { color: 'bg-blue-500', label: 'PRO' };
+      case 'vip': return { color: 'bg-purple-500', label: 'VIP' };
+      default: return { color: 'bg-gray-500', label: 'FREE' };
+    }
   };
 
   return (
     <div className="min-h-screen">
       <div className="mb-6 md:mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-[#000000] mb-2">
-          Training Modules
+          All Courses
         </h1>
         <p className="text-sm md:text-base text-gray-600">
-          Master the skills needed to become a successful cabin crew member
+          Explore and enroll in courses to start your Emirates cabin crew journey
         </p>
       </div>
 
@@ -108,159 +104,106 @@ export default function CoursesPage() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D71920] mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading modules...</p>
+            <p className="text-gray-600">Loading courses...</p>
           </div>
         </div>
-      ) : modulesWithContent.length === 0 ? (
+      ) : courses.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl shadow-lg p-8">
-          <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-800 mb-2">No Training Modules Available</h3>
+          <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Courses Available</h3>
           <p className="text-gray-600">
-            Training modules will be available soon. Check back later!
+            Courses will be available soon. Check back later!
           </p>
         </div>
       ) : (
-        <div className="space-y-6">
-          {modulesWithContent.map((module) => {
-            const isExpanded = expandedModules.has(module.id);
-            const totalCourses = module.courses.length + (module.submodules || []).reduce((sum, sub) => sum + sub.courses.length, 0);
-
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {courses.map((course) => {
+            const planBadge = getPlanBadge(course.plan);
             return (
               <motion.div
-                key={module.id}
+                key={course.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition flex flex-col"
               >
-                <div
-                  className="cursor-pointer hover:bg-gray-50 transition"
-                  onClick={() => toggleModule(module.id)}
-                >
-                  <div className="flex items-center gap-4 p-6">
-                    <img
-                      src={module.coverImage}
-                      alt={module.title}
-                      className="w-24 h-24 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">{module.title}</h3>
-                      <p className="text-gray-600 text-sm mb-2">{module.description}</p>
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span>{totalCourses} course{totalCourses !== 1 ? 's' : ''}</span>
-                        {module.submodules && module.submodules.length > 0 && (
-                          <span>{module.submodules.length} submodule{module.submodules.length !== 1 ? 's' : ''}</span>
-                        )}
-                      </div>
+                <div className="relative">
+                  <img
+                    src={course.thumbnail}
+                    alt={course.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  {course.video_url && (
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <Play className="w-12 h-12 text-white" />
                     </div>
-                    {isExpanded ? (
-                      <ChevronUp className="w-6 h-6 text-gray-400" />
+                  )}
+                  <div className={`absolute top-3 right-3 ${planBadge.color} text-white px-3 py-1 rounded-full text-xs font-bold`}>
+                    {planBadge.label}
+                  </div>
+                  {course.isEnrolled && (
+                    <div className="absolute top-3 left-3 bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                      <Check className="w-3 h-3" />
+                      ENROLLED
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-5 flex-1 flex flex-col">
+                  <div className="mb-3">
+                    <h3 className="font-bold text-lg text-gray-900 mb-1">{course.title}</h3>
+                    {course.subtitle && (
+                      <p className="text-sm text-gray-500 mb-2">{course.subtitle}</p>
+                    )}
+                    <p className="text-gray-600 text-sm line-clamp-2">{course.description}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2 mb-3 flex-wrap">
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${getLevelColor(course.level)}`}>
+                      {course.level}
+                    </span>
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {course.duration}
+                    </span>
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" />
+                      {course.lessons} lessons
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-gray-600 mb-4">
+                    <p className="flex items-center gap-1">
+                      <Award className="w-3 h-3" />
+                      By {course.instructor}
+                    </p>
+                  </div>
+
+                  <div className="mt-auto">
+                    {course.isEnrolled ? (
+                      <button
+                        onClick={() => handleViewCourse(course.id)}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold transition"
+                      >
+                        Continue Learning
+                      </button>
                     ) : (
-                      <ChevronDown className="w-6 h-6 text-gray-400" />
+                      <button
+                        onClick={() => handleEnroll(course.id)}
+                        disabled={enrollingCourseId === course.id}
+                        className="w-full bg-[#D71920] hover:bg-[#B91518] text-white py-2 px-4 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {enrollingCourseId === course.id ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                            Enrolling...
+                          </span>
+                        ) : (
+                          'Enroll Now'
+                        )}
+                      </button>
                     )}
                   </div>
                 </div>
-
-                <AnimatePresence>
-                  {isExpanded && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="border-t border-gray-200"
-                    >
-                      <div className="p-6 space-y-6">
-                        {module.courses.length > 0 && (
-                          <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Courses</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {module.courses.map((course) => (
-                                <div
-                                  key={course.id}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/course/${course.id}`);
-                                  }}
-                                  className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer"
-                                >
-                                  <div className="relative">
-                                    <img
-                                      src={course.thumbnail}
-                                      alt={course.title}
-                                      className="w-full h-32 object-cover"
-                                    />
-                                    {course.video_url && (
-                                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                        <Play className="w-8 h-8 text-white" />
-                                      </div>
-                                    )}
-                                  </div>
-                                  <div className="p-4">
-                                    <h5 className="font-semibold text-gray-900 text-sm mb-1">{course.title}</h5>
-                                    {course.subtitle && (
-                                      <p className="text-xs text-gray-500 mb-1">{course.subtitle}</p>
-                                    )}
-                                    <p className="text-gray-600 text-xs line-clamp-2">{course.description}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {(module.submodules || []).map((submodule) => (
-                          <div key={submodule.id}>
-                            <div className="flex items-center gap-3 mb-3">
-                              <img
-                                src={submodule.coverImage}
-                                alt={submodule.title}
-                                className="w-16 h-16 rounded-lg object-cover"
-                              />
-                              <div>
-                                <h4 className="font-semibold text-gray-900">{submodule.title}</h4>
-                                <p className="text-xs text-gray-600">{submodule.description}</p>
-                              </div>
-                            </div>
-                            {submodule.courses.length > 0 && (
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-20">
-                                {submodule.courses.map((course) => (
-                                  <div
-                                    key={course.id}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate(`/course/${course.id}`);
-                                    }}
-                                    className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer"
-                                  >
-                                    <div className="relative">
-                                      <img
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        className="w-full h-32 object-cover"
-                                      />
-                                      {course.video_url && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                          <Play className="w-8 h-8 text-white" />
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="p-4">
-                                      <h5 className="font-semibold text-gray-900 text-sm mb-1">{course.title}</h5>
-                                      {course.subtitle && (
-                                        <p className="text-xs text-gray-500 mb-1">{course.subtitle}</p>
-                                      )}
-                                      <p className="text-gray-600 text-xs line-clamp-2">{course.description}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
               </motion.div>
             );
           })}
