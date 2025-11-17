@@ -12,6 +12,9 @@ import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
 import SupportChatManagerPage from './pages/SupportChatManagerPage';
 import CoachDashboard from './pages/CoachDashboard';
+import NewCoachDashboard from './pages/NewCoachDashboard';
+import MainModuleViewerPage from './pages/MainModuleViewerPage';
+import SubmoduleViewerPage from './pages/SubmoduleViewerPage';
 import GovernorControlNexus from './pages/governor/GovernorControlNexus';
 import PlaceholderPage from './pages/PlaceholderPage';
 import NotificationsPage from './pages/NotificationsPage';
@@ -82,7 +85,12 @@ function AppContent() {
         <Route path="/leaderboard" element={<LeaderboardPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
-          <Route path="/coach-dashboard" element={<CoachDashboard />} />
+          <>
+            <Route path="/coach-dashboard" element={<NewCoachDashboard />} />
+            <Route path="/main-modules/:moduleId" element={<MainModuleViewerPage />} />
+            <Route path="/submodules/:submoduleId" element={<SubmoduleViewerPage />} />
+            <Route path="/course/:courseId" element={<CourseViewerPage />} />
+          </>
         )}
 
         {currentUser.role !== 'student' && (
