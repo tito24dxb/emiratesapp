@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Globe, Download, Save, Trash2, Calendar, MapPin, Plus, AlertCircle } from 'lucide-react';
+import { Globe, Download, Save, Trash2, Calendar, MapPin, Plus, AlertCircle, Copy, FileText } from 'lucide-react';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useApp } from '../context/AppContext';
@@ -17,6 +17,8 @@ export default function EmiratesWebScraper() {
   const [loading, setLoading] = useState(false);
   const [scrapedData, setScrapedData] = useState<ScrapedOpenDay[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [pasteData, setPasteData] = useState('');
+  const [showPasteSection, setShowPasteSection] = useState(false);
 
   const handleScrape = async () => {
     if (!url.trim()) {
@@ -134,6 +136,132 @@ export default function EmiratesWebScraper() {
     setScrapedData(prev => [...prev, newEvent]);
   };
 
+  const handleParsePastedData = () => {
+    if (!pasteData.trim()) {
+      alert('Please paste some data first');
+      return;
+    }
+
+    try {
+      const lines = pasteData.split('\n').filter(line => line.trim());
+      const parsedEvents: ScrapedOpenDay[] = [];
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+
+        if (!line) continue;
+
+        const datePattern = /(\d{1,2}[\s\/\-]\w+[\s\/\-]\d{2,4}|\d{1,2}[\s\/\-]\d{1,2}[\s\/\-]\d{2,4})/;
+        const dateMatch = line.match(datePattern);
+
+        let city = line;
+        let dateStr = '';
+        let time = '';
+        let venue = '';
+
+        if (dateMatch) {
+          const parts = line.split(dateMatch[0]);
+          city = parts[0].trim();
+          dateStr = dateMatch[0];
+
+          const remaining = parts[1]?.trim() || '';
+          const timeParts = remaining.split(/[\s,\-]+/);
+
+          if (timeParts.length > 0) {
+            time = timeParts.find(p => p.match(/\d{1,2}:\d{2}|AM|PM/i)) || '';
+            venue = timeParts.filter(p => !p.match(/\d{1,2}:\d{2}|AM|PM/i)).join(' ').trim();
+          }
+        }
+
+        if (city) {
+          const countryGuess = guessCountryFromCity(city);
+
+          parsedEvents.push({
+            id: `pasted-${Date.now()}-${i}`,
+            city: city,
+            country: countryGuess,
+            date: parseDate(dateStr),
+            time: time,
+            venue: venue,
+            recruiter: 'Emirates Group',
+            description: `Cabin Crew Open Day - ${city}`,
+            editable: true
+          });
+        }
+      }
+
+      if (parsedEvents.length > 0) {
+        setScrapedData(prev => [...prev, ...parsedEvents]);
+        alert(`Successfully parsed ${parsedEvents.length} events! Review and edit them below before saving.`);
+        setPasteData('');
+        setShowPasteSection(false);
+      } else {
+        alert('Could not parse any events from the pasted data. Please try manual entry.');
+      }
+    } catch (error) {
+      console.error('Error parsing pasted data:', error);
+      alert('Failed to parse pasted data. Please try manual entry instead.');
+    }
+  };
+
+  const guessCountryFromCity = (city: string): string => {
+    const cityMap: { [key: string]: string } = {
+      'Dubai': 'United Arab Emirates', 'Abu Dhabi': 'United Arab Emirates', 'Sharjah': 'United Arab Emirates',
+      'London': 'United Kingdom', 'Manchester': 'United Kingdom', 'Birmingham': 'United Kingdom', 'Glasgow': 'United Kingdom',
+      'Sydney': 'Australia', 'Melbourne': 'Australia', 'Brisbane': 'Australia',
+      'Singapore': 'Singapore',
+      'Mumbai': 'India', 'Delhi': 'India', 'Bangalore': 'India', 'Chennai': 'India',
+      'Cairo': 'Egypt', 'Alexandria': 'Egypt',
+      'Johannesburg': 'South Africa', 'Cape Town': 'South Africa',
+      'Nairobi': 'Kenya',
+      'Amman': 'Jordan',
+      'Beirut': 'Lebanon',
+      'Paris': 'France',
+      'Madrid': 'Spain', 'Barcelona': 'Spain',
+      'Rome': 'Italy', 'Milan': 'Italy',
+      'Berlin': 'Germany', 'Frankfurt': 'Germany',
+      'Toronto': 'Canada', 'Vancouver': 'Canada',
+      'New York': 'United States', 'Los Angeles': 'United States',
+      'Istanbul': 'Turkey',
+      'Bangkok': 'Thailand',
+      'Manila': 'Philippines',
+      'Jakarta': 'Indonesia',
+      'Kuala Lumpur': 'Malaysia'
+    };
+
+    for (const [cityName, country] of Object.entries(cityMap)) {
+      if (city.includes(cityName)) {
+        return country;
+      }
+    }
+    return 'United Arab Emirates';
+  };
+
+  const parseDate = (dateStr: string): string => {
+    if (!dateStr) {
+      const future = new Date();
+      future.setMonth(future.getMonth() + 1);
+      return future.toISOString().split('T')[0];
+    }
+
+    try {
+      const cleaned = dateStr.replace(/(\d+)(st|nd|rd|th)/g, '$1').trim();
+      const parsed = new Date(cleaned);
+
+      if (!isNaN(parsed.getTime()) && parsed.getFullYear() > 2020) {
+        return parsed.toISOString().split('T')[0];
+      }
+
+      const future = new Date();
+      future.setMonth(future.getMonth() + 1);
+      return future.toISOString().split('T')[0];
+    } catch {
+      const future = new Date();
+      future.setMonth(future.getMonth() + 1);
+      return future.toISOString().split('T')[0];
+    }
+  };
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -161,51 +289,83 @@ export default function EmiratesWebScraper() {
       )}
 
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Scrape Emirates Website</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">Import Open Days Data</h2>
+
+        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <FileText className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="font-bold text-blue-900 mb-2">How to Get Real Open Days Data:</h3>
+              <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                <li>Visit <a href="https://www.emiratesgroupcareers.com/cabin-crew/" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-blue-600">Emirates Careers Portal</a></li>
+                <li>Select a country from the dropdown list on the page</li>
+                <li>Wait for the open days to load for that country</li>
+                <li>Copy the list of open days (highlight and Ctrl+C / Cmd+C)</li>
+                <li>Click "Paste Data" below and paste the copied text</li>
+                <li>We'll automatically parse the cities, dates, and venues</li>
+                <li>Review, edit if needed, then save to database</li>
+              </ol>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              Emirates Open Days URL
-            </label>
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://careers.emirates.com/cabin-crew/open-days"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition"
-            />
-            <p className="text-sm text-gray-500 mt-2">
-              Enter the URL of the Emirates Open Days page to extract event information
-            </p>
-          </div>
+          {!showPasteSection ? (
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPasteSection(true)}
+                className="flex-1 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold hover:shadow-lg transition flex items-center justify-center gap-2"
+              >
+                <Copy className="w-5 h-5" />
+                Paste Data from Emirates Portal
+              </button>
+              <button
+                onClick={handleAddManual}
+                className="px-6 py-3 border-2 border-[#D71921] text-[#D71921] rounded-xl font-bold hover:bg-[#D71921] hover:text-white transition flex items-center gap-2"
+              >
+                <Plus className="w-5 h-5" />
+                Add Manually
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Paste Open Days Data Here
+                </label>
+                <textarea
+                  value={pasteData}
+                  onChange={(e) => setPasteData(e.target.value)}
+                  placeholder="Paste the open days data from Emirates website here...&#10;&#10;Example format:&#10;Dubai - 15 December 2024 - 09:00 AM - Dubai World Trade Centre&#10;London - 20 January 2025 - 10:00 AM - ExCeL London&#10;Mumbai - 5 February 2025 - 11:00 AM"
+                  rows={8}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition font-mono text-sm"
+                />
+                <p className="text-sm text-gray-500 mt-2">
+                  Paste the text from the Emirates portal. The system will try to extract cities, dates, times, and venues automatically.
+                </p>
+              </div>
 
-          <div className="flex gap-3">
-            <button
-              onClick={handleScrape}
-              disabled={loading || !url.trim()}
-              className="flex-1 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Scraping...
-                </>
-              ) : (
-                <>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleParsePastedData}
+                  disabled={!pasteData.trim()}
+                  className="flex-1 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
                   <Download className="w-5 h-5" />
-                  Scrape Data
-                </>
-              )}
-            </button>
-            <button
-              onClick={handleAddManual}
-              className="px-6 py-3 border-2 border-[#D71921] text-[#D71921] rounded-xl font-bold hover:bg-[#D71921] hover:text-white transition flex items-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Manually
-            </button>
-          </div>
+                  Parse & Import Data
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPasteSection(false);
+                    setPasteData('');
+                  }}
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
