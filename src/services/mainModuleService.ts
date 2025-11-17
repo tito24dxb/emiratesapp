@@ -18,6 +18,7 @@ export interface MainModule {
   title: string;
   description: string;
   coverImage: string;
+  visible: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -38,6 +39,7 @@ export const createMainModule = async (data: {
   title: string;
   description: string;
   coverImage: string;
+  visible: boolean;
 }): Promise<string> => {
   try {
     console.log('createMainModule: Starting creation with data:', data);
@@ -51,6 +53,7 @@ export const createMainModule = async (data: {
       title: data.title,
       description: data.description,
       coverImage: data.coverImage,
+      visible: data.visible,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };

@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Play, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllModules, Module } from '../services/moduleService';
-import { getCoursesByModule, Course } from '../services/courseService';
+import { getAllMainModules, MainModule, getSubmodulesByParent, Submodule } from '../services/mainModuleService';
+import { getCoursesByModule, getCoursesBySubmodule, Course } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 
-interface ModuleWithContent extends Module {
+interface ModuleWithContent extends MainModule {
   courses: Course[];
+  submodules: (Submodule & { courses: Course[] })[];
 }
 
 export default function CoursesPage() {
@@ -28,7 +29,7 @@ export default function CoursesPage() {
   const fetchData = async () => {
     try {
       console.log('CoursesPage: Fetching modules with content...');
-      const allModules = await getAllModules();
+      const allModules = await getAllMainModules();
       console.log('CoursesPage: All modules fetched:', allModules.length, allModules);
 
       // Filter only visible modules for students
@@ -44,13 +45,28 @@ export default function CoursesPage() {
 
       const modulesWithContentData = await Promise.all(
         modulesData.map(async (module) => {
-          console.log(`CoursesPage: Fetching courses for module ${module.id}...`);
-          const courses = await getCoursesByModule(module.id);
-          console.log(`CoursesPage: Module ${module.id} has ${courses.length} courses`);
+          console.log(`CoursesPage: Fetching content for module ${module.id}...`);
+          const [courses, submodules] = await Promise.all([
+            getCoursesByModule(module.id),
+            getSubmodulesByParent(module.id)
+          ]);
+
+          const mainModuleCourses = courses.filter(course => !course.submodule_id);
+
+          const submodulesWithCourses = await Promise.all(
+            submodules.map(async (submodule) => {
+              const submoduleCourses = await getCoursesBySubmodule(submodule.id);
+              return {
+                ...submodule,
+                courses: submoduleCourses
+              };
+            })
+          );
 
           return {
             ...module,
-            courses
+            courses: mainModuleCourses,
+            submodules: submodulesWithCourses
           };
         })
       );
@@ -107,7 +123,7 @@ export default function CoursesPage() {
         <div className="space-y-6">
           {modulesWithContent.map((module) => {
             const isExpanded = expandedModules.has(module.id);
-            const totalCourses = module.courses.length;
+            const totalCourses = module.courses.length + module.submodules.reduce((sum, sub) => sum + sub.courses.length, 0);
 
             return (
               <motion.div
@@ -121,19 +137,19 @@ export default function CoursesPage() {
                   onClick={() => toggleModule(module.id)}
                 >
                   <div className="flex items-center gap-4 p-6">
-                    {module.cover_image && (
-                      <img
-                        src={module.cover_image}
-                        alt={module.name}
-                        className="w-24 h-24 rounded-lg object-cover"
-                      />
-                    )}
+                    <img
+                      src={module.coverImage}
+                      alt={module.title}
+                      className="w-24 h-24 rounded-lg object-cover"
+                    />
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">{module.name}</h3>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">{module.title}</h3>
                       <p className="text-gray-600 text-sm mb-2">{module.description}</p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg font-semibold">{module.category}</span>
                         <span>{totalCourses} course{totalCourses !== 1 ? 's' : ''}</span>
+                        {module.submodules.length > 0 && (
+                          <span>{module.submodules.length} submodule{module.submodules.length !== 1 ? 's' : ''}</span>
+                        )}
                       </div>
                     </div>
                     {isExpanded ? (
@@ -154,8 +170,9 @@ export default function CoursesPage() {
                       className="border-t border-gray-200"
                     >
                       <div className="p-6 space-y-6">
-                        {module.courses.length > 0 ? (
+                        {module.courses.length > 0 && (
                           <div>
+                            <h4 className="font-semibold text-gray-900 mb-3">Courses</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {module.courses.map((course) => (
                                 <div
@@ -189,12 +206,57 @@ export default function CoursesPage() {
                               ))}
                             </div>
                           </div>
-                        ) : (
-                          <div className="text-center py-8 text-gray-500">
-                            <BookOpen className="w-12 h-12 mx-auto mb-2 text-gray-400" />
-                            <p>No courses in this module yet</p>
-                          </div>
                         )}
+
+                        {module.submodules.map((submodule) => (
+                          <div key={submodule.id}>
+                            <div className="flex items-center gap-3 mb-3">
+                              <img
+                                src={submodule.coverImage}
+                                alt={submodule.title}
+                                className="w-16 h-16 rounded-lg object-cover"
+                              />
+                              <div>
+                                <h4 className="font-semibold text-gray-900">{submodule.title}</h4>
+                                <p className="text-xs text-gray-600">{submodule.description}</p>
+                              </div>
+                            </div>
+                            {submodule.courses.length > 0 && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-20">
+                                {submodule.courses.map((course) => (
+                                  <div
+                                    key={course.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigate(`/course/${course.id}`);
+                                    }}
+                                    className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer"
+                                  >
+                                    <div className="relative">
+                                      <img
+                                        src={course.thumbnail}
+                                        alt={course.title}
+                                        className="w-full h-32 object-cover"
+                                      />
+                                      {course.video_url && (
+                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                                          <Play className="w-8 h-8 text-white" />
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="p-4">
+                                      <h5 className="font-semibold text-gray-900 text-sm mb-1">{course.title}</h5>
+                                      {course.subtitle && (
+                                        <p className="text-xs text-gray-500 mb-1">{course.subtitle}</p>
+                                      )}
+                                      <p className="text-gray-600 text-xs line-clamp-2">{course.description}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </motion.div>
                   )}

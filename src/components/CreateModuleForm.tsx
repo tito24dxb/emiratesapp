@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Upload, FolderPlus, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  createModule,
-  getAllModules,
-  Module
-} from '../services/moduleService';
+  createMainModule,
+  createSubmodule,
+  getAllMainModules,
+  MainModule
+} from '../services/mainModuleService';
 
 interface CreateModuleFormProps {
   isOpen: boolean;
@@ -14,13 +15,27 @@ interface CreateModuleFormProps {
 }
 
 export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateModuleFormProps) {
+  const [moduleType, setModuleType] = useState<'main' | 'submodule'>('main');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [coverImage, setCoverImage] = useState('');
-  const [category, setCategory] = useState<'grooming' | 'service' | 'safety' | 'interview' | 'language'>('grooming');
-  const [order, setOrder] = useState(1);
+  const [visible, setVisible] = useState(true);
+  const [parentModuleId, setParentModuleId] = useState('');
+  const [submoduleNumber, setSubmoduleNumber] = useState(1);
+  const [mainModules, setMainModules] = useState<MainModule[]>([]);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadMainModules();
+    }
+  }, [isOpen]);
+
+  const loadMainModules = async () => {
+    const modules = await getAllMainModules();
+    setMainModules(modules);
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,19 +61,32 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
       return;
     }
 
+    if (moduleType === 'submodule' && !parentModuleId) {
+      alert('Please select a parent module');
+      return;
+    }
+
     setLoading(true);
     try {
-      await createModule({
-        name: title.trim(),
-        description: description.trim(),
-        cover_image: coverImage,
-        category,
-        order,
-        lessons: [],
-        visible: true
-      });
+      if (moduleType === 'main') {
+        await createMainModule({
+          title: title.trim(),
+          description: description.trim(),
+          coverImage,
+          visible
+        });
+        alert('Main module created successfully!');
+      } else {
+        await createSubmodule({
+          parentModuleId,
+          order: submoduleNumber,
+          title: title.trim(),
+          description: description.trim(),
+          coverImage
+        });
+        alert('Submodule created successfully!');
+      }
 
-      alert('Module created successfully!');
       resetForm();
       onSuccess();
       onClose();
@@ -71,47 +99,118 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
   };
 
   const resetForm = () => {
+    setModuleType('main');
     setTitle('');
     setDescription('');
     setCoverImage('');
-    setCategory('grooming');
-    setOrder(1);
+    setVisible(true);
+    setParentModuleId('');
+    setSubmoduleNumber(1);
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          onClick={onClose}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
-            onClick={onClose}
-          />
-
-          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
-              onClick={(e) => e.stopPropagation()}
-            >
-            <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-4 sm:p-6 rounded-t-2xl flex items-center justify-between">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <FolderPlus className="w-5 h-5 sm:w-6 sm:h-6" />
-                <h2 className="text-xl sm:text-2xl font-bold">Create Module</h2>
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+          >
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-[#D71920] to-[#B91518]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                  <FolderPlus className="w-6 h-6 text-white" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white">Create Training Module</h2>
               </div>
               <button
                 onClick={onClose}
                 className="p-2 hover:bg-white/20 rounded-lg transition"
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-3">
+                  Module Type *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setModuleType('main')}
+                    className={`p-4 rounded-xl font-semibold transition border-2 ${
+                      moduleType === 'main'
+                        ? 'border-[#D71920] bg-red-50 text-[#D71920]'
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Main Module
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModuleType('submodule')}
+                    className={`p-4 rounded-xl font-semibold transition border-2 ${
+                      moduleType === 'submodule'
+                        ? 'border-[#D71920] bg-red-50 text-[#D71920]'
+                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+                    }`}
+                  >
+                    Submodule
+                  </button>
+                </div>
+              </div>
+
+              {moduleType === 'submodule' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Parent Module *
+                    </label>
+                    <select
+                      value={parentModuleId}
+                      onChange={(e) => setParentModuleId(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
+                      required
+                    >
+                      <option value="">Select parent module...</option>
+                      {mainModules.map((module) => (
+                        <option key={module.id} value={module.id}>
+                          {module.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Submodule Number *
+                    </label>
+                    <select
+                      value={submoduleNumber}
+                      onChange={(e) => setSubmoduleNumber(parseInt(e.target.value))}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                        <option key={num} value={num}>
+                          Submodule {num}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </>
+              )}
+
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
                   Title *
@@ -120,43 +219,10 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Cabin Crew Training Module 1"
+                  placeholder={moduleType === 'main' ? 'e.g., Cabin Crew Training' : 'e.g., Safety Procedures'}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
                   required
                 />
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Category *
-                </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as any)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
-                  required
-                >
-                  <option value="grooming">Grooming</option>
-                  <option value="service">Service</option>
-                  <option value="safety">Safety</option>
-                  <option value="interview">Interview</option>
-                  <option value="language">Language</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Order *
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={order}
-                  onChange={(e) => setOrder(parseInt(e.target.value))}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">Display order for this module</p>
               </div>
 
               <div>
@@ -172,6 +238,28 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                   required
                 />
               </div>
+
+              {moduleType === 'main' && (
+                <div>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={visible}
+                        onChange={(e) => setVisible(e.target.checked)}
+                        className="sr-only"
+                      />
+                      <div className={`w-14 h-8 rounded-full transition ${visible ? 'bg-green-500' : 'bg-gray-300'}`}>
+                        <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${visible ? 'translate-x-6' : ''}`} />
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-sm font-bold text-gray-700">Visible to Students</span>
+                      <p className="text-xs text-gray-500">Turn off to hide this module from students</p>
+                    </div>
+                  </label>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -221,7 +309,7 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                   ) : (
                     <>
                       <Plus className="w-5 h-5" />
-                      <span className="text-sm sm:text-base">Create Module</span>
+                      <span className="text-sm sm:text-base">Create {moduleType === 'main' ? 'Main Module' : 'Submodule'}</span>
                     </>
                   )}
                 </button>
@@ -234,9 +322,8 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                 </button>
               </div>
             </form>
-            </motion.div>
-          </div>
-        </>
+          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
