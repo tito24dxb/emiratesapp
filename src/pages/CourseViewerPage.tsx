@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { ArrowLeft, Lock, CheckCircle } from 'lucide-react';
 import { getCourseById, Course } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 import PDFViewer from '../components/PDFViewer';
 import UpgradePrompt from '../components/UpgradePrompt';
+import CourseQuiz from '../components/CourseQuiz';
+import { getQuizByCourseId } from '../data/quizData';
 
 export default function CourseViewerPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -13,6 +15,10 @@ export default function CourseViewerPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const [videoCompleted, setVideoCompleted] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [quizPassed, setQuizPassed] = useState(false);
 
   useEffect(() => {
     if (courseId) {
@@ -155,6 +161,13 @@ export default function CourseViewerPage() {
     );
   }
 
+  const handleQuizComplete = (passed: boolean, score: number) => {
+    setQuizCompleted(true);
+    setQuizPassed(passed);
+  };
+
+  const quiz = courseId ? getQuizByCourseId(courseId) : null;
+
   if (course.video_url) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -167,39 +180,108 @@ export default function CourseViewerPage() {
             Back to Courses
           </button>
 
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-            <div className="aspect-video w-full bg-black">
-              {course.video_url ? (
-                <iframe
-                  src={getYouTubeEmbedUrl(course.video_url)}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  title={course.title}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-white">
-                  <p>No video available</p>
+          {!showQuiz ? (
+            <>
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+                <div className="aspect-video w-full bg-black">
+                  {course.video_url ? (
+                    <iframe
+                      src={getYouTubeEmbedUrl(course.video_url)}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      title={course.title}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-white">
+                      <p>No video available</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
+                <p className="text-gray-600 mb-4">{course.description}</p>
+                <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+                  <span className="px-3 py-1 bg-gray-100 rounded-full">
+                    {course.category}
+                  </span>
+                  <span className="px-3 py-1 bg-gray-100 rounded-full">
+                    {course.level}
+                  </span>
+                  <span className="px-3 py-1 bg-gray-100 rounded-full">
+                    {course.duration}
+                  </span>
+                </div>
+              </div>
+
+              {quiz && !quizCompleted && (
+                <div className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center">
+                  <h2 className="text-2xl font-bold text-[#000000] mb-3">Ready to Test Your Knowledge?</h2>
+                  <p className="text-gray-700 mb-6">
+                    Complete the quiz to validate your understanding of this course. You need 80% or higher to pass.
+                  </p>
+                  <button
+                    onClick={() => setShowQuiz(true)}
+                    className="px-8 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
+                  >
+                    Start Quiz
+                  </button>
                 </div>
               )}
-            </div>
-          </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
-            <p className="text-gray-600 mb-4">{course.description}</p>
-            <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-              <span className="px-3 py-1 bg-gray-100 rounded-full">
-                {course.category}
-              </span>
-              <span className="px-3 py-1 bg-gray-100 rounded-full">
-                {course.level}
-              </span>
-              <span className="px-3 py-1 bg-gray-100 rounded-full">
-                {course.duration}
-              </span>
-            </div>
-          </div>
+              {quizCompleted && (
+                <div className={`rounded-2xl shadow-lg p-8 text-center ${
+                  quizPassed
+                    ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300'
+                    : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
+                }`}>
+                  {quizPassed ? (
+                    <>
+                      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+                      <h2 className="text-2xl font-bold text-green-800 mb-2">Course Completed!</h2>
+                      <p className="text-green-700">
+                        You have successfully completed this course and passed the quiz.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-2">Quiz Completed</h2>
+                      <p className="text-gray-700 mb-4">
+                        You can retry the quiz to improve your score.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setShowQuiz(true);
+                          setQuizCompleted(false);
+                        }}
+                        className="px-6 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
+                      >
+                        Retry Quiz
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {quiz ? (
+                <CourseQuiz quiz={quiz} onComplete={handleQuizComplete} />
+              ) : (
+                <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+                  <p className="text-gray-600">No quiz available for this course yet.</p>
+                  <button
+                    onClick={() => setShowQuiz(false)}
+                    className="mt-4 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition"
+                  >
+                    Back to Course
+                  </button>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     );
