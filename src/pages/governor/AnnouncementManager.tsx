@@ -1,14 +1,32 @@
-import { useState } from 'react';
-import { Megaphone, AlertCircle, Info, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Megaphone, AlertCircle, Info, AlertTriangle, CheckCircle, Save, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useApp } from '../../context/AppContext';
+import { updateAnnouncement, getSystemControl, SystemAnnouncement } from '../../services/systemControlService';
 
 type AnnouncementType = 'info' | 'warning' | 'error' | 'success';
 
 export default function AnnouncementManager() {
+  const { currentUser } = useApp();
   const [type, setType] = useState<AnnouncementType>('info');
   const [message, setMessage] = useState('');
-  const [expiresAt, setExpiresAt] = useState('');
-  const [currentAnnouncement, setCurrentAnnouncement] = useState<{type: AnnouncementType; message: string} | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [currentAnnouncement, setCurrentAnnouncement] = useState<SystemAnnouncement | null>(null);
+
+  useEffect(() => {
+    loadCurrentAnnouncement();
+  }, []);
+
+  const loadCurrentAnnouncement = async () => {
+    const control = await getSystemControl();
+    if (control) {
+      setCurrentAnnouncement(control.announcement);
+      if (control.announcement.active) {
+        setType(control.announcement.type);
+        setMessage(control.announcement.message);
+      }
+    }
+  };
 
   const types: { value: AnnouncementType; label: string; icon: any; color: string }[] = [
     { value: 'info', label: 'Info', icon: Info, color: 'blue' },
@@ -17,14 +35,49 @@ export default function AnnouncementManager() {
     { value: 'success', label: 'Success', icon: CheckCircle, color: 'green' },
   ];
 
-  const createAnnouncement = () => {
-    if (!message.trim()) return;
-    setCurrentAnnouncement({ type, message: message.trim() });
-    setMessage('');
+  const createAnnouncement = async () => {
+    if (!message.trim() || !currentUser) return;
+
+    setLoading(true);
+    try {
+      await updateAnnouncement({
+        active: true,
+        message: message.trim(),
+        type,
+        timestamp: new Date().toISOString()
+      }, currentUser.uid);
+
+      await loadCurrentAnnouncement();
+      alert('Announcement published successfully!');
+    } catch (error) {
+      console.error('Error creating announcement:', error);
+      alert('Failed to publish announcement');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const clearAnnouncement = () => {
-    setCurrentAnnouncement(null);
+  const clearAnnouncement = async () => {
+    if (!currentUser) return;
+
+    setLoading(true);
+    try {
+      await updateAnnouncement({
+        active: false,
+        message: '',
+        type: 'info',
+        timestamp: null
+      }, currentUser.uid);
+
+      setMessage('');
+      await loadCurrentAnnouncement();
+      alert('Announcement removed successfully!');
+    } catch (error) {
+      console.error('Error clearing announcement:', error);
+      alert('Failed to remove announcement');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getColorClasses = (color: string) => {
@@ -53,28 +106,34 @@ export default function AnnouncementManager() {
         </div>
       </motion.div>
 
-      {currentAnnouncement && (
+      {currentAnnouncement && currentAnnouncement.active && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className={`rounded-xl p-4 border-2 ${getColorClasses(types.find(t => t.value === currentAnnouncement.type)?.color || 'blue')}`}
         >
           <div className="flex items-start justify-between">
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-3 flex-1">
               {(() => {
                 const Icon = types.find(t => t.value === currentAnnouncement.type)?.icon || Info;
-                return <Icon className="w-5 h-5 mt-0.5" />;
+                return <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />;
               })()}
-              <div>
+              <div className="flex-1">
                 <div className="font-semibold mb-1">Current Active Announcement</div>
                 <div>{currentAnnouncement.message}</div>
+                {currentAnnouncement.timestamp && (
+                  <div className="text-xs opacity-70 mt-2">
+                    Published: {new Date(currentAnnouncement.timestamp).toLocaleString()}
+                  </div>
+                )}
               </div>
             </div>
             <button
               onClick={clearAnnouncement}
-              className="text-gray-600 hover:text-gray-900 font-bold"
+              disabled={loading}
+              className="text-gray-600 hover:text-gray-900 font-bold p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
             >
-              ✕
+              <X className="w-5 h-5" />
             </button>
           </div>
         </motion.div>
@@ -126,34 +185,24 @@ export default function AnnouncementManager() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Expiration Date (Optional)
-            </label>
-            <input
-              type="datetime-local"
-              value={expiresAt}
-              onChange={(e) => setExpiresAt(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
           <div className="flex gap-3">
             <button
               onClick={createAnnouncement}
-              disabled={!message.trim()}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!message.trim() || loading}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              Create Announcement
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Publishing...
+                </>
+              ) : (
+                <>
+                  <Save className="w-5 h-5" />
+                  Publish Announcement
+                </>
+              )}
             </button>
-            {currentAnnouncement && (
-              <button
-                onClick={clearAnnouncement}
-                className="px-6 bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-300 transition-all"
-              >
-                Clear
-              </button>
-            )}
           </div>
         </div>
       </motion.div>

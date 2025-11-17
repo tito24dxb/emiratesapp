@@ -1,134 +1,90 @@
-import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, Unsubscribe } from 'firebase/firestore';
+import { supabase } from '../lib/supabase';
 
 export interface SystemFeatures {
-  aiTrainer: boolean;
-  openDay: boolean;
   chat: boolean;
-  courses: boolean;
+  quiz: boolean;
+  englishTest: boolean;
   profileEdit: boolean;
-  downloads: boolean;
-  stripePayments: boolean;
+  openDayModule: boolean;
 }
 
 export interface SystemAnnouncement {
   active: boolean;
   message: string;
   type: 'info' | 'warning' | 'error' | 'success';
-  startedAt: any;
-  expiresAt: any;
-}
-
-export interface SystemMaintenance {
-  active: boolean;
-  message: string;
-  startedAt: any;
+  timestamp: string | null;
 }
 
 export interface SystemControl {
   features: SystemFeatures;
   announcement: SystemAnnouncement;
-  maintenance: SystemMaintenance;
-  updatedBy: string;
-  updatedAt: any;
+  updated_by: string | null;
+  updated_at: string;
 }
 
-const SYSTEM_CONTROL_DOC_ID = 'status';
+const SYSTEM_CONTROL_ID = 'status';
 
 export const getSystemControl = async (): Promise<SystemControl | null> => {
   try {
-    const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
-    const docSnap = await getDoc(docRef);
+    const { data, error } = await supabase
+      .from('system_control')
+      .select('*')
+      .eq('id', SYSTEM_CONTROL_ID)
+      .maybeSingle();
 
-    if (!docSnap.exists()) {
-      console.log('No system control entry found, creating default...');
-      return await createDefaultSystemControl();
+    if (error) {
+      console.error('Error fetching system control:', error);
+      return null;
     }
 
-    return docSnap.data() as SystemControl;
+    if (!data) {
+      console.log('No system control entry found');
+      return null;
+    }
+
+    return {
+      features: data.features,
+      announcement: data.announcement,
+      updated_by: data.updated_by,
+      updated_at: data.updated_at
+    };
   } catch (error) {
     console.error('Error fetching system control:', error);
     return null;
   }
 };
 
-const createDefaultSystemControl = async (): Promise<SystemControl | null> => {
-  try {
-    const defaultControl = {
-      features: {
-        aiTrainer: true,
-        openDay: true,
-        chat: true,
-        courses: true,
-        profileEdit: true,
-        downloads: true,
-        stripePayments: true,
-      },
-      announcement: {
-        active: false,
-        message: '',
-        type: 'info' as const,
-        startedAt: null,
-        expiresAt: null,
-      },
-      maintenance: {
-        active: false,
-        message: '',
-        startedAt: null,
-      },
-      updatedBy: 'system',
-      updatedAt: serverTimestamp(),
-    };
-
-    const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
-    await setDoc(docRef, defaultControl);
-    console.log('Default system control created successfully');
-    return defaultControl;
-  } catch (error) {
-    console.error('Error creating default system control:', error);
-    return null;
-  }
-};
-
 export const updateSystemControl = async (
-  updates: Partial<SystemControl>,
+  updates: Partial<{ features?: SystemFeatures; announcement?: SystemAnnouncement }>,
   userId: string
 ): Promise<SystemControl | null> => {
   try {
-    const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
-    const updateData = {
+    const updateData: any = {
       ...updates,
-      updatedBy: userId,
-      updatedAt: serverTimestamp(),
+      updated_by: userId,
+      updated_at: new Date().toISOString(),
     };
 
-    await updateDoc(docRef, updateData);
+    const { data, error } = await supabase
+      .from('system_control')
+      .update(updateData)
+      .eq('id', SYSTEM_CONTROL_ID)
+      .select()
+      .single();
 
-    const docSnap = await getDoc(docRef);
-    return docSnap.data() as SystemControl;
+    if (error) {
+      console.error('Error updating system control:', error);
+      throw error;
+    }
+
+    return {
+      features: data.features,
+      announcement: data.announcement,
+      updated_by: data.updated_by,
+      updated_at: data.updated_at
+    };
   } catch (error) {
     console.error('Error updating system control:', error);
-    throw error;
-  }
-};
-
-export const toggleFeature = async (
-  featureName: keyof SystemFeatures,
-  enabled: boolean,
-  userId: string
-): Promise<void> => {
-  try {
-    const systemControl = await getSystemControl();
-    if (!systemControl) throw new Error('System control not found');
-
-    const updatedFeatures = {
-      ...systemControl.features,
-      [featureName]: enabled,
-    };
-
-    await updateSystemControl({ features: updatedFeatures }, userId);
-  } catch (error) {
-    console.error('Error toggling feature:', error);
     throw error;
   }
 };
@@ -153,41 +109,30 @@ export const updateAnnouncement = async (
   }
 };
 
-export const updateMaintenance = async (
-  maintenance: Partial<SystemMaintenance>,
-  userId: string
-): Promise<void> => {
-  try {
-    const systemControl = await getSystemControl();
-    if (!systemControl) throw new Error('System control not found');
-
-    const updatedMaintenance = {
-      ...systemControl.maintenance,
-      ...maintenance,
-    };
-
-    await updateSystemControl({ maintenance: updatedMaintenance }, userId);
-  } catch (error) {
-    console.error('Error updating maintenance:', error);
-    throw error;
-  }
-};
-
 export const subscribeToSystemControl = (
   callback: (control: SystemControl | null) => void
-): Unsubscribe => {
-  const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
+): (() => void) => {
+  const channel = supabase
+    .channel('system_control_changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'system_control',
+        filter: `id=eq.${SYSTEM_CONTROL_ID}`
+      },
+      async (payload) => {
+        console.log('System control changed:', payload);
+        const control = await getSystemControl();
+        callback(control);
+      }
+    )
+    .subscribe();
 
-  const unsubscribe = onSnapshot(docRef, (docSnap) => {
-    if (docSnap.exists()) {
-      callback(docSnap.data() as SystemControl);
-    } else {
-      callback(null);
-    }
-  }, (error) => {
-    console.error('Error subscribing to system control:', error);
-    callback(null);
-  });
+  getSystemControl().then(callback);
 
-  return unsubscribe;
+  return () => {
+    supabase.removeChannel(channel);
+  };
 };

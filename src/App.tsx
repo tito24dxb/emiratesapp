@@ -23,7 +23,7 @@ import OpenDaysPage from './pages/OpenDaysPage';
 import UpgradePlanPage from './pages/UpgradePlanPage';
 import CourseViewerPage from './pages/CourseViewerPage';
 import DocumentationPage from './pages/DocumentationPage';
-import { Users } from 'lucide-react';
+import StudentsPage from './pages/StudentsPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -74,10 +74,7 @@ function AppContent() {
         <Route path="/open-days" element={<OpenDaysPage />} />
         <Route path="/upgrade" element={<UpgradePlanPage />} />
 
-        <Route
-          path="/students"
-          element={<PlaceholderPage icon={Users} title="Students" description="View and manage your student roster" />}
-        />
+        <Route path="/students" element={<StudentsPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <Route path="/coach-dashboard" element={<CoachDashboard />} />
