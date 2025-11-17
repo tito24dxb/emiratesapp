@@ -36,12 +36,16 @@ async function parsePDF(file: File, fileName: string): Promise<ParsedDocument> {
     const pdfjsLib = await import('pdfjs-dist');
     console.log('PDF.js version:', pdfjsLib.version);
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    // Import the worker directly from the package
+    const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.min.mjs?url');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+    console.log('Worker loaded');
 
     console.log('Loading PDF document...');
     const loadingTask = pdfjsLib.getDocument({
       data: arrayBuffer,
-      verbosity: 0
+      verbosity: 0,
+      isEvalSupported: false
     });
 
     const pdf = await loadingTask.promise;
@@ -78,7 +82,11 @@ async function parsePDF(file: File, fileName: string): Promise<ParsedDocument> {
       throw error;
     }
 
-    throw new Error(`Failed to parse PDF: ${errorMessage}. The file may be corrupted or password-protected.`);
+    if (errorMessage.includes('worker') || errorMessage.includes('fetch')) {
+      throw new Error('Unable to load PDF processing library. Please try again or use a text file instead.');
+    }
+
+    throw new Error(`Failed to parse PDF: ${errorMessage}. Please try uploading a different format (TXT, DOC, DOCX).`);
   }
 }
 
