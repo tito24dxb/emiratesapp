@@ -151,17 +151,18 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
             onClick={onClose}
           />
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-2xl shadow-2xl z-[70] max-h-[90vh] overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-6 rounded-t-2xl flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Upload className="w-6 h-6" />
-                <h2 className="text-2xl font-bold">Add New Course</h2>
+          <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-4 sm:p-6 rounded-t-2xl flex items-center justify-between">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <Upload className="w-5 h-5 sm:w-6 sm:h-6" />
+                <h2 className="text-xl sm:text-2xl font-bold">Add New Course</h2>
               </div>
               <button
                 onClick={onClose}
@@ -171,7 +172,7 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
                   Course Title *
@@ -338,7 +339,8 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
                 </button>
               </div>
             </form>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>
