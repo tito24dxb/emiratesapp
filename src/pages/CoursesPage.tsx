@@ -92,9 +92,17 @@ export default function CoursesPage() {
               className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
               onClick={() => navigate(`/modules/${module.id}`)}
             >
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 h-48 flex items-center justify-center">
-                <GraduationCap className="w-20 h-20 text-white opacity-80" />
-              </div>
+              {module.cover_image ? (
+                <img
+                  src={module.cover_image}
+                  alt={module.name}
+                  className="w-full h-48 object-cover"
+                />
+              ) : (
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 h-48 flex items-center justify-center">
+                  <GraduationCap className="w-20 h-20 text-white opacity-80" />
+                </div>
+              )}
 
               <div className="p-6">
                 <div className="mb-2">
@@ -109,7 +117,7 @@ export default function CoursesPage() {
                 <div className="flex items-center gap-4 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{module.lessons?.length || 0} Lessons</span>
+                    <span>{module.lessons?.length || 0} Video Lessons</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <BarChart3 className="w-4 h-4" />

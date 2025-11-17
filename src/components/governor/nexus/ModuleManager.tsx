@@ -19,7 +19,8 @@ export default function ModuleManager() {
     description: '',
     category: 'grooming' as 'grooming' | 'service' | 'safety' | 'interview' | 'language',
     order: 1,
-    quiz_id: ''
+    quiz_id: '',
+    cover_image: ''
   });
 
   useEffect(() => {
@@ -73,7 +74,8 @@ export default function ModuleManager() {
       description: module.description,
       category: module.category,
       order: module.order,
-      quiz_id: module.quiz_id || ''
+      quiz_id: module.quiz_id || '',
+      cover_image: module.cover_image || ''
     });
     setShowForm(true);
   };
@@ -99,7 +101,8 @@ export default function ModuleManager() {
       description: '',
       category: 'grooming',
       order: 1,
-      quiz_id: ''
+      quiz_id: '',
+      cover_image: ''
     });
     setEditingModule(null);
     setShowForm(false);
@@ -198,6 +201,20 @@ export default function ModuleManager() {
                 className="w-full px-4 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-slate-300 mb-2">
+              Cover Image URL (Optional)
+            </label>
+            <input
+              type="url"
+              value={formData.cover_image}
+              onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
+              className="w-full px-4 py-2 bg-slate-600 border border-slate-500 rounded-lg text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="text-xs text-slate-400 mt-1">URL to cover image for this module</p>
           </div>
 
           <div>

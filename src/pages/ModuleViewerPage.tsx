@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, BookOpen, Play, GraduationCap, FileText, Video } from 'lucide-react';
+import { ArrowLeft, BookOpen, Play, GraduationCap, FileText, Video, UserPlus } from 'lucide-react';
 import { getModule, Module, getModulesByCategory } from '../services/moduleService';
-import { getCoursesByModule, Course } from '../services/courseService';
+import { getCoursesByModule, Course, enrollInCourse, isEnrolledInCourse } from '../services/courseService';
+import { useApp } from '../context/AppContext';
 import { motion } from 'framer-motion';
 
 export default function ModuleViewerPage() {
   const { moduleId } = useParams<{ moduleId: string }>();
   const navigate = useNavigate();
+  const { currentUser } = useApp();
   const [module, setModule] = useState<Module | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
   const [relatedModules, setRelatedModules] = useState<Module[]>([]);
+  const [enrolled, setEnrolled] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
 
   useEffect(() => {
     if (moduleId) {
@@ -35,6 +39,12 @@ export default function ModuleViewerPage() {
         console.log('Courses in module:', moduleCourses.length);
         setCourses(moduleCourses);
 
+        // Check enrollment status
+        if (currentUser) {
+          const isEnrolled = await isEnrolledInCourse(currentUser.uid, moduleId);
+          setEnrolled(isEnrolled);
+        }
+
         // Load other modules in the same category
         const categoryModules = await getModulesByCategory(moduleData.category);
         const otherModules = categoryModules.filter(m =>
@@ -47,6 +57,22 @@ export default function ModuleViewerPage() {
       console.error('Error loading module data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEnroll = async () => {
+    if (!currentUser || !moduleId) return;
+
+    setEnrolling(true);
+    try {
+      await enrollInCourse(currentUser.uid, moduleId);
+      setEnrolled(true);
+      alert('Successfully enrolled in module!');
+    } catch (error) {
+      console.error('Error enrolling:', error);
+      alert('Failed to enroll in module. Please try again.');
+    } finally {
+      setEnrolling(false);
     }
   };
 
@@ -84,24 +110,63 @@ export default function ModuleViewerPage() {
           Back to Modules
         </button>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-          <div className="flex items-center gap-2 mb-2">
-            <GraduationCap className="w-6 h-6 text-blue-600" />
-            <span className="text-sm text-blue-600 font-semibold uppercase">
-              {module.category}
-            </span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">{module.name}</h1>
-          <p className="text-gray-600 mb-4">{module.description}</p>
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <BookOpen className="w-4 h-4" />
-              {module.lessons?.length || 0} Video Lessons
-            </span>
-            <span className="flex items-center gap-1">
-              <FileText className="w-4 h-4" />
-              {courses.length} Course Materials
-            </span>
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+          {module.cover_image && (
+            <img
+              src={module.cover_image}
+              alt={module.name}
+              className="w-full h-64 object-cover"
+            />
+          )}
+          <div className="p-6">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <GraduationCap className="w-6 h-6 text-blue-600" />
+                  <span className="text-sm text-blue-600 font-semibold uppercase">
+                    {module.category}
+                  </span>
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-3">{module.name}</h1>
+                <p className="text-gray-600 mb-4">{module.description}</p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    {module.lessons?.length || 0} Video Lessons
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FileText className="w-4 h-4" />
+                    {courses.length} Course Materials
+                  </span>
+                </div>
+              </div>
+
+              {currentUser && currentUser.role === 'student' && !enrolled && (
+                <button
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
+                >
+                  {enrolling ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Enrolling...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-5 h-5" />
+                      Enroll Now
+                    </>
+                  )}
+                </button>
+              )}
+
+              {enrolled && currentUser?.role === 'student' && (
+                <div className="px-6 py-3 bg-green-100 text-green-700 rounded-lg font-semibold">
+                  ✓ Enrolled
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

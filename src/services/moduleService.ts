@@ -31,6 +31,7 @@ export interface Module {
   lessons: ModuleLesson[];
   quiz_id?: string;
   visible: boolean;
+  cover_image?: string;
   created_at: string;
   updated_at: string;
 }
