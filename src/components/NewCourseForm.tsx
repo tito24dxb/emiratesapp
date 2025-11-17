@@ -117,9 +117,9 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
           description: description.trim(),
           thumbnail,
           video_url: embedUrl,
-          subtitle: subtitle.trim() || undefined,
-          module_id: selectedMainModule || undefined,
-          submodule_id: submoduleId || undefined
+          subtitle: subtitle.trim() || null,
+          module_id: selectedMainModule || null,
+          submodule_id: submoduleId || null
         });
         alert('Course updated successfully!');
       } else {
@@ -136,9 +136,9 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
           allow_download: false,
           content_type: 'video',
           video_url: embedUrl,
-          subtitle: subtitle.trim() || undefined,
-          module_id: selectedMainModule || undefined,
-          submodule_id: submoduleId || undefined,
+          subtitle: subtitle.trim() || null,
+          module_id: selectedMainModule || null,
+          submodule_id: submoduleId || null,
           visible: true
         }, currentUser.uid);
         alert('Course created successfully!');
