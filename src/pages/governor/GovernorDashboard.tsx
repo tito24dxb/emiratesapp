@@ -31,7 +31,7 @@ export default function GovernorDashboard() {
         const courses = await getAllCourses();
         const activeCourses = courses.length;
 
-        const chatsSnapshot = await getDocs(collection(db, 'chats'));
+        const chatsSnapshot = await getDocs(collection(db, 'conversations'));
         const activeChats = chatsSnapshot.size;
 
         setMetrics({

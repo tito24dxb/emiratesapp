@@ -13,7 +13,7 @@ interface AuditEvent {
 }
 
 export default function RealtimeLogs() {
-  const { data: events, loading } = useFirestoreCollection<AuditEvent>('auditEvents');
+  const { data: events, loading } = useFirestoreCollection<AuditEvent>('audit');
 
   const sortedEvents = [...events].sort((a, b) => {
     const timeA = a.timestamp?.toDate?.() || new Date(0);
