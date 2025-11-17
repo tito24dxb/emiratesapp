@@ -16,6 +16,7 @@ import SupportChatManager from '../../components/governor/nexus/SupportChatManag
 import FinancePanel from '../../components/governor/nexus/FinancePanel';
 import AnnouncementManager from './AnnouncementManager';
 import BugReportsManager from '../../components/governor/nexus/BugReportsManager';
+import ModuleManager from '../../components/governor/nexus/ModuleManager';
 
 interface Announcement {
   active: boolean;
@@ -119,6 +120,8 @@ export default function GovernorControlNexus() {
         <AnnouncementManager />
 
         <BugReportsManager />
+
+        <ModuleManager />
 
         <SupportChatManager />
       </div>

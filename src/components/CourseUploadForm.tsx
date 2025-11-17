@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Upload, FileText, X, Image } from 'lucide-react';
+import { Upload, FileText, X, Image, FolderPlus } from 'lucide-react';
 import { createCourse, updateCourse, CreateCourseData, Course } from '../services/courseService';
 import { validatePDFFile } from '../services/storageService';
+import { getAllModules, Module } from '../services/moduleService';
 
 interface CourseUploadFormProps {
   coachId: string;
@@ -16,6 +17,10 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [thumbnailBase64, setThumbnailBase64] = useState('');
   const thumbnailInputRef = useRef<HTMLInputElement>(null);
+  const [uploadType, setUploadType] = useState<'standalone' | 'module'>('standalone');
+  const [modules, setModules] = useState<Module[]>([]);
+  const [selectedModule, setSelectedModule] = useState<string>('');
+  const [orderInModule, setOrderInModule] = useState<number>(1);
 
   const [videoUrl, setVideoUrl] = useState(editingCourse?.video_url || '');
 
@@ -31,13 +36,28 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
     lessons: editingCourse?.lessons || 1,
     allow_download: editingCourse?.allow_download || false,
     content_type: editingCourse?.content_type || 'pdf',
+    module_id: editingCourse?.module_id || undefined,
+    order_in_module: editingCourse?.order_in_module || undefined,
   });
 
   useEffect(() => {
     if (editingCourse?.thumbnail) {
       setThumbnailBase64(editingCourse.thumbnail);
     }
+    if (editingCourse?.module_id) {
+      setUploadType('module');
+      setSelectedModule(editingCourse.module_id);
+      setOrderInModule(editingCourse.order_in_module || 1);
+    }
   }, [editingCourse]);
+
+  useEffect(() => {
+    const loadModules = async () => {
+      const allModules = await getAllModules();
+      setModules(allModules);
+    };
+    loadModules();
+  }, []);
 
   const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,31 +114,35 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
       return;
     }
 
+    if (uploadType === 'module' && !selectedModule) {
+      setError('Please select a module');
+      return;
+    }
+
     setIsUploading(true);
 
     try {
+      const courseData = {
+        ...formData,
+        thumbnail: thumbnailBase64,
+        pdfFile: formData.content_type === 'pdf' ? pdfFile || undefined : undefined,
+        video_url: formData.content_type === 'video' ? videoUrl : undefined,
+        module_id: uploadType === 'module' ? selectedModule : undefined,
+        order_in_module: uploadType === 'module' ? orderInModule : undefined,
+      };
+
       if (editingCourse) {
         console.log('Updating course...');
         await updateCourse(
           editingCourse.id,
-          {
-            ...formData,
-            thumbnail: thumbnailBase64,
-            pdfFile: pdfFile || undefined,
-            video_url: formData.content_type === 'video' ? videoUrl : undefined,
-          },
+          courseData,
           editingCourse.pdf_path
         );
         console.log('Course updated successfully');
       } else {
         console.log('Starting course creation...');
         await createCourse(
-          {
-            ...formData,
-            thumbnail: thumbnailBase64,
-            pdfFile: formData.content_type === 'pdf' ? pdfFile : undefined,
-            video_url: formData.content_type === 'video' ? videoUrl : undefined,
-          },
+          courseData,
           coachId
         );
         console.log('Course created successfully');
@@ -147,6 +171,78 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <div className="bg-slate-50 rounded-xl p-4 border-2 border-slate-200">
+            <label className="block text-sm font-bold text-gray-700 mb-3">
+              Course Type *
+            </label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setUploadType('standalone')}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition border-2 ${
+                  uploadType === 'standalone'
+                    ? 'bg-[#D71920] text-white border-[#D71920]'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#D71920]'
+                }`}
+              >
+                <Upload className="w-5 h-5 inline mr-2" />
+                Single Course
+              </button>
+              <button
+                type="button"
+                onClick={() => setUploadType('module')}
+                className={`flex-1 py-3 px-4 rounded-lg font-semibold transition border-2 ${
+                  uploadType === 'module'
+                    ? 'bg-[#D71920] text-white border-[#D71920]'
+                    : 'bg-white text-gray-700 border-gray-300 hover:border-[#D71920]'
+                }`}
+              >
+                <FolderPlus className="w-5 h-5 inline mr-2" />
+                Add to Module
+              </button>
+            </div>
+          </div>
+
+          {uploadType === 'module' && (
+            <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Select Module *
+                </label>
+                <select
+                  value={selectedModule}
+                  onChange={(e) => setSelectedModule(e.target.value)}
+                  required={uploadType === 'module'}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                >
+                  <option value="">Choose a module...</option>
+                  {modules.map((module) => (
+                    <option key={module.id} value={module.id}>
+                      {module.name} ({module.category})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Order in Module *
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={orderInModule}
+                  onChange={(e) => setOrderInModule(parseInt(e.target.value))}
+                  required={uploadType === 'module'}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                  placeholder="e.g., 1 for first course, 2 for second..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Course order within the module (1 = first, 2 = second, etc.)
+                </p>
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
               Course Title *

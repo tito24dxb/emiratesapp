@@ -32,6 +32,8 @@ export interface Course {
   content_type: 'pdf' | 'video' | 'text';
   suppressed?: boolean;
   suppressed_at?: string;
+  module_id?: string;
+  order_in_module?: number;
   created_at: string;
   updated_at: string;
 }
@@ -50,6 +52,8 @@ export interface CreateCourseData {
   video_url?: string;
   allow_download: boolean;
   content_type: 'pdf' | 'video' | 'text';
+  module_id?: string;
+  order_in_module?: number;
 }
 
 export const createCourse = async (data: CreateCourseData, coachId: string): Promise<Course> => {
@@ -85,6 +89,8 @@ export const createCourse = async (data: CreateCourseData, coachId: string): Pro
     if (pdfUrl) courseData.pdf_url = pdfUrl;
     if (pdfPath) courseData.pdf_path = pdfPath;
     if (data.video_url) courseData.video_url = data.video_url;
+    if (data.module_id) courseData.module_id = data.module_id;
+    if (data.order_in_module !== undefined) courseData.order_in_module = data.order_in_module;
 
     const docRef = doc(db, 'courses', courseId);
     await setDoc(docRef, courseData);
@@ -169,6 +175,56 @@ export const getCoursesByCoach = async (coachId: string): Promise<Course[]> => {
     );
   } catch (error) {
     console.error('Error fetching courses:', error);
+    return [];
+  }
+};
+
+export const getCoursesByModule = async (moduleId: string): Promise<Course[]> => {
+  try {
+    const coursesRef = collection(db, 'courses');
+    const q = query(
+      coursesRef,
+      where('module_id', '==', moduleId),
+      orderBy('order_in_module', 'asc')
+    );
+
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Course[];
+  } catch (error) {
+    console.error('Error fetching courses by module:', error);
+    return [];
+  }
+};
+
+export const getStandaloneCourses = async (category?: string): Promise<Course[]> => {
+  try {
+    const coursesRef = collection(db, 'courses');
+    let q;
+
+    if (category) {
+      q = query(
+        coursesRef,
+        where('module_id', '==', null),
+        where('category', '==', category)
+      );
+    } else {
+      q = query(coursesRef, where('module_id', '==', null));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const courses = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Course[];
+
+    return courses.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  } catch (error) {
+    console.error('Error fetching standalone courses:', error);
     return [];
   }
 };
