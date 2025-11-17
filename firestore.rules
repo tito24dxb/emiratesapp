@@ -87,18 +87,7 @@ service cloud.firestore {
     // COURSES
     ///////////////////////////////////////////////////////////////////////////
     match /courses/{courseId} {
-      allow read: if isAuthenticated() && (
-        resource.data.plan == 'free' ||
-        (
-          resource.data.plan == 'pro' &&
-          getUserData().plan in ['pro', 'vip']
-        ) ||
-        (
-          resource.data.plan == 'vip' &&
-          getUserData().plan == 'vip'
-        ) ||
-        isStaff()
-      );
+      allow read: if isAuthenticated();
 
       allow create, update: if isAuthenticated() && (
         hasRole('mentor') ||

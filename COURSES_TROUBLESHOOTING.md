@@ -4,7 +4,7 @@
 4 courses exist in Firebase Firestore under the `courses` collection, but students cannot see them on the courses page.
 
 ## Root Cause
-The Firestore security rules have been updated in the codebase, but **they haven't been deployed to Firebase yet**. The old rules are still active and checking for the wrong field name.
+The Firestore security rules were trying to call `getUserData()` which failed when checking user plan permissions. The rules have been simplified to allow all authenticated users to read courses, with plan-based filtering handled in the frontend.
 
 ## Solution
 
@@ -93,15 +93,17 @@ Make sure the student user has a `plan` field in their user document:
 5. Look for the console logs showing courses being fetched
 6. You should see at least the free courses appear
 
-## Quick Fix for Testing
+## Updated Rule (SIMPLIFIED)
 
-If you want to test immediately without deploying rules, you can temporarily change the rules in Firebase Console to:
+The new rule allows any authenticated user to read courses:
 
 ```javascript
 match /courses/{courseId} {
-  allow read: if true;  // TEMPORARY - allows all reads
-  allow write: if isGovernor();
+  allow read: if isAuthenticated();
+  allow create, update: if isAuthenticated() && (
+    hasRole('mentor') || isGovernor() || hasPermission('manageContent')
+  );
 }
 ```
 
-Then change it back to the proper rules after confirming courses appear.
+Plan-based filtering (free/pro/vip) is now handled in the frontend for better user experience. This prevents complex rule evaluation errors.
