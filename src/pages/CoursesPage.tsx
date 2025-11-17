@@ -3,16 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, BarChart3, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getVisibleRootModules, Module } from '../services/moduleService';
+import { useApp } from '../context/AppContext';
 
 export default function CoursesPage() {
   const navigate = useNavigate();
+  const { currentUser } = useApp();
   const [selectedCategory, setSelectedCategory] = useState<'all' | Module['category']>('all');
   const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (currentUser && (currentUser.role === 'mentor' || currentUser.role === 'governor')) {
+      navigate('/coach-dashboard');
+      return;
+    }
     fetchModules();
-  }, []);
+  }, [currentUser, navigate]);
 
   const fetchModules = async () => {
     try {

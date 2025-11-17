@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FolderPlus, Upload, Layers } from 'lucide-react';
+import { Plus, FolderPlus, Upload, Layers, BookOpen, Play, FileText } from 'lucide-react';
 import { getAllMainModules, getSubmodulesByParent, MainModule } from '../services/mainModuleService';
+import { getAllCourses, Course } from '../services/courseService';
 import { motion } from 'framer-motion';
 import CreateModuleForm from '../components/CreateModuleForm';
 import NewCourseForm from '../components/NewCourseForm';
@@ -11,6 +12,7 @@ export default function NewCoachDashboard() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
   const [mainModules, setMainModules] = useState<MainModule[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [submoduleCounts, setSubmoduleCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [showCreateModule, setShowCreateModule] = useState(false);
@@ -28,8 +30,13 @@ export default function NewCoachDashboard() {
   const loadModules = async () => {
     setLoading(true);
     try {
-      const modules = await getAllMainModules();
+      const [modules, allCourses] = await Promise.all([
+        getAllMainModules(),
+        getAllCourses()
+      ]);
+
       setMainModules(modules);
+      setCourses(allCourses);
 
       const counts: Record<string, number> = {};
       for (const module of modules) {
@@ -149,10 +156,91 @@ export default function NewCoachDashboard() {
         onSuccess={loadModules}
       />
 
+      <div className="mt-12 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          All Courses ({courses.length})
+        </h2>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#D71920] border-t-transparent"></div>
+        </div>
+      ) : courses.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+          <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Courses Yet</h3>
+          <p className="text-gray-600 mb-6">
+            Upload your first course to start training students
+          </p>
+          <button
+            onClick={() => setShowAddCourse(true)}
+            className="px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transition inline-flex items-center gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            Add First Course
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {courses.map((course) => (
+            <motion.div
+              key={course.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+              onClick={() => navigate(`/course/${course.id}`)}
+            >
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    course.content_type === 'video' ? 'bg-red-100 text-red-700' :
+                    course.content_type === 'pdf' ? 'bg-orange-100 text-orange-700' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {course.content_type === 'video' && <Play className="w-3 h-3 inline mr-1" />}
+                    {course.content_type === 'pdf' && <FileText className="w-3 h-3 inline mr-1" />}
+                    {course.content_type === 'text' && <BookOpen className="w-3 h-3 inline mr-1" />}
+                    {course.content_type.toUpperCase()}
+                  </span>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    course.level === 'beginner' ? 'bg-green-100 text-green-700' :
+                    course.level === 'intermediate' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {course.level.toUpperCase()}
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
+                <p className="text-gray-600 text-sm line-clamp-2 mb-4">{course.description}</p>
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    {course.lessons} Lessons
+                  </span>
+                  <span>{course.duration}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      <CreateModuleForm
+        isOpen={showCreateModule}
+        onClose={() => setShowCreateModule(false)}
+        onSuccess={loadModules}
+      />
+
       <NewCourseForm
         isOpen={showAddCourse}
         onClose={() => setShowAddCourse(false)}
-        onSuccess={() => {}}
+        onSuccess={loadModules}
       />
     </div>
   );
