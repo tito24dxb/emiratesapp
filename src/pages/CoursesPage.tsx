@@ -123,7 +123,7 @@ export default function CoursesPage() {
         <div className="space-y-6">
           {modulesWithContent.map((module) => {
             const isExpanded = expandedModules.has(module.id);
-            const totalCourses = module.courses.length + module.submodules.reduce((sum, sub) => sum + sub.courses.length, 0);
+            const totalCourses = module.courses.length + (module.submodules || []).reduce((sum, sub) => sum + sub.courses.length, 0);
 
             return (
               <motion.div
@@ -147,7 +147,7 @@ export default function CoursesPage() {
                       <p className="text-gray-600 text-sm mb-2">{module.description}</p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span>{totalCourses} course{totalCourses !== 1 ? 's' : ''}</span>
-                        {module.submodules.length > 0 && (
+                        {module.submodules && module.submodules.length > 0 && (
                           <span>{module.submodules.length} submodule{module.submodules.length !== 1 ? 's' : ''}</span>
                         )}
                       </div>
@@ -208,7 +208,7 @@ export default function CoursesPage() {
                           </div>
                         )}
 
-                        {module.submodules.map((submodule) => (
+                        {(module.submodules || []).map((submodule) => (
                           <div key={submodule.id}>
                             <div className="flex items-center gap-3 mb-3">
                               <img
