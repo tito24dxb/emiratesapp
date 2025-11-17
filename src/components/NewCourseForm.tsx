@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Upload, Plus, Edit } from 'lucide-react';
+import { X, Upload, Plus, CreditCard as Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createCourse, updateCourse, Course } from '../services/courseService';
 import { getAllMainModules, getSubmodulesByParent, MainModule, Submodule } from '../services/mainModuleService';
