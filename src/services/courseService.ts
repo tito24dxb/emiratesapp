@@ -231,19 +231,32 @@ export const getStandaloneCourses = async (category?: string): Promise<Course[]>
 
 export const getAllCourses = async (): Promise<Course[]> => {
   try {
+    console.log('Fetching courses from Firebase...');
     const coursesRef = collection(db, 'courses');
     const querySnapshot = await getDocs(coursesRef);
 
-    const courses = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Course[];
+    console.log('Courses query result:', {
+      size: querySnapshot.size,
+      empty: querySnapshot.empty,
+      docs: querySnapshot.docs.length
+    });
 
+    const courses = querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      console.log('Course data:', { id: doc.id, ...data });
+      return {
+        id: doc.id,
+        ...data
+      };
+    }) as Course[];
+
+    console.log('Total courses fetched:', courses.length);
     return courses.sort((a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
   } catch (error) {
     console.error('Error fetching all courses:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
     return [];
   }
 };
