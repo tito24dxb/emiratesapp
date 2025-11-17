@@ -67,8 +67,8 @@ export default function CoursesPage() {
     return (
       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${
         plan === 'vip'
-          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-[#000000]'
-          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
+          ? 'bg-gradient-to-r from-[#CBA135] to-[#B8941F] text-white'
+          : 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white'
       }`}>
         {plan === 'vip' ? <Crown className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
         {plan.toUpperCase()}
@@ -94,7 +94,7 @@ export default function CoursesPage() {
             onClick={() => setSelectedCategory(category.id as any)}
             className={`px-4 py-2 rounded-lg font-medium transition ${
               selectedCategory === category.id
-                ? 'bg-[#FF3B3F] text-white'
+                ? 'bg-[#D71920] text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
             }`}
           >
@@ -107,7 +107,7 @@ export default function CoursesPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white rounded-xl"
+          className="mb-6 p-4 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -118,7 +118,7 @@ export default function CoursesPage() {
             </div>
             <button
               onClick={() => navigate('/upgrade')}
-              className="px-4 py-2 bg-white text-[#FF3B3F] rounded-lg font-bold hover:shadow-lg transition whitespace-nowrap"
+              className="px-4 py-2 bg-white text-[#D71920] rounded-lg font-bold hover:shadow-lg transition whitespace-nowrap"
             >
               Upgrade
             </button>
@@ -129,7 +129,7 @@ export default function CoursesPage() {
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FF3B3F] mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D71920] mx-auto mb-4"></div>
             <p className="text-gray-600">Loading courses...</p>
           </div>
         </div>
@@ -216,7 +216,7 @@ export default function CoursesPage() {
                   }}
                   className={`mt-4 w-full py-2 rounded-lg font-bold transition ${
                     isAvailable
-                      ? 'bg-[#FF3B3F] text-white hover:bg-[#E6282C]'
+                      ? 'bg-[#D71920] text-white hover:bg-[#B91518]'
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                   }`}
                 >
