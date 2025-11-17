@@ -182,7 +182,7 @@ service cloud.firestore {
     // SYSTEM CONTROL
     ///////////////////////////////////////////////////////////////////////////
     match /systemControl/{docId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
       allow write: if isGovernor() || hasPermission('manageSystem');
     }
 
