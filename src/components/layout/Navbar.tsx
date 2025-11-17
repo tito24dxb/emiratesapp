@@ -66,7 +66,7 @@ export default function Navbar() {
                 className="flex items-center gap-1 md:gap-3 hover:bg-gray-100 rounded-lg px-2 md:px-3 py-1.5 md:py-2 transition"
               >
                 <img
-                  src={currentUser.photoURL}
+                  src={currentUser.photoURL || `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2260%22 dy=%2210.5rem%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3E${currentUser.name?.[0] || 'U'}%3C/text%3E%3C/svg%3E`}
                   alt={currentUser.name}
                   className="w-7 h-7 md:w-8 md:h-8 rounded-full object-cover border-2 border-gray-200"
                 />

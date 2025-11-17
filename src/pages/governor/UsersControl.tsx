@@ -31,7 +31,7 @@ export default function UsersControl() {
           plan: data.plan || 'free',
           country: data.country || '',
           bio: data.bio || '',
-          photoURL: data.photo_base64 || data.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+          photoURL: data.photo_base64 || '',
           expectations: data.expectations || '',
           hasCompletedOnboarding: data.hasCompletedOnboarding || false,
           hasSeenWelcomeBanner: data.hasSeenWelcomeBanner || false,
@@ -213,7 +213,7 @@ export default function UsersControl() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <img
-                        src={user.photoURL}
+                        src={user.photoURL || `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2260%22 dy=%2210.5rem%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3E${user.name?.[0] || 'U'}%3C/text%3E%3C/svg%3E`}
                         alt={user.name}
                         className="w-10 h-10 rounded-full object-cover"
                       />

@@ -38,7 +38,7 @@ export default function RegisterPage() {
         country,
         bio,
         expectations,
-        photoURL: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        photo_base64: '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
@@ -51,7 +51,7 @@ export default function RegisterPage() {
         plan: 'free' as const,
         country,
         bio,
-        photoURL: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        photoURL: '',
       };
 
       setCurrentUser(newUser);

@@ -47,7 +47,7 @@ export default function LoginPage() {
         country: userData.country || '',
         bio: userData.bio || '',
         expectations: userData.expectations || '',
-        photoURL: userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        photoURL: userData.photo_base64 || '',
         hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
         hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
         onboardingCompletedAt: userData.onboardingCompletedAt,
