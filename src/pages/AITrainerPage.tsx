@@ -1,11 +1,12 @@
-import { Brain, Upload, FileText, Sparkles, Send, Loader2 } from 'lucide-react';
+import { Brain, Upload, FileText, Sparkles, Send, Loader2, Wand2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState, useRef, useEffect } from 'react';
-import { analyzeCVForEmirates, getCabinCrewGuidance } from '../utils/aiService';
+import { analyzeCVForEmirates, getCabinCrewGuidance, optimizeCVForATS } from '../utils/aiService';
 import { checkFeatureAccess } from '../utils/featureAccess';
 import FeatureLock from '../components/FeatureLock';
 import CVAnalyzer from '../components/CVAnalyzer';
+import { parseDocument } from '../utils/documentParser';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -34,6 +35,8 @@ export default function AITrainerPage() {
   const [cvFeedback, setCvFeedback] = useState('');
   const [cvLoading, setCvLoading] = useState(false);
   const [cvError, setCvError] = useState('');
+  const [optimizedCV, setOptimizedCV] = useState('');
+  const [optimizing, setOptimizing] = useState(false);
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState('');
@@ -62,12 +65,23 @@ export default function AITrainerPage() {
       return;
     }
 
-    if (fileType === 'txt') {
-      const text = await file.text();
-      setCvText(text);
+    setCvLoading(true);
+    setCvError('');
+
+    try {
+      if (fileType === 'txt') {
+        const text = await file.text();
+        setCvText(text);
+      } else {
+        const parsed = await parseDocument(file);
+        setCvText(parsed.text);
+      }
       setCvError('');
-    } else {
-      setCvError('PDF and DOC files coming soon. Please use .txt or paste your CV text for now.');
+    } catch (error: any) {
+      setCvError(error.message || 'Failed to parse document. Please try again.');
+      setCvText('');
+    } finally {
+      setCvLoading(false);
     }
   };
 
@@ -85,6 +99,7 @@ export default function AITrainerPage() {
     setCvLoading(true);
     setCvError('');
     setCvFeedback('');
+    setOptimizedCV('');
 
     try {
       const feedback = await analyzeCVForEmirates(cvText, currentUser.uid);
@@ -93,6 +108,30 @@ export default function AITrainerPage() {
       setCvError(error.message || 'Failed to analyze CV. Please try again.');
     } finally {
       setCvLoading(false);
+    }
+  };
+
+  const handleOptimizeCV = async () => {
+    if (!cvText.trim()) {
+      setCvError('Please enter or upload your CV content first');
+      return;
+    }
+
+    if (!currentUser) {
+      setCvError('You must be logged in to use this feature');
+      return;
+    }
+
+    setOptimizing(true);
+    setCvError('');
+
+    try {
+      const optimized = await optimizeCVForATS(cvText, currentUser.uid);
+      setOptimizedCV(optimized);
+    } catch (error: any) {
+      setCvError(error.message || 'Failed to optimize CV. Please try again.');
+    } finally {
+      setOptimizing(false);
     }
   };
 
@@ -297,6 +336,51 @@ Customer service professional with 3 years of experience in hospitality..."
               <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
                 {cvFeedback}
               </div>
+
+              <button
+                onClick={handleOptimizeCV}
+                disabled={optimizing || !cvText.trim()}
+                className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-[#CBA135] to-[#B8941F] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {optimizing ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Generating Optimized CV...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="w-5 h-5" />
+                    Generate ATS-Optimized CV
+                  </>
+                )}
+              </button>
+            </motion.div>
+          )}
+
+          {optimizedCV && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-2xl shadow-lg p-6"
+            >
+              <h3 className="text-xl font-bold text-[#000000] mb-4 flex items-center gap-2">
+                <Wand2 className="w-6 h-6 text-[#CBA135]" />
+                Your ATS-Optimized Aviation CV
+              </h3>
+              <div className="bg-gray-50 rounded-xl p-6 mb-4 max-h-96 overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+                  {optimizedCV}
+                </pre>
+              </div>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(optimizedCV);
+                  alert('CV copied to clipboard! You can now paste it into your document editor.');
+                }}
+                className="w-full px-6 py-3 bg-[#D71920] text-white rounded-xl font-bold hover:bg-[#B91518] transition"
+              >
+                Copy to Clipboard
+              </button>
             </motion.div>
           )}
         </motion.div>
