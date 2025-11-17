@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Search, Mail, MapPin, Calendar, Award, BookOpen, TrendingUp, Filter } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import { collection, query, where, getDocs, orderBy as firestoreOrderBy } from 'firebase/firestore';
 import { useApp } from '../context/AppContext';
 
 interface Student {
@@ -10,17 +11,16 @@ interface Student {
   email: string;
   country: string;
   plan: string;
-  created_at: string;
-  last_login: string | null;
-  bio: string | null;
-  photo_url: string | null;
-  photo_base64: string | null;
+  createdAt: string;
+  updatedAt: string;
+  bio: string;
+  photo_base64: string;
 }
 
 interface StudentStats {
-  totalQuizzes: number;
-  averageScore: number;
-  passedQuizzes: number;
+  totalCourses: number;
+  completedCourses: number;
+  enrolledCourses: number;
 }
 
 export default function StudentsPage() {
@@ -29,7 +29,6 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPlan, setSelectedPlan] = useState<string>('all');
-  const [studentStats, setStudentStats] = useState<Record<string, StudentStats>>({});
 
   useEffect(() => {
     loadStudents();
@@ -37,53 +36,31 @@ export default function StudentsPage() {
 
   const loadStudents = async () => {
     try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('role', 'student')
-        .order('created_at', { ascending: false });
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('role', '==', 'student'), firestoreOrderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
 
-      if (error) throw error;
-
-      setStudents(data || []);
-
-      if (data) {
-        const statsPromises = data.map(student => loadStudentStats(student.id));
-        const stats = await Promise.all(statsPromises);
-        const statsMap: Record<string, StudentStats> = {};
-        data.forEach((student, index) => {
-          statsMap[student.id] = stats[index];
+      const studentsData: Student[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        studentsData.push({
+          id: doc.id,
+          name: data.name || 'Unknown',
+          email: data.email || '',
+          country: data.country || 'Not specified',
+          plan: data.plan || 'free',
+          createdAt: data.createdAt || new Date().toISOString(),
+          updatedAt: data.updatedAt || new Date().toISOString(),
+          bio: data.bio || '',
+          photo_base64: data.photo_base64 || ''
         });
-        setStudentStats(statsMap);
-      }
+      });
+
+      setStudents(studentsData);
     } catch (error) {
       console.error('Error loading students:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadStudentStats = async (userId: string): Promise<StudentStats> => {
-    try {
-      const { data, error } = await supabase
-        .from('quiz_results')
-        .select('score, passed')
-        .eq('user_id', userId);
-
-      if (error || !data || data.length === 0) {
-        return { totalQuizzes: 0, averageScore: 0, passedQuizzes: 0 };
-      }
-
-      const totalQuizzes = data.length;
-      const passedQuizzes = data.filter(r => r.passed).length;
-      const averageScore = Math.round(
-        data.reduce((sum, r) => sum + r.score, 0) / totalQuizzes
-      );
-
-      return { totalQuizzes, passedQuizzes, averageScore };
-    } catch (error) {
-      console.error('Error loading student stats:', error);
-      return { totalQuizzes: 0, averageScore: 0, passedQuizzes: 0 };
     }
   };
 
@@ -223,45 +200,19 @@ export default function StudentsPage() {
 
                   <div className="flex items-center gap-2 text-gray-700">
                     <Calendar className="w-4 h-4 text-[#D71921]" />
-                    <span>Joined {new Date(student.created_at).toLocaleDateString()}</span>
+                    <span>Joined {new Date(student.createdAt).toLocaleDateString()}</span>
                   </div>
 
-                  {student.last_login && (
-                    <div className="flex items-center gap-2 text-gray-700">
-                      <TrendingUp className="w-4 h-4 text-[#D71921]" />
-                      <span>Last login: {new Date(student.last_login).toLocaleDateString()}</span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 text-gray-700">
+                    <TrendingUp className="w-4 h-4 text-[#D71921]" />
+                    <span>Last updated: {new Date(student.updatedAt).toLocaleDateString()}</span>
+                  </div>
 
                   {student.bio && (
-                    <p className="text-sm text-gray-600 line-clamp-2 pt-2 border-t border-gray-100">
+                    <p className="text-sm text-gray-600 line-clamp-3 pt-2 border-t border-gray-100">
                       {student.bio}
                     </p>
                   )}
-
-                  <div className="grid grid-cols-3 gap-3 pt-4 border-t border-gray-100">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <BookOpen className="w-4 h-4 text-[#D71921]" />
-                      </div>
-                      <div className="text-lg font-bold text-[#000000]">{stats.totalQuizzes}</div>
-                      <div className="text-xs text-gray-600">Quizzes</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Award className="w-4 h-4 text-green-600" />
-                      </div>
-                      <div className="text-lg font-bold text-[#000000]">{stats.passedQuizzes}</div>
-                      <div className="text-xs text-gray-600">Passed</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <TrendingUp className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <div className="text-lg font-bold text-[#000000]">{stats.averageScore}%</div>
-                      <div className="text-xs text-gray-600">Avg Score</div>
-                    </div>
-                  </div>
                 </div>
               </motion.div>
             );
