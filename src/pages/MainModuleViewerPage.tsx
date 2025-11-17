@@ -110,7 +110,7 @@ export default function MainModuleViewerPage() {
         <>
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Courses in Main Module ({courses.length})
+              Courses
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -151,11 +151,13 @@ export default function MainModuleViewerPage() {
         </>
       )}
 
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Submodules ({submodules.length})
-        </h2>
-      </div>
+      {submodules.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            Submodules
+          </h2>
+        </div>
+      )}
 
       {submodules.length === 0 ? (
         <div className="bg-white rounded-xl shadow-lg p-12 text-center">
