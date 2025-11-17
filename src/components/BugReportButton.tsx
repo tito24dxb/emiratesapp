@@ -77,10 +77,11 @@ export default function BugReportButton() {
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-2xl shadow-2xl z-[70] max-h-[90vh] overflow-y-auto"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-2xl bg-white rounded-2xl shadow-2xl z-[70] max-h-[85vh] overflow-hidden flex flex-col"
+              onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white p-6 rounded-t-2xl flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -95,7 +96,7 @@ export default function BugReportButton() {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
                     Bug Title *

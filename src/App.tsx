@@ -24,6 +24,7 @@ import UpgradePlanPage from './pages/UpgradePlanPage';
 import CourseViewerPage from './pages/CourseViewerPage';
 import DocumentationPage from './pages/DocumentationPage';
 import StudentsPage from './pages/StudentsPage';
+import EmiratesWebScraper from './pages/EmiratesWebScraper';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -85,7 +86,10 @@ function AppContent() {
         )}
 
         {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
-          <Route path="/governor/nexus" element={<GovernorControlNexus />} />
+          <>
+            <Route path="/governor/nexus" element={<GovernorControlNexus />} />
+            <Route path="/web-scraper" element={<EmiratesWebScraper />} />
+          </>
         )}
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
