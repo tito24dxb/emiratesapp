@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, Plane, BookOpen, Brain, MessageCircle, Sparkles } from 'lucide-react';
+import { X, ChevronRight, Plane, BookOpen, Brain, MessageCircle, Sparkles, Award, Trophy, Users } from 'lucide-react';
 
 interface OnboardingCardProps {
   userName: string;
@@ -29,29 +29,43 @@ export default function OnboardingCard({ userName, onComplete, onSkip }: Onboard
       id: 1,
       icon: <Plane className="w-16 h-16" />,
       title: `Welcome to Crews Academy, ${userName}! ✈️`,
-      description: "Your cabin crew journey starts here. We're here to help you achieve your dream of joining Emirates and other top airlines.",
+      description: "Your cabin crew journey starts here. We're here to help you achieve your dream of joining Emirates and other top airlines with our comprehensive training platform.",
       gradient: 'from-[#D71920] to-[#B91518]'
     },
     {
       id: 2,
       icon: <BookOpen className="w-16 h-16" />,
-      title: 'Learn & Master 📚',
-      description: 'Explore free and premium courses designed to help you master Emirates recruitment, from grooming standards to customer service excellence.',
+      title: 'Structured Learning Modules 📚',
+      description: 'Access organized training modules covering everything from grooming standards to safety procedures. Our new module system makes learning easy and trackable.',
       gradient: 'from-[#D4AF37] to-[#B8941F]'
     },
     {
       id: 3,
       icon: <Brain className="w-16 h-16" />,
-      title: 'Practice & Perfect 🧠',
-      description: 'Use our AI Trainer for mock interviews, CV optimization, and English tests. Practice with the Open Day Simulator to prepare for real assessments.',
+      title: 'AI-Powered Training 🧠',
+      description: 'Get personalized feedback with our AI Trainer for mock interviews, CV optimization, and English proficiency tests. Practice the Open Day Simulator for real assessment preparation.',
       gradient: 'from-[#D71920] via-[#D4AF37] to-[#D71920]'
     },
     {
       id: 4,
-      icon: <MessageCircle className="w-16 h-16" />,
-      title: 'Connect & Grow 💬',
-      description: 'Chat with experienced mentors and connect with aspiring cabin crew members from around the world. Your support network is here.',
+      icon: <Trophy className="w-16 h-16" />,
+      title: 'Gamified Progress System 🏆',
+      description: 'Earn points, unlock badges, and climb the leaderboard as you complete courses and quizzes. Track your progress and compete with peers worldwide!',
+      gradient: 'from-[#B8941F] to-[#D4AF37]'
+    },
+    {
+      id: 5,
+      icon: <Users className="w-16 h-16" />,
+      title: 'Connect & Network 💬',
+      description: 'Chat with experienced mentors, recruiters, and connect with aspiring cabin crew members globally. Join our supportive community and get real-time help.',
       gradient: 'from-[#D4AF37] to-[#D71920]'
+    },
+    {
+      id: 6,
+      icon: <Award className="w-16 h-16" />,
+      title: 'Graduate as Verified Crew ✨',
+      description: 'Complete your training and declare yourself as a graduated cabin crew member. Earn your Verified Cabin Crew badge and showcase your achievement!',
+      gradient: 'from-[#D71920] to-[#B91518]'
     }
   ];
 

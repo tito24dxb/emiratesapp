@@ -2,10 +2,11 @@ import { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Camera, MapPin, Mail, Shield, Save, Upload, FileText, Download, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../lib/firebase';
 import CVAnalyzer from '../components/CVAnalyzer';
+import DeclareCrewButton from '../components/DeclareCrewButton';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
@@ -420,6 +421,24 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {currentUser.role === 'student' && (
+        <div className="mt-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Graduation Status</h3>
+            <DeclareCrewButton
+              userId={currentUser.uid}
+              isVerifiedCrew={currentUser.verifiedCrew || false}
+              onSuccess={async () => {
+                const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+                if (userDoc.exists()) {
+                  setCurrentUser({ ...currentUser, verifiedCrew: true });
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {currentUser.cvUrl && (
         <div className="mt-6">
