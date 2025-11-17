@@ -17,6 +17,7 @@ import FinancePanel from '../../components/governor/nexus/FinancePanel';
 import AnnouncementManager from './AnnouncementManager';
 import BugReportsManager from '../../components/governor/nexus/BugReportsManager';
 import ModuleManager from '../../components/governor/nexus/ModuleManager';
+import DataInitializer from '../../components/governor/nexus/DataInitializer';
 
 interface Announcement {
   active: boolean;
@@ -105,8 +106,10 @@ export default function GovernorControlNexus() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <BackupControl />
-          <AIAssistantPanel />
+          <DataInitializer />
         </div>
+
+        <AIAssistantPanel />
 
         <AILogsViewer />
 
