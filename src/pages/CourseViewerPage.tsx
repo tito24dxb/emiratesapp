@@ -44,7 +44,7 @@ export default function CourseViewerPage() {
   useEffect(() => {
     const trackProgress = () => {
       const timeWatching = (Date.now() - videoStartTime) / 1000;
-      const estimatedProgress = Math.min((timeWatching / 180) * 100, 95);
+      const estimatedProgress = Math.min((timeWatching / 180) * 100, 99);
 
       setWatchProgress(estimatedProgress);
 
@@ -75,17 +75,26 @@ export default function CourseViewerPage() {
       }
 
       const examData = await getExamByCourseId(courseId);
-      setExam(examData);
 
-      if (currentUser && examData) {
-        const result = await getUserExamResult(
-          currentUser.uid,
-          examData.moduleId,
-          examData.lessonId
-        );
-        if (result && result.passed) {
-          setHasPassed(true);
+      if (examData) {
+        if (!examData.courseId) {
+          console.warn('Exam missing courseId, setting it to:', courseId);
+          examData.courseId = courseId;
         }
+        setExam(examData);
+
+        if (currentUser) {
+          const result = await getUserExamResult(
+            currentUser.uid,
+            examData.moduleId,
+            examData.lessonId
+          );
+          if (result && result.passed) {
+            setHasPassed(true);
+          }
+        }
+      } else {
+        setExam(null);
       }
     } catch (error) {
       console.error('Error loading course:', error);
@@ -136,7 +145,7 @@ export default function CourseViewerPage() {
   };
 
   const handleVideoWatchComplete = async () => {
-    if (!videoWatched && currentUser && courseId && course) {
+    if (currentUser && courseId && course) {
       setVideoWatched(true);
       setWatchProgress(100);
       const moduleId = course.main_module_id || course.submodule_id;

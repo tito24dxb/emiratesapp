@@ -129,16 +129,25 @@ export const getExam = async (moduleId: string, lessonId: string): Promise<Exam 
 
 export const getExamByCourseId = async (courseId: string): Promise<Exam | null> => {
   try {
+    if (!courseId) {
+      console.warn('getExamByCourseId: No courseId provided');
+      return null;
+    }
+
     const examsRef = collection(db, 'exams');
     const q = query(examsRef, where('courseId', '==', courseId));
     const snapshot = await getDocs(q);
 
     if (!snapshot.empty) {
-      return snapshot.docs[0].data() as Exam;
+      const examData = snapshot.docs[0].data() as Exam;
+      console.log('Found exam for courseId:', courseId, 'examId:', examData.id);
+      return examData;
     }
+
+    console.log('No exam found for courseId:', courseId);
     return null;
   } catch (error) {
-    console.error('Error getting exam by course ID:', error);
+    console.error('Error getting exam by course ID:', courseId, error);
     return null;
   }
 };
@@ -240,10 +249,15 @@ export const submitExam = async (
   submission: ExamSubmission
 ): Promise<ExamResult> => {
   try {
+    console.log('submitExam called with:', { userId, moduleId, lessonId, courseId });
+
     const exam = await getExam(moduleId, lessonId);
     if (!exam) {
+      console.error('Exam not found for:', { moduleId, lessonId });
       throw new Error('Exam not found');
     }
+
+    console.log('Exam found:', exam.id);
 
     const eligibility = await canTakeExam(userId, moduleId, lessonId);
     if (!eligibility.canTake) {
