@@ -11,6 +11,7 @@ import ChatPage from './pages/ChatPage';
 import CommunityPage from './pages/CommunityPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
+import SupportChatPage from './pages/SupportChatPage';
 import SupportChatManagerPage from './pages/SupportChatManagerPage';
 import CoachDashboard from './pages/CoachDashboard';
 import NewCoachDashboard from './pages/NewCoachDashboard';
@@ -77,6 +78,7 @@ function AppContent() {
         <Route path="/chat" element={<CommunityPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />
+        <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="/ai-trainer" element={<AITrainerPage />} />
