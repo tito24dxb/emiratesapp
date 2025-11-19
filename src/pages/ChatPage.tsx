@@ -154,10 +154,14 @@ export default function ChatPage() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-              Messages
+            <h1 className="text-6xl font-black bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 animate-pulse">
+              ULTRA MODERN CHAT
             </h1>
-            <p className="text-sm text-gray-500 font-mono mb-1">Last Updated: {new Date().toLocaleTimeString()}</p>
+            <div className="flex gap-2 mb-2">
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
+              <div className="w-3 h-3 bg-cyan-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            </div>
             <p className="text-gray-600">
               Connect with mentors, students, and the community
             </p>
