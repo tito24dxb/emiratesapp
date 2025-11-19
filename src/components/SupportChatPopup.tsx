@@ -149,17 +149,17 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
 
   const getStatusBadge = (status: SupportTicket['status']) => {
     const badges = {
-      open: { color: 'bg-blue-100 text-blue-700', icon: Clock, label: 'Open' },
-      in_progress: { color: 'bg-yellow-100 text-yellow-700', icon: AlertCircle, label: 'In Progress' },
-      resolved: { color: 'bg-green-100 text-green-700', icon: CheckCircle, label: 'Resolved' },
-      closed: { color: 'bg-gray-100 text-gray-700', icon: CheckCircle, label: 'Closed' },
+      open: { className: 'status-badge status-badge-open', icon: Clock, label: 'Open' },
+      in_progress: { className: 'status-badge status-badge-progress', icon: AlertCircle, label: 'In Progress' },
+      resolved: { className: 'status-badge status-badge-resolved', icon: CheckCircle, label: 'Resolved' },
+      closed: { className: 'status-badge status-badge-closed', icon: CheckCircle, label: 'Closed' },
     };
 
     const badge = badges[status];
     const Icon = badge.icon;
 
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold ${badge.color}`}>
+      <span className={badge.className}>
         <Icon className="w-3 h-3" />
         {badge.label}
       </span>
@@ -197,16 +197,16 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
             }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-4 right-4 w-96 bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            className="fixed bottom-4 right-4 w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white p-4 flex items-center justify-between">
+            <div className="chat-header flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <MessageCircle className="w-6 h-6" />
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-bold">Support Chat</h3>
+                  <h3 className="font-bold text-gray-900">Support Chat</h3>
                   {ticket && !isMinimized && (
                     <div className="flex items-center gap-2 mt-1">
                       {getStatusBadge(ticket.status)}
@@ -217,14 +217,14 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setIsMinimized(!isMinimized)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600"
                   title={isMinimized ? "Maximize" : "Minimize"}
                 >
                   <Minus className="w-5 h-5" />
                 </button>
                 <button
                   onClick={handleClose}
-                  className="p-2 hover:bg-white/10 rounded-lg transition"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600"
                   title="Close"
                 >
                   <X className="w-5 h-5" />
@@ -243,7 +243,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                     <select
                       value={department}
                       onChange={(e) => setDepartment(e.target.value as Department)}
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                      className="w-full chat-input-field"
                     >
                       <option value="general">General Support</option>
                       <option value="technical">Technical Support</option>
@@ -260,7 +260,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                     <select
                       value={topic}
                       onChange={(e) => setTopic(e.target.value as Topic)}
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                      className="w-full chat-input-field"
                     >
                       <option value="account">Account Issues</option>
                       <option value="payment">Payment Issues</option>
@@ -280,7 +280,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                       value={subject}
                       onChange={(e) => setSubject(e.target.value)}
                       placeholder="What do you need help with?"
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                      className="w-full chat-input-field"
                     />
                   </div>
                   <div>
@@ -292,13 +292,13 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Describe your issue..."
                       rows={6}
-                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition resize-none"
+                      className="w-full chat-input-field resize-none"
                     />
                   </div>
                   <button
                     onClick={handleCreateTicket}
                     disabled={!subject.trim() || !newMessage.trim() || sending}
-                    className="w-full py-3 bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white rounded-lg font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? 'Starting Chat...' : 'Start Chat'}
                   </button>
@@ -306,7 +306,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
               </div>
             ) : !isMinimized ? (
               <>
-                <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
+                <div className="flex-1 p-4 overflow-y-auto bg-white space-y-4">
                   {messages.map((message) => {
                     const isUser = message.senderRole === 'student';
                     const isSystemMessage = message.isSystemMessage || message.senderRole === 'system';
@@ -314,7 +314,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                     if (isSystemMessage) {
                       return (
                         <div key={message.id} className="flex justify-center my-4">
-                          <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-xs font-bold">
+                          <div className="chat-system-message">
                             {message.message}
                           </div>
                         </div>
@@ -327,17 +327,13 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                         className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                            isUser
-                              ? 'bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white'
-                              : 'bg-white text-gray-900 shadow-md'
-                          }`}
+                          className={isUser ? 'chat-bubble-user' : 'chat-bubble-staff'}
                         >
-                          <div className="text-xs font-bold mb-1 opacity-80">
+                          <div className="chat-message-meta">
                             {message.senderName}
                           </div>
-                          <p className="text-sm">{message.message}</p>
-                          <div className="text-xs mt-1 opacity-70">
+                          <p className="chat-message-text">{message.message}</p>
+                          <div className="chat-message-time">
                             {message.timestamp?.toDate?.()?.toLocaleTimeString([], {
                               hour: '2-digit',
                               minute: '2-digit'
@@ -350,7 +346,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-4 bg-white border-t border-gray-200 space-y-2">
+                <div className="chat-input-container space-y-2">
                   {currentUser?.role !== 'student' && ticket && !ticket.escalatedTo && (
                     <button
                       onClick={() => setShowEscalateConfirm(true)}
@@ -367,12 +363,12 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                       onChange={(e) => setNewMessage(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
                       placeholder="Type your message..."
-                      className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                      className="flex-1 chat-input-field"
                     />
                     <button
                       onClick={handleSendMessage}
                       disabled={!newMessage.trim() || sending}
-                      className="px-4 py-2 bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white rounded-lg font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Send className="w-5 h-5" />
                     </button>
@@ -408,14 +404,14 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowEscalateConfirm(false)}
-                    className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition"
+                    className="flex-1 px-4 py-2 chat-input-field font-semibold text-gray-700 hover:bg-gray-50"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleEscalate}
                     disabled={sending}
-                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold transition disabled:opacity-50"
+                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold transition disabled:opacity-50"
                   >
                     {sending ? 'Escalating...' : 'Escalate'}
                   </button>

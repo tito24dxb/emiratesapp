@@ -297,4 +297,131 @@
     background-size: 200% 100%;
     animation: liquid-shimmer 3s infinite;
   }
+
+  /* ======================================
+     💬 CHAT MESSAGE STYLES (SLACK-INSPIRED)
+     ====================================== */
+
+  /* Chat message bubble - user (right side) */
+  .chat-bubble-user {
+    background: #1264A3;
+    color: white;
+    border-radius: 12px 12px 2px 12px;
+    padding: 10px 14px;
+    max-width: 70%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Chat message bubble - other (left side) */
+  .chat-bubble-other {
+    background: #F8F8F8;
+    color: #1D1C1D;
+    border-radius: 12px 12px 12px 2px;
+    padding: 10px 14px;
+    max-width: 70%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Chat message bubble - staff/support */
+  .chat-bubble-staff {
+    background: #FFFFFF;
+    color: #1D1C1D;
+    border: 1px solid #E8E8E8;
+    border-radius: 12px 12px 12px 2px;
+    padding: 10px 14px;
+    max-width: 70%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Chat message text */
+  .chat-message-text {
+    font-size: 15px;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+
+  /* Chat message metadata (name, time) */
+  .chat-message-meta {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  .chat-message-time {
+    font-size: 11px;
+    opacity: 0.6;
+    margin-top: 4px;
+  }
+
+  /* System message (centered) */
+  .chat-system-message {
+    background: #F0F0F0;
+    color: #616061;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 16px;
+    display: inline-block;
+  }
+
+  /* Chat input area */
+  .chat-input-container {
+    background: #FFFFFF;
+    border-top: 1px solid #E8E8E8;
+    padding: 16px;
+  }
+
+  .chat-input-field {
+    background: #FFFFFF;
+    border: 1.5px solid #D1D1D1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    transition: all 0.2s ease;
+  }
+
+  .chat-input-field:focus {
+    outline: none;
+    border-color: #1264A3;
+    box-shadow: 0 0 0 3px rgba(18, 100, 163, 0.1);
+  }
+
+  /* Chat header */
+  .chat-header {
+    background: #FFFFFF;
+    border-bottom: 1px solid #E8E8E8;
+    padding: 16px 20px;
+  }
+
+  /* Status badges for chat */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .status-badge-open {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  .status-badge-progress {
+    background: #FFF3E0;
+    color: #E65100;
+  }
+
+  .status-badge-resolved {
+    background: #E3F2FD;
+    color: #1565C0;
+  }
+
+  .status-badge-closed {
+    background: #F5F5F5;
+    color: #616161;
+  }
 }
