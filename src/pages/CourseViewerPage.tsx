@@ -35,6 +35,15 @@ function CourseViewerPageContent() {
   const [isUnlocked, setIsUnlocked] = useState(true);
 
   useEffect(() => {
+    console.log('CourseViewerPage: URL params detected:', {
+      moduleIdFromUrl,
+      moduleType,
+      fullUrl: window.location.href,
+      courseId
+    });
+  }, [moduleIdFromUrl, moduleType, courseId]);
+
+  useEffect(() => {
     if (courseId) {
       loadCourse();
     }
