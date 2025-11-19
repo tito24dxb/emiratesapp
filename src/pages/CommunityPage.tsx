@@ -133,191 +133,164 @@ export default function CommunityPage() {
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   return (
-    <div className="h-screen flex flex-col p-3">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-2 flex-shrink-0"
-      >
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-xl flex items-center justify-center shadow-lg">
-            <MessageCircle className="w-4 h-4 text-white" />
-          </div>
-          <h1 className="text-lg font-black text-gray-900">Community Chat</h1>
-        </div>
-      </motion.div>
-
-      <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col min-h-0">
-        <div className="border-b border-gray-200 bg-gray-50 p-2 flex-shrink-0" style={{ maxHeight: '120px' }}>
-          <div className="mb-1.5">
-            <div className="flex items-center gap-2 mb-1">
-              <Hash className="w-3 h-3 text-gray-500" />
-              <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Groups</h3>
+    <div className="h-screen flex flex-col bg-gray-50">
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-xl flex items-center justify-center shadow-lg">
+              <MessageCircle className="w-5 h-5 text-white" />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-              {groupChats.map((conversation) => (
-                <button
-                  key={conversation.id}
-                  onClick={() => setSelectedConversationId(conversation.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border flex-shrink-0 transition-all ${
-                    selectedConversationId === conversation.id
-                      ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] border-[#D71921] text-white shadow-md'
-                      : 'bg-white border-gray-200 text-gray-700 hover:border-[#D71921] hover:shadow-sm'
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-sm ${
-                    conversation.id === 'publicRoom'
-                      ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white'
-                      : selectedConversationId === conversation.id
-                        ? 'bg-white/20'
-                        : 'bg-gradient-to-br from-[#D71921] to-[#B01419]'
-                  }`}>
-                    {conversation.id === 'publicRoom' ? '🌍' : <Users className={`w-3 h-3 ${selectedConversationId === conversation.id ? 'text-white' : 'text-white'}`} />}
-                  </div>
-                  <span className="font-bold text-xs whitespace-nowrap">{conversation.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {privateChats.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <MessageCircle className="w-3 h-3 text-gray-500" />
-                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Private</h3>
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <h1 className="text-xl font-bold text-gray-900">Community Chat</h1>
+              <p className="text-xs text-gray-500">
+                {selectedConversation?.title || 'Select a conversation'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-100">
+          <div className="flex items-center gap-6 px-6 py-3 overflow-x-auto">
+            <div className="flex items-center gap-2">
+              <Hash className="w-4 h-4 text-gray-400" />
+              <span className="text-xs font-semibold text-gray-500 uppercase">Groups</span>
+            </div>
+            {groupChats.map((conversation) => (
+              <button
+                key={conversation.id}
+                onClick={() => setSelectedConversationId(conversation.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
+                  selectedConversationId === conversation.id
+                    ? 'bg-[#D71921] text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
+                  conversation.id === 'publicRoom'
+                    ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-base'
+                    : selectedConversationId === conversation.id
+                      ? 'bg-white/20 text-white'
+                      : 'bg-[#D71921] text-white'
+                }`}>
+                  {conversation.id === 'publicRoom' ? '🌍' : <Users className="w-4 h-4" />}
+                </div>
+                <span className="font-semibold text-sm">{conversation.title}</span>
+              </button>
+            ))}
+
+            {privateChats.length > 0 && (
+              <>
+                <div className="w-px h-6 bg-gray-300"></div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4 text-gray-400" />
+                  <span className="text-xs font-semibold text-gray-500 uppercase">Private</span>
+                </div>
                 {privateChats.map((conversation) => (
                   <button
                     key={conversation.id}
                     onClick={() => setSelectedConversationId(conversation.id)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border flex-shrink-0 transition-all ${
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                       selectedConversationId === conversation.id
-                        ? 'bg-gradient-to-r from-gray-700 to-gray-900 border-gray-700 text-white shadow-md'
-                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-sm'
+                        ? 'bg-gray-800 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
-                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm ${
                       selectedConversationId === conversation.id
                         ? 'bg-white/20 text-white'
-                        : 'bg-gradient-to-br from-gray-600 to-gray-800 text-white'
+                        : 'bg-gray-700 text-white'
                     }`}>
                       {conversation.title.charAt(0).toUpperCase()}
                     </div>
-                    <span className="font-bold text-xs whitespace-nowrap">{conversation.title}</span>
+                    <span className="font-semibold text-sm">{conversation.title}</span>
                   </button>
                 ))}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {selectedConversationId ? (
+        <div className="flex-1 flex flex-col min-h-0 bg-white">
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+            {loading ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full border-4 border-gray-200"></div>
+                  <div className="w-16 h-16 rounded-full border-4 border-[#D71921] border-t-transparent animate-spin absolute top-0 left-0"></div>
+                </div>
               </div>
+            ) : messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="text-center max-w-sm"
+                >
+                  <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                    <MessageCircle className="w-12 h-12 text-[#D71921]" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">No messages yet</h3>
+                  <p className="text-gray-500">Be the first to break the ice and start the conversation!</p>
+                </motion.div>
+              </div>
+            ) : (
+              <>
+                {messages.map((message) => (
+                  <MessageBubble
+                    key={message.messageId}
+                    message={message}
+                    onAddReaction={(emoji) =>
+                      handleReaction(message.messageId, emoji, message.senderId)
+                    }
+                    onLike={() => handleLike(message.messageId, message.senderId)}
+                    onReport={() => handleReport(message.messageId)}
+                  />
+                ))}
+                <div ref={messagesEndRef} />
+              </>
+            )}
+          </div>
+
+          {typingUsers.length > 0 && (
+            <div className="px-6 py-2 border-t border-gray-100 bg-gray-50">
+              <motion.div
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2"
+              >
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-[#D71921] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 bg-[#D71921] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-[#D71921] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
+                <p className="text-sm text-gray-600 font-medium">
+                  {typingUsers[0].userName} is typing...
+                </p>
+              </motion.div>
             </div>
           )}
-        </div>
 
-        {selectedConversationId ? (
-          <>
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex-shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-3xl">
-                    {selectedConversation?.id === 'publicRoom' ? '🌍' : selectedConversation?.type === 'group' ? '👥' : selectedConversation?.title.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-xl font-bold text-white truncate">
-                    {selectedConversation?.title || 'Conversation'}
-                  </h2>
-                  <AnimatePresence mode="wait">
-                    {typingUsers.length > 0 ? (
-                      <motion.div
-                        key="typing"
-                        initial={{ opacity: 0, y: -5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -5 }}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex gap-1">
-                          <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                          <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                          <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                        </div>
-                        <p className="text-sm text-white/90 font-medium">
-                          {typingUsers[0].userName} is typing
-                        </p>
-                      </motion.div>
-                    ) : (
-                      <motion.p
-                        key="subtitle"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-sm text-white/80"
-                      >
-                        {selectedConversation?.members.length || 0} members
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white">
-              {loading ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full border-4 border-gray-200"></div>
-                    <div className="w-16 h-16 rounded-full border-4 border-[#D71921] border-t-transparent animate-spin absolute top-0 left-0"></div>
-                  </div>
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="flex items-center justify-center h-full">
-                  <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="text-center max-w-sm"
-                  >
-                    <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                      <MessageCircle className="w-12 h-12 text-[#D71921]" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No messages yet</h3>
-                    <p className="text-gray-500">Be the first to break the ice and start the conversation!</p>
-                  </motion.div>
-                </div>
-              ) : (
-                <>
-                  {messages.map((message) => (
-                    <MessageBubble
-                      key={message.messageId}
-                      message={message}
-                      onAddReaction={(emoji) =>
-                        handleReaction(message.messageId, emoji, message.senderId)
-                      }
-                      onLike={() => handleLike(message.messageId, message.senderId)}
-                      onReport={() => handleReport(message.messageId)}
-                    />
-                  ))}
-                  <div ref={messagesEndRef} />
-                </>
-              )}
-            </div>
-
-            <div className="border-t border-gray-200 bg-white flex-shrink-0 p-6">
-              <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
-            </div>
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-center max-w-sm"
-            >
-              <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <MessageCircle className="w-12 h-12 text-[#D71921]" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Select a conversation</h3>
-              <p className="text-gray-500">Choose from the list above to start chatting</p>
-            </motion.div>
+          <div className="border-t border-gray-200 bg-white px-6 py-4">
+            <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center bg-white">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center max-w-sm"
+          >
+            <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <MessageCircle className="w-12 h-12 text-[#D71921]" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Select a conversation</h3>
+            <p className="text-gray-500">Choose from the navigation above to start chatting</p>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
