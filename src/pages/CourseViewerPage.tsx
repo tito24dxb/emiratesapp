@@ -8,6 +8,7 @@ import UpgradePrompt from '../components/UpgradePrompt';
 import CourseQuiz from '../components/CourseQuiz';
 import { getQuizByCourseId } from '../data/quizData';
 import { markLessonWatched, handleQuizPass } from '../services/rewardsService';
+import { trackCourseProgress } from '../services/enrollmentService';
 
 export default function CourseViewerPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -30,6 +31,13 @@ export default function CourseViewerPage() {
   useEffect(() => {
     if (currentUser && courseId && course) {
       markLessonWatched(currentUser.uid, courseId);
+
+      if (course.video_url) {
+        const moduleId = course.main_module_id || course.submodule_id;
+        if (moduleId) {
+          trackCourseProgress(currentUser.uid, courseId, moduleId, 50, 100);
+        }
+      }
     }
   }, [currentUser, courseId, course]);
 
@@ -172,11 +180,17 @@ export default function CourseViewerPage() {
     setQuizCompleted(true);
     setQuizPassed(passed);
 
-    if (currentUser && courseId) {
+    if (currentUser && courseId && course) {
       await handleQuizPass(currentUser.uid, courseId, score);
 
       if (passed) {
         await updateCourseProgress(currentUser.uid, courseId, 100);
+
+        if (course.main_module_id) {
+          await trackCourseProgress(currentUser.uid, courseId, course.main_module_id, 100, 100);
+        } else if (course.submodule_id) {
+          await trackCourseProgress(currentUser.uid, courseId, course.submodule_id, 100, 100);
+        }
       }
     }
   };
