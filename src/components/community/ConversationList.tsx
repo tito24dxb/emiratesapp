@@ -40,6 +40,16 @@ export default function ConversationList({
   return (
     <div className="h-full flex flex-col bg-white/5 backdrop-blur-xl border-r border-white/10">
       <div className="p-4 border-b border-white/10 bg-white/5 backdrop-blur-xl">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-white">Messages</h2>
+          <button
+            onClick={() => alert('New Conversation feature coming soon! For now, conversations are created automatically when you start chatting.')}
+            className="p-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+            title="New conversation"
+          >
+            <Plus className="w-5 h-5 text-white" />
+          </button>
+        </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
           <input
