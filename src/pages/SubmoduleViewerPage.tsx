@@ -160,7 +160,10 @@ export default function SubmoduleViewerPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="glass-course overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
-                  onClick={() => navigate(`/course/${course.id}`)}
+                  onClick={() => {
+                    console.log('SubmoduleViewer: Navigating to course:', course.id, 'with submoduleId:', submoduleId);
+                    navigate(`/course/${course.id}?moduleId=${submoduleId}&type=sub`);
+                  }}
                 >
                   <div className="relative">
                     {course.thumbnail ? (

@@ -182,8 +182,8 @@ export default function MainModuleViewerPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="glass-course overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
                   onClick={() => {
-                    console.log('MainModuleViewer: Navigating to course:', course.id, course);
-                    navigate(`/course/${course.id}`);
+                    console.log('MainModuleViewer: Navigating to course:', course.id, 'with moduleId:', moduleId);
+                    navigate(`/course/${course.id}?moduleId=${moduleId}&type=main`);
                   }}
                 >
                   <div className="relative">

@@ -28,6 +28,10 @@ function CourseViewerPageContent() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
   const [videoStartTime] = useState(Date.now());
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const moduleIdFromUrl = searchParams.get('moduleId');
+  const moduleType = searchParams.get('type');
   const [isUnlocked, setIsUnlocked] = useState(true);
 
   useEffect(() => {
@@ -174,12 +178,18 @@ function CourseViewerPageContent() {
     }
 
     try {
-      console.log('Marking course complete:', { userId: currentUser.uid, courseId, course: course.title });
+      console.log('Marking course complete:', {
+        userId: currentUser.uid,
+        courseId,
+        course: course.title,
+        moduleIdFromUrl,
+        moduleType
+      });
 
       setVideoWatched(true);
       setWatchProgress(100);
 
-      const moduleId = course.main_module_id || course.submodule_id;
+      const moduleId = moduleIdFromUrl || course.main_module_id || course.submodule_id;
       console.log('Module ID for progress:', moduleId);
 
       if (moduleId) {
@@ -190,9 +200,9 @@ function CourseViewerPageContent() {
         await updateCourseProgress(currentUser.uid, courseId, 100);
 
         console.log('✅ Course marked as complete!');
-        alert('Course marked as complete! ✅');
+        alert('✅ Course marked as complete!');
       } else {
-        console.warn('No module ID found, cannot track progress');
+        console.warn('No module ID found in URL or course data');
         alert('⚠️ Course marked but no module linked');
       }
     } catch (error) {
