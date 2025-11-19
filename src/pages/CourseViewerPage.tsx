@@ -26,9 +26,7 @@ export default function CourseViewerPage() {
   const [hasPassed, setHasPassed] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
-  const [player, setPlayer] = useState<any>(null);
-  const [playerReady, setPlayerReady] = useState(false);
-  const progressIntervalRef = useState<any>(null);
+  const [videoStartTime] = useState(Date.now());
 
   useEffect(() => {
     if (courseId) {
@@ -37,19 +35,31 @@ export default function CourseViewerPage() {
   }, [courseId]);
 
   useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-  }, []);
-
-  useEffect(() => {
     if (currentUser && courseId && course) {
       markLessonWatched(currentUser.uid, courseId);
     }
   }, [currentUser, courseId, course]);
+
+  useEffect(() => {
+    const trackProgress = () => {
+      const timeWatching = (Date.now() - videoStartTime) / 1000;
+      const estimatedProgress = Math.min((timeWatching / 180) * 100, 95);
+
+      setWatchProgress(estimatedProgress);
+
+      if (estimatedProgress >= 80 && !videoWatched && currentUser && courseId && course) {
+        setVideoWatched(true);
+        console.log('Video watched 80%, tracking progress...');
+        const moduleId = course.main_module_id || course.submodule_id;
+        if (moduleId) {
+          trackCourseProgress(currentUser.uid, courseId, moduleId, 80, 100);
+        }
+      }
+    };
+
+    const interval = setInterval(trackProgress, 3000);
+    return () => clearInterval(interval);
+  }, [videoStartTime, videoWatched, currentUser, courseId, course]);
 
   const loadCourse = async () => {
     if (!courseId) return;
@@ -88,7 +98,7 @@ export default function CourseViewerPage() {
     return coursePlanLevel <= userPlanLevel;
   };
 
-  const getYouTubeVideoId = (url: string): string => {
+  const getYouTubeEmbedUrl = (url: string): string => {
     if (!url) {
       console.error('No video URL provided');
       return '';
@@ -108,122 +118,29 @@ export default function CourseViewerPage() {
         videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0]?.split('/')[0] || '';
       }
 
-      return videoId.trim();
+      videoId = videoId.trim();
+
+      if (videoId) {
+        return `https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`;
+      }
     } catch (error) {
       console.error('Error parsing YouTube URL:', error, url);
-      return '';
+    }
+    return url;
+  };
+
+  const handleVideoWatchComplete = async () => {
+    if (!videoWatched && currentUser && courseId && course) {
+      setVideoWatched(true);
+      setWatchProgress(100);
+      const moduleId = course.main_module_id || course.submodule_id;
+      if (moduleId) {
+        await trackCourseProgress(currentUser.uid, courseId, moduleId, 100, 100);
+      }
     }
   };
 
 
-  useEffect(() => {
-    if (!course?.video_url) return;
-
-    const videoId = getYouTubeVideoId(course.video_url);
-    if (!videoId) return;
-
-    let playerInstance: any = null;
-    let progressInterval: any = null;
-
-    const initPlayer = () => {
-      if (!window.YT || !window.YT.Player) {
-        console.log('YouTube API not ready yet');
-        return;
-      }
-
-      console.log('Initializing YouTube player with video ID:', videoId);
-
-      try {
-        playerInstance = new window.YT.Player('youtube-player', {
-          height: '100%',
-          width: '100%',
-          videoId,
-          playerVars: {
-            enablejsapi: 1,
-            origin: window.location.origin,
-            modestbranding: 1,
-            rel: 0
-          },
-          events: {
-            onReady: (event: any) => {
-              console.log('YouTube player ready');
-              setPlayerReady(true);
-              setPlayer(playerInstance);
-
-              progressInterval = setInterval(() => {
-                try {
-                  if (playerInstance && typeof playerInstance.getCurrentTime === 'function') {
-                    const currentTime = playerInstance.getCurrentTime();
-                    const duration = playerInstance.getDuration();
-                    if (duration > 0) {
-                      const percentage = (currentTime / duration) * 100;
-                      setWatchProgress(percentage);
-
-                      if (percentage >= 80 && !videoWatched) {
-                        setVideoWatched(true);
-                        console.log('Video watched 80%, tracking progress...');
-                        if (currentUser && courseId && course) {
-                          const moduleId = course.main_module_id || course.submodule_id;
-                          if (moduleId) {
-                            trackCourseProgress(currentUser.uid, courseId, moduleId, 80, 100);
-                          }
-                        }
-                      }
-                    }
-                  }
-                } catch (error) {
-                  console.error('Error tracking video progress:', error);
-                }
-              }, 2000);
-            },
-            onStateChange: (event: any) => {
-              if (event.data === window.YT.PlayerState.ENDED) {
-                console.log('Video ended');
-                setVideoWatched(true);
-                setWatchProgress(100);
-                if (currentUser && courseId && course) {
-                  const moduleId = course.main_module_id || course.submodule_id;
-                  if (moduleId) {
-                    trackCourseProgress(currentUser.uid, courseId, moduleId, 100, 100);
-                  }
-                }
-              }
-            },
-            onError: (event: any) => {
-              console.error('YouTube player error:', event.data);
-            }
-          }
-        });
-      } catch (error) {
-        console.error('Error creating YouTube player:', error);
-      }
-    };
-
-    const checkAndInit = () => {
-      if (window.YT && window.YT.Player) {
-        initPlayer();
-      } else {
-        console.log('Waiting for YouTube API...');
-        window.onYouTubeIframeAPIReady = initPlayer;
-      }
-    };
-
-    const timer = setTimeout(checkAndInit, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (progressInterval) {
-        clearInterval(progressInterval);
-      }
-      if (playerInstance && typeof playerInstance.destroy === 'function') {
-        try {
-          playerInstance.destroy();
-        } catch (error) {
-          console.error('Error destroying player:', error);
-        }
-      }
-    };
-  }, [course?.video_url, courseId]);
 
   if (loading) {
     return (
@@ -343,21 +260,27 @@ export default function CourseViewerPage() {
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
             <div className="aspect-video w-full bg-black relative">
               {course.video_url ? (
-                <div id="youtube-player" className="w-full h-full"></div>
+                <iframe
+                  src={getYouTubeEmbedUrl(course.video_url)}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={course.title}
+                />
               ) : (
                 <div className="flex items-center justify-center h-full text-white">
                   <p>No video available</p>
                 </div>
               )}
-              {watchProgress > 0 && watchProgress < 100 && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-gray-800/50">
-                  <div
-                    className="h-full bg-[#D71920] transition-all duration-500"
-                    style={{ width: `${watchProgress}%` }}
-                  />
-                </div>
-              )}
             </div>
+            {watchProgress > 0 && watchProgress < 100 && (
+              <div className="bg-gray-800 h-1.5">
+                <div
+                  className="h-full bg-[#D71920] transition-all duration-500"
+                  style={{ width: `${watchProgress}%` }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -374,25 +297,37 @@ export default function CourseViewerPage() {
                 {course.duration}
               </span>
             </div>
-            {watchProgress > 0 && (
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-blue-900">Video Progress</span>
-                  <span className="text-sm font-bold text-blue-600">{Math.round(watchProgress)}%</span>
-                </div>
-                <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
-                    style={{ width: `${watchProgress}%` }}
-                  />
-                </div>
-                {watchProgress >= 80 && !videoWatched && (
-                  <p className="text-xs text-green-700 mt-2 font-semibold">
-                    Great! You can now take the exam.
-                  </p>
-                )}
+            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-blue-900">Video Progress</span>
+                <span className="text-sm font-bold text-blue-600">{Math.round(watchProgress)}%</span>
               </div>
-            )}
+              <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden mb-3">
+                <div
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
+                  style={{ width: `${watchProgress}%` }}
+                />
+              </div>
+              {watchProgress >= 80 ? (
+                <p className="text-xs text-green-700 font-semibold">
+                  ✓ You can now take the exam!
+                </p>
+              ) : (
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-gray-600">
+                    Watch video to unlock exam (need 80%)
+                  </p>
+                  {watchProgress > 0 && (
+                    <button
+                      onClick={handleVideoWatchComplete}
+                      className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
+                    >
+                      Mark Complete
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {exam && !hasPassed && (
