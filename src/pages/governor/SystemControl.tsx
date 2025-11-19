@@ -166,7 +166,7 @@ export default function SystemControl() {
       )}
 
       <div className="space-y-6">
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="glass-light rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           <div className="bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white px-6 py-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Shield className="w-5 h-5" />
@@ -227,7 +227,7 @@ export default function SystemControl() {
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+        <div className="glass-light rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
           <div className="bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white px-6 py-4">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <Bell className="w-5 h-5" />
@@ -319,7 +319,7 @@ export default function SystemControl() {
           <button
             onClick={loadSystemControl}
             disabled={saving}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:glass-light transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <RefreshCw className={`w-5 h-5 ${saving ? 'animate-spin' : ''}`} />
             Refresh

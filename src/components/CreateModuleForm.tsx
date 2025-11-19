@@ -112,35 +112,31 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
-          onClick={onClose}
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="fixed inset-0 z-50 glass-light flex flex-col"
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            className="flex-1 overflow-y-auto"
           >
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-[#D71920] to-[#B91518]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <div className="w-10 h-10 glass-light/20 rounded-lg flex items-center justify-center">
                   <FolderPlus className="w-6 h-6 text-white" />
                 </div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white">Create Training Module</h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-white/20 rounded-lg transition"
+                className="p-2 hover:glass-light/20 rounded-lg transition"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-3">
                   Module Type *
@@ -151,7 +147,7 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                     onClick={() => setModuleType('main')}
                     className={`p-4 rounded-xl font-semibold transition border-2 ${
                       moduleType === 'main'
-                        ? 'border-[#D71920] bg-red-50 text-[#D71920]'
+                        ? 'border-[#D71920] bg-[#D71920]/10 text-[#D71920]'
                         : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
                     }`}
                   >
@@ -162,7 +158,7 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                     onClick={() => setModuleType('submodule')}
                     className={`p-4 rounded-xl font-semibold transition border-2 ${
                       moduleType === 'submodule'
-                        ? 'border-[#D71920] bg-red-50 text-[#D71920]'
+                        ? 'border-[#D71920] bg-[#D71920]/10 text-[#D71920]'
                         : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
                     }`}
                   >
@@ -316,7 +312,7 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition text-sm sm:text-base"
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:glass-light transition text-sm sm:text-base"
                 >
                   Cancel
                 </button>

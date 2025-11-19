@@ -114,7 +114,7 @@ export default function InitializeData() {
         </p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-8">
+      <div className="glass-light rounded-2xl shadow-lg p-8">
         <div className="flex items-center gap-3 mb-6">
           <Database className="w-8 h-8 text-[#D71920]" />
           <div>
@@ -126,7 +126,7 @@ export default function InitializeData() {
         </div>
 
         <div className="space-y-4 mb-6">
-          <div className="p-4 bg-gray-50 rounded-xl">
+          <div className="p-4 glass-light rounded-xl">
             <h3 className="font-bold text-gray-900 mb-2">Sample Courses</h3>
             <p className="text-sm text-gray-600 mb-3">
               9 pre-configured courses covering interview prep, grooming, safety, customer
@@ -154,7 +154,7 @@ export default function InitializeData() {
             )}
           </div>
 
-          <div className="p-4 bg-gray-50 rounded-xl">
+          <div className="p-4 glass-light rounded-xl">
             <h3 className="font-bold text-gray-900 mb-2">Training Modules</h3>
             <p className="text-sm text-gray-600 mb-3">
               10 modules organized by category with progression levels
@@ -181,7 +181,7 @@ export default function InitializeData() {
             )}
           </div>
 
-          <div className="p-4 bg-gray-50 rounded-xl">
+          <div className="p-4 glass-light rounded-xl">
             <h3 className="font-bold text-gray-900 mb-2">Course Exams</h3>
             <p className="text-sm text-gray-600 mb-3">
               4 exams for Open Day courses (10 questions each, 70% passing score)
@@ -208,7 +208,7 @@ export default function InitializeData() {
             )}
           </div>
 
-          <div className="p-4 bg-gray-50 rounded-xl">
+          <div className="p-4 glass-light rounded-xl">
             <h3 className="font-bold text-gray-900 mb-2">Test Conversations</h3>
             <p className="text-sm text-gray-600 mb-3">
               Sample conversations for testing the community chat system

@@ -131,7 +131,7 @@ export default function AnnouncementManager() {
             <button
               onClick={clearAnnouncement}
               disabled={loading}
-              className="text-gray-600 hover:text-gray-900 font-bold p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
+              className="text-gray-600 hover:text-gray-900 font-bold p-2 hover:glass-bubble rounded-lg transition disabled:opacity-50"
             >
               <X className="w-5 h-5" />
             </button>
@@ -142,7 +142,7 @@ export default function AnnouncementManager() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+        className="glass-light rounded-xl shadow-lg border border-gray-100 p-6"
       >
         <h2 className="text-xl font-bold text-gray-900 mb-6">Create New Announcement</h2>
 

@@ -79,7 +79,7 @@ export default function CoachDashboard() {
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#FF3B3F] border-t-transparent"></div>
         </div>
       ) : courses.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <div className="glass-light rounded-2xl shadow-lg p-12 text-center">
           <Upload className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-600 mb-2">No courses yet</h3>
           <p className="text-gray-500 mb-6">Upload your first course to get started</p>
@@ -99,7 +99,7 @@ export default function CoachDashboard() {
             {courses.map((course) => (
               <div
                 key={course.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+                className="glass-light rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
                 onClick={() => navigate(`/courses/${course.id}`)}
               >
                 <div
@@ -119,7 +119,7 @@ export default function CoachDashboard() {
                     </span>
                   </div>
                   <div className="absolute bottom-3 left-3">
-                    <span className="px-3 py-1 bg-white/90 rounded-full text-xs font-bold text-gray-800">
+                    <span className="px-3 py-1 glass-light/90 rounded-full text-xs font-bold text-gray-800">
                       {course.category}
                     </span>
                   </div>

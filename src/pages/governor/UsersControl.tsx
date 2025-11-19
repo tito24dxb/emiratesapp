@@ -152,7 +152,7 @@ export default function UsersControl() {
         <p className="text-gray-600">Manage all platform users and permissions</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <div className="glass-light rounded-2xl shadow-lg p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -189,7 +189,7 @@ export default function UsersControl() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div className="glass-light rounded-2xl shadow-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-[#EADBC8]">
@@ -292,7 +292,7 @@ export default function UsersControl() {
                       </button>
                       <button
                         onClick={() => handleDemote(user.uid)}
-                        className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition"
+                        className="p-2 glass-bubble text-gray-600 rounded-lg hover:bg-gray-200 transition"
                         title="Demote"
                         disabled={user.role === 'student'}
                       >

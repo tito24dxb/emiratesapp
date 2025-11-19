@@ -115,7 +115,7 @@ export default function StudentsPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="glass-light rounded-2xl shadow-lg p-6">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -132,7 +132,7 @@ export default function StudentsPage() {
             <select
               value={selectedPlan}
               onChange={(e) => setSelectedPlan(e.target.value)}
-              className="pl-12 pr-8 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition appearance-none bg-white cursor-pointer"
+              className="pl-12 pr-8 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition appearance-none glass-light cursor-pointer"
             >
               <option value="all">All Plans</option>
               <option value="free">Free</option>
@@ -144,7 +144,7 @@ export default function StudentsPage() {
       </div>
 
       {filteredStudents.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <div className="glass-light rounded-2xl shadow-lg p-12 text-center">
           <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-800 mb-2">No Students Found</h3>
           <p className="text-gray-600">
@@ -164,7 +164,7 @@ export default function StudentsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition"
+                className="glass-light rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition"
               >
                 <div className="bg-gradient-to-r from-[#EADBC8] to-[#F5E6D3] p-6">
                   <div className="flex items-start gap-4">

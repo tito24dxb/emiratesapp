@@ -13,7 +13,7 @@ export default function MaintenanceMode() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="glass-light rounded-2xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-2xl font-bold text-[#1C1C1C]">System Status</h3>
             <div className={`px-4 py-2 rounded-full font-bold text-sm ${
@@ -77,7 +77,7 @@ export default function MaintenanceMode() {
         </div>
 
         <div className="space-y-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-light rounded-2xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-[#1C1C1C] mb-4">Preview</h3>
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
               <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
@@ -103,7 +103,7 @@ export default function MaintenanceMode() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-light rounded-2xl shadow-lg p-6">
             <h3 className="text-xl font-bold text-[#1C1C1C] mb-4">Impact Summary</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-[#F5F5F5]/30 rounded-lg">

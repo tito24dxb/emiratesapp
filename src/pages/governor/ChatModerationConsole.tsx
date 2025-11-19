@@ -97,7 +97,7 @@ export default function ChatModerationConsole() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-6">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+        <div className="mb-8 glass-light/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
           <div className="flex items-center gap-3 mb-4">
             <Shield className="w-8 h-8 text-blue-400" />
             <div>
@@ -153,7 +153,7 @@ export default function ChatModerationConsole() {
 
         {activeTab === 'reports' && (
           <div className="space-y-4">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
+            <div className="glass-light/5 backdrop-blur-xl border border-white/10 rounded-xl p-4">
               <div className="flex gap-2">
                 <button
                   onClick={() => setFilterStatus('open')}
@@ -195,7 +195,7 @@ export default function ChatModerationConsole() {
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
               </div>
             ) : reports.length === 0 ? (
-              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-12 text-center">
+              <div className="glass-light/5 backdrop-blur-xl border border-white/10 rounded-xl p-12 text-center">
                 <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-4" />
                 <p className="text-white/60">No reports found</p>
               </div>
@@ -203,7 +203,7 @@ export default function ChatModerationConsole() {
               reports.map((report) => (
                 <div
                   key={report.reporterId + report.messageId}
-                  className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6"
+                  className="glass-light/5 backdrop-blur-xl border border-white/10 rounded-xl p-6"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -270,7 +270,7 @@ export default function ChatModerationConsole() {
 
         {activeTab === 'audit' && (
           <div className="space-y-4">
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 flex justify-between items-center">
+            <div className="glass-light/5 backdrop-blur-xl border border-white/10 rounded-xl p-4 flex justify-between items-center">
               <p className="text-white">
                 {auditLog.length} moderation actions logged
               </p>
@@ -283,9 +283,9 @@ export default function ChatModerationConsole() {
               </button>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
+            <div className="glass-light/5 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden">
               <table className="w-full">
-                <thead className="bg-white/5">
+                <thead className="glass-light/5">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-white/60">
                       Timestamp
@@ -325,7 +325,7 @@ export default function ChatModerationConsole() {
         )}
 
         {activeTab === 'search' && (
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
+          <div className="glass-light/5 backdrop-blur-xl border border-white/10 rounded-xl p-6">
             <div className="mb-6">
               <label className="block text-white mb-2">Search Messages</label>
               <input
@@ -333,7 +333,7 @@ export default function ChatModerationConsole() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Enter search query..."
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full px-4 py-3 glass-light/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               />
             </div>
             <p className="text-white/60 text-sm">

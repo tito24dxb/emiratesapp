@@ -152,7 +152,7 @@ export default function SupportChatManagerPage() {
         <p className="text-gray-600">Manage and respond to support tickets</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+      <div className="glass-light rounded-2xl shadow-lg p-6 mb-6">
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1">
             <div className="relative">
@@ -205,7 +205,7 @@ export default function SupportChatManagerPage() {
             filteredTickets.map((ticket) => (
               <div
                 key={ticket.id}
-                className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition cursor-pointer"
+                className="glass-light rounded-xl p-4 hover:glass-bubble transition cursor-pointer"
                 onClick={() => handleOpenChat(ticket)}
               >
                 <div className="flex items-start justify-between gap-4">

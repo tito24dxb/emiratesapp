@@ -76,7 +76,7 @@ export default function BackupManager() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+        className="glass-light rounded-xl shadow-lg border border-gray-100 p-6"
       >
         <h2 className="text-xl font-bold text-gray-900 mb-6">Create Manual Backup</h2>
 
@@ -108,7 +108,7 @@ export default function BackupManager() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+        className="glass-light rounded-xl shadow-lg border border-gray-100 p-6"
       >
         <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
           <Clock className="w-5 h-5" />

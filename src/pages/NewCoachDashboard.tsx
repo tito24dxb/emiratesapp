@@ -70,7 +70,7 @@ export default function NewCoachDashboard() {
           onClick={() => setShowCreateModule(true)}
           className="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl shadow-lg hover:shadow-xl transition"
         >
-          <div className="bg-white/20 p-3 rounded-lg">
+          <div className="glass-light/20 p-3 rounded-lg">
             <FolderPlus className="w-8 h-8" />
           </div>
           <div className="text-left">
@@ -83,7 +83,7 @@ export default function NewCoachDashboard() {
           onClick={() => setShowAddCourse(true)}
           className="flex items-center gap-4 p-6 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl shadow-lg hover:shadow-xl transition"
         >
-          <div className="bg-white/20 p-3 rounded-lg">
+          <div className="glass-light/20 p-3 rounded-lg">
             <Upload className="w-8 h-8" />
           </div>
           <div className="text-left">
@@ -104,7 +104,7 @@ export default function NewCoachDashboard() {
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#D71920] border-t-transparent"></div>
         </div>
       ) : mainModules.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div className="glass-light rounded-xl shadow-lg p-12 text-center">
           <FolderPlus className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-800 mb-2">No Modules Yet</h3>
           <p className="text-gray-600 mb-6">
@@ -125,7 +125,7 @@ export default function NewCoachDashboard() {
               key={module.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+              className="glass-light rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
               onClick={() => navigate(`/main-modules/${module.id}`)}
             >
               <img
@@ -168,7 +168,7 @@ export default function NewCoachDashboard() {
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#D71920] border-t-transparent"></div>
         </div>
       ) : courses.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div className="glass-light rounded-xl shadow-lg p-12 text-center">
           <Upload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-800 mb-2">No Courses Yet</h3>
           <p className="text-gray-600 mb-6">
@@ -189,7 +189,7 @@ export default function NewCoachDashboard() {
               key={course.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
+              className="glass-light rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
             >
               <img
                 src={course.thumbnail}

@@ -100,7 +100,7 @@ export default function GovernorDashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+              className="glass-light rounded-xl p-6 shadow-lg border border-gray-100"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center`}>
@@ -122,7 +122,7 @@ export default function GovernorDashboard() {
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+          className="glass-light rounded-xl shadow-lg border border-gray-100 p-6"
         >
           <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
             <Activity className="w-5 h-5" />
@@ -130,7 +130,7 @@ export default function GovernorDashboard() {
           </h2>
           <div className="space-y-3">
             {modules.map((module) => (
-              <div key={module.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={module.name} className="flex items-center justify-between p-3 glass-light rounded-lg">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full" />
                   <span className="font-medium text-gray-900">{module.name}</span>
@@ -147,7 +147,7 @@ export default function GovernorDashboard() {
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-white rounded-xl shadow-lg border border-gray-100 p-6"
+          className="glass-light rounded-xl shadow-lg border border-gray-100 p-6"
         >
           <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-2 gap-3">

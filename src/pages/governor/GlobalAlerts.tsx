@@ -58,7 +58,7 @@ export default function GlobalAlerts() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="bg-white rounded-2xl shadow-lg p-6 mb-6"
+          className="glass-light rounded-2xl shadow-lg p-6 mb-6"
         >
           <h3 className="text-xl font-bold text-[#1C1C1C] mb-4">New Global Alert</h3>
 
@@ -154,7 +154,7 @@ export default function GlobalAlerts() {
         </motion.div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="glass-light rounded-2xl shadow-lg p-6">
         <h3 className="text-xl font-bold text-[#1C1C1C] mb-4">Active Alerts</h3>
 
         {banners.length === 0 ? (
