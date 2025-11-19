@@ -128,6 +128,24 @@ function CoursesPageContent() {
       setMainModules(mainModulesData);
       console.log('Loaded main modules:', mainModulesData.length);
       console.log('Modules with content:', mainModulesData);
+
+      mainModulesData.forEach((module, index) => {
+        console.log(`Module ${index + 1}:`, {
+          id: module.id,
+          title: module.title,
+          course_id: module.course_id,
+          course1_id: module.course1_id,
+          course2_id: module.course2_id,
+          submodules: module.submodules.length,
+          submodulesDetail: module.submodules.map(sub => ({
+            id: sub.id,
+            title: sub.title,
+            course_id: sub.course_id,
+            course1_id: sub.course1_id,
+            course2_id: sub.course2_id
+          }))
+        });
+      });
     } catch (error) {
       console.error('Error loading main modules:', error);
     } finally {
@@ -189,13 +207,17 @@ function CoursesPageContent() {
   };
 
   const handleMainModuleClick = (moduleId: string, isEnrolled: boolean) => {
+    console.log('CoursesPage: Main module clicked:', moduleId, 'enrolled:', isEnrolled);
     if (isEnrolled) {
+      console.log('CoursesPage: Navigating to /main-modules/' + moduleId);
       navigate(`/main-modules/${moduleId}`);
     }
   };
 
   const handleSubmoduleClick = (submoduleId: string, isEnrolled: boolean) => {
+    console.log('CoursesPage: Submodule clicked:', submoduleId, 'enrolled:', isEnrolled);
     if (isEnrolled) {
+      console.log('CoursesPage: Navigating to /submodules/' + submoduleId);
       navigate(`/submodules/${submoduleId}`);
     }
   };
