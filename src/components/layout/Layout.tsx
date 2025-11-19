@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import Footer from './Footer';
 import SystemAnnouncementBanner from '../SystemAnnouncementBanner';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle } from 'lucide-react';
@@ -14,7 +15,7 @@ export default function Layout({ children }: LayoutProps) {
   const { banners } = useApp();
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative flex flex-col">
       <Navbar />
       <SystemAnnouncementBanner />
 
@@ -38,13 +39,17 @@ export default function Layout({ children }: LayoutProps) {
         ))}
       </AnimatePresence>
 
-      <div className="flex flex-col md:flex-row relative z-10">
+      <div className="flex flex-col md:flex-row relative z-10 flex-1">
         <Sidebar />
-        <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden pb-16">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
         </main>
+      </div>
+
+      <div className="sticky bottom-0 z-20 mt-auto">
+        <Footer />
       </div>
     </div>
   );

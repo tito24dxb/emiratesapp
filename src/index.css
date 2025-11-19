@@ -292,6 +292,15 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   }
 
+  /* Liquid glass footer - subtle frosted effect */
+  .liquid-footer {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.04);
+  }
+
   /* Input fields with crystal effect */
   .liquid-input {
     backdrop-filter: blur(16px);
@@ -557,43 +566,19 @@
     border-radius: 8px;
   }
 
-  /* Custom scrollbar for sidebar navigation */
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  /* Hide all scrollbars completely */
+  .scrollbar-thin,
+  .scrollbar-thumb-gray-400\/20,
+  .scrollbar-track-transparent {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
-  .scrollbar-thin::-webkit-scrollbar {
-    display: block;
-    width: 6px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.15);
-    border-radius: 3px;
-  }
-
-  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.25);
-  }
-
-  .scrollbar-thumb-gray-400\/20 {
-    scrollbar-color: rgba(156, 163, 175, 0.2) transparent;
-  }
-
-  .scrollbar-thumb-gray-400\/20::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.2);
-  }
-
-  .scrollbar-thumb-gray-400\/20::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(156, 163, 175, 0.3);
-  }
-
-  .scrollbar-track-transparent::-webkit-scrollbar-track {
-    background: transparent;
+  .scrollbar-thin::-webkit-scrollbar,
+  .scrollbar-thumb-gray-400\/20::-webkit-scrollbar,
+  .scrollbar-track-transparent::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }
