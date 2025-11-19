@@ -468,4 +468,34 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06),
                 0 1px 2px rgba(0, 0, 0, 0.03) !important;
   }
+
+  /* ======================================
+     🎨 MATERIAL DESIGN - ROUNDED STYLE
+     ====================================== */
+
+  /* Ensure all buttons are properly rounded, not squared */
+  button {
+    border-radius: 8px;
+  }
+
+  /* Override any square/cubic styles */
+  .rounded-xl {
+    border-radius: 12px !important;
+  }
+
+  .rounded-2xl {
+    border-radius: 16px !important;
+  }
+
+  /* Ensure inputs and selects are rounded */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    border-radius: 8px;
+  }
+
+  /* Priority buttons in bug report - make them fully rounded */
+  button[type="button"] {
+    border-radius: 8px;
+  }
 }

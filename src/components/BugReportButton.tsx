@@ -67,21 +67,19 @@ export default function BugReportButton() {
 
       <AnimatePresence>
         {isOpen && (
-          <>
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60]"
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
               onClick={() => setIsOpen(false)}
             />
-
-            <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col"
+                className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col z-10"
                 onClick={(e) => e.stopPropagation()}
               >
               <div className="sticky top-0 chat-header flex items-center justify-between rounded-t-2xl">
@@ -196,8 +194,7 @@ export default function BugReportButton() {
                 </div>
               </form>
               </motion.div>
-            </div>
-          </>
+          </div>
         )}
       </AnimatePresence>
     </>
