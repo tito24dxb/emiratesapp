@@ -189,9 +189,9 @@ export const communityChatService = {
     if (!userId) throw new Error('Not authenticated');
 
     const messageRef = doc(collection(db, 'conversations', conversationId, 'messages'));
-    let attachmentUrl: string | undefined;
-    let attachmentRef: string | undefined;
-    let attachmentMetadata: any;
+    let attachmentUrl: string | null = null;
+    let attachmentRef: string | null = null;
+    let attachmentMetadata: any = null;
 
     if (attachmentFile) {
       const storagePath = `attachments/${conversationId}/${messageRef.id}/${attachmentFile.name}`;
