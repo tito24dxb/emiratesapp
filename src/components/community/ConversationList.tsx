@@ -128,7 +128,7 @@ export default function ConversationList({
       case 'governor':
         return 'bg-yellow-100 text-yellow-800';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'glass-bubble text-gray-700';
     }
   };
 
@@ -149,7 +149,7 @@ export default function ConversationList({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
+      <div className="p-4 border-b border-gray-200 glass-light flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-900">Messages</h2>
           <button
@@ -167,27 +167,27 @@ export default function ConversationList({
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent transition-all"
+            className="w-full pl-10 pr-4 py-2.5 glass-light border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent transition-all"
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-gray-50">
+      <div className="flex-1 overflow-y-auto glass-light">
         {groupChats.length > 0 && (
           <div className="mb-1">
-            <div className="px-4 py-2 bg-white border-b border-gray-100">
+            <div className="px-4 py-2 glass-light border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <Hash className="w-4 h-4 text-gray-500" />
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Group Chats</h3>
                 <span className="text-xs text-gray-400">({groupChats.length})</span>
               </div>
             </div>
-            <div className="bg-white">
+            <div className="glass-light">
               {groupChats.map((conversation) => (
                 <button
                   key={conversation.id}
                   onClick={() => onSelectConversation(conversation.id)}
-                  className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
+                  className={`w-full p-4 flex items-start gap-3 hover:glass-bubble transition-all border-b border-gray-100 ${
                     selectedConversationId === conversation.id
                       ? 'bg-red-50 border-l-4 border-l-[#D71921]'
                       : ''
@@ -244,19 +244,19 @@ export default function ConversationList({
 
         {privateChats.length > 0 && (
           <div>
-            <div className="px-4 py-2 bg-white border-b border-gray-100">
+            <div className="px-4 py-2 glass-light border-b border-gray-100">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-gray-500" />
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Private Chats</h3>
                 <span className="text-xs text-gray-400">({privateChats.length})</span>
               </div>
             </div>
-            <div className="bg-white">
+            <div className="glass-light">
               {privateChats.map((conversation) => (
                 <button
                   key={conversation.id}
                   onClick={() => onSelectConversation(conversation.id)}
-                  className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
+                  className={`w-full p-4 flex items-start gap-3 hover:glass-bubble transition-all border-b border-gray-100 ${
                     selectedConversationId === conversation.id
                       ? 'bg-red-50 border-l-4 border-l-[#D71921]'
                       : ''
@@ -308,7 +308,7 @@ export default function ConversationList({
 
       {showNewConversation && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="glass-light rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">New Conversation</h2>
@@ -318,7 +318,7 @@ export default function ConversationList({
                     setSelectedUsers([]);
                     setGroupTitle('');
                   }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="p-2 hover:glass-bubble rounded-lg transition-colors"
                 >
                   <X className="w-6 h-6" />
                 </button>
@@ -333,7 +333,7 @@ export default function ConversationList({
                   className={`flex-1 py-2 px-4 rounded-xl font-bold transition-colors ${
                     conversationType === 'private'
                       ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'glass-bubble text-gray-700 hover:glass-light'
                   }`}
                 >
                   Private Chat
@@ -346,7 +346,7 @@ export default function ConversationList({
                   className={`flex-1 py-2 px-4 rounded-xl font-bold transition-colors ${
                     conversationType === 'group'
                       ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'glass-bubble text-gray-700 hover:glass-light'
                   }`}
                 >
                   Group Chat
@@ -385,7 +385,7 @@ export default function ConversationList({
                       className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                         selectedUsers.includes(user.uid)
                           ? 'border-[#D71921] bg-red-50 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md'
+                          : 'border-gray-200 hover:border-gray-300 glass-light hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-center gap-3">
