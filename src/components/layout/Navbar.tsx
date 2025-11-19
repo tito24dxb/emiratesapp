@@ -32,7 +32,7 @@ export default function Navbar() {
   if (!currentUser) return null;
 
   return (
-    <nav className="sticky top-0 z-40 backdrop-blur-3xl" style={{background: 'var(--sidebar-bg)'}}>
+    <nav className="sticky top-0 z-40 ios-glass-dark rounded-none">
       <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/dashboard" className="flex items-center">

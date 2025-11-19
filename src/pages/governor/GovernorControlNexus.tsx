@@ -153,11 +153,10 @@ export default function GovernorControlNexus() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="glass-panel p-6"
-          style={{background: 'rgba(62, 0, 12, 0.15)', backdropFilter: 'blur(40px)'}}
+          className="ios-glass-dark p-6"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{background: 'var(--primary-glass)', backdropFilter: 'blur(24px)'}}>
+            <div className="w-14 h-14 rounded-3xl flex items-center justify-center glass-primary">
               <Shield className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -172,8 +171,8 @@ export default function GovernorControlNexus() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-card p-6 parallax-hover"
-            style={{background: 'var(--yale-glass)', backdropFilter: 'blur(24px)'}}
+            className="ios-glass p-6 parallax-hover"
+            style={{background: 'linear-gradient(to bottom right, rgba(43, 65, 98, 0.92), rgba(43, 65, 98, 0.78)), rgba(43, 65, 98, 0.85)'}}
           >
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-white font-medium">Current MRR</p>
@@ -185,8 +184,8 @@ export default function GovernorControlNexus() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-card p-6 parallax-hover"
-            style={{background: 'var(--jasmine-glass)', backdropFilter: 'blur(24px)'}}
+            className="ios-glass p-6 parallax-hover"
+            style={{background: 'linear-gradient(to bottom right, rgba(255, 232, 130, 0.95), rgba(255, 232, 130, 0.88)), rgba(255, 232, 130, 0.90)'}}
           >
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-gray-800 font-medium">Current Customers</p>
@@ -198,8 +197,7 @@ export default function GovernorControlNexus() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass-card p-6 parallax-hover"
-            style={{background: 'var(--primary-glass)', backdropFilter: 'blur(24px)'}}
+            className="glass-primary p-6 parallax-hover"
           >
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-white font-medium">Active Customers</p>
@@ -211,8 +209,8 @@ export default function GovernorControlNexus() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="glass-card p-6 parallax-hover"
-            style={{background: 'var(--primary-glass-hover)', backdropFilter: 'blur(24px)'}}
+            className="ios-glass p-6 parallax-hover"
+            style={{background: 'linear-gradient(to bottom right, rgba(209, 0, 0, 0.92), rgba(209, 0, 0, 0.78)), rgba(209, 0, 0, 0.85)'}}
           >
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm text-white font-medium">Churn Rate</p>
@@ -226,8 +224,7 @@ export default function GovernorControlNexus() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="lg:col-span-2 glass-card p-6"
-            style={{background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(40px)'}}
+            className="lg:col-span-2 ios-glass p-6"
           >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Trend</h2>
@@ -373,7 +370,7 @@ export default function GovernorControlNexus() {
                 { email: 'amy.smit11@8f6r59dcaus.uk', issue: 'Product Malfunction', priority: 'MEDIUM' },
                 { email: 'yandeyp.innov@0w44tyfiv.org', issue: 'Feature Request', priority: 'LOW' }
               ].map((ticket, index) => (
-                <div key={index} className="flex items-center justify-between p-3 rounded-2xl" style={{background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(20px)'}}>
+                <div key={index} className="flex items-center justify-between p-3 glass-ultra-thin">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-[#e71d36]"></div>
                     <div>
