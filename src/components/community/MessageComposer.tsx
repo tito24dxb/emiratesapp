@@ -137,7 +137,7 @@ export default function MessageComposer({
               setAttachment(null);
               setImagePreview(null);
             }}
-            className="p-2 hover:bg-gray-200/50 rounded-xl transition-colors"
+            className="p-2 hover:glass-bubble rounded-xl transition-colors"
           >
             <X className="w-5 h-5 text-gray-600" />
           </button>

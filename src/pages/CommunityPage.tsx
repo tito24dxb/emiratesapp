@@ -133,8 +133,8 @@ export default function CommunityPage() {
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+    <div className="h-screen flex flex-col ">
+      <div className="glass-light border-b border-gray-200 shadow-sm">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-xl flex items-center justify-center shadow-lg">
@@ -162,7 +162,7 @@ export default function CommunityPage() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                   selectedConversationId === conversation.id
                     ? 'bg-[#D71921] text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    : 'glass-bubble text-gray-700 hover:glass-light'
                 }`}
               >
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
@@ -192,7 +192,7 @@ export default function CommunityPage() {
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all whitespace-nowrap ${
                       selectedConversationId === conversation.id
                         ? 'bg-gray-800 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        : 'glass-bubble text-gray-700 hover:glass-light'
                     }`}
                   >
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-sm ${
@@ -212,7 +212,7 @@ export default function CommunityPage() {
       </div>
 
       {selectedConversationId ? (
-        <div className="flex-1 flex flex-col min-h-0 bg-white">
+        <div className="flex-1 flex flex-col min-h-0 glass-light">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
             {loading ? (
               <div className="flex items-center justify-center h-full">
@@ -254,7 +254,7 @@ export default function CommunityPage() {
           </div>
 
           {typingUsers.length > 0 && (
-            <div className="px-6 py-2 border-t border-gray-100 bg-gray-50">
+            <div className="px-6 py-2 border-t border-gray-100 glass-light">
               <motion.div
                 initial={{ opacity: 0, y: -5 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -272,12 +272,12 @@ export default function CommunityPage() {
             </div>
           )}
 
-          <div className="border-t border-gray-200 bg-white px-6 py-4">
+          <div className="border-t border-gray-200 glass-light px-6 py-4">
             <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center bg-white">
+        <div className="flex-1 flex items-center justify-center glass-light">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
