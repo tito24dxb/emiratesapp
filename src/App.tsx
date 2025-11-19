@@ -87,13 +87,13 @@ function AppContent() {
         <Route path="/leaderboard" element={<LeaderboardPage />} />
         <Route path="/my-progress" element={<MyProgressPage />} />
         <Route path="/lesson/:courseId/:moduleId/:lessonId" element={<LessonViewerPage />} />
+        <Route path="/main-modules/:moduleId" element={<MainModuleViewerPage />} />
+        <Route path="/submodules/:submoduleId" element={<SubmoduleViewerPage />} />
+        <Route path="/course/:courseId" element={<CourseViewerPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>
             <Route path="/coach-dashboard" element={<NewCoachDashboard />} />
-            <Route path="/main-modules/:moduleId" element={<MainModuleViewerPage />} />
-            <Route path="/submodules/:submoduleId" element={<SubmoduleViewerPage />} />
-            <Route path="/course/:courseId" element={<CourseViewerPage />} />
           </>
         )}
 
