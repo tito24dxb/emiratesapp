@@ -189,7 +189,7 @@ export default function ConversationList({
                   onClick={() => onSelectConversation(conversation.id)}
                   className={`w-full p-4 flex items-start gap-3 hover:glass-bubble transition-all border-b border-gray-100 ${
                     selectedConversationId === conversation.id
-                      ? 'bg-red-50 border-l-4 border-l-[#D71921]'
+                      ? 'bg-[#D71921]/10 border-l-4 border-l-[#D71921]'
                       : ''
                   }`}
                 >
@@ -258,7 +258,7 @@ export default function ConversationList({
                   onClick={() => onSelectConversation(conversation.id)}
                   className={`w-full p-4 flex items-start gap-3 hover:glass-bubble transition-all border-b border-gray-100 ${
                     selectedConversationId === conversation.id
-                      ? 'bg-red-50 border-l-4 border-l-[#D71921]'
+                      ? 'bg-[#D71921]/10 border-l-4 border-l-[#D71921]'
                       : ''
                   }`}
                 >
@@ -384,7 +384,7 @@ export default function ConversationList({
                       onClick={() => toggleUserSelection(user.uid)}
                       className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                         selectedUsers.includes(user.uid)
-                          ? 'border-[#D71921] bg-red-50 shadow-md'
+                          ? 'border-[#D71921] bg-[#D71921]/10 shadow-md'
                           : 'border-gray-200 hover:border-gray-300 glass-light hover:shadow-md'
                       }`}
                     >
