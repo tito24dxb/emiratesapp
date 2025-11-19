@@ -1,14 +1,18 @@
 import { useState } from 'react';
-import { Database, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
+import { Database, RefreshCw, CheckCircle, XCircle, FileCheck, MessageSquare } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { initializeDefaultCourses } from '../../utils/initializeCourses';
 import { initializeDefaultModules } from '../../utils/initializeModules';
+import { initializeExams } from '../../utils/initializeExams';
+import { initializeTestConversations } from '../../utils/initializeConversations';
 
 export default function InitializeData() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
     courses?: 'success' | 'error';
     modules?: 'success' | 'error';
+    exams?: 'success' | 'error';
+    conversations?: 'success' | 'error';
     message?: string;
   }>({});
 
@@ -40,15 +44,47 @@ export default function InitializeData() {
     }
   };
 
+  const handleInitializeExams = async () => {
+    setLoading(true);
+    setStatus({});
+    try {
+      await initializeExams();
+      setStatus({ exams: 'success', message: 'Exams initialized successfully!' });
+    } catch (error: any) {
+      console.error('Error:', error);
+      setStatus({ exams: 'error', message: error.message || 'Failed to initialize exams' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInitializeConversations = async () => {
+    setLoading(true);
+    setStatus({});
+    try {
+      await initializeTestConversations();
+      setStatus({ conversations: 'success', message: 'Conversations initialized successfully!' });
+    } catch (error: any) {
+      console.error('Error:', error);
+      setStatus({ conversations: 'error', message: error.message || 'Failed to initialize conversations' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInitializeAll = async () => {
     setLoading(true);
     setStatus({});
     try {
       await initializeDefaultCourses();
       await initializeDefaultModules();
+      await initializeExams();
+      await initializeTestConversations();
       setStatus({
         courses: 'success',
         modules: 'success',
+        exams: 'success',
+        conversations: 'success',
         message: 'All data initialized successfully!'
       });
     } catch (error: any) {
@@ -56,6 +92,8 @@ export default function InitializeData() {
       setStatus({
         courses: 'error',
         modules: 'error',
+        exams: 'error',
+        conversations: 'error',
         message: error.message || 'Failed to initialize data'
       });
     } finally {
@@ -134,6 +172,60 @@ export default function InitializeData() {
                 status.modules === 'success' ? 'text-green-600' : 'text-red-600'
               }`}>
                 {status.modules === 'success' ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <XCircle className="w-4 h-4" />
+                )}
+                <span>{status.message}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <h3 className="font-bold text-gray-900 mb-2">Course Exams</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              4 exams for Open Day courses (10 questions each, 70% passing score)
+            </p>
+            <button
+              onClick={handleInitializeExams}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-[#D71920] text-white rounded-lg font-bold hover:bg-[#B91518] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <FileCheck className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Initialize Exams
+            </button>
+            {status.exams && (
+              <div className={`mt-3 flex items-center gap-2 text-sm ${
+                status.exams === 'success' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {status.exams === 'success' ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <XCircle className="w-4 h-4" />
+                )}
+                <span>{status.message}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="p-4 bg-gray-50 rounded-xl">
+            <h3 className="font-bold text-gray-900 mb-2">Test Conversations</h3>
+            <p className="text-sm text-gray-600 mb-3">
+              Sample conversations for testing the community chat system
+            </p>
+            <button
+              onClick={handleInitializeConversations}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-[#D71920] text-white rounded-lg font-bold hover:bg-[#B91518] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <MessageSquare className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Initialize Conversations
+            </button>
+            {status.conversations && (
+              <div className={`mt-3 flex items-center gap-2 text-sm ${
+                status.conversations === 'success' ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {status.conversations === 'success' ? (
                   <CheckCircle className="w-4 h-4" />
                 ) : (
                   <XCircle className="w-4 h-4" />

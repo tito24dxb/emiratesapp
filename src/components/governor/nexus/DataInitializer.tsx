@@ -3,12 +3,16 @@ import { motion } from 'framer-motion';
 import { Database, RefreshCw, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { initializeDefaultCourses } from '../../../utils/initializeCourses';
 import { initializeDefaultModules } from '../../../utils/initializeModules';
+import { initializeTestConversations } from '../../../utils/initializeConversations';
+import { initializeExams } from '../../../utils/initializeExams';
 
 export default function DataInitializer() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{
     courses?: 'success' | 'error';
     modules?: 'success' | 'error';
+    conversations?: 'success' | 'error';
+    exams?: 'success' | 'error';
     message?: string;
   }>({});
 
@@ -27,10 +31,20 @@ export default function DataInitializer() {
       await initializeDefaultModules();
       console.log('✅ Modules initialized successfully');
 
+      console.log('Step 3: Initializing exams...');
+      await initializeExams();
+      console.log('✅ Exams initialized successfully');
+
+      console.log('Step 4: Initializing conversations...');
+      await initializeTestConversations();
+      console.log('✅ Conversations initialized successfully');
+
       setStatus({
         courses: 'success',
         modules: 'success',
-        message: 'Database initialized with sample courses and modules!'
+        conversations: 'success',
+        exams: 'success',
+        message: 'Database initialized with sample courses, modules, exams, and conversations!'
       });
     } catch (error: any) {
       console.error('❌ INITIALIZATION ERROR:', error);
@@ -48,6 +62,8 @@ export default function DataInitializer() {
       setStatus({
         courses: 'error',
         modules: 'error',
+        conversations: 'error',
+        exams: 'error',
         message: errorMessage
       });
     } finally {
@@ -77,7 +93,7 @@ export default function DataInitializer() {
           <div className="flex items-start gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div className="text-xs text-slate-300">
-              This will add 9 sample courses and 10 training modules to the database. Only runs if database is empty.
+              This will add 9 sample courses, 10 training modules, 4 exams, and test conversations to the database. Only runs if database is empty.
             </div>
           </div>
         </div>
