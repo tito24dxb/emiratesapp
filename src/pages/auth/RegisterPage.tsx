@@ -39,6 +39,7 @@ export default function RegisterPage() {
         bio,
         expectations,
         photo_base64: '',
+        points: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
