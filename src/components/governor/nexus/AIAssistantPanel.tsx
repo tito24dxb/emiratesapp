@@ -139,11 +139,11 @@ export default function AIAssistantPanel() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-slate-800 border border-slate-700 rounded-lg p-6"
+        className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6"
       >
         <div className="text-center py-8">
-          <Loader2 className="w-8 h-8 text-slate-400 animate-spin mx-auto mb-2" />
-          <p className="text-slate-400">Checking AI status...</p>
+          <Loader2 className="w-8 h-8 text-gray-400 animate-spin mx-auto mb-2" />
+          <p className="text-gray-600">Checking AI status...</p>
         </div>
       </motion.div>
     );
@@ -153,23 +153,23 @@ export default function AIAssistantPanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden"
+      className="bg-white rounded-xl shadow-lg border-2 border-transparent hover:border-gray-200 overflow-hidden transition"
     >
-      <div className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border-b border-slate-700 px-6 py-4">
+      <div className="bg-gradient-to-r from-[#5A6B75] to-[#3D4A52] px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center border border-purple-500/20">
-              <Brain className="w-6 h-6 text-purple-400" />
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+              <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100">AI Assistant</h2>
-              <p className="text-xs text-slate-400">Powered by OpenAI GPT-4</p>
+              <h2 className="text-xl font-bold text-white">AI Assistant</h2>
+              <p className="text-xs text-white/80">Powered by OpenAI GPT-4</p>
             </div>
           </div>
           <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
             aiEnabled
-              ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-              : 'bg-red-500/20 text-red-400 border border-red-500/30'
+              ? 'bg-green-100 text-green-700 border border-green-300'
+              : 'bg-red-100 text-red-700 border border-red-300'
           }`}>
             {aiEnabled ? 'Online' : 'Offline'}
           </span>
@@ -177,11 +177,11 @@ export default function AIAssistantPanel() {
       </div>
 
       {!aiEnabled && (
-        <div className="mx-6 mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+        <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-300 rounded-lg flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm text-red-300 font-semibold">AI Assistant Disabled</p>
-            <p className="text-xs text-red-400 mt-1">
+            <p className="text-sm text-red-700 font-semibold">AI Assistant Disabled</p>
+            <p className="text-xs text-red-600 mt-1">
               Enable AI in the AI Control Panel below to use this feature.
             </p>
           </div>
@@ -191,10 +191,10 @@ export default function AIAssistantPanel() {
       <div className="p-6">
         <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
           {messages.length === 0 ? (
-            <div className="text-center py-12 bg-slate-900/50 rounded-lg border border-slate-700">
-              <Brain className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-              <p className="text-slate-400 font-semibold">AI Assistant Ready</p>
-              <p className="text-xs text-slate-500 mt-1">Ask me anything about system operations</p>
+            <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-gray-200">
+              <Brain className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-700 font-semibold">AI Assistant Ready</p>
+              <p className="text-xs text-gray-500 mt-1">Ask me anything about system operations</p>
             </div>
           ) : (
             messages.map((message, index) => (
@@ -204,20 +204,20 @@ export default function AIAssistantPanel() {
                 animate={{ opacity: 1, y: 0 }}
                 className={`p-3 rounded-lg ${
                   message.role === 'user'
-                    ? 'bg-blue-500/20 border border-blue-500/30 ml-8'
-                    : 'bg-slate-900/50 border border-slate-700 mr-8'
+                    ? 'bg-blue-50 border border-blue-300 ml-8'
+                    : 'bg-gray-50 border border-gray-200 mr-8'
                 }`}
               >
                 <div className="flex items-start justify-between gap-2 mb-1">
-                  <span className="text-xs font-semibold text-slate-400">
+                  <span className="text-xs font-semibold text-gray-600">
                     {message.role === 'user' ? 'You' : 'AI Assistant'}
                   </span>
                   {message.tokensUsed && (
-                    <span className="text-xs text-purple-400">{message.tokensUsed} tokens</span>
+                    <span className="text-xs text-[#5A6B75]">{message.tokensUsed} tokens</span>
                   )}
                 </div>
-                <p className="text-sm text-slate-200 whitespace-pre-wrap">{message.content}</p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-sm text-gray-800 whitespace-pre-wrap">{message.content}</p>
+                <p className="text-xs text-gray-500 mt-1">
                   {message.timestamp.toLocaleTimeString()}
                 </p>
               </motion.div>
@@ -227,9 +227,9 @@ export default function AIAssistantPanel() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center gap-2 text-sm text-slate-400 bg-slate-900/50 rounded-lg p-3 border border-slate-700"
+              className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-3 border border-gray-200"
             >
-              <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+              <Loader2 className="w-4 h-4 animate-spin text-[#5A6B75]" />
               AI is thinking...
             </motion.div>
           )}
@@ -243,7 +243,7 @@ export default function AIAssistantPanel() {
               placeholder={aiEnabled ? "Ask the AI assistant..." : "AI disabled"}
               disabled={!aiEnabled || loading}
               rows={2}
-              className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+              className="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71920] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -254,7 +254,7 @@ export default function AIAssistantPanel() {
             <button
               type="submit"
               disabled={!aiEnabled || loading || !prompt.trim()}
-              className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2 self-end"
+              className="px-6 py-3 bg-gradient-to-r from-[#5A6B75] to-[#3D4A52] hover:from-[#3D4A52] hover:to-[#2A3439] text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2 self-end shadow-md"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -263,7 +263,7 @@ export default function AIAssistantPanel() {
               )}
             </button>
           </div>
-          <p className="text-xs text-slate-500 mt-2">
+          <p className="text-xs text-gray-500 mt-2">
             Press Enter to send, Shift+Enter for new line
           </p>
         </form>

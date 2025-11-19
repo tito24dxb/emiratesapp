@@ -39,24 +39,24 @@ export default function ModuleManager() {
   }, {} as Record<string, Module[]>);
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+    <div className="bg-white border border-gray-200 rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <FolderPlus className="w-6 h-6 text-blue-400" />
           <div>
-            <h2 className="text-xl font-bold text-slate-100">Module Management</h2>
-            <p className="text-slate-400 text-sm">View course modules ({modules.length} total)</p>
-            <p className="text-slate-400 text-xs mt-1">Create modules from Coach Dashboard</p>
+            <h2 className="text-xl font-bold text-gray-900">Module Management</h2>
+            <p className="text-gray-600 text-sm">View course modules ({modules.length} total)</p>
+            <p className="text-gray-600 text-xs mt-1">Create modules from Coach Dashboard</p>
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="flex bg-slate-700 rounded-lg p-1">
+          <div className="flex bg-slate-700 rounded-xl p-1">
             <button
               onClick={() => setViewMode('grouped')}
               className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
                 viewMode === 'grouped'
                   ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:text-slate-300'
+                  : 'text-gray-600 hover:text-gray-700'
               }`}
             >
               Grouped
@@ -66,7 +66,7 @@ export default function ModuleManager() {
               className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
                 viewMode === 'all'
                   ? 'bg-blue-600 text-white'
-                  : 'text-slate-400 hover:text-slate-300'
+                  : 'text-gray-600 hover:text-gray-700'
               }`}
             >
               All Modules
@@ -78,17 +78,17 @@ export default function ModuleManager() {
       {loading ? (
         <div className="text-center py-8">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-400 mt-3">Loading modules...</p>
+          <p className="text-gray-600 mt-3">Loading modules...</p>
         </div>
       ) : modules.length === 0 ? (
-        <div className="text-center py-12 bg-slate-700 rounded-lg">
-          <FolderPlus className="w-16 h-16 text-slate-500 mx-auto mb-3" />
-          <p className="text-slate-300 font-semibold">No modules created yet</p>
-          <p className="text-slate-400 text-sm mt-1">Modules are created from Coach Dashboard</p>
+        <div className="text-center py-12 bg-slate-700 rounded-xl">
+          <FolderPlus className="w-16 h-16 text-gray-500 mx-auto mb-3" />
+          <p className="text-gray-700 font-semibold">No modules created yet</p>
+          <p className="text-gray-600 text-sm mt-1">Modules are created from Coach Dashboard</p>
         </div>
       ) : viewMode === 'all' ? (
-        <div className="bg-slate-700 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-slate-100 mb-3">
+        <div className="bg-slate-700 rounded-xl p-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">
             All Modules ({modules.length})
           </h3>
           <div className="space-y-2">
@@ -102,7 +102,7 @@ export default function ModuleManager() {
               .map((module) => (
                 <div
                   key={module.id}
-                  className="bg-slate-600 rounded-lg p-4 hover:bg-slate-550 transition"
+                  className="bg-slate-600 rounded-xl p-4 hover:bg-slate-550 transition"
                 >
                   <div className="flex items-center gap-3">
                     <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded uppercase">
@@ -111,14 +111,14 @@ export default function ModuleManager() {
                     <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs font-bold rounded">
                       #{module.order}
                     </span>
-                    <h4 className="font-bold text-slate-100">{module.name}</h4>
+                    <h4 className="font-bold text-gray-900">{module.name}</h4>
                     {module.visible && (
                       <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs font-bold rounded">
                         VISIBLE
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-400 mt-1">{module.description}</p>
+                  <p className="text-sm text-gray-600 mt-1">{module.description}</p>
                   {module.quiz_id && (
                     <p className="text-xs text-green-400 mt-2">
                       Quiz Required: {module.quiz_id}
@@ -136,28 +136,28 @@ export default function ModuleManager() {
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedModules).map(([category, categoryModules]) => (
-            <div key={category} className="bg-slate-700 rounded-lg p-4">
-              <h3 className="text-lg font-bold text-slate-100 mb-3 capitalize">
+            <div key={category} className="bg-slate-700 rounded-xl p-4">
+              <h3 className="text-lg font-bold text-gray-900 mb-3 capitalize">
                 {category} Modules
               </h3>
               <div className="space-y-2">
                 {categoryModules.map((module) => (
                   <div
                     key={module.id}
-                    className="bg-slate-600 rounded-lg p-4 hover:bg-slate-550 transition"
+                    className="bg-slate-600 rounded-xl p-4 hover:bg-slate-550 transition"
                   >
                     <div className="flex items-center gap-3">
                       <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs font-bold rounded">
                         #{module.order}
                       </span>
-                      <h4 className="font-bold text-slate-100">{module.name}</h4>
+                      <h4 className="font-bold text-gray-900">{module.name}</h4>
                       {module.visible && (
                         <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs font-bold rounded">
                           VISIBLE
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-400 mt-1">{module.description}</p>
+                    <p className="text-sm text-gray-600 mt-1">{module.description}</p>
                     {module.quiz_id && (
                       <p className="text-xs text-green-400 mt-2">
                         Quiz Required: {module.quiz_id}

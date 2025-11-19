@@ -52,28 +52,28 @@ export default function MetricsCards() {
       label: 'Active Users',
       value: loading ? '...' : `${activeUsers}/${totalUsers}`,
       icon: Users,
-      color: 'from-blue-600 to-blue-700',
+      color: 'from-[#D71920] to-[#B91518]',
       change: totalUsers > 0 ? `${Math.round((activeUsers / totalUsers) * 100)}%` : '0%',
     },
     {
       label: 'Conversations',
       value: loading ? '...' : activeConversations.toString(),
       icon: MessageCircle,
-      color: 'from-purple-600 to-purple-700',
+      color: 'from-[#3D4A52] to-[#2A3439]',
       change: activeConversations > 0 ? 'Active' : 'None',
     },
     {
       label: 'System Health',
       value: `${systemHealth}%`,
       icon: Activity,
-      color: 'from-emerald-600 to-emerald-700',
+      color: 'from-green-600 to-green-700',
       change: systemHealth === 100 ? 'Optimal' : 'Degraded',
     },
     {
       label: 'AI Assistant',
       value: loading ? '...' : (systemStatus.aiEnabled ? 'Online' : 'Offline'),
       icon: Brain,
-      color: 'from-orange-600 to-orange-700',
+      color: 'from-[#5A6B75] to-[#3D4A52]',
       change: systemStatus.aiEnabled ? 'Active' : 'Disabled',
     },
   ];
@@ -88,18 +88,18 @@ export default function MetricsCards() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-slate-800 border border-slate-700 rounded-lg p-6 shadow-xl hover:border-slate-600 transition"
+            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition border-2 border-transparent hover:border-gray-200"
           >
             <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${metric.color} flex items-center justify-center border border-slate-600 shadow-lg`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center shadow-md`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-bold text-slate-300 px-3 py-1 bg-slate-700/50 rounded border border-slate-600 uppercase tracking-wide">
+              <span className="text-xs font-bold text-gray-600 px-3 py-1 bg-gray-100 rounded-full uppercase tracking-wide">
                 {metric.change}
               </span>
             </div>
-            <div className="text-3xl font-bold text-slate-100 mb-1 tracking-tight">{metric.value}</div>
-            <div className="text-sm text-slate-400 font-medium uppercase tracking-wide">{metric.label}</div>
+            <div className="text-3xl font-bold text-gray-900 mb-1 tracking-tight">{metric.value}</div>
+            <div className="text-sm text-gray-600 font-medium uppercase tracking-wide">{metric.label}</div>
           </motion.div>
         );
       })}

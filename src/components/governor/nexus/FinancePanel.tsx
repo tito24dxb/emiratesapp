@@ -121,12 +121,12 @@ export default function FinancePanel() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-slate-800 border border-slate-700 rounded-lg p-6"
+        className="bg-white border border-gray-200 rounded-xl p-6"
       >
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <RefreshCw className="w-8 h-8 text-slate-400 animate-spin mx-auto mb-2" />
-            <p className="text-slate-400">Loading financial data...</p>
+            <RefreshCw className="w-8 h-8 text-gray-600 animate-spin mx-auto mb-2" />
+            <p className="text-gray-600">Loading financial data...</p>
           </div>
         </div>
       </motion.div>
@@ -137,34 +137,34 @@ export default function FinancePanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden"
+      className="bg-white border border-gray-200 rounded-xl overflow-hidden"
     >
-      <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-b border-slate-700 px-6 py-4">
+      <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-500/10 rounded-lg flex items-center justify-center border border-green-500/20">
+            <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center border border-green-500/20">
               <DollarSign className="w-6 h-6 text-green-400" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-100">Finance & Billing</h2>
-              <p className="text-xs text-slate-400">Revenue, subscriptions, and payments</p>
+              <h2 className="text-xl font-bold text-gray-900">Finance & Billing</h2>
+              <p className="text-xs text-gray-600">Revenue, subscriptions, and payments</p>
             </div>
           </div>
-          <button className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+          <button className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-gray-700 rounded-xl text-sm font-semibold transition flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export
           </button>
         </div>
       </div>
 
-      <div className="border-b border-slate-700">
+      <div className="border-b border-gray-200">
         <div className="flex gap-4 px-6">
           <button
             onClick={() => setActiveTab('overview')}
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'overview'
                 ? 'border-green-500 text-green-400'
-                : 'border-transparent text-slate-400 hover:text-slate-300'
+                : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
             Overview
@@ -174,7 +174,7 @@ export default function FinancePanel() {
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'customers'
                 ? 'border-green-500 text-green-400'
-                : 'border-transparent text-slate-400 hover:text-slate-300'
+                : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
             Customers ({customers.length})
@@ -184,7 +184,7 @@ export default function FinancePanel() {
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'subscriptions'
                 ? 'border-green-500 text-green-400'
-                : 'border-transparent text-slate-400 hover:text-slate-300'
+                : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
             Subscriptions ({subscriptions.length})
@@ -194,7 +194,7 @@ export default function FinancePanel() {
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'invoices'
                 ? 'border-green-500 text-green-400'
-                : 'border-transparent text-slate-400 hover:text-slate-300'
+                : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
             Invoices ({invoices.length})
@@ -206,48 +206,48 @@ export default function FinancePanel() {
         {activeTab === 'overview' && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-4 h-4 text-green-400" />
-                  <span className="text-xs font-semibold text-slate-400">MRR</span>
+                  <span className="text-xs font-semibold text-gray-600">MRR</span>
                 </div>
-                <p className="text-2xl font-bold text-slate-100">${calculateMRR().toFixed(2)}</p>
-                <p className="text-xs text-slate-500 mt-1">Monthly Recurring</p>
+                <p className="text-2xl font-bold text-gray-900">${calculateMRR().toFixed(2)}</p>
+                <p className="text-xs text-gray-500 mt-1">Monthly Recurring</p>
               </div>
 
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="w-4 h-4 text-blue-400" />
-                  <span className="text-xs font-semibold text-slate-400">Today</span>
+                  <span className="text-xs font-semibold text-gray-600">Today</span>
                 </div>
-                <p className="text-2xl font-bold text-slate-100">${calculateTodayRevenue().toFixed(2)}</p>
-                <p className="text-xs text-slate-500 mt-1">Revenue Today</p>
+                <p className="text-2xl font-bold text-gray-900">${calculateTodayRevenue().toFixed(2)}</p>
+                <p className="text-xs text-gray-500 mt-1">Revenue Today</p>
               </div>
 
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-purple-400" />
-                  <span className="text-xs font-semibold text-slate-400">Active</span>
+                  <span className="text-xs font-semibold text-gray-600">Active</span>
                 </div>
-                <p className="text-2xl font-bold text-slate-100">{subscriptions.length}</p>
-                <p className="text-xs text-slate-500 mt-1">Subscriptions</p>
+                <p className="text-2xl font-bold text-gray-900">{subscriptions.length}</p>
+                <p className="text-xs text-gray-500 mt-1">Subscriptions</p>
               </div>
 
-              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
+              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-4 h-4 text-red-400" />
-                  <span className="text-xs font-semibold text-slate-400">Failed</span>
+                  <span className="text-xs font-semibold text-gray-600">Failed</span>
                 </div>
-                <p className="text-2xl font-bold text-slate-100">{getFailedPayments()}</p>
-                <p className="text-xs text-slate-500 mt-1">Payments</p>
+                <p className="text-2xl font-bold text-gray-900">{getFailedPayments()}</p>
+                <p className="text-xs text-gray-500 mt-1">Payments</p>
               </div>
             </div>
 
             {customers.length === 0 && subscriptions.length === 0 && (
               <div className="text-center py-8">
-                <CreditCard className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400 font-semibold mb-1">No financial data yet</p>
-                <p className="text-xs text-slate-500">Stripe data will appear here once webhook is configured</p>
+                <CreditCard className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-600 font-semibold mb-1">No financial data yet</p>
+                <p className="text-xs text-gray-500">Stripe data will appear here once webhook is configured</p>
               </div>
             )}
           </div>
@@ -256,16 +256,16 @@ export default function FinancePanel() {
         {activeTab === 'customers' && (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {customers.length === 0 ? (
-              <p className="text-center py-8 text-slate-400">No customers found</p>
+              <p className="text-center py-8 text-gray-600">No customers found</p>
             ) : (
               customers.map((customer) => (
-                <div key={customer.id} className="bg-slate-900/50 rounded-lg p-3 border border-slate-700 hover:border-slate-600 transition">
+                <div key={customer.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200 hover:border-gray-300 transition">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-slate-200">{customer.name || 'Unknown'}</p>
-                      <p className="text-xs text-slate-400">{customer.email}</p>
+                      <p className="font-semibold text-gray-800">{customer.name || 'Unknown'}</p>
+                      <p className="text-xs text-gray-600">{customer.email}</p>
                     </div>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-gray-500">
                       {new Date(customer.created * 1000).toLocaleDateString()}
                     </p>
                   </div>
@@ -278,21 +278,21 @@ export default function FinancePanel() {
         {activeTab === 'subscriptions' && (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {subscriptions.length === 0 ? (
-              <p className="text-center py-8 text-slate-400">No active subscriptions</p>
+              <p className="text-center py-8 text-gray-600">No active subscriptions</p>
             ) : (
               subscriptions.map((sub) => (
-                <div key={sub.id} className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                <div key={sub.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
                       sub.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
                     }`}>
                       {sub.status}
                     </span>
-                    <p className="text-sm font-bold text-slate-200">
+                    <p className="text-sm font-bold text-gray-800">
                       ${(sub.plan?.amount || 0) / 100}/{sub.plan?.interval || 'mo'}
                     </p>
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-gray-500">
                     Renews: {new Date(sub.current_period_end * 1000).toLocaleDateString()}
                   </p>
                 </div>
@@ -304,10 +304,10 @@ export default function FinancePanel() {
         {activeTab === 'invoices' && (
           <div className="space-y-2 max-h-96 overflow-y-auto">
             {invoices.length === 0 ? (
-              <p className="text-center py-8 text-slate-400">No invoices found</p>
+              <p className="text-center py-8 text-gray-600">No invoices found</p>
             ) : (
               invoices.map((invoice) => (
-                <div key={invoice.id} className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                <div key={invoice.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -319,11 +319,11 @@ export default function FinancePanel() {
                       }`}>
                         {invoice.status}
                       </span>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-gray-500">
                         {new Date(invoice.created * 1000).toLocaleDateString()}
                       </p>
                     </div>
-                    <p className="text-sm font-bold text-slate-200">
+                    <p className="text-sm font-bold text-gray-800">
                       ${(invoice.amount_paid / 100).toFixed(2)}
                     </p>
                   </div>

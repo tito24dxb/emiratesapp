@@ -77,10 +77,10 @@ export default function SupportChatManager() {
 
   const getStatusBadge = (status: SupportTicket['status']) => {
     const badges = {
-      open: { color: 'bg-blue-900 text-blue-200', icon: Clock, label: 'Open' },
-      in_progress: { color: 'bg-yellow-900 text-yellow-200', icon: AlertCircle, label: 'In Progress' },
-      resolved: { color: 'bg-green-900 text-green-200', icon: CheckCircle, label: 'Resolved' },
-      closed: { color: 'bg-slate-700 text-slate-300', icon: CheckCircle, label: 'Closed' },
+      open: { color: 'bg-blue-100 text-blue-700 border border-blue-300', icon: Clock, label: 'Open' },
+      in_progress: { color: 'bg-yellow-100 text-yellow-700 border border-yellow-300', icon: AlertCircle, label: 'In Progress' },
+      resolved: { color: 'bg-green-100 text-green-700 border border-green-300', icon: CheckCircle, label: 'Resolved' },
+      closed: { color: 'bg-gray-100 text-gray-700 border border-gray-300', icon: CheckCircle, label: 'Closed' },
     };
 
     const badge = badges[status];
@@ -98,36 +98,36 @@ export default function SupportChatManager() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden"
+      className="bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden"
     >
-      <div className="flex items-center gap-3 p-6 border-b border-slate-700">
-        <MessageCircle className="w-6 h-6 text-slate-300" />
-        <h2 className="text-xl font-bold text-slate-100">Support Chat Manager</h2>
-        <span className="ml-auto px-3 py-1 bg-slate-700 text-slate-300 rounded-full text-sm font-bold">
+      <div className="flex items-center gap-3 p-6 border-b border-gray-200">
+        <MessageCircle className="w-6 h-6 text-gray-700" />
+        <h2 className="text-xl font-bold text-gray-900">Support Chat Manager</h2>
+        <span className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold border border-red-300">
           {tickets.filter(t => t.unreadByGovernor > 0).length} unread
         </span>
       </div>
 
       <div className="flex h-[600px]">
-        <div className="w-80 border-r border-slate-700 overflow-y-auto bg-slate-900">
+        <div className="w-80 border-r border-gray-200 overflow-y-auto bg-gray-50">
           {tickets.length === 0 ? (
-            <div className="p-4 text-center text-slate-400">No support tickets yet</div>
+            <div className="p-4 text-center text-gray-600">No support tickets yet</div>
           ) : (
-            <div className="divide-y divide-slate-700">
+            <div className="divide-y divide-gray-200">
               {tickets.map((ticket) => (
                 <div
                   key={ticket.id}
                   onClick={() => setSelectedTicket(ticket)}
                   className={`p-4 cursor-pointer transition ${
                     selectedTicket?.id === ticket.id
-                      ? 'bg-slate-700'
-                      : 'hover:bg-slate-800'
+                      ? 'bg-gray-100'
+                      : 'hover:bg-white'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-100 truncate">{ticket.subject}</h4>
-                      <p className="text-xs text-slate-400 truncate">{ticket.userName}</p>
+                      <h4 className="font-bold text-gray-900 truncate">{ticket.subject}</h4>
+                      <p className="text-xs text-gray-600 truncate">{ticket.userName}</p>
                     </div>
                     {ticket.unreadByGovernor > 0 && (
                       <span className="px-2 py-1 bg-red-600 text-white rounded-full text-xs font-bold">
@@ -137,7 +137,7 @@ export default function SupportChatManager() {
                   </div>
                   <div className="flex items-center justify-between mt-2">
                     {getStatusBadge(ticket.status)}
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-gray-500">
                       {ticket.lastMessageAt?.toDate?.()?.toLocaleDateString()}
                     </span>
                   </div>
@@ -149,7 +149,7 @@ export default function SupportChatManager() {
 
         <div className="flex-1 flex flex-col">
           {!selectedTicket ? (
-            <div className="flex-1 flex items-center justify-center text-slate-400">
+            <div className="flex-1 flex items-center justify-center text-gray-600">
               <div className="text-center">
                 <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
                 <p>Select a ticket to view conversation</p>
@@ -157,11 +157,11 @@ export default function SupportChatManager() {
             </div>
           ) : (
             <>
-              <div className="p-4 border-b border-slate-700 bg-slate-800">
+              <div className="p-4 border-b border-gray-200 bg-white">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-bold text-slate-100">{selectedTicket.subject}</h3>
-                    <p className="text-sm text-slate-400 mt-1">
+                    <h3 className="font-bold text-gray-900">{selectedTicket.subject}</h3>
+                    <p className="text-sm text-gray-600 mt-1">
                       {selectedTicket.userName} • {selectedTicket.userEmail}
                     </p>
                   </div>
@@ -169,7 +169,7 @@ export default function SupportChatManager() {
                     <select
                       value={selectedTicket.status}
                       onChange={(e) => handleStatusChange(selectedTicket.id, e.target.value as any)}
-                      className="px-3 py-1 bg-slate-700 text-slate-100 rounded text-sm font-bold border border-slate-600 focus:outline-none focus:border-slate-500"
+                      className="px-3 py-1 bg-gray-50 text-gray-900 rounded text-sm font-bold border border-gray-300 focus:outline-none focus:border-[#D71920]"
                     >
                       <option value="open">Open</option>
                       <option value="in_progress">In Progress</option>
@@ -180,7 +180,7 @@ export default function SupportChatManager() {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 overflow-y-auto bg-slate-900 space-y-3">
+              <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
                 {messages.map((message) => {
                   const isGovernor = message.senderRole === 'governor';
                   return (
@@ -191,8 +191,8 @@ export default function SupportChatManager() {
                       <div
                         className={`max-w-[75%] rounded-2xl px-4 py-2 ${
                           isGovernor
-                            ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-slate-100'
-                            : 'bg-slate-800 text-slate-100 border border-slate-700'
+                            ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
+                            : 'bg-white text-gray-900 border border-gray-200'
                         }`}
                       >
                         <div className="text-xs font-bold mb-1 opacity-70">
@@ -212,7 +212,7 @@ export default function SupportChatManager() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="p-4 bg-slate-800 border-t border-slate-700">
+              <div className="p-4 bg-white border-t border-gray-200">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -220,12 +220,12 @@ export default function SupportChatManager() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
                     placeholder="Type your response..."
-                    className="flex-1 px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:border-slate-500 focus:outline-none"
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none"
                   />
                   <button
                     onClick={handleSendMessage}
                     disabled={!newMessage.trim() || sending}
-                    className="px-4 py-2 bg-gradient-to-r from-slate-600 to-slate-700 text-white rounded-lg font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Send className="w-5 h-5" />
                   </button>

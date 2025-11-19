@@ -76,23 +76,23 @@ export default function DataInitializer() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800 border border-slate-700 rounded-lg p-6 shadow-xl"
+      className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl"
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-slate-700 rounded-lg flex items-center justify-center">
-          <Database className="w-5 h-5 text-slate-300" />
+        <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
+          <Database className="w-5 h-5 text-gray-700" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-100">Database Initialization</h2>
-          <p className="text-xs text-slate-400">Populate with sample data</p>
+          <h2 className="text-xl font-bold text-gray-900">Database Initialization</h2>
+          <p className="text-xs text-gray-600">Populate with sample data</p>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="p-3 bg-slate-900 rounded-lg border border-slate-700">
+        <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
           <div className="flex items-start gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-            <div className="text-xs text-slate-300">
+            <div className="text-xs text-gray-700">
               This will add 9 sample courses, 10 training modules, 4 exams, and test conversations to the database. Only runs if database is empty.
             </div>
           </div>
@@ -102,7 +102,7 @@ export default function DataInitializer() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className={`p-3 rounded-lg border flex items-center gap-2 ${
+            className={`p-3 rounded-xl border flex items-center gap-2 ${
               status.courses === 'success'
                 ? 'bg-green-900/20 border-green-700 text-green-300'
                 : 'bg-red-900/20 border-red-700 text-red-300'
@@ -120,7 +120,7 @@ export default function DataInitializer() {
         <button
           onClick={handleInitializeAll}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-slate-100 rounded-lg font-semibold transition border border-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-gray-900 rounded-xl font-semibold transition border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Initializing...' : 'Initialize Sample Data'}

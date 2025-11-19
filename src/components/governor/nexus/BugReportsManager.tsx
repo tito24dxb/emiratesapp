@@ -113,26 +113,26 @@ export default function BugReportsManager() {
 
   if (loading) {
     return (
-      <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+      <div className="bg-white border border-gray-200 rounded-xl p-6">
         <div className="flex items-center justify-center py-12">
-          <div className="w-8 h-8 border-4 border-slate-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6 space-y-6">
+    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Bug className="w-6 h-6 text-red-400" />
-          <h2 className="text-xl font-bold text-slate-100">Bug Reports</h2>
+          <h2 className="text-xl font-bold text-gray-900">Bug Reports</h2>
         </div>
         <div className="flex items-center gap-2">
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 text-sm"
+            className="px-4 py-2 bg-slate-700 border border-gray-300 rounded-xl text-gray-900 text-sm"
           >
             <option value="all">All Status</option>
             <option value="open">Open</option>
@@ -145,7 +145,7 @@ export default function BugReportsManager() {
       </div>
 
       {filteredReports.length === 0 ? (
-        <div className="text-center py-12 text-slate-400">
+        <div className="text-center py-12 text-gray-600">
           <Bug className="w-12 h-12 mx-auto mb-3 opacity-50" />
           <p>No bug reports found</p>
         </div>
@@ -156,7 +156,7 @@ export default function BugReportsManager() {
               key={report.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-700 border border-slate-600 rounded-lg p-4 hover:border-slate-500 transition cursor-pointer"
+              className="bg-slate-700 border border-gray-300 rounded-xl p-4 hover:border-slate-500 transition cursor-pointer"
               onClick={() => setSelectedReport(report)}
             >
               <div className="flex items-start justify-between gap-4">
@@ -174,9 +174,9 @@ export default function BugReportsManager() {
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-slate-100 mb-1">{report.title}</h3>
-                  <p className="text-sm text-slate-300 line-clamp-2 mb-2">{report.description}</p>
-                  <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">{report.title}</h3>
+                  <p className="text-sm text-gray-700 line-clamp-2 mb-2">{report.description}</p>
+                  <div className="flex items-center gap-4 text-xs text-gray-600">
                     <div className="flex items-center gap-1">
                       <User className="w-3 h-3" />
                       <span>{report.reportedByName} ({report.reportedByRole})</span>
@@ -225,11 +225,11 @@ export default function BugReportsManager() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-slate-800 rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-slate-700 p-6 border-b border-slate-600">
-              <h3 className="text-2xl font-bold text-slate-100">{selectedReport.title}</h3>
+            <div className="sticky top-0 bg-slate-700 p-6 border-b border-gray-300">
+              <h3 className="text-2xl font-bold text-gray-900">{selectedReport.title}</h3>
               <div className="flex items-center gap-2 mt-2">
                 <span className={`px-2 py-1 rounded text-xs font-bold ${getPriorityColor(selectedReport.priority)}`}>
                   {selectedReport.priority.toUpperCase()}
@@ -242,37 +242,37 @@ export default function BugReportsManager() {
 
             <div className="p-6 space-y-6">
               <div>
-                <h4 className="text-sm font-bold text-slate-300 mb-2">Description</h4>
-                <p className="text-slate-100">{selectedReport.description}</p>
+                <h4 className="text-sm font-bold text-gray-700 mb-2">Description</h4>
+                <p className="text-gray-900">{selectedReport.description}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-slate-400">Reported by:</span>
-                  <p className="text-slate-100 font-semibold">{selectedReport.reportedByName}</p>
+                  <span className="text-gray-600">Reported by:</span>
+                  <p className="text-gray-900 font-semibold">{selectedReport.reportedByName}</p>
                 </div>
                 <div>
-                  <span className="text-slate-400">Category:</span>
-                  <p className="text-slate-100 font-semibold">{selectedReport.category}</p>
+                  <span className="text-gray-600">Category:</span>
+                  <p className="text-gray-900 font-semibold">{selectedReport.category}</p>
                 </div>
               </div>
 
               {selectedReport.responses && selectedReport.responses.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
                     Responses ({selectedReport.responses.length})
                   </h4>
                   <div className="space-y-3">
                     {selectedReport.responses.map((response) => (
-                      <div key={response.id} className="bg-slate-700 rounded-lg p-3">
+                      <div key={response.id} className="bg-slate-700 rounded-xl p-3">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-semibold text-slate-100">{response.userName}</span>
-                          <span className="text-xs text-slate-400">
+                          <span className="text-sm font-semibold text-gray-900">{response.userName}</span>
+                          <span className="text-xs text-gray-600">
                             {response.createdAt?.toDate?.()?.toLocaleString?.() || 'N/A'}
                           </span>
                         </div>
-                        <p className="text-sm text-slate-300">{response.message}</p>
+                        <p className="text-sm text-gray-700">{response.message}</p>
                       </div>
                     ))}
                   </div>
@@ -280,18 +280,18 @@ export default function BugReportsManager() {
               )}
 
               <div>
-                <h4 className="text-sm font-bold text-slate-300 mb-2">Add Response</h4>
+                <h4 className="text-sm font-bold text-gray-700 mb-2">Add Response</h4>
                 <textarea
                   value={responseMessage}
                   onChange={(e) => setResponseMessage(e.target.value)}
                   placeholder="Type your response..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-400 focus:border-slate-500 focus:outline-none resize-none"
+                  className="w-full px-4 py-3 bg-slate-700 border border-gray-300 rounded-xl text-gray-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none resize-none"
                 />
                 <button
                   onClick={handleAddResponse}
                   disabled={!responseMessage.trim()}
-                  className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   Send Response
                 </button>

@@ -136,15 +136,15 @@ export default function SystemFlags() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-slate-800 border border-slate-700 rounded-lg p-6"
+      className="bg-white border border-gray-200 rounded-xl p-6"
     >
       <div className="flex items-center gap-2 mb-4">
-        <Settings className="w-5 h-5 text-slate-300" />
-        <h2 className="text-xl font-bold text-slate-100">System Feature Flags</h2>
+        <Settings className="w-5 h-5 text-gray-700" />
+        <h2 className="text-xl font-bold text-gray-900">System Feature Flags</h2>
       </div>
 
       {!isGovernor && (
-        <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-lg flex items-start gap-2">
+        <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-xl flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-yellow-300">
             View only mode. System flag control requires governor access.
@@ -164,11 +164,11 @@ export default function SystemFlags() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 bg-slate-700 rounded-lg border border-slate-600"
+              className="p-4 bg-slate-700 rounded-xl border border-gray-300"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                     flag.color === 'blue' ? 'bg-blue-900/50' :
                     flag.color === 'green' ? 'bg-green-900/50' :
                     flag.color === 'purple' ? 'bg-purple-900/50' :
@@ -184,8 +184,8 @@ export default function SystemFlags() {
                     }`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-slate-100">{flag.label}</h3>
-                    <p className="text-xs text-slate-400">{flag.description}</p>
+                    <h3 className="font-semibold text-gray-900">{flag.label}</h3>
+                    <p className="text-xs text-gray-600">{flag.description}</p>
                   </div>
                 </div>
 
@@ -215,7 +215,7 @@ export default function SystemFlags() {
         })}
       </div>
 
-      <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+      <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700/50 rounded-xl">
         <p className="text-xs text-blue-300">
           <strong>Note:</strong> Changes to system flags are instantly reflected across the entire platform.
         </p>

@@ -64,7 +64,7 @@ export default function GovernorControlNexus() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {!loading && announcement && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -82,15 +82,15 @@ export default function GovernorControlNexus() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800 border border-slate-700 rounded-lg p-6 shadow-2xl"
+          className="bg-white border-2 border-transparent hover:border-[#D71920] rounded-2xl p-6 shadow-lg transition"
         >
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-slate-700 to-slate-900 rounded-lg flex items-center justify-center border border-slate-600">
-              <Shield className="w-8 h-8 text-slate-300" />
+            <div className="w-14 h-14 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-xl flex items-center justify-center shadow-md">
+              <Shield className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-slate-100 tracking-tight">Governor Control Nexus</h1>
-              <p className="text-slate-400 text-sm mt-1">Central command system for platform management</p>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Governor Control Nexus</h1>
+              <p className="text-gray-600 text-sm mt-1">Central command system for platform management</p>
             </div>
           </div>
         </motion.div>
