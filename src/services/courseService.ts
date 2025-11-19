@@ -123,13 +123,48 @@ export const isCourseUnlocked = async (userId: string, course: Course): Promise<
     const previousCourse = moduleCourses[currentIndex - 1];
     if (!previousCourse) return true;
 
+    // Check if previous course is completed
     const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${previousCourse.id}`);
     const enrollmentSnap = await getDoc(enrollmentRef);
 
-    if (!enrollmentSnap.exists()) return false;
+    if (!enrollmentSnap.exists()) {
+      console.log(`Course ${course.title} locked: previous course not started`);
+      return false;
+    }
 
     const enrollment = enrollmentSnap.data();
-    return enrollment.completed === true && enrollment.progress >= 100;
+    if (!enrollment.completed || enrollment.progress < 100) {
+      console.log(`Course ${course.title} locked: previous course not completed`);
+      return false;
+    }
+
+    // Check if previous course has an exam that needs to be passed
+    const examsRef = collection(db, 'exams');
+    const examQuery = query(examsRef, where('courseId', '==', previousCourse.id));
+    const examSnapshot = await getDocs(examQuery);
+
+    if (!examSnapshot.empty) {
+      // Previous course has an exam - check if passed
+      const exam = examSnapshot.docs[0];
+      const examId = exam.id;
+
+      const resultRef = doc(db, 'userExams', `${examId}_${userId}_latest`);
+      const resultSnap = await getDoc(resultRef);
+
+      if (!resultSnap.exists()) {
+        console.log(`Course ${course.title} locked: previous course exam not attempted`);
+        return false;
+      }
+
+      const result = resultSnap.data();
+      if (!result.passed) {
+        console.log(`Course ${course.title} locked: previous course exam not passed`);
+        return false;
+      }
+    }
+
+    console.log(`Course ${course.title} unlocked: all requirements met`);
+    return true;
   } catch (error) {
     console.error('Error checking course unlock status:', error);
     return true;
