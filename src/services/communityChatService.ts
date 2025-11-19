@@ -171,12 +171,19 @@ export const communityChatService = {
     const q = query(
       collection(db, 'groupChats'),
       where('members', 'array-contains', userId),
-      orderBy('lastMessage.createdAt', 'desc'),
+      orderBy('createdAt', 'desc'),
       limit(50)
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Conversation));
+    const conversations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Conversation));
+
+    // Sort by lastMessage if it exists, otherwise by createdAt
+    return conversations.sort((a, b) => {
+      const aTime = a.lastMessage?.createdAt?.toMillis() || a.createdAt?.toMillis() || 0;
+      const bTime = b.lastMessage?.createdAt?.toMillis() || b.createdAt?.toMillis() || 0;
+      return bTime - aTime;
+    });
   },
 
   subscribeToConversations(callback: (conversations: Conversation[]) => void) {
@@ -186,7 +193,7 @@ export const communityChatService = {
     const q = query(
       collection(db, 'groupChats'),
       where('members', 'array-contains', userId),
-      orderBy('lastMessage.createdAt', 'desc'),
+      orderBy('createdAt', 'desc'),
       limit(50)
     );
 
@@ -195,7 +202,15 @@ export const communityChatService = {
         id: doc.id,
         ...doc.data(),
       } as Conversation));
-      callback(conversations);
+
+      // Sort by lastMessage if it exists, otherwise by createdAt
+      const sorted = conversations.sort((a, b) => {
+        const aTime = a.lastMessage?.createdAt?.toMillis() || a.createdAt?.toMillis() || 0;
+        const bTime = b.lastMessage?.createdAt?.toMillis() || b.createdAt?.toMillis() || 0;
+        return bTime - aTime;
+      });
+
+      callback(sorted);
     });
   },
 
