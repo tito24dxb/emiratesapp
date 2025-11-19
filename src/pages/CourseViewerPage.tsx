@@ -67,11 +67,23 @@ function CourseViewerPageContent() {
     if (!courseId) return;
 
     try {
+      console.log('CourseViewer: Loading course with ID:', courseId);
       const courseData = await getCourseById(courseId);
+      console.log('CourseViewer: Course data received:', courseData);
       setCourse(courseData);
+
+      if (!courseData) {
+        console.error('CourseViewer: Course not found in database');
+        setLoading(false);
+        return;
+      }
+
+      console.log('CourseViewer: Course video_url:', courseData.video_url);
+      console.log('CourseViewer: Course pdf_url:', courseData.pdf_url);
 
       if (currentUser) {
         const unlocked = await isCourseUnlocked(currentUser.uid, courseData);
+        console.log('CourseViewer: Course unlocked:', unlocked);
         setIsUnlocked(unlocked);
       }
 
@@ -146,14 +158,46 @@ function CourseViewerPageContent() {
   };
 
   const handleVideoWatchComplete = async () => {
-    if (currentUser && courseId && course) {
+    console.log('Mark Complete button clicked');
+    if (!currentUser) {
+      console.error('No current user');
+      alert('Please log in to mark progress');
+      return;
+    }
+    if (!courseId) {
+      console.error('No course ID');
+      return;
+    }
+    if (!course) {
+      console.error('No course data');
+      return;
+    }
+
+    try {
+      console.log('Marking course complete:', { userId: currentUser.uid, courseId, course: course.title });
+
       setVideoWatched(true);
       setWatchProgress(100);
+
       const moduleId = course.main_module_id || course.submodule_id;
+      console.log('Module ID for progress:', moduleId);
+
       if (moduleId) {
+        console.log('Tracking course progress...');
         await trackCourseProgress(currentUser.uid, courseId, moduleId, 100, 100);
+
+        console.log('Updating course progress...');
         await updateCourseProgress(currentUser.uid, courseId, 100);
+
+        console.log('✅ Course marked as complete!');
+        alert('Course marked as complete! ✅');
+      } else {
+        console.warn('No module ID found, cannot track progress');
+        alert('⚠️ Course marked but no module linked');
       }
+    } catch (error) {
+      console.error('Error marking course complete:', error);
+      alert('Failed to mark course complete. Check console for details.');
     }
   };
 

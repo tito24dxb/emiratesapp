@@ -10,6 +10,7 @@ import { useApp } from '../context/AppContext';
 import { updateLastAccessed, isEnrolledInModule } from '../services/enrollmentService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import ModuleExamTrigger from '../components/ModuleExamTrigger';
 
 export default function MainModuleViewerPage() {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -154,6 +155,15 @@ export default function MainModuleViewerPage() {
             )}
           </div>
         </div>
+
+        {currentUser && moduleId && mainModule && courses.length > 0 && (
+          <ModuleExamTrigger
+            userId={currentUser.uid}
+            courseIds={courses.map(c => c.id)}
+            moduleId={moduleId}
+            moduleName={mainModule.title}
+          />
+        )}
 
         {courses.length > 0 && (
           <div className="mb-8">
