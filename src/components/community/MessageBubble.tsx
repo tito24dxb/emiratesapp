@@ -29,7 +29,7 @@ export default function MessageBubble({
   if (message.deleted) {
     return (
       <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className="max-w-md px-4 py-2 rounded-2xl bg-gray-100 border border-gray-200">
+        <div className="max-w-md px-4 py-2 rounded-2xl glass-bubble border border-gray-200">
           <p className="text-gray-400 italic text-sm">This message was deleted</p>
         </div>
       </div>
@@ -47,7 +47,7 @@ export default function MessageBubble({
           className={`relative px-4 py-3 rounded-3xl shadow-xl backdrop-blur-2xl ${
             isOwnMessage
               ? 'bg-[#D71921]/90 text-white border border-white/20'
-              : 'bg-white/80 border border-white/30 text-gray-900'
+              : 'glass-card border border-white/30 text-gray-900'
           }`}
         >
           {message.replyTo && (
@@ -74,7 +74,7 @@ export default function MessageBubble({
                   className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
                     isOwnMessage
                       ? 'bg-white bg-opacity-20 hover:bg-opacity-30'
-                      : 'bg-gray-50 hover:bg-gray-100'
+                      : 'glass-light hover:glass-bubble'
                   }`}
                 >
                   <div className="flex-1 min-w-0">
@@ -101,7 +101,7 @@ export default function MessageBubble({
                   className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
                     isOwnMessage
                       ? 'bg-white bg-opacity-20 hover:bg-opacity-30'
-                      : 'bg-gray-100 hover:bg-gray-200'
+                      : 'glass-bubble hover:glass-light'
                   }`}
                 >
                   <span>{emoji}</span>
@@ -136,10 +136,10 @@ export default function MessageBubble({
           </div>
 
           <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="flex flex-col gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-lg">
+            <div className="flex flex-col gap-1 glass-card border border-gray-200 rounded-lg p-1 shadow-lg">
               <button
                 onClick={() => setShowReactions(!showReactions)}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                className="p-1.5 hover:glass-bubble rounded transition-colors"
                 title="Add reaction"
               >
                 <Smile className="w-4 h-4 text-gray-600" />
@@ -147,7 +147,7 @@ export default function MessageBubble({
 
               <button
                 onClick={onLike}
-                className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                className="p-1.5 hover:glass-bubble rounded transition-colors"
                 title="Like"
               >
                 <Heart
@@ -160,7 +160,7 @@ export default function MessageBubble({
               {!isOwnMessage && (
                 <button
                   onClick={onReport}
-                  className="p-1.5 hover:bg-gray-100 rounded transition-colors"
+                  className="p-1.5 hover:glass-bubble rounded transition-colors"
                   title="Report"
                 >
                   <Flag className="w-4 h-4 text-gray-600" />
@@ -170,7 +170,7 @@ export default function MessageBubble({
           </div>
 
           {showReactions && (
-            <div className="absolute -top-12 left-0 bg-white border border-gray-200 rounded-lg p-2 flex gap-2 shadow-xl z-10">
+            <div className="absolute -top-12 left-0 glass-card border border-gray-200 rounded-lg p-2 flex gap-2 shadow-xl z-10">
               {QUICK_REACTIONS.map((emoji) => (
                 <button
                   key={emoji}

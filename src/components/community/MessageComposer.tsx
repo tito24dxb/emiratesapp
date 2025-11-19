@@ -102,15 +102,15 @@ export default function MessageComposer({
   };
 
   return (
-    <div className="bg-white relative">
+    <div className="glass-light relative">
       {showEmojiPicker && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 p-4 max-h-64 overflow-y-auto">
+        <div className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-card backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 p-4 max-h-64 overflow-y-auto">
           <div className="grid grid-cols-8 gap-2">
             {IOS_EMOJIS.map((emoji, index) => (
               <button
                 key={index}
                 onClick={() => handleEmojiSelect(emoji)}
-                className="text-3xl p-2 hover:bg-gray-100/50 rounded-2xl transition-all transform hover:scale-110 active:scale-95"
+                className="text-3xl p-2 hover:glass-bubble rounded-2xl transition-all transform hover:scale-110 active:scale-95"
               >
                 {emoji}
               </button>
@@ -120,7 +120,7 @@ export default function MessageComposer({
       )}
 
       {imagePreview && (
-        <div className="mb-3 flex items-center gap-3 p-3 bg-white/60 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg">
+        <div className="mb-3 flex items-center gap-3 p-3 glass-light backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg">
           <img
             src={imagePreview}
             alt="Preview"
@@ -147,7 +147,7 @@ export default function MessageComposer({
       <div className="flex items-end gap-3">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex-shrink-0"
+          className="p-3 glass-bubble hover:glass-light rounded-lg transition-all flex-shrink-0"
           disabled={sending}
         >
           <ImageIcon className="w-5 h-5 text-gray-600" />
@@ -155,7 +155,7 @@ export default function MessageComposer({
 
         <button
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex-shrink-0"
+          className="p-3 glass-bubble hover:glass-light rounded-lg transition-all flex-shrink-0"
           disabled={sending}
         >
           <Smile className="w-5 h-5 text-gray-600" />
@@ -176,7 +176,7 @@ export default function MessageComposer({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             rows={2}
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-[#D71921] resize-none text-base"
+            className="w-full px-4 py-3 glass-light border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-[#D71921] resize-none text-base"
             disabled={sending}
             style={{ minHeight: '60px', maxHeight: '120px' }}
           />
