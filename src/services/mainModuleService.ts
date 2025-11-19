@@ -22,7 +22,16 @@ export interface MainModule {
   course_id?: string;
   course1_id?: string;
   course2_id?: string;
-  submodule_id?: string;
+  submodules?: {
+    id: string;
+    title: string;
+    description: string;
+    coverImage: string;
+    course_id?: string;
+    course1_id?: string;
+    course2_id?: string;
+    order: number;
+  }[];
   created_at: string;
   updated_at: string;
 }
@@ -50,7 +59,16 @@ export const createMainModule = async (data: {
   course_id?: string;
   course1_id?: string;
   course2_id?: string;
-  submodule_id?: string;
+  submodules?: {
+    id: string;
+    title: string;
+    description: string;
+    coverImage: string;
+    course_id?: string;
+    course1_id?: string;
+    course2_id?: string;
+    order: number;
+  }[];
 }): Promise<string> => {
   try {
     console.log('createMainModule: Starting creation with data:', data);
@@ -72,7 +90,7 @@ export const createMainModule = async (data: {
     if (data.course_id) mainModule.course_id = data.course_id;
     if (data.course1_id) mainModule.course1_id = data.course1_id;
     if (data.course2_id) mainModule.course2_id = data.course2_id;
-    if (data.submodule_id) mainModule.submodule_id = data.submodule_id;
+    if (data.submodules && data.submodules.length > 0) mainModule.submodules = data.submodules;
 
     console.log('createMainModule: Module object to save:', mainModule);
     console.log('createMainModule: Saving to collection path: main_modules');

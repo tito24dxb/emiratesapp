@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Upload, FolderPlus, Image as ImageIcon, Check } from 'lucide-react';
+import { ArrowLeft, Upload, FolderPlus, Image as ImageIcon, Check, Plus, Trash2, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../lib/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
@@ -31,8 +31,24 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
   const [availableCourses, setAvailableCourses] = useState<any[]>([]);
   const [selectedCourse1, setSelectedCourse1] = useState('');
   const [selectedCourse2, setSelectedCourse2] = useState('');
-  const [selectedSubmodule, setSelectedSubmodule] = useState('');
   const [availableSubmodules, setAvailableSubmodules] = useState<any[]>([]);
+
+  const [submodules, setSubmodules] = useState<{
+    id: string;
+    title: string;
+    description: string;
+    coverImage: string;
+    course1_id: string;
+    course2_id: string;
+    order: number;
+  }[]>([]);
+  const [showSubmoduleForm, setShowSubmoduleForm] = useState(false);
+  const [submoduleTitle, setSubmoduleTitle] = useState('');
+  const [submoduleDescription, setSubmoduleDescription] = useState('');
+  const [submoduleCoverImage, setSubmoduleCoverImage] = useState('');
+  const [submoduleCourse1, setSubmoduleCourse1] = useState('');
+  const [submoduleCourse2, setSubmoduleCourse2] = useState('');
+  const submoduleFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -122,8 +138,19 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
           moduleData.course_id = selectedCourse1;
         }
 
-        if (selectedSubmodule) {
-          moduleData.submodule_id = selectedSubmodule;
+        if (submodules.length > 0) {
+          moduleData.submodules = submodules.map(sub => ({
+            id: sub.id,
+            title: sub.title,
+            description: sub.description,
+            coverImage: sub.coverImage,
+            ...(sub.course1_id && sub.course2_id
+              ? { course1_id: sub.course1_id, course2_id: sub.course2_id }
+              : sub.course1_id
+              ? { course_id: sub.course1_id }
+              : {}),
+            order: sub.order
+          }));
         }
 
         await createMainModule(moduleData);
@@ -169,7 +196,57 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
     setSubmoduleNumber(1);
     setSelectedCourse1('');
     setSelectedCourse2('');
-    setSelectedSubmodule('');
+    setSubmodules([]);
+    setShowSubmoduleForm(false);
+    resetSubmoduleForm();
+  };
+
+  const resetSubmoduleForm = () => {
+    setSubmoduleTitle('');
+    setSubmoduleDescription('');
+    setSubmoduleCoverImage('');
+    setSubmoduleCourse1('');
+    setSubmoduleCourse2('');
+  };
+
+  const handleAddSubmodule = () => {
+    if (!submoduleTitle.trim() || !submoduleDescription.trim() || !submoduleCoverImage) {
+      alert('Please fill in all submodule fields and upload a cover image');
+      return;
+    }
+
+    const newSubmodule = {
+      id: `sub_${Date.now()}`,
+      title: submoduleTitle.trim(),
+      description: submoduleDescription.trim(),
+      coverImage: submoduleCoverImage,
+      course1_id: submoduleCourse1,
+      course2_id: submoduleCourse2,
+      order: submodules.length + 1
+    };
+
+    setSubmodules([...submodules, newSubmodule]);
+    resetSubmoduleForm();
+    setShowSubmoduleForm(false);
+  };
+
+  const handleRemoveSubmodule = (id: string) => {
+    setSubmodules(submodules.filter(sub => sub.id !== id));
+  };
+
+  const handleSubmoduleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (PNG or JPG)');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSubmoduleCoverImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -453,27 +530,169 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                       </div>
                     )}
 
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-3">
-                        Link Submodule (Optional)
-                      </label>
-                      <select
-                        value={selectedSubmodule}
-                        onChange={(e) => setSelectedSubmodule(e.target.value)}
-                        className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
-                      >
-                        <option value="">No submodule selected</option>
-                        {availableSubmodules.map((submodule) => (
-                          <option key={submodule.id} value={submodule.id}>
-                            {submodule.title || 'Untitled Submodule'}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
                     <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-xl">
                       <strong>Note:</strong> If you select 2 videos, they will be stored as course1_id and course2_id. If you select only 1 video, it will be stored as course_id.
                     </div>
+                  </div>
+
+                  <div className="space-y-4 p-6 glass-light rounded-2xl border-2 border-green-200">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold text-gray-900">Submodules ({submodules.length})</h3>
+                      <button
+                        type="button"
+                        onClick={() => setShowSubmoduleForm(!showSubmoduleForm)}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors"
+                      >
+                        <Plus className="w-4 h-4" />
+                        Add Submodule
+                      </button>
+                    </div>
+
+                    {submodules.map((sub, index) => (
+                      <div key={sub.id} className="p-4 bg-white border-2 border-gray-200 rounded-xl">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex gap-4 flex-1">
+                            <img src={sub.coverImage} alt={sub.title} className="w-20 h-20 rounded-lg object-cover" />
+                            <div className="flex-1">
+                              <h4 className="font-bold text-gray-900">{sub.title}</h4>
+                              <p className="text-sm text-gray-600 mt-1">{sub.description}</p>
+                              <div className="flex gap-2 mt-2 text-xs text-gray-500">
+                                {sub.course1_id && <span className="px-2 py-1 bg-blue-100 rounded">Course 1</span>}
+                                {sub.course2_id && <span className="px-2 py-1 bg-blue-100 rounded">Course 2</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSubmodule(sub.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    {showSubmoduleForm && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="p-6 bg-green-50 border-2 border-green-300 rounded-xl space-y-4"
+                      >
+                        <h4 className="font-bold text-gray-900">New Submodule</h4>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
+                          <input
+                            type="text"
+                            value={submoduleTitle}
+                            onChange={(e) => setSubmoduleTitle(e.target.value)}
+                            placeholder="e.g., Emergency Procedures"
+                            className="w-full px-4 py-3 glass-light border-2 border-gray-200 rounded-xl"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                          <textarea
+                            value={submoduleDescription}
+                            onChange={(e) => setSubmoduleDescription(e.target.value)}
+                            placeholder="Describe this submodule..."
+                            rows={3}
+                            className="w-full px-4 py-3 glass-light border-2 border-gray-200 rounded-xl resize-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image</label>
+                          <input
+                            ref={submoduleFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleSubmoduleImageUpload}
+                            className="hidden"
+                          />
+                          {submoduleCoverImage ? (
+                            <div className="relative rounded-xl overflow-hidden">
+                              <img src={submoduleCoverImage} alt="Preview" className="w-full h-32 object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => submoduleFileInputRef.current?.click()}
+                                className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center text-white font-semibold"
+                              >
+                                Change Image
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => submoduleFileInputRef.current?.click()}
+                              className="w-full p-4 glass-light border-2 border-dashed border-gray-300 rounded-xl hover:border-green-500 transition-all"
+                            >
+                              <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                              <p className="text-sm text-gray-600">Upload Image</p>
+                            </button>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">Course 1 (Optional)</label>
+                          <select
+                            value={submoduleCourse1}
+                            onChange={(e) => setSubmoduleCourse1(e.target.value)}
+                            className="w-full px-4 py-3 glass-light border-2 border-gray-200 rounded-xl"
+                          >
+                            <option value="">No course selected</option>
+                            {availableCourses.map((course) => (
+                              <option key={course.id} value={course.id}>
+                                {course.title || course.name || 'Untitled Course'}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {submoduleCourse1 && (
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">Course 2 (Optional)</label>
+                            <select
+                              value={submoduleCourse2}
+                              onChange={(e) => setSubmoduleCourse2(e.target.value)}
+                              className="w-full px-4 py-3 glass-light border-2 border-gray-200 rounded-xl"
+                            >
+                              <option value="">No second course</option>
+                              {availableCourses
+                                .filter(course => course.id !== submoduleCourse1)
+                                .map((course) => (
+                                  <option key={course.id} value={course.id}>
+                                    {course.title || course.name || 'Untitled Course'}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                        )}
+
+                        <div className="flex gap-3">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowSubmoduleForm(false);
+                              resetSubmoduleForm();
+                            }}
+                            className="flex-1 px-4 py-3 glass-light border-2 border-gray-300 text-gray-700 rounded-xl font-semibold"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleAddSubmodule}
+                            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700"
+                          >
+                            Add Submodule
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 p-4 sm:p-5 glass-light rounded-2xl border border-gray-200">
