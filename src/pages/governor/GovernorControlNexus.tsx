@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, AlertCircle, PowerOff } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Shield, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -11,7 +10,6 @@ import BackupControl from '../../components/governor/nexus/BackupControl';
 import AIAssistantPanel from '../../components/governor/nexus/AIAssistantPanel';
 import AILogsViewer from '../../components/governor/nexus/AILogsViewer';
 import UserManager from '../../components/governor/nexus/UserManager';
-import SystemFlags from '../../components/governor/nexus/SystemFlags';
 import CourseManager from '../../components/governor/nexus/CourseManager';
 import SupportChatManager from '../../components/governor/nexus/SupportChatManager';
 import FinancePanel from '../../components/governor/nexus/FinancePanel';
@@ -19,7 +17,7 @@ import AnnouncementManager from './AnnouncementManager';
 import BugReportsManager from '../../components/governor/nexus/BugReportsManager';
 import ModuleManager from '../../components/governor/nexus/ModuleManager';
 import DataInitializer from '../../components/governor/nexus/DataInitializer';
-import FeatureControl from '../../components/governor/nexus/FeatureControl';
+import FeatureShutdownControl from './FeatureShutdownControl';
 
 interface Announcement {
   active: boolean;
@@ -29,7 +27,6 @@ interface Announcement {
 }
 
 export default function GovernorControlNexus() {
-  const navigate = useNavigate();
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -116,38 +113,13 @@ export default function GovernorControlNexus() {
 
         <AILogsViewer />
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <UserManager />
-          <SystemFlags />
-        </div>
+        <UserManager />
 
         <CourseManager />
 
         <AnnouncementManager />
 
-        <FeatureControl />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-light rounded-2xl p-6 border-2 border-gray-200 hover:border-red-500 transition-all cursor-pointer"
-          onClick={() => navigate('/governor/shutdown')}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
-                <PowerOff className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Feature Shutdown Control</h3>
-                <p className="text-gray-600 text-sm">Emergency maintenance controls for all major features</p>
-              </div>
-            </div>
-            <div className="text-red-600 font-bold text-sm px-4 py-2 bg-red-50 rounded-lg">
-              EMERGENCY
-            </div>
-          </div>
-        </motion.div>
+        <FeatureShutdownControl />
 
         <BugReportsManager />
 
