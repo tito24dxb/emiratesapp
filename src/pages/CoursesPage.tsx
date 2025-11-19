@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { BookOpen, ChevronDown, ChevronRight, Folder, Layers, Eye, EyeOff, CheckCircle, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { enrollInModule, isEnrolledInModule } from '../services/enrollmentService';
+import { enrollInModule } from '../services/moduleProgressService';
 import FeatureAccessGuard from '../components/FeatureAccessGuard';
 
 interface Submodule {
@@ -50,6 +50,17 @@ function CoursesPageContent() {
     loadMainModules();
   }, [currentUser, navigate]);
 
+  const checkEnrollment = async (userId: string, moduleId: string): Promise<boolean> => {
+    try {
+      const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
+      const enrollmentSnap = await getDoc(enrollmentRef);
+      return enrollmentSnap.exists();
+    } catch (error) {
+      console.error('Error checking enrollment:', error);
+      return false;
+    }
+  };
+
   const loadMainModules = async () => {
     try {
       setLoading(true);
@@ -61,7 +72,7 @@ function CoursesPageContent() {
         mainModulesSnap.docs.map(async (doc) => {
           const mainModuleData = doc.data();
 
-          const isEnrolled = currentUser ? await isEnrolledInModule(currentUser.uid, doc.id) : false;
+          const isEnrolled = currentUser ? await checkEnrollment(currentUser.uid, doc.id) : false;
 
           const submodulesRef = collection(db, 'submodules');
           const submodulesQuery = query(
@@ -72,7 +83,7 @@ function CoursesPageContent() {
 
           const submodulesData: Submodule[] = await Promise.all(
             submodulesSnap.docs.map(async (subDoc) => {
-              const isSubEnrolled = currentUser ? await isEnrolledInModule(currentUser.uid, subDoc.id) : false;
+              const isSubEnrolled = currentUser ? await checkEnrollment(currentUser.uid, subDoc.id) : false;
               return {
                 id: subDoc.id,
                 ...subDoc.data(),
@@ -139,7 +150,7 @@ function CoursesPageContent() {
     }
 
     try {
-      await enrollInModule(currentUser.uid, moduleId, moduleType);
+      await enrollInModule(currentUser.uid, moduleId);
       await loadMainModules();
       navigate(`/${moduleType === 'main_module' ? 'main-modules' : 'submodules'}/${moduleId}`);
     } catch (error) {
