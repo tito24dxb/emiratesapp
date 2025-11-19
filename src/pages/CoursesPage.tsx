@@ -1,36 +1,34 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronDown, ChevronRight, Folder, FileText, Play } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronRight, Folder, Layers, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-
-interface Course {
-  id: string;
-  title: string;
-  description?: string;
-  thumbnail?: string;
-  video_url?: string;
-  order: number;
-}
 
 interface Submodule {
   id: string;
-  title: string;
-  description?: string;
+  type: string;
+  parentModuleId: string;
   order: number;
-  courses: Course[];
+  title: string;
+  description: string;
+  coverImage: string;
+  created_at: string;
+  updated_at: string;
   expanded: boolean;
 }
 
 interface MainModule {
   id: string;
+  type: string;
   title: string;
-  description?: string;
-  order: number;
+  description: string;
+  coverImage: string;
+  visible: boolean;
+  created_at: string;
+  updated_at: string;
   submodules: Submodule[];
-  courses: Course[];
   expanded: boolean;
 }
 
@@ -45,75 +43,52 @@ export default function CoursesPage() {
       navigate('/coach-dashboard');
       return;
     }
-    loadHierarchy();
+    loadMainModules();
   }, [currentUser, navigate]);
 
-  const loadHierarchy = async () => {
+  const loadMainModules = async () => {
     try {
       setLoading(true);
 
       const mainModulesRef = collection(db, 'main_modules');
-      const mainModulesQuery = query(mainModulesRef, orderBy('order', 'asc'));
-      const mainModulesSnap = await getDocs(mainModulesQuery);
+      const mainModulesSnap = await getDocs(mainModulesRef);
 
       const mainModulesData: MainModule[] = await Promise.all(
         mainModulesSnap.docs.map(async (doc) => {
           const mainModuleData = doc.data();
 
-          const mainModuleCoursesRef = collection(db, 'main_modules', doc.id, 'courses');
-          const mainModuleCoursesQuery = query(mainModuleCoursesRef, orderBy('order', 'asc'));
-          const mainModuleCoursesSnap = await getDocs(mainModuleCoursesQuery);
-          const mainModuleCourses = mainModuleCoursesSnap.docs.map(courseDoc => ({
-            id: courseDoc.id,
-            ...courseDoc.data(),
-            order: courseDoc.data().order || 0
-          } as Course));
-
           const submodulesRef = collection(db, 'submodules');
-          const submodulesQuery = query(submodulesRef, orderBy('order', 'asc'));
+          const submodulesQuery = query(
+            submodulesRef,
+            where('parentModuleId', '==', doc.id)
+          );
           const submodulesSnap = await getDocs(submodulesQuery);
 
-          const submodulesData: Submodule[] = await Promise.all(
-            submodulesSnap.docs
-              .filter(subDoc => subDoc.data().main_module_id === doc.id)
-              .map(async (subDoc) => {
-                const submoduleData = subDoc.data();
-
-                const submoduleCoursesRef = collection(db, 'submodules', subDoc.id, 'courses');
-                const submoduleCoursesQuery = query(submoduleCoursesRef, orderBy('order', 'asc'));
-                const submoduleCoursesSnap = await getDocs(submoduleCoursesQuery);
-                const submoduleCourses = submoduleCoursesSnap.docs.map(courseDoc => ({
-                  id: courseDoc.id,
-                  ...courseDoc.data(),
-                  order: courseDoc.data().order || 0
-                } as Course));
-
-                return {
-                  id: subDoc.id,
-                  title: submoduleData.title || 'Untitled Submodule',
-                  description: submoduleData.description,
-                  order: submoduleData.order || 0,
-                  courses: submoduleCourses,
-                  expanded: false
-                };
-              })
-          );
+          const submodulesData: Submodule[] = submodulesSnap.docs.map((subDoc) => ({
+            id: subDoc.id,
+            ...subDoc.data(),
+            expanded: false
+          } as Submodule)).sort((a, b) => a.order - b.order);
 
           return {
             id: doc.id,
-            title: mainModuleData.title || 'Untitled Main Module',
-            description: mainModuleData.description,
-            order: mainModuleData.order || 0,
+            type: mainModuleData.type || 'main',
+            title: mainModuleData.title || 'Untitled Module',
+            description: mainModuleData.description || '',
+            coverImage: mainModuleData.coverImage || '',
+            visible: mainModuleData.visible !== false,
+            created_at: mainModuleData.created_at || '',
+            updated_at: mainModuleData.updated_at || '',
             submodules: submodulesData,
-            courses: mainModuleCourses,
             expanded: false
           };
         })
       );
 
       setMainModules(mainModulesData);
+      console.log('Loaded main modules:', mainModulesData.length);
     } catch (error) {
-      console.error('Error loading course hierarchy:', error);
+      console.error('Error loading main modules:', error);
     } finally {
       setLoading(false);
     }
@@ -142,8 +117,12 @@ export default function CoursesPage() {
     );
   };
 
-  const handleCourseClick = (courseId: string) => {
-    navigate(`/course/${courseId}`);
+  const handleMainModuleClick = (moduleId: string) => {
+    navigate(`/main-modules/${moduleId}`);
+  };
+
+  const handleSubmoduleClick = (submoduleId: string) => {
+    navigate(`/submodules/${submoduleId}`);
   };
 
   if (loading) {
@@ -151,7 +130,7 @@ export default function CoursesPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#D71920] border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading course structure...</p>
+          <p className="text-gray-600">Loading modules...</p>
         </div>
       </div>
     );
@@ -161,174 +140,145 @@ export default function CoursesPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Courses</h1>
-          <p className="text-gray-600">Explore our structured learning path</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Learning Modules</h1>
+          <p className="text-gray-600">Explore our comprehensive training modules</p>
         </div>
 
         {mainModules.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-bold text-gray-800 mb-2">No Content Available</h3>
-            <p className="text-gray-600">Course content will be added soon.</p>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">No Modules Available</h3>
+            <p className="text-gray-600">Training modules will be added soon.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {mainModules.map((mainModule) => (
-              <div key={mainModule.id} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                <div
-                  className="p-6 cursor-pointer hover:bg-gray-50 transition flex items-center justify-between"
-                  onClick={() => toggleMainModule(mainModule.id)}
-                >
-                  <div className="flex items-center gap-4 flex-1">
-                    <div className="p-3 bg-[#D71920] rounded-lg">
-                      <Folder className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{mainModule.title}</h2>
-                      {mainModule.description && (
-                        <p className="text-sm text-gray-600 mt-1">{mainModule.description}</p>
-                      )}
-                      <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                        <span>{mainModule.courses.length} direct courses</span>
-                        <span>{mainModule.submodules.length} submodules</span>
+              <motion.div
+                key={mainModule.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-transparent hover:border-[#D71920] transition"
+              >
+                <div className="p-6">
+                  <div className="flex items-start gap-6">
+                    {mainModule.coverImage && (
+                      <img
+                        src={mainModule.coverImage}
+                        alt={mainModule.title}
+                        className="w-32 h-32 object-cover rounded-xl shadow-md flex-shrink-0"
+                      />
+                    )}
+
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-xl">
+                            <Folder className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <h2 className="text-2xl font-bold text-gray-900">{mainModule.title}</h2>
+                            <div className="flex items-center gap-3 mt-1">
+                              <span className="flex items-center gap-1 text-sm text-gray-500">
+                                <Layers className="w-4 h-4" />
+                                {mainModule.submodules.length} submodules
+                              </span>
+                              <span className={`flex items-center gap-1 text-sm ${mainModule.visible ? 'text-green-600' : 'text-gray-400'}`}>
+                                {mainModule.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                                {mainModule.visible ? 'Visible' : 'Hidden'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => toggleMainModule(mainModule.id)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition"
+                        >
+                          {mainModule.expanded ? (
+                            <ChevronDown className="w-6 h-6 text-gray-600" />
+                          ) : (
+                            <ChevronRight className="w-6 h-6 text-gray-600" />
+                          )}
+                        </button>
                       </div>
+
+                      <p className="text-gray-700 mb-4 leading-relaxed">{mainModule.description}</p>
+
+                      <button
+                        onClick={() => handleMainModuleClick(mainModule.id)}
+                        className="px-6 py-2.5 bg-[#D71920] hover:bg-[#B91518] text-white rounded-xl font-semibold transition shadow-md hover:shadow-lg"
+                      >
+                        View Module Details
+                      </button>
                     </div>
                   </div>
-                  {mainModule.expanded ? (
-                    <ChevronDown className="w-6 h-6 text-gray-400" />
-                  ) : (
-                    <ChevronRight className="w-6 h-6 text-gray-400" />
-                  )}
                 </div>
 
                 <AnimatePresence>
-                  {mainModule.expanded && (
+                  {mainModule.expanded && mainModule.submodules.length > 0 && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="border-t border-gray-200 bg-gray-50"
+                      className="border-t border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100"
                     >
-                      <div className="p-6 space-y-4">
-                        {mainModule.courses.length > 0 && (
-                          <div>
-                            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                              <FileText className="w-5 h-5" />
-                              Direct Courses
-                            </h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                              {mainModule.courses.map((course) => (
-                                <div
-                                  key={course.id}
-                                  onClick={() => handleCourseClick(course.id)}
-                                  className="bg-white rounded-lg p-4 shadow hover:shadow-lg transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
-                                >
-                                  {course.thumbnail && (
+                      <div className="p-6">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                          <Layers className="w-5 h-5 text-[#D71920]" />
+                          Submodules ({mainModule.submodules.length})
+                        </h3>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {mainModule.submodules.map((submodule) => (
+                            <motion.div
+                              key={submodule.id}
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-2 border-transparent hover:border-blue-500"
+                            >
+                              <div className="p-4">
+                                <div className="flex items-start gap-3">
+                                  {submodule.coverImage && (
                                     <img
-                                      src={course.thumbnail}
-                                      alt={course.title}
-                                      className="w-full h-32 object-cover rounded-lg mb-3"
+                                      src={submodule.coverImage}
+                                      alt={submodule.title}
+                                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
                                     />
                                   )}
-                                  <h4 className="font-bold text-gray-900 mb-1">{course.title}</h4>
-                                  {course.description && (
-                                    <p className="text-sm text-gray-600 line-clamp-2">{course.description}</p>
-                                  )}
-                                  {course.video_url && (
-                                    <div className="mt-2 flex items-center gap-1 text-xs text-[#D71920]">
-                                      <Play className="w-3 h-3" />
-                                      <span>Video included</span>
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
 
-                        {mainModule.submodules.length > 0 && (
-                          <div>
-                            <h3 className="text-lg font-bold text-gray-800 mb-3">Submodules</h3>
-                            <div className="space-y-3">
-                              {mainModule.submodules.map((submodule) => (
-                                <div key={submodule.id} className="bg-white rounded-lg shadow overflow-hidden">
-                                  <div
-                                    className="p-4 cursor-pointer hover:bg-gray-50 transition flex items-center justify-between"
-                                    onClick={() => toggleSubmodule(mainModule.id, submodule.id)}
-                                  >
-                                    <div className="flex items-center gap-3 flex-1">
-                                      <div className="p-2 bg-blue-100 rounded">
-                                        <Folder className="w-5 h-5 text-blue-600" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className="p-2 bg-blue-100 rounded-lg">
+                                          <Folder className="w-4 h-4 text-blue-600" />
+                                        </div>
+                                        <h4 className="font-bold text-gray-900 text-sm">{submodule.title}</h4>
                                       </div>
-                                      <div>
-                                        <h4 className="font-bold text-gray-900">{submodule.title}</h4>
-                                        {submodule.description && (
-                                          <p className="text-sm text-gray-600">{submodule.description}</p>
-                                        )}
-                                        <span className="text-xs text-gray-500">{submodule.courses.length} courses</span>
-                                      </div>
+                                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-semibold">
+                                        #{submodule.order}
+                                      </span>
                                     </div>
-                                    {submodule.expanded ? (
-                                      <ChevronDown className="w-5 h-5 text-gray-400" />
-                                    ) : (
-                                      <ChevronRight className="w-5 h-5 text-gray-400" />
-                                    )}
+
+                                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{submodule.description}</p>
+
+                                    <button
+                                      onClick={() => handleSubmoduleClick(submodule.id)}
+                                      className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-semibold transition"
+                                    >
+                                      View Submodule
+                                    </button>
                                   </div>
-
-                                  <AnimatePresence>
-                                    {submodule.expanded && (
-                                      <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: 'auto', opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="border-t border-gray-200 bg-gray-50 p-4"
-                                      >
-                                        {submodule.courses.length === 0 ? (
-                                          <p className="text-center text-gray-500 py-4">No courses in this submodule</p>
-                                        ) : (
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                            {submodule.courses.map((course) => (
-                                              <div
-                                                key={course.id}
-                                                onClick={() => handleCourseClick(course.id)}
-                                                className="bg-white rounded-lg p-3 shadow hover:shadow-md transition cursor-pointer border-2 border-transparent hover:border-blue-500"
-                                              >
-                                                {course.thumbnail && (
-                                                  <img
-                                                    src={course.thumbnail}
-                                                    alt={course.title}
-                                                    className="w-full h-24 object-cover rounded mb-2"
-                                                  />
-                                                )}
-                                                <h5 className="font-semibold text-gray-900 text-sm mb-1">{course.title}</h5>
-                                                {course.description && (
-                                                  <p className="text-xs text-gray-600 line-clamp-2">{course.description}</p>
-                                                )}
-                                                {course.video_url && (
-                                                  <div className="mt-2 flex items-center gap-1 text-xs text-blue-600">
-                                                    <Play className="w-3 h-3" />
-                                                    <span>Video included</span>
-                                                  </div>
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        )}
-                                      </motion.div>
-                                    )}
-                                  </AnimatePresence>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
