@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Upload, FolderPlus, Plus } from 'lucide-react';
+import { ArrowLeft, Upload, FolderPlus, Image as ImageIcon, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   createMainModule,
@@ -115,64 +115,83 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="glass-light rounded-2xl shadow-2xl"
+          className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8"
         >
-            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-[#D71920] to-[#B91518]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 glass-light/20 rounded-lg flex items-center justify-center">
-                  <FolderPlus className="w-6 h-6 text-white" />
+          <div className="glass-light rounded-3xl shadow-2xl overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 px-6 sm:px-8 py-8 sm:py-12">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <FolderPlus className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white">Create Training Module</h2>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">Create Training Module</h1>
+                  <p className="text-blue-100 text-sm sm:text-base mt-1">Build comprehensive training content for your students</p>
+                </div>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 hover:glass-light/20 rounded-lg transition"
-              >
-                <X className="w-5 h-5 text-white" />
-              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6 sm:space-y-8">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-3">
-                  Module Type *
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Module Type
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <button
                     type="button"
                     onClick={() => setModuleType('main')}
-                    className={`p-4 rounded-xl font-semibold transition border-2 ${
+                    className={`relative p-4 sm:p-6 rounded-2xl font-semibold transition-all duration-300 border-2 ${
                       moduleType === 'main'
-                        ? 'border-[#D71920] bg-[#D71920]/10 text-[#D71920]'
-                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+                        ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700 shadow-lg scale-105'
+                        : 'border-gray-200 glass-light text-gray-600 hover:border-gray-300 hover:shadow-md'
                     }`}
                   >
-                    Main Module
+                    {moduleType === 'main' && (
+                      <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <div className="font-bold text-base sm:text-lg mb-1">Main Module</div>
+                      <div className="text-xs sm:text-sm opacity-75">Create a new primary training module</div>
+                    </div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setModuleType('submodule')}
-                    className={`p-4 rounded-xl font-semibold transition border-2 ${
+                    className={`relative p-4 sm:p-6 rounded-2xl font-semibold transition-all duration-300 border-2 ${
                       moduleType === 'submodule'
-                        ? 'border-[#D71920] bg-[#D71920]/10 text-[#D71920]'
-                        : 'border-gray-200 bg-gray-50 text-gray-700 hover:border-gray-300'
+                        ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700 shadow-lg scale-105'
+                        : 'border-gray-200 glass-light text-gray-600 hover:border-gray-300 hover:shadow-md'
                     }`}
                   >
-                    Submodule
+                    {moduleType === 'submodule' && (
+                      <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <div className="font-bold text-base sm:text-lg mb-1">Submodule</div>
+                      <div className="text-xs sm:text-sm opacity-75">Add a chapter to existing module</div>
+                    </div>
                   </button>
                 </div>
               </div>
 
               {moduleType === 'submodule' && (
-                <>
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-6"
+                >
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Parent Module *
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Parent Module
                     </label>
                     <select
                       value={parentModuleId}
                       onChange={(e) => setParentModuleId(e.target.value)}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
+                      className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                       required
                     >
                       <option value="">Select parent module...</option>
@@ -185,13 +204,13 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                   </div>
 
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Submodule Number *
+                    <label className="block text-sm font-semibold text-gray-700 mb-3">
+                      Submodule Number
                     </label>
                     <select
                       value={submoduleNumber}
                       onChange={(e) => setSubmoduleNumber(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
+                      className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                         <option key={num} value={num}>
@@ -200,120 +219,133 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                       ))}
                     </select>
                   </div>
-                </>
+                </motion.div>
               )}
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Title *
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Module Title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder={moduleType === 'main' ? 'e.g., Cabin Crew Training' : 'e.g., Safety Procedures'}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
+                  placeholder={moduleType === 'main' ? 'e.g., Cabin Crew Safety Training' : 'e.g., Emergency Procedures'}
+                  className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Description *
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Description
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what this module covers..."
-                  rows={4}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition resize-none"
+                  placeholder="Describe what students will learn in this module..."
+                  rows={5}
+                  className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none resize-none"
                   required
                 />
               </div>
 
-              {moduleType === 'main' && (
-                <div>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={visible}
-                        onChange={(e) => setVisible(e.target.checked)}
-                        className="sr-only"
-                      />
-                      <div className={`w-14 h-8 rounded-full transition ${visible ? 'bg-green-500' : 'bg-gray-300'}`}>
-                        <div className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${visible ? 'translate-x-6' : ''}`} />
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-sm font-bold text-gray-700">Visible to Students</span>
-                      <p className="text-xs text-gray-500">Turn off to hide this module from students</p>
-                    </div>
-                  </label>
-                </div>
-              )}
-
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Cover Image * (PNG or JPG)
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Cover Image
                 </label>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/png, image/jpeg, image/jpg"
+                  accept="image/*"
                   onChange={handleImageUpload}
                   className="hidden"
                 />
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-[#D71920] transition"
-                >
+                <div className="space-y-4">
                   {coverImage ? (
-                    <div className="space-y-3">
+                    <div className="relative rounded-2xl overflow-hidden shadow-lg">
                       <img
                         src={coverImage}
                         alt="Cover preview"
-                        className="w-full h-48 object-cover rounded-lg"
+                        className="w-full h-48 sm:h-64 object-cover"
                       />
-                      <p className="text-sm text-gray-600">Click to change image</p>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center"
+                      >
+                        <div className="text-white text-center">
+                          <Upload className="w-8 h-8 mx-auto mb-2" />
+                          <span className="font-semibold">Change Image</span>
+                        </div>
+                      </button>
                     </div>
                   ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-12 h-12 text-gray-400 mx-auto" />
-                      <p className="text-gray-600 font-semibold">Click to upload cover image</p>
-                      <p className="text-sm text-gray-500">PNG or JPG (recommended: 1200x600px)</p>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full p-8 sm:p-12 glass-light border-2 border-dashed border-gray-300 rounded-2xl hover:border-blue-500 hover:glass-bubble transition-all group"
+                    >
+                      <ImageIcon className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 group-hover:text-blue-500 mx-auto mb-4 transition-colors" />
+                      <div className="text-center">
+                        <p className="text-gray-700 font-semibold mb-1 text-sm sm:text-base">Click to upload cover image</p>
+                        <p className="text-gray-500 text-xs sm:text-sm">PNG, JPG up to 10MB</p>
+                      </div>
+                    </button>
                   )}
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white py-3 rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm sm:text-base">Creating...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5" />
-                      <span className="text-sm sm:text-base">Create {moduleType === 'main' ? 'Main Module' : 'Submodule'}</span>
-                    </>
-                  )}
-                </button>
+              {moduleType === 'main' && (
+                <div className="flex items-center gap-3 p-4 sm:p-5 glass-light rounded-2xl border border-gray-200">
+                  <button
+                    type="button"
+                    onClick={() => setVisible(!visible)}
+                    className={`relative w-14 h-7 rounded-full transition-colors ${
+                      visible ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <div
+                      className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                        visible ? 'translate-x-7' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-sm sm:text-base">Visible to Students</div>
+                    <div className="text-xs sm:text-sm text-gray-500">Make this module available immediately</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:glass-light transition text-sm sm:text-base"
+                  className="w-full sm:flex-1 px-6 py-4 glass-light border-2 border-gray-300 text-gray-700 rounded-2xl font-bold hover:border-gray-400 hover:shadow-lg transition-all"
                 >
                   Cancel
                 </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full sm:flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Creating...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <Check className="w-5 h-5" />
+                      Create {moduleType === 'main' ? 'Main Module' : 'Submodule'}
+                    </span>
+                  )}
+                </button>
               </div>
             </form>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

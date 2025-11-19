@@ -52,7 +52,7 @@ export default function SystemAnnouncementBanner() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -50 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="fixed top-20 md:top-24 left-1/2 -translate-x-1/2 z-[60] w-[90%] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[55%] max-w-4xl px-2 sm:px-4"
+        className="fixed top-20 md:top-24 left-0 right-0 mx-auto z-[60] w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%] max-w-4xl px-2 sm:px-4"
       >
         <div className={`relative bg-gradient-to-r ${config.bgGradient} backdrop-blur-xl border ${config.borderColor} rounded-xl md:rounded-2xl shadow-2xl overflow-hidden`}>
           <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
@@ -63,7 +63,7 @@ export default function SystemAnnouncementBanner() {
                 <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
               </div>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 text-center sm:text-left">
                 <p className="text-white font-medium text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
                   {systemAnnouncement.message}
                 </p>
