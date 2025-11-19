@@ -171,7 +171,7 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-8">
+    <div className="min-h-screen pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Learning Modules</h1>
@@ -179,7 +179,7 @@ export default function CoursesPage() {
         </div>
 
         {mainModules.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-lg">
+          <div className="glass-card rounded-2xl p-12 text-center shadow-lg">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">No Modules Available</h3>
             <p className="text-gray-600">Training modules will be added soon.</p>
@@ -226,7 +226,7 @@ export default function CoursesPage() {
 
                         <button
                           onClick={() => toggleMainModule(mainModule.id)}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition"
+                          className="p-2 hover:glass-bubble rounded-lg transition"
                         >
                           {mainModule.expanded ? (
                             <ChevronDown className="w-6 h-6 text-gray-600" />
@@ -265,7 +265,7 @@ export default function CoursesPage() {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="border-t border-gray-200 bg-gray-50"
+                      className="border-t border-gray-200 glass-light"
                     >
                       <div className="p-6">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">

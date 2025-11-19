@@ -184,7 +184,7 @@ export default function ChatPage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full md:w-96 border-r border-gray-100 md:flex-shrink-0 bg-white"
+              className="w-full md:w-96 border-r border-gray-100 md:flex-shrink-0 glass-light"
             >
               <ConversationList
                 onSelectConversation={handleSelectConversation}
@@ -201,7 +201,7 @@ export default function ChatPage() {
               {selectedConversationId !== COMMUNITY_CHAT_ID && (
                 <button
                   onClick={handleBackToCommunity}
-                  className="p-2 hover:bg-white/60 rounded-xl transition-all"
+                  className="p-2 hover:glass-bubble rounded-xl transition-all"
                   title="Back to Community Chat"
                 >
                   <ArrowLeft className="w-5 h-5 text-gray-700" />
@@ -230,7 +230,7 @@ export default function ChatPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="relative">

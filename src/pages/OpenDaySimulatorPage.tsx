@@ -186,7 +186,7 @@ export default function OpenDaySimulatorPage() {
       case 'english':
         return 'bg-gradient-to-br from-[#CBA135] to-[#B8941E]';
       default:
-        return 'bg-white';
+        return '';
     }
   };
 

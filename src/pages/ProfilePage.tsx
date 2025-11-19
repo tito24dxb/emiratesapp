@@ -191,7 +191,7 @@ export default function ProfilePage() {
               {isEditing && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 glass-bubble hover:bg-gray-200 text-gray-800 rounded-lg font-semibold transition text-sm"
+                  className="flex items-center gap-2 px-4 py-2 glass-bubble hover:glass-light text-gray-800 rounded-lg font-semibold transition text-sm"
                 >
                   <Upload className="w-4 h-4" />
                   Change Photo

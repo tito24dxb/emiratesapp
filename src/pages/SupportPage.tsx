@@ -134,7 +134,7 @@ export default function SupportPage() {
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center gap-2 px-6 py-4 font-bold transition whitespace-nowrap ${
                     activeTab === tab.id
-                      ? 'text-[#D71921] border-b-2 border-[#D71921] bg-white'
+                      ? 'text-[#D71921] border-b-2 border-[#D71921]'
                       : 'text-gray-600 hover:text-gray-900 hover:glass-bubble'
                   }`}
                 >
@@ -375,7 +375,7 @@ export default function SupportPage() {
                                 p === 'high' ? 'bg-orange-600 text-white' :
                                 p === 'medium' ? 'bg-yellow-600 text-white' :
                                 'bg-green-600 text-white'
-                              : 'bg-white text-gray-700 hover:glass-bubble border border-gray-300'
+                              : 'glass-light text-gray-700 hover:glass-bubble border border-gray-300'
                           }`}
                         >
                           {p.charAt(0).toUpperCase() + p.slice(1)}
