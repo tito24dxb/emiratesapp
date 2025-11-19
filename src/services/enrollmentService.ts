@@ -160,7 +160,12 @@ export const trackCourseProgress = async (
     }
 
     await updateModuleProgress(userId, moduleId);
-  } catch (error) {
+  } catch (error: any) {
+    // Suppress permission errors until Firestore rules are deployed
+    if (error?.code === 'permission-denied') {
+      console.warn('⚠️ Course progress permission denied - deploy Firestore rules to fix');
+      return;
+    }
     console.error('Error tracking course progress:', error);
     throw error;
   }

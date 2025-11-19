@@ -1,14 +1,21 @@
 # 🚨 URGENT: Deploy Firestore Rules
 
+## Current Status
+✅ **TEMPORARY FIX APPLIED** - Permission errors are now suppressed
+⚠️ **BUT YOU MUST STILL DEPLOY RULES** - Progress won't actually save until rules are deployed
+
 ## The Problem
 - Mark Complete button fails with: "Missing or insufficient permissions"
 - Exam results can't be read: "Missing or insufficient permissions"
+- Progress tracking doesn't save to Firestore
 
 ## The Fix
 Firestore rules have been updated in `firestore.rules` to allow:
 - Users to read/write their own course progress
 - Users to read/write their own exam results
-- Proper permission checks for new documents
+- Proper permission checks for both ID patterns:
+  - `{userId}_{moduleId}_{lessonId}` - lesson exams
+  - `{examId}_{userId}_latest` - course exams
 
 ## Deploy NOW
 
@@ -39,11 +46,12 @@ match /course_progress/{progressId} {
 }
 ```
 
-### Exam Results Rules
+### Exam Results Rules (UPDATED - supports both ID patterns)
 ```javascript
 match /userExams/{resultId} {
   allow read: if isAuthenticated() && (
-    resultId.matches('.*_' + request.auth.uid + '_.*') ||
+    resultId.matches('^' + request.auth.uid + '_.*') ||  // NEW: {userId}_...
+    resultId.matches('.*_' + request.auth.uid + '_.*') || // ..._userId_...
     (resource.exists() && resource.data.userId == request.auth.uid) ||
     isGovernor() || isStaff()
   );
@@ -52,12 +60,22 @@ match /userExams/{resultId} {
 }
 ```
 
+## What You'll See Now (Before Deployment)
+
+**Console warnings:**
+```
+⚠️ Exam result permission denied - deploy Firestore rules to fix
+⚠️ Course progress permission denied - deploy Firestore rules to fix
+```
+
+**No more errors!** The app works but progress isn't saved.
+
 ## After Deployment
 
-Mark Complete button will work and you'll see:
-```
-✅ Course marked as complete!
-```
+✅ Warnings disappear
+✅ Progress actually saves to Firestore
+✅ Mark Complete works properly
+✅ Exam results are stored
 
 ## Module Locking Now Active
 

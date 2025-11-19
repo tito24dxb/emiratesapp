@@ -540,9 +540,13 @@ service cloud.firestore {
 
     ///////////////////////////////////////////////////////////////////////////
     // USER EXAMS (Exam Results)
+    // Supports two patterns:
+    // 1. {userId}_{moduleId}_{lessonId} - for lesson exams
+    // 2. {examId}_{userId}_latest - for course exams
     ///////////////////////////////////////////////////////////////////////////
     match /userExams/{resultId} {
       allow read: if isAuthenticated() && (
+        resultId.matches('^' + request.auth.uid + '_.*') ||
         resultId.matches('.*_' + request.auth.uid + '_.*') ||
         (resource.exists() && resource.data.userId == request.auth.uid) ||
         isGovernor() ||

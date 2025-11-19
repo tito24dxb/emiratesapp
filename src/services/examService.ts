@@ -199,7 +199,12 @@ export const getUserExamResult = async (
       return resultSnap.data() as UserExamResult;
     }
     return null;
-  } catch (error) {
+  } catch (error: any) {
+    // Suppress permission errors until Firestore rules are deployed
+    if (error?.code === 'permission-denied') {
+      console.warn('⚠️ Exam result permission denied - deploy Firestore rules to fix');
+      return null;
+    }
     console.error('Error getting user exam result:', error);
     return null;
   }
