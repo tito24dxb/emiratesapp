@@ -252,8 +252,12 @@ export const communityChatService = {
         );
       });
 
-      const awardAttachment = httpsCallable(functions, 'awardAttachmentUpload');
-      await awardAttachment({ conversationId });
+      try {
+        const awardAttachment = httpsCallable(functions, 'awardAttachmentUpload');
+        await awardAttachment({ conversationId });
+      } catch (error) {
+        console.warn('Failed to award attachment points:', error);
+      }
     }
 
     const userDoc = await getDoc(doc(db, 'users', userId));
@@ -287,8 +291,12 @@ export const communityChatService = {
       },
     });
 
-    const awardMessage = httpsCallable(functions, 'awardMessageSent');
-    await awardMessage({ conversationId });
+    try {
+      const awardMessage = httpsCallable(functions, 'awardMessageSent');
+      await awardMessage({ conversationId });
+    } catch (error) {
+      console.warn('Failed to award message points:', error);
+    }
 
     return messageRef.id;
   },
@@ -380,8 +388,12 @@ export const communityChatService = {
       await updateDoc(messageRef, { reactions });
 
       if (recipientId !== userId) {
-        const awardReaction = httpsCallable(functions, 'awardEmojiReaction');
-        await awardReaction({ messageId, conversationId, recipientId, emoji });
+        try {
+          const awardReaction = httpsCallable(functions, 'awardEmojiReaction');
+          await awardReaction({ messageId, conversationId, recipientId, emoji });
+        } catch (error) {
+          console.warn('Failed to award reaction points:', error);
+        }
       }
     }
   },
@@ -428,8 +440,12 @@ export const communityChatService = {
     });
 
     if (recipientId !== userId) {
-      const awardLike = httpsCallable(functions, 'awardMessageLike');
-      await awardLike({ messageId, conversationId, recipientId });
+      try {
+        const awardLike = httpsCallable(functions, 'awardMessageLike');
+        await awardLike({ messageId, conversationId, recipientId });
+      } catch (error) {
+        console.warn('Failed to award like points:', error);
+      }
     }
   },
 
