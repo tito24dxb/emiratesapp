@@ -382,7 +382,7 @@ service cloud.firestore {
     ///////////////////////////////////////////////////////////////////////////
     match /enrollments/{enrollmentId} {
       allow read: if isAuthenticated() && (
-        enrollmentId.matches('.*_' + request.auth.uid + '$') ||
+        enrollmentId.matches('^' + request.auth.uid + '_.*') ||
         (resource.exists() && resource.data.user_id == request.auth.uid) ||
         isGovernor() ||
         isStaff()
