@@ -112,15 +112,11 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '100%' }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="fixed inset-0 z-50 glass-light flex flex-col"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          className="glass-light rounded-2xl shadow-2xl"
         >
-          <motion.div
-            className="flex-1 overflow-y-auto"
-          >
             <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-[#D71920] to-[#B91518]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 glass-light/20 rounded-lg flex items-center justify-center">
@@ -318,7 +314,6 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                 </button>
               </div>
             </form>
-          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
