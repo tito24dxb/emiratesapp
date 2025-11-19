@@ -27,6 +27,8 @@ export default function CourseViewerPage() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
   const [player, setPlayer] = useState<any>(null);
+  const [playerReady, setPlayerReady] = useState(false);
+  const progressIntervalRef = useState<any>(null);
 
   useEffect(() => {
     if (courseId) {
@@ -113,79 +115,115 @@ export default function CourseViewerPage() {
     }
   };
 
-  const handleVideoProgress = async (progress: number, duration: number) => {
-    const percentage = (progress / duration) * 100;
-    setWatchProgress(percentage);
-
-    if (percentage >= 80 && !videoWatched && currentUser && courseId && course) {
-      setVideoWatched(true);
-      console.log('Video watched 80%, tracking progress...');
-
-      const moduleId = course.main_module_id || course.submodule_id;
-      if (moduleId) {
-        await trackCourseProgress(currentUser.uid, courseId, moduleId, 80, 100);
-      }
-    }
-  };
 
   useEffect(() => {
-    if (!course?.video_url || !window.YT) return;
+    if (!course?.video_url) return;
 
     const videoId = getYouTubeVideoId(course.video_url);
     if (!videoId) return;
 
-    const initPlayer = () => {
-      const newPlayer = new window.YT.Player('youtube-player', {
-        videoId,
-        playerVars: {
-          enablejsapi: 1,
-          origin: window.location.origin
-        },
-        events: {
-          onReady: (event: any) => {
-            console.log('YouTube player ready');
-            const interval = setInterval(() => {
-              if (newPlayer && typeof newPlayer.getCurrentTime === 'function') {
-                const currentTime = newPlayer.getCurrentTime();
-                const duration = newPlayer.getDuration();
-                if (duration > 0) {
-                  handleVideoProgress(currentTime, duration);
-                }
-              }
-            }, 2000);
+    let playerInstance: any = null;
+    let progressInterval: any = null;
 
-            return () => clearInterval(interval);
+    const initPlayer = () => {
+      if (!window.YT || !window.YT.Player) {
+        console.log('YouTube API not ready yet');
+        return;
+      }
+
+      console.log('Initializing YouTube player with video ID:', videoId);
+
+      try {
+        playerInstance = new window.YT.Player('youtube-player', {
+          height: '100%',
+          width: '100%',
+          videoId,
+          playerVars: {
+            enablejsapi: 1,
+            origin: window.location.origin,
+            modestbranding: 1,
+            rel: 0
           },
-          onStateChange: (event: any) => {
-            if (event.data === window.YT.PlayerState.ENDED) {
-              console.log('Video ended');
-              if (currentUser && courseId && course) {
-                const moduleId = course.main_module_id || course.submodule_id;
-                if (moduleId) {
-                  trackCourseProgress(currentUser.uid, courseId, moduleId, 100, 100);
+          events: {
+            onReady: (event: any) => {
+              console.log('YouTube player ready');
+              setPlayerReady(true);
+              setPlayer(playerInstance);
+
+              progressInterval = setInterval(() => {
+                try {
+                  if (playerInstance && typeof playerInstance.getCurrentTime === 'function') {
+                    const currentTime = playerInstance.getCurrentTime();
+                    const duration = playerInstance.getDuration();
+                    if (duration > 0) {
+                      const percentage = (currentTime / duration) * 100;
+                      setWatchProgress(percentage);
+
+                      if (percentage >= 80 && !videoWatched) {
+                        setVideoWatched(true);
+                        console.log('Video watched 80%, tracking progress...');
+                        if (currentUser && courseId && course) {
+                          const moduleId = course.main_module_id || course.submodule_id;
+                          if (moduleId) {
+                            trackCourseProgress(currentUser.uid, courseId, moduleId, 80, 100);
+                          }
+                        }
+                      }
+                    }
+                  }
+                } catch (error) {
+                  console.error('Error tracking video progress:', error);
+                }
+              }, 2000);
+            },
+            onStateChange: (event: any) => {
+              if (event.data === window.YT.PlayerState.ENDED) {
+                console.log('Video ended');
+                setVideoWatched(true);
+                setWatchProgress(100);
+                if (currentUser && courseId && course) {
+                  const moduleId = course.main_module_id || course.submodule_id;
+                  if (moduleId) {
+                    trackCourseProgress(currentUser.uid, courseId, moduleId, 100, 100);
+                  }
                 }
               }
-              setVideoWatched(true);
-              setWatchProgress(100);
+            },
+            onError: (event: any) => {
+              console.error('YouTube player error:', event.data);
             }
           }
-        }
-      });
-      setPlayer(newPlayer);
-    };
-
-    if (window.YT.Player) {
-      initPlayer();
-    } else {
-      window.onYouTubeIframeAPIReady = initPlayer;
-    }
-
-    return () => {
-      if (player) {
-        player.destroy();
+        });
+      } catch (error) {
+        console.error('Error creating YouTube player:', error);
       }
     };
-  }, [course, currentUser, courseId, videoWatched]);
+
+    const checkAndInit = () => {
+      if (window.YT && window.YT.Player) {
+        initPlayer();
+      } else {
+        console.log('Waiting for YouTube API...');
+        window.onYouTubeIframeAPIReady = initPlayer;
+      }
+    };
+
+    const timer = setTimeout(checkAndInit, 100);
+
+    return () => {
+      clearTimeout(timer);
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      if (playerInstance && typeof playerInstance.destroy === 'function') {
+        try {
+          playerInstance.destroy();
+        } catch (error) {
+          console.error('Error destroying player:', error);
+        }
+      }
+    };
+  }, [course?.video_url, courseId]);
 
   if (loading) {
     return (
