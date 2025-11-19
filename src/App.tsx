@@ -68,59 +68,52 @@ function AppContent() {
   }
 
   return (
-    <>
+    <Layout>
       <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/courses" element={<CoursesPage />} />
+        <Route path="/courses/:courseId" element={<CourseViewerPage />} />
+        <Route path="/modules/:moduleId" element={<ModuleViewerPage />} />
         <Route path="/chat" element={<CommunityPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/support" element={<SupportPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/documentation" element={<DocumentationPage />} />
+        <Route path="/ai-trainer" element={<AITrainerPage />} />
+        <Route path="/open-day" element={<OpenDaySimulatorPage />} />
+        <Route path="/recruiters" element={<RecruitersPage />} />
+        <Route path="/open-days" element={<OpenDaysPage />} />
+        <Route path="/upgrade" element={<UpgradePlanPage />} />
 
-        <Route path="/*" element={
-          <Layout>
-            <Routes>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/courses" element={<CoursesPage />} />
-              <Route path="/courses/:courseId" element={<CourseViewerPage />} />
-              <Route path="/modules/:moduleId" element={<ModuleViewerPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/support" element={<SupportPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/documentation" element={<DocumentationPage />} />
-              <Route path="/ai-trainer" element={<AITrainerPage />} />
-              <Route path="/open-day" element={<OpenDaySimulatorPage />} />
-              <Route path="/recruiters" element={<RecruitersPage />} />
-              <Route path="/open-days" element={<OpenDaysPage />} />
-              <Route path="/upgrade" element={<UpgradePlanPage />} />
+        <Route path="/students" element={<StudentsPage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/my-progress" element={<MyProgressPage />} />
+        <Route path="/lesson/:courseId/:moduleId/:lessonId" element={<LessonViewerPage />} />
+        <Route path="/main-modules/:moduleId" element={<MainModuleViewerPage />} />
+        <Route path="/submodules/:submoduleId" element={<SubmoduleViewerPage />} />
+        <Route path="/course/:courseId" element={<CourseViewerPage />} />
 
-              <Route path="/students" element={<StudentsPage />} />
-              <Route path="/leaderboard" element={<LeaderboardPage />} />
-              <Route path="/my-progress" element={<MyProgressPage />} />
-              <Route path="/lesson/:courseId/:moduleId/:lessonId" element={<LessonViewerPage />} />
-              <Route path="/main-modules/:moduleId" element={<MainModuleViewerPage />} />
-              <Route path="/submodules/:submoduleId" element={<SubmoduleViewerPage />} />
-              <Route path="/course/:courseId" element={<CourseViewerPage />} />
+        {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
+          <>
+            <Route path="/coach-dashboard" element={<NewCoachDashboard />} />
+          </>
+        )}
 
-              {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
-                <>
-                  <Route path="/coach-dashboard" element={<NewCoachDashboard />} />
-                </>
-              )}
+        {currentUser.role !== 'student' && (
+          <Route path="/support-manager" element={<SupportChatManagerPage />} />
+        )}
 
-              {currentUser.role !== 'student' && (
-                <Route path="/support-manager" element={<SupportChatManagerPage />} />
-              )}
+        {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
+          <>
+            <Route path="/governor/nexus" element={<GovernorControlNexus />} />
+            <Route path="/governor/initialize" element={<InitializeData />} />
+            <Route path="/governor/moderation" element={<ChatModerationConsole />} />
+          </>
+        )}
 
-              {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
-                <>
-                  <Route path="/governor/nexus" element={<GovernorControlNexus />} />
-                  <Route path="/governor/initialize" element={<InitializeData />} />
-                  <Route path="/governor/moderation" element={<ChatModerationConsole />} />
-                </>
-              )}
-
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </Layout>
-        } />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
-    </>
+    </Layout>
   );
 }
 

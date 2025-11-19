@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Heart, Smile, Flag, MoreVertical, Check, CheckCheck } from 'lucide-react';
+import { Heart, Smile, Flag, Check, CheckCheck } from 'lucide-react';
 import { Message } from '../../services/communityChatService';
 import { auth } from '../../lib/firebase';
 
@@ -21,7 +21,6 @@ export default function MessageBubble({
   showReadReceipts = true,
 }: MessageBubbleProps) {
   const [showReactions, setShowReactions] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const currentUserId = auth.currentUser?.uid;
   const isOwnMessage = message.senderId === currentUserId;
 
@@ -30,8 +29,8 @@ export default function MessageBubble({
   if (message.deleted) {
     return (
       <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className="max-w-md px-4 py-2 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10">
-          <p className="text-white/40 italic text-sm">This message was deleted</p>
+        <div className="max-w-md px-4 py-2 rounded-2xl bg-gray-100 border border-gray-200">
+          <p className="text-gray-400 italic text-sm">This message was deleted</p>
         </div>
       </div>
     );
@@ -41,19 +40,19 @@ export default function MessageBubble({
     <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4 group`}>
       <div className="max-w-md">
         {!isOwnMessage && (
-          <p className="text-xs text-white/60 mb-1 ml-3">{message.senderName}</p>
+          <p className="text-xs text-gray-500 mb-1 ml-3 font-medium">{message.senderName}</p>
         )}
 
         <div
-          className={`relative px-4 py-3 rounded-2xl backdrop-blur-xl border ${
+          className={`relative px-4 py-3 rounded-2xl shadow-sm ${
             isOwnMessage
-              ? 'bg-blue-500/20 border-blue-500/30 text-white'
-              : 'bg-white/10 border-white/20 text-white'
+              ? 'bg-[#D71921] text-white'
+              : 'bg-white border border-gray-200 text-gray-900'
           }`}
         >
           {message.replyTo && (
-            <div className="mb-2 pb-2 border-b border-white/10">
-              <p className="text-xs text-white/60">Replying to message</p>
+            <div className="mb-2 pb-2 border-b border-opacity-20 border-current">
+              <p className="text-xs opacity-70">Replying to message</p>
             </div>
           )}
 
@@ -72,13 +71,17 @@ export default function MessageBubble({
                   href={message.attachmentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                  className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                    isOwnMessage
+                      ? 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                      : 'bg-gray-50 hover:bg-gray-100'
+                  }`}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">
                       {message.attachmentMetadata?.name || 'Attachment'}
                     </p>
-                    <p className="text-xs text-white/60">
+                    <p className={`text-xs ${isOwnMessage ? 'opacity-70' : 'text-gray-500'}`}>
                       {message.attachmentMetadata?.size
                         ? `${(message.attachmentMetadata.size / 1024 / 1024).toFixed(2)} MB`
                         : ''}
@@ -95,16 +98,24 @@ export default function MessageBubble({
                 <button
                   key={emoji}
                   onClick={() => onAddReaction(emoji)}
-                  className="flex items-center gap-1 px-2 py-1 bg-white/10 rounded-full text-xs hover:bg-white/20 transition-colors"
+                  className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
+                    isOwnMessage
+                      ? 'bg-white bg-opacity-20 hover:bg-opacity-30'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                  }`}
                 >
                   <span>{emoji}</span>
-                  <span className="text-white/60">{users.length}</span>
+                  <span className={isOwnMessage ? 'opacity-70' : 'text-gray-600'}>
+                    {users.length}
+                  </span>
                 </button>
               ))}
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-2 text-xs text-white/40">
+          <div className={`flex items-center justify-between mt-2 text-xs ${
+            isOwnMessage ? 'text-white text-opacity-70' : 'text-gray-400'
+          }`}>
             <span>
               {message.createdAt.toDate().toLocaleTimeString([], {
                 hour: '2-digit',
@@ -115,7 +126,7 @@ export default function MessageBubble({
             {isOwnMessage && showReadReceipts && readByCount > 1 && (
               <div className="flex items-center gap-1">
                 {readByCount > 2 ? (
-                  <CheckCheck className="w-3 h-3 text-blue-400" />
+                  <CheckCheck className="w-3 h-3" />
                 ) : (
                   <Check className="w-3 h-3" />
                 )}
@@ -125,23 +136,23 @@ export default function MessageBubble({
           </div>
 
           <div className="absolute -right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="flex flex-col gap-1 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg p-1">
+            <div className="flex flex-col gap-1 bg-white border border-gray-200 rounded-lg p-1 shadow-lg">
               <button
                 onClick={() => setShowReactions(!showReactions)}
-                className="p-1.5 hover:bg-white/20 rounded transition-colors"
+                className="p-1.5 hover:bg-gray-100 rounded transition-colors"
                 title="Add reaction"
               >
-                <Smile className="w-4 h-4 text-white" />
+                <Smile className="w-4 h-4 text-gray-600" />
               </button>
 
               <button
                 onClick={onLike}
-                className="p-1.5 hover:bg-white/20 rounded transition-colors"
+                className="p-1.5 hover:bg-gray-100 rounded transition-colors"
                 title="Like"
               >
                 <Heart
                   className={`w-4 h-4 ${
-                    message.likesCount > 0 ? 'fill-red-500 text-red-500' : 'text-white'
+                    message.likesCount > 0 ? 'fill-red-500 text-red-500' : 'text-gray-600'
                   }`}
                 />
               </button>
@@ -149,17 +160,17 @@ export default function MessageBubble({
               {!isOwnMessage && (
                 <button
                   onClick={onReport}
-                  className="p-1.5 hover:bg-white/20 rounded transition-colors"
+                  className="p-1.5 hover:bg-gray-100 rounded transition-colors"
                   title="Report"
                 >
-                  <Flag className="w-4 h-4 text-white" />
+                  <Flag className="w-4 h-4 text-gray-600" />
                 </button>
               )}
             </div>
           </div>
 
           {showReactions && (
-            <div className="absolute -top-12 left-0 bg-white/10 backdrop-blur-xl border border-white/20 rounded-lg p-2 flex gap-2 shadow-xl">
+            <div className="absolute -top-12 left-0 bg-white border border-gray-200 rounded-lg p-2 flex gap-2 shadow-xl z-10">
               {QUICK_REACTIONS.map((emoji) => (
                 <button
                   key={emoji}
@@ -177,9 +188,9 @@ export default function MessageBubble({
         </div>
 
         {message.likesCount > 0 && (
-          <div className="flex items-center gap-1 mt-1 ml-3 text-xs text-white/60">
+          <div className="flex items-center gap-1 mt-1 ml-3 text-xs text-gray-500">
             <Heart className="w-3 h-3 fill-red-500 text-red-500" />
-            <span>{message.likesCount} likes</span>
+            <span>{message.likesCount} {message.likesCount === 1 ? 'like' : 'likes'}</span>
           </div>
         )}
       </div>

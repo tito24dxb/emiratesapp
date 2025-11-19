@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Users, MessageCircle, Search, Plus } from 'lucide-react';
 import { communityChatService, Conversation } from '../../services/communityChatService';
-import { presenceService } from '../../services/presenceService';
 
 interface ConversationListProps {
   onSelectConversation: (conversationId: string) => void;
@@ -32,39 +31,39 @@ export default function ConversationList({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#D71921]"></div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col bg-white/5 backdrop-blur-xl border-r border-white/10">
-      <div className="p-4 border-b border-white/10 bg-white/5 backdrop-blur-xl">
+    <div className="h-full flex flex-col bg-white">
+      <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-white">Messages</h2>
+          <h2 className="text-lg font-semibold text-[#000000]">Conversations</h2>
           <button
             onClick={() => alert('New Conversation feature coming soon! For now, conversations are created automatically when you start chatting.')}
-            className="p-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+            className="p-2 bg-[#D71921] hover:bg-[#B01419] rounded-lg transition-colors"
             title="New conversation"
           >
             <Plus className="w-5 h-5 text-white" />
           </button>
         </div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-white/40" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-xl"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-white/40 p-8">
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
             <MessageCircle className="w-12 h-12 mb-4" />
             <p>No conversations yet</p>
           </div>
@@ -73,13 +72,13 @@ export default function ConversationList({
             <button
               key={conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
-              className={`w-full p-4 flex items-start gap-3 hover:bg-white/10 transition-all border-b border-white/5 ${
+              className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
                 selectedConversationId === conversation.id
-                  ? 'bg-blue-500/20 border-l-4 border-l-blue-500'
+                  ? 'bg-red-50 border-l-4 border-l-[#D71921]'
                   : ''
               }`}
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold backdrop-blur-xl">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D71921] to-[#B01419] flex items-center justify-center text-white font-semibold shadow">
                 {conversation.type === 'group' ? (
                   <Users className="w-6 h-6" />
                 ) : (
@@ -89,9 +88,9 @@ export default function ConversationList({
 
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-white truncate">{conversation.title}</h3>
+                  <h3 className="font-semibold text-gray-900 truncate">{conversation.title}</h3>
                   {conversation.lastMessage && (
-                    <span className="text-xs text-white/40">
+                    <span className="text-xs text-gray-400">
                       {conversation.lastMessage.createdAt.toDate().toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
@@ -101,17 +100,17 @@ export default function ConversationList({
                 </div>
 
                 {conversation.lastMessage && (
-                  <p className="text-sm text-white/60 truncate">
+                  <p className="text-sm text-gray-500 truncate">
                     {conversation.lastMessage.text}
                   </p>
                 )}
 
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-white/40">
+                  <span className="text-xs text-gray-400">
                     {conversation.members.length} members
                   </span>
                   {conversation.pinned && (
-                    <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded-full">
+                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">
                       Pinned
                     </span>
                   )}

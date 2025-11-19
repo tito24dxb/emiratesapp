@@ -67,21 +67,21 @@ export default function MessageComposer({
   };
 
   return (
-    <div className="border-t border-white/10 bg-white/5 backdrop-blur-xl p-4">
+    <div className="border-t border-gray-200 bg-white p-4">
       {attachment && (
-        <div className="mb-3 flex items-center gap-3 p-3 bg-white/10 rounded-lg border border-white/20">
-          <ImageIcon className="w-5 h-5 text-blue-400" />
+        <div className="mb-3 flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <ImageIcon className="w-5 h-5 text-[#D71921]" />
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-white font-medium truncate">{attachment.name}</p>
-            <p className="text-xs text-white/60">
+            <p className="text-sm text-gray-900 font-medium truncate">{attachment.name}</p>
+            <p className="text-xs text-gray-500">
               {(attachment.size / 1024 / 1024).toFixed(2)} MB
             </p>
           </div>
           <button
             onClick={() => setAttachment(null)}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
+            className="p-1 hover:bg-gray-200 rounded transition-colors"
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-4 h-4 text-gray-600" />
           </button>
         </div>
       )}
@@ -89,10 +89,10 @@ export default function MessageComposer({
       <div className="flex items-end gap-3">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-3 bg-white/10 hover:bg-white/20 rounded-xl transition-colors backdrop-blur-xl border border-white/20"
+          className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors border border-gray-300"
           disabled={sending}
         >
-          <Paperclip className="w-5 h-5 text-white" />
+          <Paperclip className="w-5 h-5 text-gray-600" />
         </button>
 
         <input
@@ -110,7 +110,7 @@ export default function MessageComposer({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             rows={1}
-            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/50 backdrop-blur-xl resize-none"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent resize-none"
             disabled={sending}
           />
         </div>
@@ -118,17 +118,17 @@ export default function MessageComposer({
         <button
           onClick={handleSend}
           disabled={(!message.trim() && !attachment) || sending}
-          className="p-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-xl shadow-lg"
+          className="p-3 bg-gradient-to-r from-[#D71921] to-[#B01419] hover:from-[#B01419] hover:to-[#9B1116] rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow"
         >
           {sending ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <Send className="w-5 h-5 text-white" />
           )}
         </button>
       </div>
 
-      <p className="text-xs text-white/40 mt-2">
+      <p className="text-xs text-gray-500 mt-2">
         Press Enter to send, Shift+Enter for new line. Max file size: 10MB
       </p>
     </div>
