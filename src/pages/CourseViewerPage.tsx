@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Lock, CheckCircle, Award } from 'lucide-react';
-import { getCourseById, Course, updateCourseProgress } from '../services/courseService';
+import { getCourseById, Course, updateCourseProgress, isCourseUnlocked } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 import PDFViewer from '../components/PDFViewer';
 import UpgradePrompt from '../components/UpgradePrompt';
@@ -27,6 +27,7 @@ export default function CourseViewerPage() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
   const [videoStartTime] = useState(Date.now());
+  const [isUnlocked, setIsUnlocked] = useState(true);
 
   useEffect(() => {
     if (courseId) {
@@ -67,6 +68,11 @@ export default function CourseViewerPage() {
     try {
       const courseData = await getCourseById(courseId);
       setCourse(courseData);
+
+      if (currentUser) {
+        const unlocked = await isCourseUnlocked(currentUser.uid, courseData);
+        setIsUnlocked(unlocked);
+      }
 
       const examData = await getExamByCourseId(courseId);
       setExam(examData);
@@ -161,6 +167,26 @@ export default function CourseViewerPage() {
           <ArrowLeft className="w-5 h-5" />
           Back to Courses
         </button>
+      </div>
+    );
+  }
+
+  if (!isUnlocked) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+          <Lock className="w-16 h-16 mx-auto mb-4 text-orange-500" />
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Course Locked</h1>
+          <p className="text-gray-600 mb-6">
+            Complete the previous course and pass its exam with 80% or higher to unlock this course.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
+          >
+            Go Back
+          </button>
+        </div>
       </div>
     );
   }
@@ -309,28 +335,33 @@ export default function CourseViewerPage() {
                 />
               </div>
               {watchProgress >= 80 ? (
-                <p className="text-xs text-green-700 font-semibold">
-                  ✓ You can now take the exam!
-                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleVideoWatchComplete}
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition text-sm"
+                  >
+                    ✓ Mark Complete
+                  </button>
+                  {exam && !hasPassed && (
+                    <button
+                      onClick={handleStartExam}
+                      className="flex-1 px-4 py-2 bg-gradient-to-r from-[#D71921] to-[#B91518] hover:shadow-lg text-white rounded-lg font-semibold transition text-sm"
+                    >
+                      Take Exam
+                    </button>
+                  )}
+                </div>
               ) : (
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-gray-600">
                     Watch video to unlock exam (need 80%)
                   </p>
-                  {watchProgress > 0 && (
-                    <button
-                      onClick={handleVideoWatchComplete}
-                      className="text-xs px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition"
-                    >
-                      Mark Complete
-                    </button>
-                  )}
                 </div>
               )}
             </div>
           </div>
 
-          {exam && !hasPassed && (
+          {exam && !hasPassed && watchProgress < 80 && (
             <div
               className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center"
               style={{
@@ -338,25 +369,16 @@ export default function CourseViewerPage() {
                 backdropFilter: 'blur(10px)'
               }}
             >
-              <Award className="w-16 h-16 text-[#D71920] mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-[#000000] mb-3">Ready to Validate Your Learning?</h2>
+              <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-[#000000] mb-3">Exam Locked</h2>
               <p className="text-gray-700 mb-4">
-                Complete the exam to validate your understanding of this course. You need {exam.passingScore}% or higher to pass.
+                Watch at least 80% of the video to unlock the exam.
               </p>
-              {!videoWatched && watchProgress < 80 && (
-                <div className="bg-orange-100 border border-orange-300 rounded-lg p-4 mb-4">
-                  <p className="text-orange-800 text-sm">
-                    Watch at least 80% of the video to unlock the exam ({Math.round(watchProgress)}% watched)
-                  </p>
-                </div>
-              )}
-              <button
-                onClick={handleStartExam}
-                disabled={!videoWatched && watchProgress < 80}
-                className="px-8 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-              >
-                {videoWatched || watchProgress >= 80 ? 'Start Exam' : 'Watch Video to Unlock'}
-              </button>
+              <div className="bg-orange-100 border border-orange-300 rounded-lg p-4">
+                <p className="text-orange-800 text-sm font-semibold">
+                  Progress: {Math.round(watchProgress)}% / 80% required
+                </p>
+              </div>
             </div>
           )}
 

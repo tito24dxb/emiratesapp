@@ -80,6 +80,44 @@ export const updateCourseProgress = async (userId: string, courseId: string, pro
   });
 };
 
+export const isCourseUnlocked = async (userId: string, course: Course): Promise<boolean> => {
+  try {
+    if (!course.module_id && !course.submodule_id) {
+      return true;
+    }
+
+    const moduleId = course.module_id || course.submodule_id;
+    if (!moduleId) return true;
+
+    const coursesRef = collection(db, 'courses');
+    const q = query(
+      coursesRef,
+      where(course.module_id ? 'module_id' : 'submodule_id', '==', moduleId),
+      orderBy('order_in_module', 'asc')
+    );
+
+    const snapshot = await getDocs(q);
+    const moduleCourses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+
+    const currentIndex = moduleCourses.findIndex(c => c.id === course.id);
+    if (currentIndex === 0) return true;
+
+    const previousCourse = moduleCourses[currentIndex - 1];
+    if (!previousCourse) return true;
+
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${previousCourse.id}`);
+    const enrollmentSnap = await getDoc(enrollmentRef);
+
+    if (!enrollmentSnap.exists()) return false;
+
+    const enrollment = enrollmentSnap.data();
+    return enrollment.completed === true && enrollment.progress >= 100;
+  } catch (error) {
+    console.error('Error checking course unlock status:', error);
+    return true;
+  }
+};
+
 export interface Course {
   id: string;
   title: string;
