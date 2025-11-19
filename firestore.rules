@@ -519,5 +519,27 @@ service cloud.firestore {
         request.resource.data.user_id == request.auth.uid;
       allow delete: if false;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // EXAMS
+    ///////////////////////////////////////////////////////////////////////////
+    match /exams/{examId} {
+      allow read: if isAuthenticated();
+      allow write: if isGovernor() || hasPermission('manageContent') || hasRole('mentor');
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // USER EXAMS (Exam Results)
+    ///////////////////////////////////////////////////////////////////////////
+    match /userExams/{resultId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor() ||
+        isStaff()
+      );
+      allow create, update: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if false;
+    }
   }
 }

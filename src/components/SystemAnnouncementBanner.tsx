@@ -52,23 +52,23 @@ export default function SystemAnnouncementBanner() {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -50 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="fixed top-20 md:top-24 left-1/2 -translate-x-1/2 z-[60] w-[95%] md:w-auto md:max-w-2xl"
+        className="fixed top-20 md:top-24 left-1/2 -translate-x-1/2 z-[60] w-[90%] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[55%] max-w-4xl px-2 sm:px-4"
       >
-        <div className={`relative bg-gradient-to-r ${config.bgGradient} backdrop-blur-xl border ${config.borderColor} rounded-2xl shadow-2xl overflow-hidden`}>
+        <div className={`relative bg-gradient-to-r ${config.bgGradient} backdrop-blur-xl border ${config.borderColor} rounded-xl md:rounded-2xl shadow-2xl overflow-hidden`}>
           <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
 
-          <div className="relative p-4 md:p-6">
-            <div className="flex items-start gap-4">
+          <div className="relative p-3 sm:p-4 md:p-6">
+            <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
               <div className={`${config.iconColor} flex-shrink-0 mt-0.5`}>
-                <Icon className="w-6 h-6 md:w-7 md:h-7" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-white font-medium text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
+                <p className="text-white font-medium text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
                   {systemAnnouncement.message}
                 </p>
                 {systemAnnouncement.timestamp && (
-                  <p className="text-white/70 text-xs mt-2">
+                  <p className="text-white/70 text-[10px] sm:text-xs mt-1 sm:mt-2">
                     {new Date(systemAnnouncement.timestamp).toLocaleString()}
                   </p>
                 )}
@@ -76,10 +76,10 @@ export default function SystemAnnouncementBanner() {
 
               <button
                 onClick={() => setIsDismissed(true)}
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-2 transition flex-shrink-0"
+                className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 sm:p-2 transition flex-shrink-0"
                 aria-label="Dismiss announcement"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
