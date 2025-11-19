@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, MessageCircle, Users, Sparkles } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Users, Sparkles, Menu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConversationList from '../components/community/ConversationList';
 import MessageBubble from '../components/community/MessageBubble';
@@ -13,7 +13,7 @@ export default function CommunityPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showConversations, setShowConversations] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -125,140 +125,159 @@ export default function CommunityPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col">
+    <div className="h-[calc(100vh-100px)] flex flex-col max-w-7xl mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4 md:mb-6"
+        className="mb-6"
       >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="relative">
-            <MessageCircle className="w-8 h-8 md:w-10 md:h-10 text-[#D71921]" />
-            <Sparkles className="w-4 h-4 text-yellow-500 absolute -top-1 -right-1 animate-pulse" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-2xl flex items-center justify-center shadow-lg">
+              <MessageCircle className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-black text-gray-900">
+                Community Chat
+              </h1>
+              <p className="text-sm text-gray-500 font-medium">
+                Connect with students and mentors worldwide
+              </p>
+            </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#D71921] to-[#B01419]">
-            Community Chat
-          </h1>
+          <button
+            onClick={() => setShowSidebar(!showSidebar)}
+            className="lg:hidden p-3 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95"
+          >
+            <Menu className="w-6 h-6 text-gray-700" />
+          </button>
         </div>
-        <p className="text-sm md:text-base text-gray-600 font-medium">
-          Connect with mentors, students, and the community worldwide
-        </p>
       </motion.div>
 
-      <div className="flex-1 bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl md:rounded-3xl shadow-2xl border border-gray-200 overflow-hidden flex flex-col md:flex-row">
+      <div className="flex-1 flex gap-6 min-h-0 relative">
         <AnimatePresence>
-          {(showConversations || window.innerWidth >= 768) && (
+          {(showSidebar || window.innerWidth >= 1024) && (
             <motion.div
-              initial={{ x: -300, opacity: 0 }}
+              initial={{ x: -320, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              className="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-gray-200 flex-shrink-0 bg-white/80 backdrop-blur-xl"
+              exit={{ x: -320, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="w-80 flex-shrink-0 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col absolute lg:relative inset-y-0 left-0 z-50 lg:z-0"
             >
-              <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419]">
-                <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5 text-white" />
-                  <h3 className="text-lg font-bold text-white">Conversations</h3>
+              <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-5 h-5 text-[#D71921]" />
+                    <h3 className="text-lg font-bold text-gray-900">Conversations</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowSidebar(false)}
+                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ArrowLeft className="w-5 h-5 text-gray-600" />
+                  </button>
                 </div>
+                <p className="text-xs text-gray-500">Select a conversation to start chatting</p>
               </div>
-              <ConversationList
-                onSelectConversation={(id) => {
-                  setSelectedConversationId(id);
-                  setShowConversations(false);
-                }}
-                selectedConversationId={selectedConversationId || undefined}
-              />
+              <div className="flex-1 overflow-y-auto">
+                <ConversationList
+                  onSelectConversation={(id) => {
+                    setSelectedConversationId(id);
+                    setShowSidebar(false);
+                  }}
+                  selectedConversationId={selectedConversationId || undefined}
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="flex-1 flex flex-col min-w-0">
+        {showSidebar && (
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+            onClick={() => setShowSidebar(false)}
+          />
+        )}
+
+        <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col min-w-0">
           {selectedConversationId ? (
             <>
-              <div className="p-3 md:p-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex items-center gap-3 flex-shrink-0">
-                <button
-                  onClick={() => setShowConversations(true)}
-                  className="md:hidden p-2 hover:bg-white/20 rounded-xl transition-all active:scale-95"
-                >
-                  <ArrowLeft className="w-5 h-5 text-white" />
-                </button>
-                <div className="flex-1 min-w-0">
-                  <h2 className="text-base md:text-lg font-bold text-white truncate">
-                    {selectedConversationId === 'publicRoom' ? '🌍 Global Community' : 'Conversation'}
-                  </h2>
-                  <AnimatePresence mode="wait">
-                    {typingUsers.length > 0 ? (
-                      <motion.div
-                        key="typing"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center gap-2"
-                      >
-                        <div className="flex gap-1">
-                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                        </div>
-                        <p className="text-xs md:text-sm text-white/90 font-medium truncate">
-                          {typingUsers[0].userName} is typing
-                        </p>
-                      </motion.div>
-                    ) : (
-                      selectedConversationId === 'publicRoom' && (
+              <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                    <span className="text-2xl">🌍</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg font-bold text-white truncate">
+                      {selectedConversationId === 'publicRoom' ? 'Global Community' : 'Conversation'}
+                    </h2>
+                    <AnimatePresence mode="wait">
+                      {typingUsers.length > 0 ? (
+                        <motion.div
+                          key="typing"
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className="flex items-center gap-2"
+                        >
+                          <div className="flex gap-1">
+                            <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                            <span className="w-1.5 h-1.5 bg-white/80 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                          </div>
+                          <p className="text-sm text-white/90 font-medium">
+                            {typingUsers[0].userName} is typing
+                          </p>
+                        </motion.div>
+                      ) : (
                         <motion.p
                           key="subtitle"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="text-xs md:text-sm text-white/80 font-medium"
+                          className="text-sm text-white/80"
                         >
-                          Active community members online
+                          Active members online
                         </motion.p>
-                      )
-                    )}
-                  </AnimatePresence>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-3 md:space-y-4 bg-gradient-to-b from-gray-50 to-white">
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white">
                 {loading ? (
                   <div className="flex items-center justify-center h-full">
                     <div className="relative">
-                      <div className="w-12 h-12 rounded-full border-4 border-gray-200"></div>
-                      <div className="w-12 h-12 rounded-full border-4 border-[#D71921] border-t-transparent animate-spin absolute top-0"></div>
+                      <div className="w-16 h-16 rounded-full border-4 border-gray-200"></div>
+                      <div className="w-16 h-16 rounded-full border-4 border-[#D71921] border-t-transparent animate-spin absolute top-0 left-0"></div>
                     </div>
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
+                      initial={{ scale: 0.9, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      className="text-center"
+                      className="text-center max-w-sm"
                     >
-                      <div className="w-20 h-20 bg-gradient-to-br from-[#D71921]/20 to-[#B01419]/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <MessageCircle className="w-10 h-10 text-[#D71921]" />
+                      <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                        <MessageCircle className="w-12 h-12 text-[#D71921]" />
                       </div>
-                      <p className="text-lg font-bold text-gray-700 mb-2">No messages yet</p>
-                      <p className="text-sm text-gray-500">Be the first to start the conversation!</p>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">No messages yet</h3>
+                      <p className="text-gray-500">Be the first to break the ice and start the conversation!</p>
                     </motion.div>
                   </div>
                 ) : (
                   <>
-                    {messages.map((message, index) => (
-                      <motion.div
+                    {messages.map((message) => (
+                      <MessageBubble
                         key={message.messageId}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                      >
-                        <MessageBubble
-                          message={message}
-                          onAddReaction={(emoji) =>
-                            handleReaction(message.messageId, emoji, message.senderId)
-                          }
-                          onLike={() => handleLike(message.messageId, message.senderId)}
-                          onReport={() => handleReport(message.messageId)}
-                        />
-                      </motion.div>
+                        message={message}
+                        onAddReaction={(emoji) =>
+                          handleReaction(message.messageId, emoji, message.senderId)
+                        }
+                        onLike={() => handleLike(message.messageId, message.senderId)}
+                        onReport={() => handleReport(message.messageId)}
+                      />
                     ))}
                     <div ref={messagesEndRef} />
                   </>
@@ -270,17 +289,17 @@ export default function CommunityPage() {
               </div>
             </>
           ) : (
-            <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-50 to-white">
+            <div className="flex items-center justify-center h-full">
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="text-center p-8"
+                className="text-center max-w-sm"
               >
-                <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/20 to-[#B01419]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-24 h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
                   <MessageCircle className="w-12 h-12 text-[#D71921]" />
                 </div>
-                <p className="text-xl font-bold text-gray-700 mb-2">Select a conversation</p>
-                <p className="text-sm text-gray-500">Choose from the list to start chatting</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Select a conversation</h3>
+                <p className="text-gray-500">Choose from the list to start chatting</p>
               </motion.div>
             </div>
           )}
