@@ -102,7 +102,7 @@ export default function MessageComposer({
   };
 
   return (
-    <div className="border-t border-white/20 bg-white/80 backdrop-blur-2xl p-4 relative">
+    <div className="bg-white relative">
       {showEmojiPicker && (
         <div className="absolute bottom-full left-0 right-0 mb-2 mx-4 bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/30 p-4 max-h-64 overflow-y-auto">
           <div className="grid grid-cols-8 gap-2">
@@ -147,18 +147,18 @@ export default function MessageComposer({
       <div className="flex items-end gap-3">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-3 bg-white/60 backdrop-blur-xl hover:bg-white/80 rounded-2xl transition-all border border-white/30 shadow-lg"
+          className="p-4 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all"
           disabled={sending}
         >
-          <ImageIcon className="w-5 h-5 text-[#D71921]" />
+          <ImageIcon className="w-6 h-6 text-gray-600" />
         </button>
 
         <button
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="p-3 bg-white/60 backdrop-blur-xl hover:bg-white/80 rounded-2xl transition-all border border-white/30 shadow-lg"
+          className="p-4 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all"
           disabled={sending}
         >
-          <Smile className="w-5 h-5 text-[#D71921]" />
+          <Smile className="w-6 h-6 text-gray-600" />
         </button>
 
         <input
@@ -175,26 +175,27 @@ export default function MessageComposer({
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            rows={1}
-            className="w-full px-4 py-3 bg-white/60 backdrop-blur-xl border border-white/30 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921]/50 focus:border-transparent resize-none shadow-lg"
+            rows={2}
+            className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-[#D71921] resize-none text-base"
             disabled={sending}
+            style={{ minHeight: '60px' }}
           />
         </div>
 
         <button
           onClick={handleSend}
           disabled={(!message.trim() && !attachment) || sending}
-          className="p-3 bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-xl"
+          className="p-4 bg-gradient-to-r from-[#D71921] to-[#B01419] hover:shadow-lg rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {sending ? (
-            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <Send className="w-5 h-5 text-white" />
+            <Send className="w-6 h-6 text-white" />
           )}
         </button>
       </div>
 
-      <p className="text-xs text-gray-500 mt-2">
+      <p className="text-xs text-gray-500 mt-3">
         Press Enter to send, Shift+Enter for new line. Images only, max 5MB
       </p>
     </div>

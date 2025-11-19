@@ -133,18 +133,18 @@ export default function CommunityPage() {
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   return (
-    <div className="h-[calc(100vh-100px)] flex flex-col max-w-7xl mx-auto">
+    <div className="h-screen flex flex-col p-4 md:p-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-4"
+        className="mb-4 md:mb-6"
       >
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-2xl flex items-center justify-center shadow-lg">
             <MessageCircle className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-black text-gray-900">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900">
               Community Chat
             </h1>
             <p className="text-sm text-gray-500 font-medium">
@@ -154,34 +154,34 @@ export default function CommunityPage() {
         </div>
       </motion.div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col min-h-0">
-        <div className="border-b border-gray-200 bg-gray-50 p-4">
+      <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col" style={{ height: 'calc(100vh - 180px)' }}>
+        <div className="border-b border-gray-200 bg-gray-50 p-4 md:p-6">
           <div className="mb-3">
             <div className="flex items-center gap-2 mb-2">
               <Hash className="w-4 h-4 text-gray-500" />
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Group Chats</h3>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               {groupChats.map((conversation) => (
                 <button
                   key={conversation.id}
                   onClick={() => setSelectedConversationId(conversation.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 flex-shrink-0 transition-all ${
+                  className={`flex items-center gap-3 px-5 py-3 rounded-xl border-2 flex-shrink-0 transition-all ${
                     selectedConversationId === conversation.id
                       ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] border-[#D71921] text-white shadow-lg'
                       : 'bg-white border-gray-200 text-gray-700 hover:border-[#D71921] hover:shadow-md'
                   }`}
                 >
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
                     conversation.id === 'publicRoom'
-                      ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-lg'
+                      ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-xl'
                       : selectedConversationId === conversation.id
                         ? 'bg-white/20'
                         : 'bg-gradient-to-br from-[#D71921] to-[#B01419]'
                   }`}>
-                    {conversation.id === 'publicRoom' ? '🌍' : <Users className={`w-4 h-4 ${selectedConversationId === conversation.id ? 'text-white' : 'text-white'}`} />}
+                    {conversation.id === 'publicRoom' ? '🌍' : <Users className={`w-5 h-5 ${selectedConversationId === conversation.id ? 'text-white' : 'text-white'}`} />}
                   </div>
-                  <span className="font-bold text-sm whitespace-nowrap">{conversation.title}</span>
+                  <span className="font-bold text-base whitespace-nowrap">{conversation.title}</span>
                 </button>
               ))}
             </div>
@@ -193,25 +193,25 @@ export default function CommunityPage() {
                 <MessageCircle className="w-4 h-4 text-gray-500" />
                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Private Chats</h3>
               </div>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {privateChats.map((conversation) => (
                   <button
                     key={conversation.id}
                     onClick={() => setSelectedConversationId(conversation.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border-2 flex-shrink-0 transition-all ${
+                    className={`flex items-center gap-3 px-5 py-3 rounded-xl border-2 flex-shrink-0 transition-all ${
                       selectedConversationId === conversation.id
                         ? 'bg-gradient-to-r from-gray-700 to-gray-900 border-gray-700 text-white shadow-lg'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-md'
                     }`}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0 ${
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg flex-shrink-0 ${
                       selectedConversationId === conversation.id
                         ? 'bg-white/20 text-white'
                         : 'bg-gradient-to-br from-gray-600 to-gray-800 text-white'
                     }`}>
                       {conversation.title.charAt(0).toUpperCase()}
                     </div>
-                    <span className="font-bold text-sm whitespace-nowrap">{conversation.title}</span>
+                    <span className="font-bold text-base whitespace-nowrap">{conversation.title}</span>
                   </button>
                 ))}
               </div>
@@ -221,15 +221,15 @@ export default function CommunityPage() {
 
         {selectedConversationId ? (
           <>
-            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-2xl">
+            <div className="px-6 py-5 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex-shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <span className="text-3xl">
                     {selectedConversation?.id === 'publicRoom' ? '🌍' : selectedConversation?.type === 'group' ? '👥' : selectedConversation?.title.charAt(0).toUpperCase()}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-bold text-white truncate">
+                  <h2 className="text-xl font-bold text-white truncate">
                     {selectedConversation?.title || 'Conversation'}
                   </h2>
                   <AnimatePresence mode="wait">
@@ -265,7 +265,7 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white" style={{ minHeight: '400px' }}>
               {loading ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="relative">
@@ -305,7 +305,7 @@ export default function CommunityPage() {
               )}
             </div>
 
-            <div className="border-t border-gray-200 bg-white flex-shrink-0">
+            <div className="border-t border-gray-200 bg-white flex-shrink-0 p-4">
               <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
             </div>
           </>
