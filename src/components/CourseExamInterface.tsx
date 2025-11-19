@@ -23,7 +23,7 @@ export default function CourseExamInterface({ exam, userId, onComplete, isRetake
   const isLastQuestion = currentQuestion === exam.questions.length - 1;
 
   const handleSubmit = () => {
-    const correct = selectedAnswer === question.correctAnswer;
+    const correct = selectedAnswer === question.correctIndex;
     setIsCorrect(correct);
     setShowFeedback(true);
 
@@ -108,7 +108,7 @@ export default function CourseExamInterface({ exam, userId, onComplete, isRetake
             exit={{ opacity: 0, x: -20 }}
             className="bg-white rounded-2xl shadow-lg p-8 border-2 border-gray-100"
           >
-            <h3 className="text-xl font-bold text-gray-900 mb-6">{question.question}</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-6">{question.questionText}</h3>
 
             <div className="space-y-3 mb-6">
               {question.options.map((option, index) => (

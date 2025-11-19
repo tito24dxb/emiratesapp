@@ -256,17 +256,30 @@ export const submitExam = async (
   try {
     console.log('submitExam called with:', { userId, moduleId, lessonId, courseId });
 
-    const exam = await getExam(moduleId, lessonId);
+    let exam: Exam | null = null;
+
+    if (courseId && (!moduleId || !lessonId)) {
+      exam = await getExamByCourseId(courseId);
+      if (exam) {
+        moduleId = exam.moduleId || '';
+        lessonId = exam.lessonId || '';
+      }
+    } else {
+      exam = await getExam(moduleId, lessonId);
+    }
+
     if (!exam) {
-      console.error('Exam not found for:', { moduleId, lessonId });
+      console.error('Exam not found for:', { moduleId, lessonId, courseId });
       throw new Error('Exam not found');
     }
 
     console.log('Exam found:', exam.id);
 
-    const eligibility = await canTakeExam(userId, moduleId, lessonId);
-    if (!eligibility.canTake) {
-      throw new Error(eligibility.reason || 'Cannot take exam at this time');
+    if (moduleId && lessonId) {
+      const eligibility = await canTakeExam(userId, moduleId, lessonId);
+      if (!eligibility.canTake) {
+        throw new Error(eligibility.reason || 'Cannot take exam at this time');
+      }
     }
 
     let correctAnswers = 0;
@@ -284,21 +297,26 @@ export const submitExam = async (
     const score = Math.round((correctAnswers / totalQuestions) * 100);
     const passed = score >= exam.passingScore;
 
-    let pointsAwarded = 0;
-    if (passed) {
-      pointsAwarded = 40;
-
-      const previousResult = await getUserExamResult(userId, moduleId, lessonId);
-      if (!previousResult || previousResult.attempts === 0) {
-        pointsAwarded += 10;
-      }
-    }
-
-    const resultId = `${userId}_${moduleId}_${lessonId}`;
+    const resultId = courseId && (!moduleId || !lessonId)
+      ? `${exam.id}_${userId}_latest`
+      : `${userId}_${moduleId}_${lessonId}`;
     const resultRef = doc(db, 'userExams', resultId);
     const existingResult = await getDoc(resultRef);
 
     const attempts = existingResult.exists() ? (existingResult.data().attempts || 0) + 1 : 1;
+    const isFirstPass = existingResult.exists() ? !existingResult.data().passed : true;
+
+    let pointsAwarded = 0;
+    if (passed && isFirstPass) {
+      pointsAwarded = 40;
+
+      if (moduleId && lessonId) {
+        const previousResult = await getUserExamResult(userId, moduleId, lessonId);
+        if (!previousResult || previousResult.attempts === 0) {
+          pointsAwarded += 10;
+        }
+      }
+    }
 
     const now = new Date();
     const canRetryAt = passed ? undefined : new Date(now.getTime() + exam.cooldownMinutes * 60 * 1000).toISOString();
