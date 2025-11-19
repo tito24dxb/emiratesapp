@@ -144,7 +144,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <section className="relative overflow-hidden bg-gradient-to-br from-gray-50 via-white to-gray-50 py-24 lg:py-32">
+      <section className="relative overflow-hidden bg-white py-24 lg:py-32">
         <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/436413/pexels-photo-436413.jpeg?auto=compress&cs=tinysrgb&w=1920')] opacity-5 bg-cover bg-center" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white" />
 

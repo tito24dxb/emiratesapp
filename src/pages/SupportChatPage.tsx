@@ -115,8 +115,8 @@ export default function SupportChatPage() {
         </div>
       </motion.div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+      <div className="flex-1 bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-white">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center">

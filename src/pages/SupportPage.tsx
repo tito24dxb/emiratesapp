@@ -175,7 +175,7 @@ export default function SupportPage() {
 
                 <div
                   onClick={() => navigate('/documentation')}
-                  className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-center border border-gray-100 hover:shadow-lg transition cursor-pointer"
+                  className="bg-white rounded-2xl p-6 text-center border border-gray-100 hover:shadow-md transition cursor-pointer"
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
                     <BookOpen className="w-8 h-8 text-white" />

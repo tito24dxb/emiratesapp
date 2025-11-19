@@ -184,7 +184,7 @@ export default function ChatPage() {
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -300, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full md:w-96 border-r border-gray-100 md:flex-shrink-0 bg-gradient-to-b from-gray-50 to-white"
+              className="w-full md:w-96 border-r border-gray-100 md:flex-shrink-0 bg-white"
             >
               <ConversationList
                 onSelectConversation={handleSelectConversation}
@@ -230,7 +230,7 @@ export default function ChatPage() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="relative">

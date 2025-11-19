@@ -65,7 +65,7 @@ export default function GovernorControlNexus() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-white">
       {!loading && announcement && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}

@@ -141,7 +141,7 @@ export default function MyProgressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-8">
+    <div className="min-h-screen bg-white pb-8">
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">My Progress</h1>

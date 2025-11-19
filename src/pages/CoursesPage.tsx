@@ -171,7 +171,7 @@ export default function CoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-8">
+    <div className="min-h-screen bg-white pb-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Learning Modules</h1>
@@ -265,7 +265,7 @@ export default function CoursesPage() {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="border-t border-gray-200 bg-gradient-to-br from-gray-50 to-gray-100"
+                      className="border-t border-gray-200 bg-gray-50"
                     >
                       <div className="p-6">
                         <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
