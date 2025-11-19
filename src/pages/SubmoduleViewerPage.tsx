@@ -7,6 +7,8 @@ import { motion } from 'framer-motion';
 import NewCourseForm from '../components/NewCourseForm';
 import { useApp } from '../context/AppContext';
 import { updateLastAccessed, isEnrolledInModule } from '../services/enrollmentService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function SubmoduleViewerPage() {
   const { submoduleId } = useParams<{ submoduleId: string }>();
@@ -47,22 +49,29 @@ export default function SubmoduleViewerPage() {
         if (sub.course1_id) courseIds.push(sub.course1_id);
         if (sub.course2_id) courseIds.push(sub.course2_id);
 
-        if (courseIds.length > 0) {
-          const { collection, doc, getDoc } = await import('firebase/firestore');
-          const { db } = await import('../lib/firebase');
+        console.log('SubmoduleViewer: Submodule data:', sub);
+        console.log('SubmoduleViewer: Course IDs found:', courseIds);
 
+        if (courseIds.length > 0) {
           const coursesData = await Promise.all(
             courseIds.map(async (courseId) => {
+              console.log('SubmoduleViewer: Fetching course:', courseId);
               const courseDoc = await getDoc(doc(db, 'courses', courseId));
               if (courseDoc.exists()) {
+                console.log('SubmoduleViewer: Course found:', courseDoc.id, courseDoc.data());
                 return { id: courseDoc.id, ...courseDoc.data() } as Course;
+              } else {
+                console.log('SubmoduleViewer: Course not found:', courseId);
               }
               return null;
             })
           );
 
-          setCourses(coursesData.filter(c => c !== null) as Course[]);
+          const validCourses = coursesData.filter(c => c !== null) as Course[];
+          console.log('SubmoduleViewer: Valid courses:', validCourses);
+          setCourses(validCourses);
         } else {
+          console.log('SubmoduleViewer: No course IDs in submodule');
           setCourses([]);
         }
       }

@@ -8,6 +8,8 @@ import CreateModuleForm from '../components/CreateModuleForm';
 import NewCourseForm from '../components/NewCourseForm';
 import { useApp } from '../context/AppContext';
 import { updateLastAccessed, isEnrolledInModule } from '../services/enrollmentService';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function MainModuleViewerPage() {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -53,22 +55,29 @@ export default function MainModuleViewerPage() {
         if (module.course1_id) courseIds.push(module.course1_id);
         if (module.course2_id) courseIds.push(module.course2_id);
 
-        if (courseIds.length > 0) {
-          const { collection, doc, getDoc } = await import('firebase/firestore');
-          const { db } = await import('../lib/firebase');
+        console.log('MainModuleViewer: Module data:', module);
+        console.log('MainModuleViewer: Course IDs found:', courseIds);
 
+        if (courseIds.length > 0) {
           const coursesData = await Promise.all(
             courseIds.map(async (courseId) => {
+              console.log('MainModuleViewer: Fetching course:', courseId);
               const courseDoc = await getDoc(doc(db, 'courses', courseId));
               if (courseDoc.exists()) {
+                console.log('MainModuleViewer: Course found:', courseDoc.id, courseDoc.data());
                 return { id: courseDoc.id, ...courseDoc.data() } as Course;
+              } else {
+                console.log('MainModuleViewer: Course not found:', courseId);
               }
               return null;
             })
           );
 
-          setCourses(coursesData.filter(c => c !== null) as Course[]);
+          const validCourses = coursesData.filter(c => c !== null) as Course[];
+          console.log('MainModuleViewer: Valid courses:', validCourses);
+          setCourses(validCourses);
         } else {
+          console.log('MainModuleViewer: No course IDs in module');
           setCourses([]);
         }
       }
