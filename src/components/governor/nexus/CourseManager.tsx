@@ -1,16 +1,23 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Trash2, Eye, EyeOff, Video, FileText, Search } from 'lucide-react';
+import { BookOpen, Trash2, Eye, EyeOff, Video, FileText, Search, Award, Plus } from 'lucide-react';
 import { getAllCourses, deleteCourse, Course } from '../../../services/courseService';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
+import { getExamByCourseId } from '../../../services/examService';
+import ExamCreationForm from '../../ExamCreationForm';
+import { useApp } from '../../../context/AppContext';
 
 export default function CourseManager() {
+  const { currentUser } = useApp();
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'pdf' | 'video'>('all');
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [examStatuses, setExamStatuses] = useState<Record<string, boolean>>({});
+  const [showExamForm, setShowExamForm] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
 
   useEffect(() => {
     loadCourses();
@@ -21,6 +28,13 @@ export default function CourseManager() {
     try {
       const allCourses = await getAllCourses();
       setCourses(allCourses);
+
+      const statuses: Record<string, boolean> = {};
+      for (const course of allCourses) {
+        const exam = await getExamByCourseId(course.id);
+        statuses[course.id] = exam !== null;
+      }
+      setExamStatuses(statuses);
     } catch (error) {
       console.error('Error loading courses:', error);
     } finally {
@@ -60,6 +74,15 @@ export default function CourseManager() {
     } finally {
       setActionInProgress(null);
     }
+  };
+
+  const handleAddExam = (course: Course) => {
+    setSelectedCourse(course);
+    setShowExamForm(true);
+  };
+
+  const handleExamCreated = () => {
+    loadCourses();
   };
 
   const filteredCourses = courses.filter(course => {
@@ -187,6 +210,18 @@ export default function CourseManager() {
                       </div>
                       <div className="flex gap-2">
                         <button
+                          onClick={() => handleAddExam(course)}
+                          disabled={isProcessing}
+                          className={`p-2 rounded-lg transition ${
+                            examStatuses[course.id]
+                              ? 'bg-green-900 text-green-200'
+                              : 'bg-blue-900 hover:bg-blue-800 text-blue-200'
+                          } disabled:opacity-50`}
+                          title={examStatuses[course.id] ? 'Exam exists' : 'Add exam'}
+                        >
+                          {examStatuses[course.id] ? <Award className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                        </button>
+                        <button
                           onClick={() => handleSuppressCourse(course.id, isSuppressed)}
                           disabled={isProcessing}
                           className={`p-2 rounded-lg transition ${
@@ -219,9 +254,24 @@ export default function CourseManager() {
       <div className="mt-4 pt-4 border-t border-slate-700">
         <div className="text-sm text-slate-400">
           Total: {filteredCourses.length} course(s) •
-          Suppressed: {filteredCourses.filter((c: any) => c.suppressed).length}
+          Suppressed: {filteredCourses.filter((c: any) => c.suppressed).length} •
+          With Exams: {Object.values(examStatuses).filter(Boolean).length}
         </div>
       </div>
+
+      {showExamForm && selectedCourse && currentUser && (
+        <ExamCreationForm
+          moduleId={selectedCourse.main_module_id || selectedCourse.submodule_id || 'default'}
+          lessonId={selectedCourse.id}
+          courseId={selectedCourse.id}
+          createdBy={currentUser.uid}
+          onClose={() => {
+            setShowExamForm(false);
+            setSelectedCourse(null);
+          }}
+          onSuccess={handleExamCreated}
+        />
+      )}
     </motion.div>
   );
 }

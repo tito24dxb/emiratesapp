@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Lock, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Lock, CheckCircle, Award } from 'lucide-react';
 import { getCourseById, Course, updateCourseProgress } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 import PDFViewer from '../components/PDFViewer';
 import UpgradePrompt from '../components/UpgradePrompt';
-import CourseQuiz from '../components/CourseQuiz';
-import { getQuizByCourseId } from '../data/quizData';
-import { markLessonWatched, handleQuizPass } from '../services/rewardsService';
+import { markLessonWatched } from '../services/rewardsService';
 import { trackCourseProgress } from '../services/enrollmentService';
+import { getExamByCourseId, getUserExamResult, Exam, ExamResult } from '../services/examService';
+import ExamInterface from '../components/ExamInterface';
+import ExamResultModal from '../components/ExamResultModal';
+import { AnimatePresence } from 'framer-motion';
 
 export default function CourseViewerPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -17,10 +19,11 @@ export default function CourseViewerPage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
-  const [videoCompleted, setVideoCompleted] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [quizPassed, setQuizPassed] = useState(false);
+  const [exam, setExam] = useState<Exam | null>(null);
+  const [examResult, setExamResult] = useState<ExamResult | null>(null);
+  const [showExam, setShowExam] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [hasPassed, setHasPassed] = useState(false);
 
   useEffect(() => {
     if (courseId) {
@@ -47,6 +50,20 @@ export default function CourseViewerPage() {
     try {
       const courseData = await getCourseById(courseId);
       setCourse(courseData);
+
+      const examData = await getExamByCourseId(courseId);
+      setExam(examData);
+
+      if (currentUser && examData) {
+        const result = await getUserExamResult(
+          currentUser.uid,
+          examData.moduleId,
+          examData.lessonId
+        );
+        if (result && result.passed) {
+          setHasPassed(true);
+        }
+      }
     } catch (error) {
       console.error('Error loading course:', error);
     } finally {
@@ -176,26 +193,33 @@ export default function CourseViewerPage() {
     );
   }
 
-  const handleQuizComplete = async (passed: boolean, score: number) => {
-    setQuizCompleted(true);
-    setQuizPassed(passed);
+  const handleExamComplete = async (result: ExamResult) => {
+    setExamResult(result);
+    setShowExam(false);
+    setShowResultModal(true);
 
-    if (currentUser && courseId && course) {
-      await handleQuizPass(currentUser.uid, courseId, score);
+    if (result.passed && currentUser && courseId && course) {
+      setHasPassed(true);
+      await updateCourseProgress(currentUser.uid, courseId, 100);
 
-      if (passed) {
-        await updateCourseProgress(currentUser.uid, courseId, 100);
-
-        if (course.main_module_id) {
-          await trackCourseProgress(currentUser.uid, courseId, course.main_module_id, 100, 100);
-        } else if (course.submodule_id) {
-          await trackCourseProgress(currentUser.uid, courseId, course.submodule_id, 100, 100);
-        }
+      if (course.main_module_id) {
+        await trackCourseProgress(currentUser.uid, courseId, course.main_module_id, 100, 100);
+      } else if (course.submodule_id) {
+        await trackCourseProgress(currentUser.uid, courseId, course.submodule_id, 100, 100);
       }
     }
   };
 
-  const quiz = courseId ? getQuizByCourseId(courseId) : null;
+  const handleStartExam = () => {
+    setShowExam(true);
+  };
+
+  const handleCloseResultModal = () => {
+    setShowResultModal(false);
+    if (examResult?.passed) {
+      navigate(-1);
+    }
+  };
 
   if (course.video_url) {
     return (
@@ -209,108 +233,93 @@ export default function CourseViewerPage() {
             Back to Courses
           </button>
 
-          {!showQuiz ? (
-            <>
-              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
-                <div className="aspect-video w-full bg-black">
-                  {course.video_url ? (
-                    <iframe
-                      src={getYouTubeEmbedUrl(course.video_url)}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      title={course.title}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-white">
-                      <p>No video available</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
-                <p className="text-gray-600 mb-4">{course.description}</p>
-                <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-                  <span className="px-3 py-1 bg-gray-100 rounded-full">
-                    {course.category}
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full">
-                    {course.level}
-                  </span>
-                  <span className="px-3 py-1 bg-gray-100 rounded-full">
-                    {course.duration}
-                  </span>
-                </div>
-              </div>
-
-              {quiz && !quizCompleted && (
-                <div className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center">
-                  <h2 className="text-2xl font-bold text-[#000000] mb-3">Ready to Test Your Knowledge?</h2>
-                  <p className="text-gray-700 mb-6">
-                    Complete the quiz to validate your understanding of this course. You need 80% or higher to pass.
-                  </p>
-                  <button
-                    onClick={() => setShowQuiz(true)}
-                    className="px-8 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
-                  >
-                    Start Quiz
-                  </button>
-                </div>
-              )}
-
-              {quizCompleted && (
-                <div className={`rounded-2xl shadow-lg p-8 text-center ${
-                  quizPassed
-                    ? 'bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300'
-                    : 'bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-300'
-                }`}>
-                  {quizPassed ? (
-                    <>
-                      <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-                      <h2 className="text-2xl font-bold text-green-800 mb-2">Course Completed!</h2>
-                      <p className="text-green-700">
-                        You have successfully completed this course and passed the quiz.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="text-2xl font-bold text-gray-800 mb-2">Quiz Completed</h2>
-                      <p className="text-gray-700 mb-4">
-                        You can retry the quiz to improve your score.
-                      </p>
-                      <button
-                        onClick={() => {
-                          setShowQuiz(true);
-                          setQuizCompleted(false);
-                        }}
-                        className="px-6 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
-                      >
-                        Retry Quiz
-                      </button>
-                    </>
-                  )}
-                </div>
-              )}
-            </>
-          ) : (
-            <>
-              {quiz ? (
-                <CourseQuiz quiz={quiz} onComplete={handleQuizComplete} />
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+            <div className="aspect-video w-full bg-black">
+              {course.video_url ? (
+                <iframe
+                  src={getYouTubeEmbedUrl(course.video_url)}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={course.title}
+                />
               ) : (
-                <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-                  <p className="text-gray-600">No quiz available for this course yet.</p>
-                  <button
-                    onClick={() => setShowQuiz(false)}
-                    className="mt-4 px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition"
-                  >
-                    Back to Course
-                  </button>
+                <div className="flex items-center justify-center h-full text-white">
+                  <p>No video available</p>
                 </div>
               )}
-            </>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+            <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
+            <p className="text-gray-600 mb-4">{course.description}</p>
+            <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+              <span className="px-3 py-1 bg-gray-100 rounded-full">
+                {course.category}
+              </span>
+              <span className="px-3 py-1 bg-gray-100 rounded-full">
+                {course.level}
+              </span>
+              <span className="px-3 py-1 bg-gray-100 rounded-full">
+                {course.duration}
+              </span>
+            </div>
+          </div>
+
+          {exam && !hasPassed && (
+            <div
+              className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(234, 219, 200, 0.9) 0%, rgba(245, 230, 211, 0.9) 100%)',
+                backdropFilter: 'blur(10px)'
+              }}
+            >
+              <Award className="w-16 h-16 text-[#D71920] mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-[#000000] mb-3">Ready to Validate Your Learning?</h2>
+              <p className="text-gray-700 mb-6">
+                Complete the exam to validate your understanding of this course. You need {exam.passingScore}% or higher to pass.
+              </p>
+              <button
+                onClick={handleStartExam}
+                className="px-8 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition transform hover:scale-105"
+              >
+                Start Exam
+              </button>
+            </div>
           )}
+
+          {hasPassed && (
+            <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl shadow-lg p-8 text-center">
+              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-green-800 mb-2">Course Completed!</h2>
+              <p className="text-green-700">
+                You have successfully completed this course and passed the exam.
+              </p>
+            </div>
+          )}
+
+          <AnimatePresence>
+            {showExam && exam && currentUser && (
+              <ExamInterface
+                exam={exam}
+                userId={currentUser.uid}
+                onClose={() => setShowExam(false)}
+                onComplete={handleExamComplete}
+              />
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showResultModal && examResult && exam && (
+              <ExamResultModal
+                result={examResult}
+                examTitle={exam.examTitle}
+                onClose={handleCloseResultModal}
+                cooldownMinutes={exam.cooldownMinutes}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </div>
     );
