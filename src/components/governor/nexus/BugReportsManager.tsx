@@ -113,7 +113,7 @@ export default function BugReportsManager() {
 
   if (loading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-6">
+      <div className="glass-light border border-gray-200 rounded-xl p-6">
         <div className="flex items-center justify-center py-12">
           <div className="w-8 h-8 border-4 border-gray-300 border-t-transparent rounded-full animate-spin"></div>
         </div>
@@ -122,7 +122,7 @@ export default function BugReportsManager() {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-6">
+    <div className="glass-light border border-gray-200 rounded-xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Bug className="w-6 h-6 text-red-400" />
@@ -132,7 +132,7 @@ export default function BugReportsManager() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 text-sm"
+            className="px-4 py-2 glass-light border border-gray-300 rounded-xl text-gray-900 text-sm"
           >
             <option value="all">All Status</option>
             <option value="open">Open</option>
@@ -156,7 +156,7 @@ export default function BugReportsManager() {
               key={report.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-gray-50 border border-gray-300 rounded-xl p-4 hover:border-gray-400 transition cursor-pointer"
+              className="glass-light border border-gray-300 rounded-xl p-4 hover:border-gray-400 transition cursor-pointer"
               onClick={() => setSelectedReport(report)}
             >
               <div className="flex items-start justify-between gap-4">
@@ -225,10 +225,10 @@ export default function BugReportsManager() {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
+            className="glass-light rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-gray-50 p-6 border-b border-gray-300">
+            <div className="sticky top-0 glass-light p-6 border-b border-gray-300">
               <h3 className="text-2xl font-bold text-gray-900">{selectedReport.title}</h3>
               <div className="flex items-center gap-2 mt-2">
                 <span className={`px-2 py-1 rounded text-xs font-bold ${getPriorityColor(selectedReport.priority)}`}>
@@ -265,7 +265,7 @@ export default function BugReportsManager() {
                   </h4>
                   <div className="space-y-3">
                     {selectedReport.responses.map((response) => (
-                      <div key={response.id} className="bg-gray-50 rounded-xl p-3">
+                      <div key={response.id} className="glass-light rounded-xl p-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-semibold text-gray-900">{response.userName}</span>
                           <span className="text-xs text-gray-600">
@@ -286,7 +286,7 @@ export default function BugReportsManager() {
                   onChange={(e) => setResponseMessage(e.target.value)}
                   placeholder="Type your response..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none resize-none"
+                  className="w-full px-4 py-3 glass-light border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none resize-none"
                 />
                 <button
                   onClick={handleAddResponse}

@@ -121,7 +121,7 @@ export default function FinancePanel() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-white border border-gray-200 rounded-xl p-6"
+        className="glass-light border border-gray-200 rounded-xl p-6"
       >
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
@@ -137,7 +137,7 @@ export default function FinancePanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-xl overflow-hidden"
+      className="glass-light border border-gray-200 rounded-xl overflow-hidden"
     >
       <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
@@ -206,7 +206,7 @@ export default function FinancePanel() {
         {activeTab === 'overview' && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
+              <div className="glass-light/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <TrendingUp className="w-4 h-4 text-green-600" />
                   <span className="text-xs font-semibold text-gray-600">MRR</span>
@@ -215,7 +215,7 @@ export default function FinancePanel() {
                 <p className="text-xs text-gray-500 mt-1">Monthly Recurring</p>
               </div>
 
-              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
+              <div className="glass-light/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="w-4 h-4 text-blue-400" />
                   <span className="text-xs font-semibold text-gray-600">Today</span>
@@ -224,7 +224,7 @@ export default function FinancePanel() {
                 <p className="text-xs text-gray-500 mt-1">Revenue Today</p>
               </div>
 
-              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
+              <div className="glass-light/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-[#5A6B75]" />
                   <span className="text-xs font-semibold text-gray-600">Active</span>
@@ -233,7 +233,7 @@ export default function FinancePanel() {
                 <p className="text-xs text-gray-500 mt-1">Subscriptions</p>
               </div>
 
-              <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
+              <div className="glass-light/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-4 h-4 text-red-600" />
                   <span className="text-xs font-semibold text-gray-600">Failed</span>
@@ -259,7 +259,7 @@ export default function FinancePanel() {
               <p className="text-center py-8 text-gray-600">No customers found</p>
             ) : (
               customers.map((customer) => (
-                <div key={customer.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200 hover:border-gray-300 transition">
+                <div key={customer.id} className="glass-light/50 rounded-xl p-3 border border-gray-200 hover:border-gray-300 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-semibold text-gray-800">{customer.name || 'Unknown'}</p>
@@ -281,7 +281,7 @@ export default function FinancePanel() {
               <p className="text-center py-8 text-gray-600">No active subscriptions</p>
             ) : (
               subscriptions.map((sub) => (
-                <div key={sub.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200">
+                <div key={sub.id} className="glass-light/50 rounded-xl p-3 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
                       sub.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
@@ -307,7 +307,7 @@ export default function FinancePanel() {
               <p className="text-center py-8 text-gray-600">No invoices found</p>
             ) : (
               invoices.map((invoice) => (
-                <div key={invoice.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200">
+                <div key={invoice.id} className="glass-light/50 rounded-xl p-3 border border-gray-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded text-xs font-semibold ${

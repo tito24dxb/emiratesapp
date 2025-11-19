@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MessageCircle, Filter, Search, User, Clock, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import {
   getAllSupportTickets,
@@ -8,15 +9,13 @@ import {
   Department,
   Topic
 } from '../services/supportChatService';
-import SupportChatPopup from '../components/SupportChatPopup';
 
 export default function SupportChatManagerPage() {
   const { currentUser } = useApp();
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterDepartment, setFilterDepartment] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -77,8 +76,7 @@ export default function SupportChatManagerPage() {
   };
 
   const handleOpenChat = (ticket: SupportTicket) => {
-    setSelectedTicket(ticket);
-    setIsChatOpen(true);
+    navigate('/support-chat', { state: { ticketId: ticket.id } });
   };
 
   const getStatusIcon = (status: string) => {
@@ -264,15 +262,6 @@ export default function SupportChatManagerPage() {
         </div>
       </div>
 
-      <SupportChatPopup
-        isOpen={isChatOpen}
-        onClose={() => {
-          setIsChatOpen(false);
-          setSelectedTicket(null);
-          loadTickets();
-        }}
-        ticket={selectedTicket}
-      />
     </div>
   );
 }

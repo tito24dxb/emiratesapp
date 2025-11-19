@@ -125,7 +125,7 @@ export default function SystemFlags() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="backdrop-blur-lg bg-white/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
+        className="backdrop-blur-lg glass-light/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
       >
         <div className="text-center py-8 text-gray-500">Loading system flags...</div>
       </motion.div>
@@ -136,7 +136,7 @@ export default function SystemFlags() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-xl p-6"
+      className="glass-light border border-gray-200 rounded-xl p-6"
     >
       <div className="flex items-center gap-2 mb-4">
         <Settings className="w-5 h-5 text-gray-700" />
@@ -164,7 +164,7 @@ export default function SystemFlags() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 bg-gray-50 rounded-xl border border-gray-200"
+              className="p-4 glass-light rounded-xl border border-gray-200"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

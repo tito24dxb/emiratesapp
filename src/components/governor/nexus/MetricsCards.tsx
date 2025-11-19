@@ -88,13 +88,13 @@ export default function MetricsCards() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
-            className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition border-2 border-transparent hover:border-gray-200"
+            className="glass-light rounded-xl p-6 shadow-lg hover:shadow-xl transition border-2 border-transparent hover:border-gray-200"
           >
             <div className="flex items-center justify-between mb-4">
               <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.color} flex items-center justify-center shadow-md`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-bold text-gray-600 px-3 py-1 bg-gray-100 rounded-full uppercase tracking-wide">
+              <span className="text-xs font-bold text-gray-600 px-3 py-1 glass-bubble rounded-full uppercase tracking-wide">
                 {metric.change}
               </span>
             </div>

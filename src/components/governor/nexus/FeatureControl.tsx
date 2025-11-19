@@ -131,7 +131,7 @@ export default function FeatureControl() {
 
   if (!features) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg p-6">
+      <div className="glass-light rounded-2xl shadow-lg p-6">
         <div className="flex items-center justify-center h-40">
           <div className="animate-spin rounded-full h-8 w-8 border-4 border-[#D71920] border-t-transparent"></div>
         </div>
@@ -143,7 +143,7 @@ export default function FeatureControl() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl shadow-lg p-6"
+      className="glass-light rounded-2xl shadow-lg p-6"
     >
       <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
         <Power className="w-6 h-6 text-[#D71920]" />
@@ -162,7 +162,7 @@ export default function FeatureControl() {
               className={`border-2 rounded-xl p-4 transition ${
                 feature.enabled
                   ? 'border-green-200 bg-green-50'
-                  : 'border-red-200 bg-red-50'
+                  : 'border-red-200 bg-[#D71920]/10'
               }`}
             >
               {isEditing ? (

@@ -105,7 +105,7 @@ export default function UserManager() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="backdrop-blur-lg bg-white/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
+      className="backdrop-blur-lg glass-light/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
     >
       <div className="flex items-center gap-2 mb-4">
         <Users className="w-5 h-5 text-gray-700" />
@@ -125,7 +125,7 @@ export default function UserManager() {
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading users...</div>
         ) : users.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50/50 rounded-lg">
+          <div className="text-center py-8 glass-light/50 rounded-lg">
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-500">No users found</p>
           </div>
@@ -136,7 +136,7 @@ export default function UserManager() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="p-4 bg-white/50 rounded-lg border border-gray-200/50 hover:bg-white/80 transition"
+              className="p-4 glass-card rounded-lg border border-gray-200/50 hover:glass-light/80 transition"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">

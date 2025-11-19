@@ -48,7 +48,7 @@ export default function CommandConsole() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-lg p-6 border-2 border-transparent hover:border-gray-200 transition"
+      className="glass-light rounded-xl shadow-lg p-6 border-2 border-transparent hover:border-gray-200 transition"
     >
       <div className="flex items-center gap-2 mb-4">
         <Terminal className="w-5 h-5 text-gray-700" />
@@ -96,7 +96,7 @@ export default function CommandConsole() {
 
       <div className="space-y-2 max-h-64 overflow-y-auto">
         {responses.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50 rounded-xl border-2 border-gray-200">
+          <div className="text-center py-8 glass-light rounded-xl border-2 border-gray-200">
             <Terminal className="w-12 h-12 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-600">No commands executed yet</p>
             <p className="text-xs text-gray-500 mt-1">Commands: /shutdown, /disable, /lock, /downgrade</p>
@@ -110,7 +110,7 @@ export default function CommandConsole() {
               className={`p-3 rounded-lg border-2 ${
                 response.success
                   ? 'bg-green-50 border-green-300'
-                  : 'bg-red-50 border-red-300'
+                  : 'bg-[#D71920]/10 border-red-300'
               }`}
             >
               <div className="flex items-start gap-2">

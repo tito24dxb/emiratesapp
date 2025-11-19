@@ -36,6 +36,8 @@ import InitializeData from './pages/governor/InitializeData';
 import MyProgressPage from './pages/MyProgressPage';
 import LessonViewerPage from './pages/LessonViewerPage';
 import VideoCoursePage from './pages/VideoCoursePage';
+import CreateModulePage from './pages/CreateModulePage';
+import CreateCoursePage from './pages/CreateCoursePage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -100,6 +102,8 @@ function AppContent() {
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>
             <Route path="/coach-dashboard" element={<NewCoachDashboard />} />
+            <Route path="/create-module" element={<CreateModulePage />} />
+            <Route path="/create-course" element={<CreateCoursePage />} />
           </>
         )}
 

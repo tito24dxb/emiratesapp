@@ -97,7 +97,7 @@ export default function CourseManager() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl"
+      className="glass-light border border-gray-200 rounded-xl p-6 shadow-xl"
     >
       <div className="flex items-center gap-3 mb-6">
         <BookOpen className="w-6 h-6 text-gray-700" />
@@ -112,7 +112,7 @@ export default function CourseManager() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search courses..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-slate-500 focus:border-slate-500 focus:outline-none"
+            className="w-full pl-10 pr-4 py-2 glass-light border border-gray-200 rounded-xl text-gray-900 placeholder-slate-500 focus:border-slate-500 focus:outline-none"
           />
         </div>
 

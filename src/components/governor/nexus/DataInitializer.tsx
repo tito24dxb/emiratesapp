@@ -76,7 +76,7 @@ export default function DataInitializer() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl"
+      className="glass-light border border-gray-200 rounded-xl p-6 shadow-xl"
     >
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
@@ -89,7 +89,7 @@ export default function DataInitializer() {
       </div>
 
       <div className="space-y-4">
-        <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+        <div className="p-3 glass-light rounded-xl border border-gray-200">
           <div className="flex items-start gap-2 mb-2">
             <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
             <div className="text-xs text-gray-700">

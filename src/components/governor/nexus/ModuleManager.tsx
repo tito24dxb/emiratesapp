@@ -39,7 +39,7 @@ export default function ModuleManager() {
   }, {} as Record<string, Module[]>);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-6">
+    <div className="glass-light border border-gray-200 rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <FolderPlus className="w-6 h-6 text-blue-400" />
@@ -50,7 +50,7 @@ export default function ModuleManager() {
           </div>
         </div>
         <div className="flex gap-2">
-          <div className="flex bg-gray-50 rounded-xl p-1">
+          <div className="flex glass-light rounded-xl p-1">
             <button
               onClick={() => setViewMode('grouped')}
               className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
@@ -81,13 +81,13 @@ export default function ModuleManager() {
           <p className="text-gray-600 mt-3">Loading modules...</p>
         </div>
       ) : modules.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-xl">
+        <div className="text-center py-12 glass-light rounded-xl">
           <FolderPlus className="w-16 h-16 text-gray-500 mx-auto mb-3" />
           <p className="text-gray-700 font-semibold">No modules created yet</p>
           <p className="text-gray-600 text-sm mt-1">Modules are created from Coach Dashboard</p>
         </div>
       ) : viewMode === 'all' ? (
-        <div className="bg-gray-50 rounded-xl p-4">
+        <div className="glass-light rounded-xl p-4">
           <h3 className="text-lg font-bold text-gray-900 mb-3">
             All Modules ({modules.length})
           </h3>
@@ -102,7 +102,7 @@ export default function ModuleManager() {
               .map((module) => (
                 <div
                   key={module.id}
-                  className="bg-white rounded-xl p-4 hover:bg-gray-100 transition"
+                  className="glass-light rounded-xl p-4 hover:glass-bubble transition"
                 >
                   <div className="flex items-center gap-3">
                     <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded uppercase">
@@ -136,7 +136,7 @@ export default function ModuleManager() {
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedModules).map(([category, categoryModules]) => (
-            <div key={category} className="bg-gray-50 rounded-xl p-4">
+            <div key={category} className="glass-light rounded-xl p-4">
               <h3 className="text-lg font-bold text-gray-900 mb-3 capitalize">
                 {category} Modules
               </h3>
@@ -144,7 +144,7 @@ export default function ModuleManager() {
                 {categoryModules.map((module) => (
                   <div
                     key={module.id}
-                    className="bg-white rounded-xl p-4 hover:bg-gray-100 transition"
+                    className="glass-light rounded-xl p-4 hover:glass-bubble transition"
                   >
                     <div className="flex items-center gap-3">
                       <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">

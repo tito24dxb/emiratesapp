@@ -72,7 +72,7 @@ export default function AILogsViewer() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-white/50 rounded-xl p-6 border border-gray-200"
+        className="glass-card rounded-xl p-6 border border-gray-200"
       >
         <div className="flex items-center justify-center py-12">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
@@ -87,7 +87,7 @@ export default function AILogsViewer() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="bg-white/50 rounded-xl p-6 border border-gray-200"
+        className="glass-card rounded-xl p-6 border border-gray-200"
       >
         <div className="flex items-center text-red-400">
           <AlertCircle className="w-5 h-5 mr-2" />
@@ -101,7 +101,7 @@ export default function AILogsViewer() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/50 rounded-xl p-6 border border-gray-200"
+      className="glass-card rounded-xl p-6 border border-gray-200"
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function AILogsViewer() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search logs by prompt, response, or user ID..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 glass-bubble border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
           />
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function AILogsViewer() {
               key={log.id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-gray-50 rounded-xl p-4 border border-gray-300 hover:border-gray-300 transition-colors cursor-pointer"
+              className="glass-light rounded-xl p-4 border border-gray-300 hover:border-gray-300 transition-colors cursor-pointer"
               onClick={() => setSelectedLog(log)}
             >
               <div className="flex items-start justify-between mb-2">
@@ -187,7 +187,7 @@ export default function AILogsViewer() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="bg-white rounded-xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto border border-gray-200"
+            className="glass-light rounded-xl p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto border border-gray-200"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -225,14 +225,14 @@ export default function AILogsViewer() {
 
               <div>
                 <span className="text-sm text-gray-600">Prompt</span>
-                <div className="mt-1 p-4 bg-gray-100 rounded-xl">
+                <div className="mt-1 p-4 glass-bubble rounded-xl">
                   <p className="text-gray-900 whitespace-pre-wrap">{selectedLog.prompt}</p>
                 </div>
               </div>
 
               <div>
                 <span className="text-sm text-gray-600">Response</span>
-                <div className="mt-1 p-4 bg-gray-100 rounded-xl">
+                <div className="mt-1 p-4 glass-bubble rounded-xl">
                   <p className="text-gray-900 whitespace-pre-wrap">{selectedLog.response}</p>
                 </div>
               </div>

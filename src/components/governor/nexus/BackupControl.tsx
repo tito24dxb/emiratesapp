@@ -55,7 +55,7 @@ export default function BackupControl() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="backdrop-blur-lg bg-white/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
+      className="backdrop-blur-lg glass-light/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export default function BackupControl() {
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading backup history...</div>
         ) : sortedBackups.length === 0 ? (
-          <div className="text-center py-8 bg-gray-50/50 rounded-lg">
+          <div className="text-center py-8 glass-light/50 rounded-lg">
             <Database className="w-12 h-12 text-gray-300 mx-auto mb-2" />
             <p className="text-gray-500">No backups found yet</p>
             <p className="text-xs text-gray-400 mt-1">Trigger a manual backup to get started</p>
@@ -95,7 +95,7 @@ export default function BackupControl() {
               className={`p-4 rounded-lg border ${
                 backup.result === 'success'
                   ? 'bg-green-50/50 border-green-200'
-                  : 'bg-red-50/50 border-red-200'
+                  : 'bg-[#D71920]/10/50 border-red-200'
               }`}
             >
               <div className="flex items-start justify-between">
@@ -113,7 +113,7 @@ export default function BackupControl() {
                         {backup.result === 'success' ? 'Backup Successful' : 'Backup Failed'}
                       </span>
                       {backup.size && (
-                        <span className="text-xs text-gray-500 px-2 py-0.5 bg-white rounded-full">
+                        <span className="text-xs text-gray-500 px-2 py-0.5 glass-light rounded-full">
                           {formatSize(backup.size)}
                         </span>
                       )}

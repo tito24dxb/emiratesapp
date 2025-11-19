@@ -98,7 +98,7 @@ export default function SupportChatManager() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden"
+      className="glass-light border border-gray-200 rounded-xl shadow-xl overflow-hidden"
     >
       <div className="flex items-center gap-3 p-6 border-b border-gray-200">
         <MessageCircle className="w-6 h-6 text-gray-700" />
@@ -109,7 +109,7 @@ export default function SupportChatManager() {
       </div>
 
       <div className="flex h-[600px]">
-        <div className="w-80 border-r border-gray-200 overflow-y-auto bg-gray-50">
+        <div className="w-80 border-r border-gray-200 overflow-y-auto glass-light">
           {tickets.length === 0 ? (
             <div className="p-4 text-center text-gray-600">No support tickets yet</div>
           ) : (
@@ -157,7 +157,7 @@ export default function SupportChatManager() {
             </div>
           ) : (
             <>
-              <div className="p-4 border-b border-gray-200 bg-white">
+              <div className="p-4 border-b border-gray-200 glass-light">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-bold text-gray-900">{selectedTicket.subject}</h3>
@@ -169,7 +169,7 @@ export default function SupportChatManager() {
                     <select
                       value={selectedTicket.status}
                       onChange={(e) => handleStatusChange(selectedTicket.id, e.target.value as any)}
-                      className="px-3 py-1 bg-gray-50 text-gray-900 rounded text-sm font-bold border border-gray-300 focus:outline-none focus:border-[#D71920]"
+                      className="px-3 py-1 glass-light text-gray-900 rounded text-sm font-bold border border-gray-300 focus:outline-none focus:border-[#D71920]"
                     >
                       <option value="open">Open</option>
                       <option value="in_progress">In Progress</option>
@@ -180,7 +180,7 @@ export default function SupportChatManager() {
                 </div>
               </div>
 
-              <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
+              <div className="flex-1 p-4 overflow-y-auto glass-light space-y-3">
                 {messages.map((message) => {
                   const isGovernor = message.senderRole === 'governor';
                   return (
@@ -212,7 +212,7 @@ export default function SupportChatManager() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="p-4 bg-white border-t border-gray-200">
+              <div className="p-4 glass-light border-t border-gray-200">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -220,7 +220,7 @@ export default function SupportChatManager() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
                     placeholder="Type your response..."
-                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none"
+                    className="flex-1 px-4 py-2 glass-light border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none"
                   />
                   <button
                     onClick={handleSendMessage}

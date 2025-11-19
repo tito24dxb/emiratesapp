@@ -139,7 +139,7 @@ export default function AIAssistantPanel() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-6"
+        className="glass-light rounded-xl shadow-lg border-2 border-gray-200 p-6"
       >
         <div className="text-center py-8">
           <Loader2 className="w-8 h-8 text-gray-400 animate-spin mx-auto mb-2" />
@@ -153,12 +153,12 @@ export default function AIAssistantPanel() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl shadow-lg border-2 border-transparent hover:border-gray-200 overflow-hidden transition"
+      className="glass-light rounded-xl shadow-lg border-2 border-transparent hover:border-gray-200 overflow-hidden transition"
     >
       <div className="bg-gradient-to-r from-[#5A6B75] to-[#3D4A52] px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+            <div className="w-10 h-10 glass-light/10 rounded-xl flex items-center justify-center border border-white/20">
               <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -177,7 +177,7 @@ export default function AIAssistantPanel() {
       </div>
 
       {!aiEnabled && (
-        <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-300 rounded-lg flex items-start gap-2">
+        <div className="mx-6 mt-4 p-3 bg-[#D71920]/10 border border-red-300 rounded-lg flex items-start gap-2">
           <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm text-red-700 font-semibold">AI Assistant Disabled</p>
@@ -191,7 +191,7 @@ export default function AIAssistantPanel() {
       <div className="p-6">
         <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
           {messages.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-gray-200">
+            <div className="text-center py-12 glass-light rounded-xl border-2 border-gray-200">
               <Brain className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-700 font-semibold">AI Assistant Ready</p>
               <p className="text-xs text-gray-500 mt-1">Ask me anything about system operations</p>
@@ -227,7 +227,7 @@ export default function AIAssistantPanel() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg p-3 border border-gray-200"
+              className="flex items-center gap-2 text-sm text-gray-600 glass-light rounded-lg p-3 border border-gray-200"
             >
               <Loader2 className="w-4 h-4 animate-spin text-[#5A6B75]" />
               AI is thinking...
@@ -243,7 +243,7 @@ export default function AIAssistantPanel() {
               placeholder={aiEnabled ? "Ask the AI assistant..." : "AI disabled"}
               disabled={!aiEnabled || loading}
               rows={2}
-              className="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71920] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed resize-none"
+              className="flex-1 px-4 py-3 glass-light border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71920] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed resize-none"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

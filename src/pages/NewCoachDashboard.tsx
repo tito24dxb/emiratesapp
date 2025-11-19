@@ -5,8 +5,6 @@ import { Plus, FolderPlus, Upload, Layers, BookOpen, Play, FileText, Edit } from
 import { getAllMainModules, getSubmodulesByParent, MainModule } from '../services/mainModuleService';
 import { getAllCourses, Course } from '../services/courseService';
 import { motion } from 'framer-motion';
-import CreateModuleForm from '../components/CreateModuleForm';
-import NewCourseForm from '../components/NewCourseForm';
 
 export default function NewCoachDashboard() {
   const { currentUser } = useApp();
@@ -15,9 +13,6 @@ export default function NewCoachDashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [submoduleCounts, setSubmoduleCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const [showCreateModule, setShowCreateModule] = useState(false);
-  const [showAddCourse, setShowAddCourse] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<Course | undefined>(undefined);
 
   useEffect(() => {
     if (!currentUser || (currentUser.role !== 'mentor' && currentUser.role !== 'governor')) {
@@ -67,7 +62,7 @@ export default function NewCoachDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         <button
-          onClick={() => setShowCreateModule(true)}
+          onClick={() => navigate('/create-module')}
           className="flex items-center gap-4 p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl shadow-lg hover:shadow-xl transition"
         >
           <div className="glass-light/20 p-3 rounded-lg">
@@ -80,7 +75,7 @@ export default function NewCoachDashboard() {
         </button>
 
         <button
-          onClick={() => setShowAddCourse(true)}
+          onClick={() => navigate('/create-course')}
           className="flex items-center gap-4 p-6 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl shadow-lg hover:shadow-xl transition"
         >
           <div className="glass-light/20 p-3 rounded-lg">
@@ -111,7 +106,7 @@ export default function NewCoachDashboard() {
             Create your first main module to start building your training program
           </p>
           <button
-            onClick={() => setShowCreateModule(true)}
+            onClick={() => navigate('/create-module')}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:shadow-lg transition inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
@@ -151,11 +146,6 @@ export default function NewCoachDashboard() {
         </div>
       )}
 
-      <CreateModuleForm
-        isOpen={showCreateModule}
-        onClose={() => setShowCreateModule(false)}
-        onSuccess={loadModules}
-      />
 
       <div className="mt-12 mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -175,7 +165,7 @@ export default function NewCoachDashboard() {
             Upload your first course to start training students
           </p>
           <button
-            onClick={() => setShowAddCourse(true)}
+            onClick={() => navigate('/create-course')}
             className="px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transition inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
@@ -232,8 +222,7 @@ export default function NewCoachDashboard() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEditingCourse(course);
-                      setShowAddCourse(true);
+                      navigate('/create-course', { state: { course } });
                     }}
                     className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold transition"
                   >
@@ -247,24 +236,6 @@ export default function NewCoachDashboard() {
         </div>
       )}
 
-      <CreateModuleForm
-        isOpen={showCreateModule}
-        onClose={() => setShowCreateModule(false)}
-        onSuccess={loadModules}
-      />
-
-      <NewCourseForm
-        isOpen={showAddCourse}
-        onClose={() => {
-          setShowAddCourse(false);
-          setEditingCourse(undefined);
-        }}
-        onSuccess={() => {
-          loadModules();
-          setEditingCourse(undefined);
-        }}
-        editingCourse={editingCourse}
-      />
     </div>
   );
 }
