@@ -45,13 +45,19 @@ export default function MyProgressPage() {
   }, [currentUser]);
 
   const loadProgressData = async () => {
-    if (!currentUser) return;
+    console.log('loadProgressData called, currentUser:', currentUser);
+    if (!currentUser) {
+      console.log('No current user, exiting loadProgressData');
+      return;
+    }
 
     try {
       setLoading(true);
+      console.log('Fetching enrollments for user:', currentUser.uid);
 
       const enrollments = await getUserEnrollments(currentUser.uid);
       console.log('User enrollments:', enrollments);
+      console.log('Number of enrollments:', enrollments.length);
 
       const modulesWithDetails = await Promise.all(
         enrollments.map(async (enrollment) => {
@@ -83,8 +89,10 @@ export default function MyProgressPage() {
       );
 
       const validModules = modulesWithDetails.filter((m): m is EnrolledModule => m !== null);
+      console.log('Valid modules after filtering:', validModules);
       validModules.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
       setEnrolledModules(validModules);
+      console.log('Enrolled modules set to:', validModules.length, 'modules');
 
       const avgProgress = await getAverageProgress(currentUser.uid);
       const completed = await getCompletedModulesCount(currentUser.uid);
