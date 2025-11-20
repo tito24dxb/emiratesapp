@@ -9,7 +9,7 @@ import {
   getCompletedModulesCount,
   getInProgressModulesCount,
   CourseEnrollment
-} from '../services/moduleProgressService';
+} from '../services/enrollmentService';
 import { getMainModule, getSubmodule } from '../services/mainModuleService';
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
