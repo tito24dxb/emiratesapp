@@ -30,6 +30,7 @@ function CourseViewerPageContent() {
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
   const [videoStartTime] = useState(Date.now());
+  const [courseCompleted, setCourseCompleted] = useState(false);
 
   const searchParams = new URLSearchParams(window.location.search);
   const moduleIdFromUrl = searchParams.get('moduleId');
@@ -58,6 +59,10 @@ function CourseViewerPageContent() {
   }, [currentUser, courseId, course]);
 
   useEffect(() => {
+    if (courseCompleted) {
+      return;
+    }
+
     const trackProgress = () => {
       const timeWatching = (Date.now() - videoStartTime) / 1000;
       const estimatedProgress = Math.min((timeWatching / 180) * 100, 99);
@@ -76,7 +81,7 @@ function CourseViewerPageContent() {
 
     const interval = setInterval(trackProgress, 3000);
     return () => clearInterval(interval);
-  }, [videoStartTime, videoWatched, currentUser, courseId, course]);
+  }, [videoStartTime, videoWatched, currentUser, courseId, course, courseCompleted]);
 
   const loadCourse = async () => {
     if (!courseId) return;
@@ -110,6 +115,7 @@ function CourseViewerPageContent() {
           console.log('CourseViewer: Course already completed, setting watch progress to 100%');
           setWatchProgress(100);
           setVideoWatched(true);
+          setCourseCompleted(true);
         }
       }
 
@@ -437,46 +443,71 @@ function CourseViewerPageContent() {
                 {course.duration}
               </span>
             </div>
-            <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-blue-900">Video Progress</span>
-                <span className="text-sm font-bold text-blue-600">{Math.round(watchProgress)}%</span>
+            {courseCompleted ? (
+              <div className="bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-300 rounded-lg p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                  <span className="text-base font-bold text-green-900">Course Completed</span>
+                </div>
+                {lastExamResult && (
+                  <div className="mt-3 pt-3 border-t border-green-200">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-gray-600 mb-1">Exam Score</p>
+                        <p className="font-bold text-green-700 text-lg">{lastExamResult.lastScore}%</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600 mb-1">Status</p>
+                        <p className="font-bold text-green-700 text-lg">
+                          {lastExamResult.passed ? '✓ Passed' : 'Not Passed'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden mb-3">
-                <div
-                  className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
-                  style={{ width: `${watchProgress}%` }}
-                />
-              </div>
-              {watchProgress >= 80 ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleVideoWatchComplete}
-                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition text-sm"
-                  >
-                    ✓ Mark Complete
-                  </button>
-                  {exam && (
+            ) : (
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-blue-900">Video Progress</span>
+                  <span className="text-sm font-bold text-blue-600">{Math.round(watchProgress)}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden mb-3">
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500"
+                    style={{ width: `${watchProgress}%` }}
+                  />
+                </div>
+                {watchProgress >= 80 ? (
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={handleStartExam}
-                      className={`flex-1 px-4 py-2 ${
-                        hasPassed
-                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
-                          : 'bg-gradient-to-r from-[#D71921] to-[#B91518]'
-                      } hover:shadow-lg text-white rounded-lg font-semibold transition text-sm`}
+                      onClick={handleVideoWatchComplete}
+                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition text-sm"
                     >
-                      {hasPassed ? 'Retake Exam' : 'Take Exam'}
+                      ✓ Mark Complete
                     </button>
-                  )}
-                </div>
-              ) : (
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-600">
-                    Watch video to unlock exam (need 80%)
-                  </p>
-                </div>
-              )}
-            </div>
+                    {exam && (
+                      <button
+                        onClick={handleStartExam}
+                        className={`flex-1 px-4 py-2 ${
+                          hasPassed
+                            ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                            : 'bg-gradient-to-r from-[#D71921] to-[#B91518]'
+                        } hover:shadow-lg text-white rounded-lg font-semibold transition text-sm`}
+                      >
+                        {hasPassed ? 'Retake Exam' : 'Take Exam'}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-gray-600">
+                      Watch video to unlock exam (need 80%)
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           )}
 
