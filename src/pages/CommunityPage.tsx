@@ -372,14 +372,14 @@ export default function CommunityPage() {
   if (selectedConversationId) {
     return (
       <div className="h-full flex flex-col glass-light overflow-hidden rounded-xl">
-        <div className="glass-light border-b border-white/20 px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 flex-shrink-0">
+        <div className="glass-light border-b border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 flex-shrink-0">
           <button
             onClick={() => setSelectedConversationId(null)}
-            className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all"
+            className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all flex-shrink-0"
           >
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
           </button>
-          <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${
+          <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
             selectedConversation?.id === 'publicRoom'
               ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-base'
               : selectedConversation?.type === 'group'
@@ -398,7 +398,7 @@ export default function CommunityPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 space-y-3 md:space-y-4 min-h-0">
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 min-h-0" style={{ overflowX: 'hidden' }}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="relative">
@@ -421,7 +421,7 @@ export default function CommunityPage() {
               </motion.div>
             </div>
           ) : (
-            <>
+            <div className="space-y-3 md:space-y-4">
               {messages.map((message) => (
                 <MessageBubble
                   key={message.messageId}
@@ -434,12 +434,12 @@ export default function CommunityPage() {
                 />
               ))}
               <div ref={messagesEndRef} />
-            </>
+            </div>
           )}
         </div>
 
         {typingUsers.length > 0 && (
-          <div className="px-3 md:px-4 py-2 glass-light border-t border-white/20 flex-shrink-0">
+          <div className="px-3 md:px-4 py-1.5 md:py-2 glass-light border-t border-white/20 flex-shrink-0">
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
@@ -457,7 +457,7 @@ export default function CommunityPage() {
           </div>
         )}
 
-        <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2 md:py-3 flex-shrink-0">
+        <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex-shrink-0">
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
         </div>
       </div>
