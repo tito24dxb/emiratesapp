@@ -119,23 +119,23 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] via-[#F5E6D3] to-[#E8D5C4]">
+      <nav className="glass-nav sticky top-0 z-50 border-b border-white/20 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-3">
               <img src="/logo.png" alt="The Crew Academy" className="h-14 w-auto" />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate('/login')}
-                className="px-6 py-2.5 text-gray-700 font-semibold hover:text-[#D71920] transition rounded-lg hover:bg-gray-50"
+                className="px-4 sm:px-6 py-2.5 text-gray-700 font-semibold hover:text-[#D71920] transition rounded-lg hover:bg-white/50 text-sm sm:text-base"
               >
                 Login
               </button>
               <button
                 onClick={() => navigate('/register')}
-                className="px-6 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition"
+                className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition text-sm sm:text-base whitespace-nowrap"
               >
                 Sign Up Free
               </button>
@@ -144,7 +144,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <section className="relative overflow-hidden bg-white py-24 lg:py-32">
+      <section className="relative overflow-hidden py-16 sm:py-24 lg:py-32">
         <div className="absolute inset-0 bg-[url('https://images.pexels.com/photos/436413/pexels-photo-436413.jpeg?auto=compress&cs=tinysrgb&w=1920')] opacity-5 bg-cover bg-center" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/50 to-white" />
 
@@ -165,19 +165,19 @@ export default function LandingPage() {
               <span className="text-sm font-semibold text-gray-700">Trusted by 10,000+ aspiring cabin crew worldwide</span>
             </motion.div>
 
-            <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight px-4">
               Your Dream Career
               <span className="block mt-2 bg-gradient-to-r from-[#D71920] via-[#E63946] to-[#CBA135] bg-clip-text text-transparent">
                 Starts Here
               </span>
             </h1>
 
-            <p className="text-xl lg:text-2xl text-gray-600 mb-10 leading-relaxed">
+            <p className="text-lg sm:text-xl lg:text-2xl text-gray-600 mb-10 leading-relaxed px-4">
               Join The Crew Academy and master every skill needed to become elite cabin crew.
               From AI-powered training to real recruiter connections - we have got you covered.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 px-4">
               <button
                 onClick={() => navigate('/register')}
                 className="group px-10 py-4 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition flex items-center gap-2"
@@ -227,7 +227,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-white">
+      <section className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <motion.div
@@ -254,7 +254,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="group bg-gradient-to-br from-white to-gray-50 p-8 rounded-2xl border-2 border-gray-100 hover:border-[#D71920]/30 hover:shadow-xl transition-all duration-300"
+                className="group glass-card p-6 sm:p-8 hover:shadow-xl transition-all duration-300"
               >
                 <div className="w-16 h-16 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-2xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform">
                   {feature.icon}
@@ -267,7 +267,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-gradient-to-br from-[#D71920]/5 via-white to-[#CBA135]/5">
+      <section className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <motion.div
@@ -294,7 +294,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all"
+                className="glass-card p-6 sm:p-8 hover:shadow-2xl transition-all"
               >
                 <div className="flex items-center gap-1 mb-4">
                   {[...Array(5)].map((_, i) => (
@@ -315,7 +315,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-24 bg-white">
+      <section className="py-16 sm:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <motion.div
@@ -342,10 +342,10 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`relative bg-white rounded-3xl p-8 border-2 transition-all hover:shadow-2xl ${
+                className={`relative glass-card rounded-3xl p-6 sm:p-8 border-2 transition-all hover:shadow-2xl ${
                   plan.highlighted
-                    ? 'border-[#D71920] shadow-xl scale-105 bg-gradient-to-br from-white to-gray-50'
-                    : 'border-gray-200 hover:border-[#D71920]/50'
+                    ? 'border-[#D71920] shadow-xl md:scale-105'
+                    : 'border-white/30 hover:border-[#D71920]/50'
                 }`}
               >
                 {plan.popular && (

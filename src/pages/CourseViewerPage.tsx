@@ -112,16 +112,25 @@ function CourseViewerPageContent() {
         setExam(examData);
 
         if (currentUser) {
+          console.log('CourseViewer: Fetching exam result for:', {
+            userId: currentUser.uid,
+            moduleId: examData.moduleId,
+            lessonId: examData.lessonId
+          });
           const result = await getUserExamResult(
             currentUser.uid,
             examData.moduleId,
             examData.lessonId
           );
+          console.log('CourseViewer: Exam result fetched:', result);
           if (result) {
             setLastExamResult(result);
             if (result.passed) {
               setHasPassed(true);
+              console.log('CourseViewer: User has passed exam, score:', result.lastScore);
             }
+          } else {
+            console.log('CourseViewer: No exam result found for this user');
           }
         }
       } else {
@@ -325,8 +334,23 @@ function CourseViewerPageContent() {
   const handleExamComplete = async (result: ExamResult) => {
     setExamResult(result);
 
-    if (result.passed && currentUser && courseId && course) {
+    if (result.passed && currentUser && courseId && course && exam) {
       setHasPassed(true);
+
+      const updatedResult = {
+        userId: currentUser.uid,
+        moduleId: exam.moduleId,
+        lessonId: exam.lessonId,
+        courseId: courseId,
+        attempts: (lastExamResult?.attempts || 0) + 1,
+        lastScore: result.score,
+        passed: true,
+        passedAt: new Date().toISOString(),
+        lastAttemptAt: new Date().toISOString(),
+        answers: []
+      };
+      setLastExamResult(updatedResult);
+
       await updateCourseProgress(currentUser.uid, courseId, 100);
 
       if (course.main_module_id) {
