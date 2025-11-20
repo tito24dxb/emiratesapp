@@ -101,14 +101,14 @@ export default function SystemAnnouncementBanner() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center"
+              className="fixed inset-0 z-[100] flex items-end justify-center"
               style={{
                 position: 'fixed',
                 top: 0,
                 left: 0,
                 right: 0,
                 bottom: 0,
-                padding: 'max(env(safe-area-inset-top), 1rem) max(env(safe-area-inset-right), 1rem) max(env(safe-area-inset-bottom), 1rem) max(env(safe-area-inset-left), 1rem)'
+                padding: 'max(env(safe-area-inset-top), 1rem) max(env(safe-area-inset-right), 1rem) max(env(safe-area-inset-bottom, 5rem), 5rem) max(env(safe-area-inset-left), 1rem)'
               }}
             >
               <div className={`bg-gradient-to-br ${config.bgGradient} rounded-xl shadow-2xl p-4 w-full max-w-sm mx-auto`}>
