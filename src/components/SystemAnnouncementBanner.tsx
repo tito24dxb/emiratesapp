@@ -48,33 +48,29 @@ export default function SystemAnnouncementBanner() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, height: 0 }}
-        animate={{ opacity: 1, height: 'auto' }}
-        exit={{ opacity: 0, height: 0 }}
+        initial={{ opacity: 0, width: 0 }}
+        animate={{ opacity: 1, width: 'auto' }}
+        exit={{ opacity: 0, width: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className={`bg-gradient-to-r ${config.bgGradient} border-b ${config.borderColor}`}
+        className={`bg-gradient-to-r ${config.bgGradient} rounded-full px-3 py-1.5 flex items-center gap-2 max-w-md`}
       >
-        <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8 py-2">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className={`${config.iconColor} flex-shrink-0`}>
-              <Icon className="w-4 h-4 md:w-5 md:h-5" />
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <p className="text-white font-medium text-xs md:text-sm truncate">
-                {systemAnnouncement.message}
-              </p>
-            </div>
-
-            <button
-              onClick={() => setIsDismissed(true)}
-              className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1 transition flex-shrink-0"
-              aria-label="Dismiss announcement"
-            >
-              <X className="w-3 h-3 md:w-4 md:h-4" />
-            </button>
-          </div>
+        <div className={`${config.iconColor} flex-shrink-0`}>
+          <Icon className="w-4 h-4" />
         </div>
+
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-medium text-xs truncate">
+            {systemAnnouncement.message}
+          </p>
+        </div>
+
+        <button
+          onClick={() => setIsDismissed(true)}
+          className="text-white/80 hover:text-white hover:bg-white/20 rounded-full p-0.5 transition flex-shrink-0"
+          aria-label="Dismiss announcement"
+        >
+          <X className="w-3 h-3" />
+        </button>
       </motion.div>
     </AnimatePresence>
   );

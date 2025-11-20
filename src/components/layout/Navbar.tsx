@@ -47,18 +47,22 @@ export default function Navbar() {
   return (
     <>
       <nav className="liquid-navbar sticky top-0 z-40">
-        <SystemAnnouncementBanner />
         <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
-            <Link to="/dashboard" className="flex items-center">
-              <img
-                src="/Crews (2).png"
-                alt="The Crew Academy"
-                className="h-16 md:h-24 w-auto object-contain"
-              />
-            </Link>
+            <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
+              <Link to="/dashboard" className="flex items-center flex-shrink-0">
+                <img
+                  src="/Crews (2).png"
+                  alt="The Crew Academy"
+                  className="h-16 md:h-24 w-auto object-contain"
+                />
+              </Link>
+              <div className="hidden lg:block flex-1 min-w-0">
+                <SystemAnnouncementBanner />
+              </div>
+            </div>
 
-            <div className="flex items-center gap-2 md:gap-4">
+            <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               {isCommunityPage && (
                 <button
                   onClick={() => setShowMobileMenu(!showMobileMenu)}
