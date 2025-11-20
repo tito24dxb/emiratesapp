@@ -99,6 +99,13 @@ export default function MyProgressPage() {
       const coursesWithDetails = await Promise.all(
         courseEnrollments.map(async (enrollment) => {
           try {
+            console.log('Processing enrollment:', enrollment);
+
+            if (!enrollment.course_id) {
+              console.warn('Enrollment missing course_id:', enrollment);
+              return null;
+            }
+
             const course = await getCourseById(enrollment.course_id);
             if (course) {
               return {
@@ -114,7 +121,7 @@ export default function MyProgressPage() {
               };
             }
           } catch (error) {
-            console.error('Error loading course details:', error);
+            console.error('Error loading course details for enrollment:', enrollment, error);
           }
           return null;
         })
