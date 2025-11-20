@@ -51,6 +51,10 @@ export default function Layout({ children }: LayoutProps) {
             {children}
           </main>
         </div>
+
+        <div className="flex-shrink-0 z-20">
+          <Footer />
+        </div>
       </div>
     );
   }
