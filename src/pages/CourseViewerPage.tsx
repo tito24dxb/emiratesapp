@@ -447,62 +447,64 @@ function CourseViewerPageContent() {
           </div>
           )}
 
-          {exam && !hasPassed && watchProgress < 80 && !showExam && (
-            <div
-              className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center"
-              style={{
-                background: 'linear-gradient(135deg, rgba(234, 219, 200, 0.9) 0%, rgba(245, 230, 211, 0.9) 100%)',
-                backdropFilter: 'blur(10px)'
-              }}
-            >
-              <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-[#000000] mb-3">Exam Locked</h2>
-              <p className="text-gray-700 mb-4">
-                Watch at least 80% of the video to unlock the exam.
-              </p>
-              <div className="bg-orange-100 border border-orange-300 rounded-lg p-4">
-                <p className="text-orange-800 text-sm font-semibold">
-                  Progress: {Math.round(watchProgress)}% / 80% required
-                </p>
-              </div>
-            </div>
-          )}
+          {!showExam && exam && (
+            <>
+              {hasPassed && lastExamResult ? (
+                <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
+                  <div className="text-center mb-8">
+                    <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Award className="w-12 h-12 text-white" />
+                    </div>
+                    <div className="inline-block px-6 py-2 bg-green-500 text-white rounded-full font-bold text-lg mb-4">
+                      PASSED
+                    </div>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Course Completed!</h1>
+                    <p className="text-lg text-gray-600">You have successfully passed this exam.</p>
+                  </div>
 
-          {hasPassed && lastExamResult && !showExam && (
-            <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
-              <div className="text-center mb-8">
-                <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Award className="w-12 h-12 text-white" />
-                </div>
-                <div className="inline-block px-6 py-2 bg-green-500 text-white rounded-full font-bold text-lg mb-4">
-                  PASSED
-                </div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Course Completed!</h1>
-                <p className="text-lg text-gray-600">You have successfully passed this exam.</p>
-              </div>
+                  <div className="grid md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6 text-center">
+                      <div className="text-sm font-semibold text-blue-700 mb-2">Your Score</div>
+                      <div className="text-4xl font-bold text-green-600">{lastExamResult.lastScore}%</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6 text-center">
+                      <div className="text-sm font-semibold text-green-700 mb-2">Attempts</div>
+                      <div className="text-4xl font-bold text-green-600">{lastExamResult.attempts}</div>
+                    </div>
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 rounded-xl p-6 text-center">
+                      <div className="text-sm font-semibold text-yellow-700 mb-2">Status</div>
+                      <div className="text-2xl font-bold text-green-600">✓ Passed</div>
+                    </div>
+                  </div>
 
-              <div className="grid md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6 text-center">
-                  <div className="text-sm font-semibold text-blue-700 mb-2">Your Score</div>
-                  <div className="text-4xl font-bold text-green-600">{lastExamResult.lastScore}%</div>
+                  <button
+                    onClick={handleStartExam}
+                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold transition"
+                  >
+                    Retake Exam
+                  </button>
                 </div>
-                <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6 text-center">
-                  <div className="text-sm font-semibold text-green-700 mb-2">Attempts</div>
-                  <div className="text-4xl font-bold text-green-600">{lastExamResult.attempts}</div>
+              ) : watchProgress < 80 ? (
+                <div
+                  className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(234, 219, 200, 0.9) 0%, rgba(245, 230, 211, 0.9) 100%)',
+                    backdropFilter: 'blur(10px)'
+                  }}
+                >
+                  <Award className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h2 className="text-2xl font-bold text-[#000000] mb-3">Exam Locked</h2>
+                  <p className="text-gray-700 mb-4">
+                    Watch at least 80% of the video to unlock the exam.
+                  </p>
+                  <div className="bg-orange-100 border border-orange-300 rounded-lg p-4">
+                    <p className="text-orange-800 text-sm font-semibold">
+                      Progress: {Math.round(watchProgress)}% / 80% required
+                    </p>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 rounded-xl p-6 text-center">
-                  <div className="text-sm font-semibold text-yellow-700 mb-2">Status</div>
-                  <div className="text-2xl font-bold text-green-600">✓ Passed</div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleStartExam}
-                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold transition"
-              >
-                Retake Exam
-              </button>
-            </div>
+              ) : null}
+            </>
           )}
 
           {showExam && exam && currentUser && (
