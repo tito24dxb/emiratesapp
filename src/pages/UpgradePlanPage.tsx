@@ -2,27 +2,36 @@ import { Check, Crown, Shield, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
+import { auth } from '../lib/firebase';
 
 export default function UpgradePlanPage() {
   const { currentUser } = useApp();
   const [loading, setLoading] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleUpgrade = async (planName: string, priceId: string) => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('Please log in to upgrade your plan');
+      navigate('/login');
+      return;
+    }
 
     setLoading(planName);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const user = auth.currentUser;
+      if (!user) {
         alert('Please log in to upgrade your plan');
+        navigate('/login');
         return;
       }
+
+      const token = await user.getIdToken();
 
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${session.access_token}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
