@@ -101,7 +101,7 @@ export default function SystemAnnouncementBanner() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+              className="fixed inset-0 z-[100] flex items-end pb-24 justify-center p-4"
               style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
             >
               <div className={`bg-gradient-to-br ${config.bgGradient} rounded-xl shadow-2xl p-4 w-full max-w-sm mx-auto`}>
