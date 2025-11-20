@@ -147,91 +147,56 @@ function ChatPageContent() {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-6xl font-black bg-gradient-to-r from-emerald-500 via-cyan-500 to-blue-600 bg-clip-text text-transparent mb-2 animate-pulse">
-              ULTRA MODERN CHAT
-            </h1>
-            <div className="flex gap-2 mb-2">
-              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
-              <div className="w-3 h-3 bg-cyan-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-            </div>
-            <p className="text-gray-600">
-              Connect with mentors, students, and the community
-            </p>
+    <div className="h-[calc(100vh-80px)] flex flex-col md:flex-row overflow-hidden">
+      {/* Mobile: Show conversation list OR chat. Desktop: Show both side by side */}
+      <div className={`w-full md:w-96 md:border-r border-gray-200 flex-shrink-0 ${
+        selectedConversationId && !showConversationList ? 'hidden md:block' : 'block'
+      }`}>
+        <div className="h-full flex flex-col">
+          <div className="px-4 py-4 border-b border-gray-200 bg-white">
+            <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+            <p className="text-sm text-gray-600 mt-1">Connect with the community</p>
           </div>
-          <button
-            onClick={() => setShowConversationList(!showConversationList)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
-          >
-            <Users className="w-5 h-5" />
-            <span className="hidden sm:inline">Conversations</span>
-          </button>
+          <div className="flex-1 overflow-y-auto">
+            <ConversationList
+              onSelectConversation={handleSelectConversation}
+              selectedConversationId={selectedConversationId}
+              onClose={() => {}}
+            />
+          </div>
         </div>
-      </motion.div>
+      </div>
 
-      <div className="flex-1 glass-card rounded-2xl shadow-2xl overflow-hidden flex border border-gray-100">
-        <AnimatePresence>
-          {showConversationList && (
-            <motion.div
-              initial={{ x: -300, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -300, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="w-full md:w-96 border-r border-gray-100 md:flex-shrink-0 glass-light"
-            >
-              <ConversationList
-                onSelectConversation={handleSelectConversation}
-                selectedConversationId={selectedConversationId}
-                onClose={() => setShowConversationList(false)}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <div className={`flex-1 flex flex-col ${showConversationList ? 'hidden md:flex' : ''}`}>
-          <div className="px-6 py-4 glass-light border-b border-gray-100 backdrop-blur-xl">
-            <div className="flex items-center gap-4">
-              {selectedConversationId !== COMMUNITY_CHAT_ID && (
-                <button
-                  onClick={handleBackToCommunity}
-                  className="p-2 hover:glass-bubble rounded-xl transition-all"
-                  title="Back to Community Chat"
-                >
-                  <ArrowLeft className="w-5 h-5 text-gray-700" />
-                </button>
-              )}
+      {/* Chat area */}
+      <div className={`flex-1 flex flex-col bg-white ${
+        !selectedConversationId || showConversationList ? 'hidden md:flex' : 'flex'
+      }`}>
+          <div className="px-4 py-3 border-b border-gray-200 bg-white">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowConversationList(true)}
+                className="md:hidden p-2 hover:bg-gray-100 rounded-lg transition-all"
+                title="Back to conversations"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-700" />
+              </button>
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-gray-900 truncate">{conversationTitle}</h2>
+                <h2 className="text-lg font-semibold text-gray-900 truncate">{conversationTitle}</h2>
                 {typingUsers.length > 0 && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                  <div className="flex items-center gap-2 text-xs text-gray-600 mt-0.5">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-[#D71920] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-[#D71920] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                      <span className="w-1.5 h-1.5 bg-[#D71920] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                     </div>
                     <span>{typingUsers[0].userName} is typing...</span>
                   </div>
                 )}
               </div>
-              <button
-                onClick={() => setShowConversationList(!showConversationList)}
-                className="p-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all shadow-lg"
-                title="New conversation"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <div className="relative">
