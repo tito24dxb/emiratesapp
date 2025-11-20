@@ -45,7 +45,7 @@ export default function Layout({ children }: LayoutProps) {
 
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
-          <main className="flex-1 overflow-hidden">
+          <main className="flex-1 overflow-hidden relative">
             {children}
           </main>
         </div>
