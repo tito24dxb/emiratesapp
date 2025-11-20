@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Users, Search, ChevronLeft, Plus, UserPlus, X, Check } from 'lucide-react';
+import { MessageCircle, Users, Search, ChevronLeft, Plus, UserPlus, X, Check, Info } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageBubble from '../components/community/MessageBubble';
 import MessageComposer from '../components/community/MessageComposer';
@@ -27,6 +27,7 @@ export default function CommunityPage() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showRules, setShowRules] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -400,6 +401,14 @@ export default function CommunityPage() {
             <h2 className="font-bold text-gray-900 text-sm md:text-base truncate">{selectedConversation?.title}</h2>
             <p className="text-xs text-gray-500 truncate">{selectedConversation?.type === 'group' ? 'Group Chat' : 'Private Chat'}</p>
           </div>
+          {selectedConversation?.id === 'publicRoom' && (
+            <button
+              onClick={() => setShowRules(true)}
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all flex-shrink-0"
+            >
+              <Info className="w-4 h-4 md:w-5 md:h-5 text-[#D71921]" />
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 min-h-0" style={{ overflowX: 'hidden' }}>
@@ -464,6 +473,162 @@ export default function CommunityPage() {
         <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex-shrink-0">
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
         </div>
+
+        <AnimatePresence>
+          {showRules && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+              onClick={() => setShowRules(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="glass-light rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden border border-white/20"
+              >
+                <div className="bg-gradient-to-r from-[#D71921] to-[#B01419] p-4 md:p-6 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">
+                      🎉
+                    </div>
+                    <div>
+                      <h2 className="text-xl md:text-2xl font-bold text-white">Community Rules</h2>
+                      <p className="text-sm text-white/80">Please read before participating</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowRules(false)}
+                    className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
+
+                <div className="overflow-y-auto p-4 md:p-6 space-y-4 max-h-[calc(85vh-120px)]">
+                  <div className="glass-bubble rounded-xl p-4">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">Welcome to the Community Hub!</h3>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      Your space to connect, collaborate, learn, and grow together. Before you jump in, please read the rules carefully — this ensures a safe, respectful, and high-value experience for everyone.
+                    </p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">1.</span> Respect Above Everything
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>Treat everyone with respect — no insults, harassment, racism, discrimination, or personal attacks.</li>
+                        <li>Debate ideas, not people.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">2.</span> No Spam or Self-Promotion
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>No excessive messaging, repeated texts, or disruptive behavior.</li>
+                        <li>No unsolicited ads, promotions, links, or sales pitches without admin approval.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">3.</span> Keep It Safe & Legal
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>No illegal content, piracy, or sharing of copyrighted material.</li>
+                        <li>No hacking, exploits, or malicious software.</li>
+                        <li>No doxxing or sharing private information of others.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">4.</span> Stay On Topic
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>Use the proper channels for the proper discussions.</li>
+                        <li>Don't derail conversations with unrelated content.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">5.</span> No Explicit or Harmful Content
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>No pornographic, violent, or graphic material.</li>
+                        <li>No content that promotes self-harm, abuse, or dangerous activities.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">6.</span> Be Constructive
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>Provide feedback in a helpful, actionable manner.</li>
+                        <li>Add value with every interaction — share knowledge, support others, and contribute positively.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">7.</span> Respect Moderators & Decisions
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>Follow moderator instructions immediately.</li>
+                        <li>Mods reserve the right to mute, kick, or ban members who violate rules.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4">
+                      <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-lg">8.</span> English or Spanish Only
+                      </h4>
+                      <ul className="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+                        <li>To maintain coherence, keep conversations in the languages allowed by the community rules.</li>
+                      </ul>
+                    </div>
+
+                    <div className="glass-bubble rounded-xl p-4 bg-[#D71921]/5">
+                      <h4 className="font-bold text-[#D71921] mb-2 flex items-center gap-2">
+                        <span className="text-lg">9.</span> Zero Tolerance Policy
+                      </h4>
+                      <p className="text-sm text-gray-700">
+                        Any severe violation — hate speech, threats, harassment, scams, or illegal activity — results in instant removal.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="glass-bubble rounded-xl p-4 bg-gradient-to-br from-[#D4AF37]/10 to-[#D71921]/10">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <span className="text-xl">🚀</span> You're All Set!
+                    </h3>
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      Thank you for being part of this community. Let's build something powerful together — respectfully, safely, and with purpose.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-[#D71921] to-[#B01419] p-4 flex justify-center">
+                  <button
+                    onClick={() => setShowRules(false)}
+                    className="px-6 py-2.5 bg-white text-[#D71921] rounded-xl font-bold hover:shadow-lg transition-all"
+                  >
+                    I Understand
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     );
   }
