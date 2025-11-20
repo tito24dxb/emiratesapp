@@ -26,6 +26,7 @@ function CourseViewerPageContent() {
   const [showResultModal, setShowResultModal] = useState(false);
   const [hasPassed, setHasPassed] = useState(false);
   const [isRetake, setIsRetake] = useState(false);
+  const [lastExamResult, setLastExamResult] = useState<any>(null);
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
   const [videoStartTime] = useState(Date.now());
@@ -116,8 +117,11 @@ function CourseViewerPageContent() {
             examData.moduleId,
             examData.lessonId
           );
-          if (result && result.passed) {
-            setHasPassed(true);
+          if (result) {
+            setLastExamResult(result);
+            if (result.passed) {
+              setHasPassed(true);
+            }
           }
         }
       } else {
@@ -320,8 +324,6 @@ function CourseViewerPageContent() {
 
   const handleExamComplete = async (result: ExamResult) => {
     setExamResult(result);
-    setShowExam(false);
-    setShowResultModal(true);
 
     if (result.passed && currentUser && courseId && course) {
       setHasPassed(true);
@@ -466,13 +468,40 @@ function CourseViewerPageContent() {
             </div>
           )}
 
-          {hasPassed && !showExam && (
-            <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl shadow-lg p-8 text-center">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-green-800 mb-2">Course Completed!</h2>
-              <p className="text-green-700">
-                You have successfully completed this course and passed the exam.
-              </p>
+          {hasPassed && lastExamResult && !showExam && (
+            <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
+              <div className="text-center mb-8">
+                <div className="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Award className="w-12 h-12 text-white" />
+                </div>
+                <div className="inline-block px-6 py-2 bg-green-500 text-white rounded-full font-bold text-lg mb-4">
+                  PASSED
+                </div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Course Completed!</h1>
+                <p className="text-lg text-gray-600">You have successfully passed this exam.</p>
+              </div>
+
+              <div className="grid md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6 text-center">
+                  <div className="text-sm font-semibold text-blue-700 mb-2">Your Score</div>
+                  <div className="text-4xl font-bold text-green-600">{lastExamResult.lastScore}%</div>
+                </div>
+                <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6 text-center">
+                  <div className="text-sm font-semibold text-green-700 mb-2">Attempts</div>
+                  <div className="text-4xl font-bold text-green-600">{lastExamResult.attempts}</div>
+                </div>
+                <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-2 border-yellow-200 rounded-xl p-6 text-center">
+                  <div className="text-sm font-semibold text-yellow-700 mb-2">Status</div>
+                  <div className="text-2xl font-bold text-green-600">✓ Passed</div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleStartExam}
+                className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-bold transition"
+              >
+                Retake Exam
+              </button>
             </div>
           )}
 
@@ -487,16 +516,6 @@ function CourseViewerPageContent() {
             </div>
           )}
 
-          <AnimatePresence>
-            {showResultModal && examResult && exam && (
-              <ExamResultModal
-                result={examResult}
-                examTitle={exam.examTitle}
-                onClose={handleCloseResultModal}
-                cooldownMinutes={exam.cooldownMinutes}
-              />
-            )}
-          </AnimatePresence>
         </div>
       </div>
     );

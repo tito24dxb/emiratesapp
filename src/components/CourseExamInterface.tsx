@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CheckCircle, XCircle, ChevronRight, Trophy, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, ChevronRight, Trophy, RefreshCw, Award, AlertCircle } from 'lucide-react';
 import { Exam, submitExam, ExamResult } from '../services/examService';
 
 interface CourseExamInterfaceProps {
@@ -17,6 +17,8 @@ export default function CourseExamInterface({ exam, userId, onComplete, isRetake
   const [isCorrect, setIsCorrect] = useState(false);
   const [answers, setAnswers] = useState<Record<number, { selected: number; correct: boolean }>>({});
   const [startTime] = useState(Date.now());
+  const [examResult, setExamResult] = useState<ExamResult | null>(null);
+  const [showResults, setShowResults] = useState(false);
 
   const question = exam.questions[currentQuestion];
   const progress = ((currentQuestion + 1) / exam.questions.length) * 100;
@@ -57,6 +59,8 @@ export default function CourseExamInterface({ exam, userId, onComplete, isRetake
           timeSpent
         });
 
+        setExamResult(result);
+        setShowResults(true);
         onComplete(result);
       } catch (error) {
         console.error('Error submitting exam:', error);
@@ -67,6 +71,137 @@ export default function CourseExamInterface({ exam, userId, onComplete, isRetake
       setShowFeedback(false);
     }
   };
+
+  const handleRetry = () => {
+    setCurrentQuestion(0);
+    setSelectedAnswer(-1);
+    setShowFeedback(false);
+    setIsCorrect(false);
+    setAnswers({});
+    setExamResult(null);
+    setShowResults(false);
+  };
+
+  if (showResults && examResult) {
+    const getScoreColor = (score: number) => {
+      if (score >= 80) return 'text-green-600';
+      if (score >= exam.passingScore) return 'text-yellow-600';
+      return 'text-red-600';
+    };
+
+    const getStatusBadge = () => {
+      if (examResult.score >= 80) {
+        return {
+          text: 'EXCELLENT',
+          color: 'bg-green-500',
+          message: 'Outstanding performance!'
+        };
+      } else if (examResult.score >= exam.passingScore) {
+        return {
+          text: 'PASSED',
+          color: 'bg-yellow-500',
+          message: 'You passed the exam!'
+        };
+      } else {
+        return {
+          text: 'NEEDS IMPROVEMENT',
+          color: 'bg-red-500',
+          message: `You need ${exam.passingScore}% or higher to pass.`
+        };
+      }
+    };
+
+    const status = getStatusBadge();
+    const answersArray = Object.values(answers);
+
+    return (
+      <div className="max-w-4xl mx-auto py-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12">
+          <div className="text-center mb-8">
+            <div className={`w-24 h-24 ${status.color} rounded-full flex items-center justify-center mx-auto mb-6`}>
+              {examResult.passed ? (
+                <Award className="w-12 h-12 text-white" />
+              ) : (
+                <AlertCircle className="w-12 h-12 text-white" />
+              )}
+            </div>
+            <div className={`inline-block px-6 py-2 ${status.color} text-white rounded-full font-bold text-lg mb-4`}>
+              {status.text}
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {examResult.passed ? 'Congratulations!' : 'Not Quite There'}
+            </h1>
+            <p className="text-lg text-gray-600">{status.message}</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4 mb-8">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-6 text-center">
+              <div className="text-sm font-semibold text-blue-700 mb-2">Your Score</div>
+              <div className={`text-4xl font-bold ${getScoreColor(examResult.score)}`}>{examResult.score}%</div>
+            </div>
+            <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-6 text-center">
+              <div className="text-sm font-semibold text-green-700 mb-2">Correct Answers</div>
+              <div className="text-4xl font-bold text-green-600">{examResult.correctAnswers}</div>
+            </div>
+            <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-xl p-6 text-center">
+              <div className="text-sm font-semibold text-red-700 mb-2">Incorrect Answers</div>
+              <div className="text-4xl font-bold text-red-600">{examResult.totalQuestions - examResult.correctAnswers}</div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-xl p-6 mb-8">
+            <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <CheckCircle className="w-6 h-6 text-[#D71920]" />
+              Review Your Answers:
+            </h3>
+            <div className="space-y-3">
+              {exam.questions.map((question, index) => {
+                const userAnswer = answersArray[index];
+                const isAnswerCorrect = userAnswer?.correct || false;
+
+                return (
+                  <div key={question.id} className="bg-white rounded-lg p-4 border-2 border-gray-200">
+                    <div className="flex items-start gap-3 mb-2">
+                      {isAnswerCorrect ? (
+                        <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+                      ) : (
+                        <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                      )}
+                      <div className="flex-1">
+                        <p className="font-semibold text-gray-900 mb-2">Q{index + 1}: {question.questionText}</p>
+                        <p className="text-sm text-gray-700 mb-1">
+                          Your answer: <span className={`font-semibold ${isAnswerCorrect ? 'text-green-700' : 'text-red-700'}`}>
+                            {question.options[userAnswer?.selected]}
+                          </span>
+                        </p>
+                        {!isAnswerCorrect && (
+                          <p className="text-sm text-green-700">
+                            Correct answer: <span className="font-semibold">{question.options[question.correctIndex]}</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            {!examResult.passed && (
+              <button
+                onClick={handleRetry}
+                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-bold transition"
+              >
+                <RefreshCw className="w-5 h-5" />
+                Retry Exam
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto py-8">
