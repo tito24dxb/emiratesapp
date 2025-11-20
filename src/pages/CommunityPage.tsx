@@ -105,6 +105,10 @@ export default function CommunityPage() {
       contentType,
       file
     );
+
+    setTimeout(() => {
+      scrollToBottom();
+    }, 100);
   };
 
   const handleTyping = () => {
