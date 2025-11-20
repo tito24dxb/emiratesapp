@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { enrollInModule } from '../services/moduleProgressService';
+import { enrollInModule } from '../services/enrollmentService';
 import FeatureAccessGuard from '../components/FeatureAccessGuard';
 
 interface Submodule {
@@ -197,7 +197,7 @@ function CoursesPageContent() {
       const course2Id = moduleData.course2_id;
       const submoduleId = moduleData.submodule_id;
 
-      await enrollInModule(currentUser.uid, moduleId, courseId, course1Id, course2Id, submoduleId);
+      await enrollInModule(currentUser.uid, moduleId, moduleType);
       await loadMainModules();
       navigate(`/${moduleType === 'main_module' ? 'main-modules' : 'submodules'}/${moduleId}`);
     } catch (error) {

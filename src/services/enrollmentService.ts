@@ -300,3 +300,40 @@ export const getUserEnrollments = async (
     return [];
   }
 };
+
+export const getAverageProgress = async (userId: string): Promise<number> => {
+  try {
+    const enrollments = await getUserEnrollments(userId);
+    if (enrollments.length === 0) return 0;
+
+    const totalProgress = enrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.progress_percentage || 0),
+      0
+    );
+
+    return Math.round(totalProgress / enrollments.length);
+  } catch (error) {
+    console.error('Error getting average progress:', error);
+    return 0;
+  }
+};
+
+export const getCompletedModulesCount = async (userId: string): Promise<number> => {
+  try {
+    const enrollments = await getUserEnrollments(userId);
+    return enrollments.filter(e => e.completed).length;
+  } catch (error) {
+    console.error('Error getting completed modules count:', error);
+    return 0;
+  }
+};
+
+export const getInProgressModulesCount = async (userId: string): Promise<number> => {
+  try {
+    const enrollments = await getUserEnrollments(userId);
+    return enrollments.filter(e => !e.completed && e.progress_percentage > 0).length;
+  } catch (error) {
+    console.error('Error getting in-progress modules count:', error);
+    return 0;
+  }
+};

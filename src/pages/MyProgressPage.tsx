@@ -8,7 +8,7 @@ import {
   getAverageProgress,
   getCompletedModulesCount,
   getInProgressModulesCount,
-  CourseEnrollment
+  ModuleEnrollment
 } from '../services/enrollmentService';
 import { getMainModule, getSubmodule } from '../services/mainModuleService';
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
@@ -70,7 +70,7 @@ export default function MyProgressPage() {
                 type: 'main_module' as const,
                 coverImage: mainModule.coverImage,
                 enrolled_at: enrollment.enrolled_at,
-                progress_percentage: enrollment.progress,
+                progress_percentage: enrollment.progress_percentage,
                 completed: enrollment.completed,
                 last_accessed: enrollment.last_accessed
               };
