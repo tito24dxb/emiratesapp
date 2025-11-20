@@ -57,7 +57,7 @@ export default function Navbar() {
                   className="h-16 md:h-24 w-auto object-contain"
                 />
               </Link>
-              <div className="hidden lg:block flex-1 min-w-0">
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <SystemAnnouncementBanner />
               </div>
             </div>
