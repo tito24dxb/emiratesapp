@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       return corsResponse({ error: 'Method not allowed' }, 405);
     }
 
-    const { price_id, success_url, cancel_url, mode } = await req.json();
+    const { price_id, success_url, cancel_url, mode, firebase_uid } = await req.json();
 
     const error = validateParameters(
       { price_id, success_url, cancel_url, mode },
@@ -59,25 +59,16 @@ Deno.serve(async (req) => {
       return corsResponse({ error }, 400);
     }
 
-    const authHeader = req.headers.get('Authorization')!;
-    const token = authHeader.replace('Bearer ', '');
-    const {
-      data: { user },
-      error: getUserError,
-    } = await supabase.auth.getUser(token);
-
-    if (getUserError) {
-      return corsResponse({ error: 'Failed to authenticate user' }, 401);
+    if (!firebase_uid) {
+      return corsResponse({ error: 'Firebase UID is required' }, 400);
     }
 
-    if (!user) {
-      return corsResponse({ error: 'User not found' }, 404);
-    }
+    const userId = firebase_uid;
 
     const { data: customer, error: getCustomerError } = await supabase
       .from('stripe_customers')
       .select('customer_id')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .is('deleted_at', null)
       .maybeSingle();
 
@@ -94,16 +85,15 @@ Deno.serve(async (req) => {
      */
     if (!customer || !customer.customer_id) {
       const newCustomer = await stripe.customers.create({
-        email: user.email,
         metadata: {
-          userId: user.id,
+          userId: userId,
         },
       });
 
-      console.log(`Created new Stripe customer ${newCustomer.id} for user ${user.id}`);
+      console.log(`Created new Stripe customer ${newCustomer.id} for user ${userId}`);
 
       const { error: createCustomerError } = await supabase.from('stripe_customers').insert({
-        user_id: user.id,
+        user_id: userId,
         customer_id: newCustomer.id,
       });
 

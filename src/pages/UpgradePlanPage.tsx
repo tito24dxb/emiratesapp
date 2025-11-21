@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { auth } from '../lib/firebase';
 
 export default function UpgradePlanPage() {
   const { currentUser } = useApp();
@@ -19,30 +19,44 @@ export default function UpgradePlanPage() {
 
     setLoading(planName);
     try {
-      const { data: session } = await supabase.auth.getSession();
+      const firebaseUser = auth.currentUser;
 
-      if (!session?.session?.access_token) {
+      if (!firebaseUser) {
         alert('Please log in to upgrade your plan');
         navigate('/login');
         return;
       }
 
+      const idToken = await firebaseUser.getIdToken();
+
       const successUrl = `${window.location.origin}/dashboard?upgrade=success`;
       const cancelUrl = `${window.location.origin}/upgrade-plan?upgrade=cancelled`;
 
-      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
-        body: {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/stripe-checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+          'apikey': supabaseAnonKey,
+        },
+        body: JSON.stringify({
           price_id: priceId,
           success_url: successUrl,
           cancel_url: cancelUrl,
-          mode: 'subscription'
-        }
+          mode: 'subscription',
+          firebase_uid: currentUser.uid
+        })
       });
 
-      if (error) {
-        console.error('Stripe checkout error:', error);
-        throw new Error(error.message || 'Failed to create checkout session');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to create checkout session');
       }
+
+      const data = await response.json();
 
       if (!data?.url) {
         throw new Error('No checkout URL returned');
