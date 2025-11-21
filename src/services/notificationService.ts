@@ -12,6 +12,7 @@ import {
   Timestamp,
   getDocs,
   limit,
+  getDoc,
 } from 'firebase/firestore';
 
 export type NotificationType =
@@ -455,18 +456,18 @@ export async function getCurrentSystemAnnouncements() {
 export async function getActiveFeatureShutdowns() {
   try {
     const shutdownDocRef = doc(db, 'systemSettings', 'featuresShutdown');
-    const snapshot = await getDocs(query(collection(shutdownDocRef.parent), where('__name__', '==', 'featuresShutdown')));
+    const snapshot = await getDoc(shutdownDocRef);
     
-    if (snapshot.empty) {
+    if (!snapshot.exists()) {
       return [];
     }
     
-    const shutdownData = snapshot.docs[0].data();
+    const shutdownData = snapshot.data();
     const activeShutdowns = [];
     
     // Filter active shutdowns from the document data
     for (const [featureName, shutdownInfo] of Object.entries(shutdownData)) {
-      if (shutdownInfo && typeof shutdownInfo === 'object' && shutdownInfo.isActive) {
+      if (shutdownInfo && typeof shutdownInfo === 'object' && (shutdownInfo.isActive || shutdownInfo.isShutdown)) {
         activeShutdowns.push({
           id: featureName,
           featureName,
