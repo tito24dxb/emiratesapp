@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { HelpCircle, Mail, MessageCircle, FileText, BookOpen, Bug, Send, AlertCircle, Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { createSupportTicket, Department, Topic, getUserSupportTickets, SupportTicket } from '../services/supportChatService';
 import { createBugReport, BugPriority, getAllBugReports, BugReport } from '../services/bugReportService';
+import ExpandableBugReportCard from '../components/ExpandableBugReportCard';
 
 type Tab = 'overview' | 'live-chat' | 'bug-report';
 
 export default function SupportPage() {
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const [searchParams] = useSearchParams();
+  const bugIdFromParams = searchParams.get('bugId');
+  const [activeTab, setActiveTab] = useState<Tab>(bugIdFromParams ? 'bug-report' : 'overview');
   const navigate = useNavigate();
   const { currentUser } = useApp();
 
@@ -574,79 +577,13 @@ export default function SupportPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {bugReports.map((report) => {
-                      const getStatusColor = (status: string) => {
-                        switch (status) {
-                          case 'open': return 'text-blue-600 bg-blue-100';
-                          case 'in-progress': return 'text-yellow-600 bg-yellow-100';
-                          case 'escalated': return 'text-purple-600 bg-purple-100';
-                          case 'resolved': return 'text-green-600 bg-green-100';
-                          case 'closed': return 'text-gray-600 bg-gray-100';
-                          default: return 'text-gray-600 bg-gray-100';
-                        }
-                      };
-
-                      const getPriorityColor = (priority: string) => {
-                        switch (priority) {
-                          case 'critical': return 'text-red-600 bg-red-100';
-                          case 'high': return 'text-orange-600 bg-orange-100';
-                          case 'medium': return 'text-yellow-600 bg-yellow-100';
-                          case 'low': return 'text-green-600 bg-green-100';
-                          default: return 'text-gray-600 bg-gray-100';
-                        }
-                      };
-
-                      const getStatusIcon = (status: string) => {
-                        switch (status) {
-                          case 'open': return <Clock className="w-4 h-4" />;
-                          case 'in-progress': return <AlertCircle className="w-4 h-4" />;
-                          case 'resolved': return <CheckCircle2 className="w-4 h-4" />;
-                          case 'closed': return <XCircle className="w-4 h-4" />;
-                          default: return <Bug className="w-4 h-4" />;
-                        }
-                      };
-
-                      return (
-                        <div key={report.id} className="glass-card rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition">
-                          <div className="space-y-3">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                              <h4 className="text-base sm:text-lg font-bold text-gray-900 break-words">{report.title}</h4>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${getStatusColor(report.status)}`}>
-                                  {getStatusIcon(report.status)}
-                                  <span className="capitalize">{report.status}</span>
-                                </div>
-                                <div className={`px-2 py-1 rounded-lg text-xs font-bold ${getPriorityColor(report.priority)}`}>
-                                  {report.priority.toUpperCase()}
-                                </div>
-                              </div>
-                            </div>
-
-                            <p className="text-gray-600 text-sm break-words">{report.description}</p>
-
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-semibold">Category: <span className="text-gray-700">{report.category}</span></span>
-                                <span className="hidden sm:inline">•</span>
-                                <span className="font-semibold">Reported by: <span className="text-gray-700 break-words">{report.reportedByName}</span></span>
-                              </div>
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="font-semibold">Role: <span className="text-gray-700">{report.reportedByRole}</span></span>
-                                <span className="hidden sm:inline">•</span>
-                                <span className="whitespace-nowrap">{new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-
-                            {report.assignedToName && (
-                              <div className="text-xs text-gray-600">
-                                <span className="font-semibold">Assigned to: </span>
-                                <span className="text-blue-600 break-words">{report.assignedToName}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+                    {bugReports.map((report) => (
+                      <ExpandableBugReportCard
+                        key={report.id}
+                        report={report}
+                        onUpdate={loadBugReports}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
