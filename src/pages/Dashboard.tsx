@@ -216,7 +216,7 @@ export default function Dashboard() {
               Welcome back, {currentUser.name.split(' ')[0]}!
             </h1>
             <p className="text-sm md:text-base text-gray-600">
-              Continue your journey to Emirates excellence
+              Continue your journey to cabin crew excellence
             </p>
           </motion.div>
 
@@ -254,7 +254,7 @@ export default function Dashboard() {
             <EmptyState
               icon={BookOpen}
               title="No Courses Yet"
-              description="You haven't enrolled in any courses yet. Explore our free lessons or browse courses to get started on your Emirates cabin crew journey."
+              description="You haven't enrolled in any courses yet. Explore our free lessons or browse courses to get started on your cabin crew journey."
               action={{
                 label: 'Explore Courses',
                 onClick: () => navigate('/courses'),
@@ -320,7 +320,7 @@ export default function Dashboard() {
           <EmptyState
             icon={GraduationCap}
             title="Start Creating Content"
-            description="No uploads yet. Start by adding your first course or resource to help your students succeed in their Emirates cabin crew journey."
+            description="No uploads yet. Start by adding your first course or resource to help your students succeed in their cabin crew journey."
             action={{
               label: 'Upload Content',
               onClick: () => navigate('/coach-dashboard'),

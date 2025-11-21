@@ -48,7 +48,7 @@ export default function LandingPage() {
   const testimonials = [
     {
       name: 'Sarah Ahmed',
-      role: 'Emirates Cabin Crew',
+      role: 'Cabin Crew Professional',
       image: 'https://images.pexels.com/photos/3228213/pexels-photo-3228213.jpeg?auto=compress&cs=tinysrgb&w=200',
       quote: 'The Crew Academy helped me prepare for every stage of the assessment. The AI trainer was a game-changer!'
     },
@@ -104,7 +104,7 @@ export default function LandingPage() {
     },
     {
       name: 'Pro',
-      price: '$29',
+      price: '£39',
       period: 'per month',
       priceId: 'price_1SUxeo02SYry0M3gdhJU01Xr',
       features: [
@@ -122,7 +122,7 @@ export default function LandingPage() {
     },
     {
       name: 'VIP',
-      price: '$79',
+      price: '£79',
       period: 'per month',
       priceId: 'price_1SUxfV02SYry0M3gjVKsRY8l',
       features: [

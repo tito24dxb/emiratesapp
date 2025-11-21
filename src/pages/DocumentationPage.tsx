@@ -5,7 +5,7 @@ export default function DocumentationPage() {
     <div className="min-h-screen">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#1C1C1C] mb-2">Documentation</h1>
-        <p className="text-gray-600">Complete guide to Emirates Academy Platform</p>
+        <p className="text-gray-600">Complete guide to The Crew Academy Platform</p>
       </div>
 
       <div className="space-y-8">
@@ -14,11 +14,11 @@ export default function DocumentationPage() {
             <div className="w-12 h-12 bg-gradient-to-br from-[#D71920] to-[#E6282C] rounded-lg flex items-center justify-center">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
-            <h2 className="text-3xl font-bold text-[#1C1C1C]">About Emirates Academy</h2>
+            <h2 className="text-3xl font-bold text-[#1C1C1C]">About The Crew Academy</h2>
           </div>
           <div className="prose max-w-none text-gray-700 space-y-4">
             <p className="text-lg leading-relaxed">
-              Emirates Academy is a comprehensive learning management system designed specifically for aspiring cabin crew professionals.
+              The Crew Academy is a comprehensive learning management system designed specifically for aspiring cabin crew professionals.
               Our platform provides world-class training resources, interactive learning experiences, and direct mentorship opportunities
               to help you achieve your dream of joining the aviation industry.
             </p>
@@ -265,7 +265,7 @@ export default function DocumentationPage() {
               </div>
               <p className="text-gray-700">
                 Extensive collection of courses covering grooming standards, customer service excellence, safety procedures,
-                interview preparation, and language skills. Courses include both PDF documents and video content from YouTube,
+                interview preparation, and language skills. Courses include both PDF documents and tailor-made video content,
                 organized by difficulty level and access tier.
               </p>
             </div>
@@ -441,7 +441,7 @@ export default function DocumentationPage() {
               Contact Support
             </a>
             <a
-              href="mailto:support@emirates.academy"
+              href="mailto:support@thecrewacademy.co"
               className="px-6 py-3 bg-white/10 backdrop-blur-sm border-2 border-white text-white rounded-lg font-bold hover:bg-white/20 transition"
             >
               Email Us

@@ -197,8 +197,8 @@ export default function SupportPage() {
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Email Support</h3>
                   <p className="text-gray-600 mb-4">Get help via email within 24 hours</p>
-                  <a href="mailto:support@emirates.academy" className="text-[#D71920] font-bold hover:underline">
-                    support@emirates.academy
+                  <a href="mailto:support@thecrewacademy.co" className="text-[#D71920] font-bold hover:underline">
+                    support@thecrewacademy.co
                   </a>
                 </div>
 
