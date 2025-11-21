@@ -46,9 +46,9 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="liquid-navbar sticky top-0 z-40">
+      <nav className="liquid-navbar sticky top-0 z-[100]">
         <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 md:h-20">
+          <div className="flex items-center justify-between h-16 md:h-20 relative">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
               <Link to="/dashboard" className="flex items-center flex-shrink-0">
                 <img
@@ -87,10 +87,10 @@ export default function Navbar() {
               )}
             </button>
 
-            <div className="relative">
+            <div className="relative z-[101]">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-1 md:gap-3 liquid-button-secondary rounded-3xl px-2 md:px-3 py-1.5 md:py-2 transition-all"
+                className="flex items-center gap-1 md:gap-3 liquid-button-secondary rounded-3xl px-2 md:px-3 py-1.5 md:py-2 transition-all relative z-[101]"
               >
                 <img
                   src={currentUser.photoURL || `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2260%22 dy=%2210.5rem%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3E${currentUser.name?.[0] || 'U'}%3C/text%3E%3C/svg%3E`}
@@ -111,7 +111,7 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute right-0 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-50"
+                    className="absolute right-0 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-[102] shadow-2xl"
                   >
                     <Link
                       to="/profile"
