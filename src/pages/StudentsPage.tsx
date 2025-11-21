@@ -15,6 +15,7 @@ interface Student {
   updatedAt: string;
   bio: string;
   photo_base64: string;
+  photoURL?: string;
 }
 
 interface StudentStats {
@@ -52,7 +53,8 @@ export default function StudentsPage() {
           createdAt: data.createdAt || new Date().toISOString(),
           updatedAt: data.updatedAt || new Date().toISOString(),
           bio: data.bio || '',
-          photo_base64: data.photo_base64 || ''
+          photo_base64: data.photo_base64 || '',
+          photoURL: data.photoURL || data.profilePicture || ''
         });
       });
 
@@ -156,7 +158,6 @@ export default function StudentsPage() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {filteredStudents.map((student, index) => {
-            const stats = studentStats[student.id] || { totalQuizzes: 0, averageScore: 0, passedQuizzes: 0 };
 
             return (
               <motion.div
@@ -168,12 +169,12 @@ export default function StudentsPage() {
               >
                 <div className="bg-gradient-to-r from-[#EADBC8] to-[#F5E6D3] p-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D71921] to-[#B91518] flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg">
-                      {student.photo_base64 ? (
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-[#D71921] to-[#B91518] flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg">
+                      {(student.photoURL || student.photo_base64) ? (
                         <img
-                          src={student.photo_base64}
+                          src={student.photoURL || student.photo_base64}
                           alt={student.name}
-                          className="w-full h-full rounded-full object-cover"
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         getStudentInitials(student.name)

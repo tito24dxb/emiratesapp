@@ -262,8 +262,18 @@ export default function ConversationList({
                       : ''
                   }`}
                 >
-                  <div className="w-11 h-11 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold shadow-md flex-shrink-0">
-                    {conversation.title.charAt(0).toUpperCase()}
+                  <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#D71920] to-[#B91518] shadow-md">
+                    {conversation.photoURL ? (
+                      <img
+                        src={conversation.photoURL}
+                        alt={conversation.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                        {conversation.title.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex-1 text-left min-w-0">
@@ -389,8 +399,18 @@ export default function ConversationList({
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-xl flex items-center justify-center text-white font-bold shadow-md">
-                          {user.name.charAt(0).toUpperCase()}
+                        <div className="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-[#D71921] to-[#B01419] shadow-md">
+                          {user.photoURL ? (
+                            <img
+                              src={user.photoURL}
+                              alt={user.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-white font-bold">
+                              {user.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
