@@ -47,7 +47,16 @@ export interface CommunityComment {
   userId: string;
   userName: string;
   userEmail: string;
+  userPhotoURL?: string;
   content: string;
+  imageUrl?: string;
+  replyTo?: string;
+  replyToName?: string;
+  reactions?: {
+    heart: number;
+    thumbsUp: number;
+    laugh: number;
+  };
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -211,14 +220,29 @@ export const communityFeedService = {
     userId: string,
     userName: string,
     userEmail: string,
-    content: string
+    content: string,
+    options?: {
+      imageUrl?: string;
+      replyTo?: string;
+      replyToName?: string;
+      userPhotoURL?: string;
+    }
   ): Promise<string> {
     const commentData = {
       postId,
       userId,
       userName,
       userEmail,
+      userPhotoURL: options?.userPhotoURL || '',
       content,
+      imageUrl: options?.imageUrl || '',
+      replyTo: options?.replyTo || '',
+      replyToName: options?.replyToName || '',
+      reactions: {
+        heart: 0,
+        thumbsUp: 0,
+        laugh: 0
+      },
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };

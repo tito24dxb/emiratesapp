@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical } from 'lucide-react';
 import { CommunityPost, communityFeedService } from '../../services/communityFeedService';
-import CommentsSection from './CommentsSection';
+import EnhancedCommentsSection from './EnhancedCommentsSection';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -192,7 +192,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
       </div>
 
       {showComments && (
-        <CommentsSection
+        <EnhancedCommentsSection
           postId={post.id}
           currentUser={currentUser}
         />
