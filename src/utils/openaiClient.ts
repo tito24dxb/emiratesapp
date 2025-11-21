@@ -11,15 +11,6 @@ interface AIResponse {
 }
 
 export class OpenAIClient {
-  private getAIEndpoint(): string {
-    // Always use the Supabase URL from environment variables
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    if (!supabaseUrl) {
-      throw new Error('Supabase URL is not configured. Please check your environment variables.');
-    }
-    return `${supabaseUrl}/functions/v1/ai`;
-  }
-
   async sendMessage(
     messages: Message[],
     userId: string
@@ -29,43 +20,24 @@ export class OpenAIClient {
         throw new Error('User ID is required. Please log in.');
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-      if (!anonKey) {
-        throw new Error('Supabase anonymous key is not configured. Please check your environment variables.');
-      }
-
-      const authToken = session?.access_token || anonKey;
-      const aiEndpoint = this.getAIEndpoint();
-
-      const response = await fetch(aiEndpoint, {
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-          'apikey': anonKey,
-        },
-        body: JSON.stringify({ messages, userId }),
+      const { data, error } = await supabase.functions.invoke('ai', {
+        body: { messages, userId }
       });
 
-      console.log('Response status:', response.status);
+      if (error) {
+        console.error('Edge function error:', error);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error response:', errorData);
-        const errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
-
-        if (errorMessage.includes('OpenAI API key not configured')) {
+        if (error.message?.includes('OpenAI API key not configured')) {
           throw new Error('AI service is not configured. Please contact the administrator to set up the OpenAI API key.');
         }
 
-        throw new Error(errorMessage);
+        throw new Error(error.message || 'Failed to get AI response');
       }
 
-      const data: AIResponse = await response.json();
+      if (!data) {
+        throw new Error('No response from AI service');
+      }
+
       console.log('Success response:', data);
 
       return {
