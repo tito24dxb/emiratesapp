@@ -417,63 +417,59 @@ export default function CommunityPage() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute top-full right-0 mt-2 w-96 max-w-[calc(100vw-2rem)] liquid-crystal-strong shadow-2xl rounded-2xl z-[104] max-h-[70vh] overflow-y-auto"
+                    className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] glass-card shadow-2xl rounded-2xl z-[104] max-h-[70vh] overflow-hidden border-2 border-white/40"
                   >
-                    <div className="bg-gradient-to-r from-[#D71921] to-[#B01419] p-3 flex items-center justify-between sticky top-0 z-10">
+                    <div className="p-4 border-b border-white/20 bg-gradient-to-r from-[#D71920]/10 to-[#B91518]/10">
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-lg">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-xl flex items-center justify-center text-xl shadow-md">
                           🎉
                         </div>
-                        <div>
-                          <h3 className="text-lg font-bold text-white">Community Rules</h3>
-                        </div>
+                        <h3 className="text-lg font-bold text-gray-900">Community Rules</h3>
                       </div>
-                      <button
-                        onClick={() => setShowRules(false)}
-                        className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
-                      >
-                        <X className="w-4 h-4 text-white" />
-                      </button>
                     </div>
 
-                    <div className="p-4 space-y-3">
-                      <div className="glass-bubble rounded-xl p-3">
-                        <p className="text-xs text-gray-700 leading-relaxed">
-                          Welcome! Please read these rules to ensure a safe and respectful community experience.
-                        </p>
-                      </div>
-
-                      <div className="space-y-2">
-                        {[
-                          { num: "1", title: "Respect Above Everything", desc: "Treat everyone with respect — no insults, harassment, or personal attacks." },
-                          { num: "2", title: "No Spam", desc: "No excessive messaging or unsolicited promotions." },
-                          { num: "3", title: "Keep It Safe & Legal", desc: "No illegal content, piracy, or sharing private information." },
-                          { num: "4", title: "Stay On Topic", desc: "Use proper channels for discussions." },
-                          { num: "5", title: "No Explicit Content", desc: "No pornographic, violent, or harmful material." },
-                          { num: "6", title: "Be Constructive", desc: "Add value and support others positively." },
-                          { num: "7", title: "Respect Moderators", desc: "Follow moderator instructions immediately." },
-                          { num: "8", title: "English or Spanish Only", desc: "Keep conversations in allowed languages." },
-                        ].map((rule) => (
-                          <div key={rule.num} className="glass-bubble rounded-lg p-2.5">
-                            <h4 className="font-bold text-gray-900 text-sm mb-1 flex items-center gap-1.5">
-                              <span className="text-sm">{rule.num}.</span> {rule.title}
-                            </h4>
-                            <p className="text-xs text-gray-700 ml-5">{rule.desc}</p>
-                          </div>
-                        ))}
-                        <div className="glass-bubble rounded-lg p-2.5 bg-[#D71921]/5">
-                          <h4 className="font-bold text-[#D71921] text-sm mb-1 flex items-center gap-1.5">
-                            <span className="text-sm">9.</span> Zero Tolerance
-                          </h4>
-                          <p className="text-xs text-gray-700 ml-5">
-                            Severe violations result in instant removal.
+                    <div className="overflow-y-auto max-h-[calc(70vh-120px)]">
+                      <div className="p-4 space-y-3">
+                        <div className="glass-card rounded-xl p-3 border-2 border-white/40">
+                          <p className="text-xs text-gray-700 leading-relaxed">
+                            Welcome! Please read these rules to ensure a safe and respectful community experience.
                           </p>
                         </div>
-                      </div>
 
+                        <div className="space-y-2">
+                          {[
+                            { num: "1", title: "Respect Above Everything", desc: "Treat everyone with respect — no insults, harassment, or personal attacks." },
+                            { num: "2", title: "No Spam", desc: "No excessive messaging or unsolicited promotions." },
+                            { num: "3", title: "Keep It Safe & Legal", desc: "No illegal content, piracy, or sharing private information." },
+                            { num: "4", title: "Stay On Topic", desc: "Use proper channels for discussions." },
+                            { num: "5", title: "No Explicit Content", desc: "No pornographic, violent, or harmful material." },
+                            { num: "6", title: "Be Constructive", desc: "Add value and support others positively." },
+                            { num: "7", title: "Respect Moderators", desc: "Follow moderator instructions immediately." },
+                            { num: "8", title: "English or Spanish Only", desc: "Keep conversations in allowed languages." },
+                          ].map((rule) => (
+                            <div key={rule.num} className="glass-card rounded-xl p-3 border border-white/40 hover:bg-white/40 transition">
+                              <h4 className="font-bold text-gray-900 text-xs mb-1 flex items-center gap-1.5">
+                                <span className="text-[#D71920]">{rule.num}.</span> {rule.title}
+                              </h4>
+                              <p className="text-xs text-gray-700 ml-4">{rule.desc}</p>
+                            </div>
+                          ))}
+                          <div className="glass-card rounded-xl p-3 border-2 border-red-200 bg-red-50">
+                            <h4 className="font-bold text-[#D71920] text-xs mb-1 flex items-center gap-1.5">
+                              <span>9.</span> Zero Tolerance
+                            </h4>
+                            <p className="text-xs text-gray-700 ml-4">
+                              Severe violations result in instant removal.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-4 border-t border-white/20 bg-white/50">
                       <button
                         onClick={() => setShowRules(false)}
-                        className="w-full px-4 py-2 bg-gradient-to-r from-[#D71921] to-[#B01419] text-white rounded-xl font-bold hover:shadow-lg transition-all text-sm"
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition-all text-sm"
                       >
                         I Understand
                       </button>

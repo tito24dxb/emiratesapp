@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Trophy, Medal, Award, TrendingUp, ChevronDown, ChevronUp, Shield, AlertTriangle, Mail, Star } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Medal, Award, TrendingUp, Shield, AlertTriangle, Mail, Star } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getLeaderboard, UserPoints } from '../services/rewardsService';
 import BadgeDisplay from '../components/BadgeDisplay';
-import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
 interface UserWithDetails extends UserPoints {
@@ -13,7 +13,6 @@ interface UserWithDetails extends UserPoints {
   photoURL?: string;
   achievements?: string[];
   bio?: string;
-  joinedAt?: any;
 }
 
 interface GroupedUsers {
@@ -31,8 +30,6 @@ export default function LeaderboardPage() {
     students: []
   });
   const [loading, setLoading] = useState(true);
-  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
-  const [expandedSection, setExpandedSection] = useState<string>('students');
 
   useEffect(() => {
     loadLeaderboard();
@@ -54,10 +51,9 @@ export default function LeaderboardPage() {
             userName: userData.name || userData.displayName || 'Unknown User',
             email: userData.email || '',
             role: userData.role || 'student',
-            photoURL: userData.photoURL || userData.profilePicture || '',
+            photoURL: userData.photoURL || userData.profilePicture || userData.photo_base64 || '',
             achievements: userData.achievements || [],
             bio: userData.bio || '',
-            joinedAt: userData.createdAt,
             total_points: pointsData?.total_points || 0,
             current_rank: pointsData?.current_rank || 'Bronze',
             daily_login_streak: pointsData?.daily_login_streak || 0,
@@ -107,10 +103,10 @@ export default function LeaderboardPage() {
   };
 
   const getRankBackground = (index: number) => {
-    if (index === 0) return 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-300';
-    if (index === 1) return 'glass-card border-gray-300';
-    if (index === 2) return 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300';
-    return 'glass-card border-white/40';
+    if (index === 0) return 'from-yellow-50 to-amber-50 border-yellow-300';
+    if (index === 1) return 'from-gray-50 to-gray-100 border-gray-300';
+    if (index === 2) return 'from-amber-50 to-orange-50 border-amber-300';
+    return 'from-white to-gray-50 border-gray-200';
   };
 
   const getRoleEmail = (email: string, role: string) => {
@@ -136,215 +132,147 @@ export default function LeaderboardPage() {
     return null;
   };
 
-  const toggleUserCard = (userId: string) => {
-    setExpandedUserId(expandedUserId === userId ? null : userId);
+  const renderUserCard = (user: UserWithDetails, index: number, globalIndex: number) => {
+    return (
+      <motion.div
+        key={user.user_id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: globalIndex * 0.02 }}
+        className={`glass-card rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all border-2 bg-gradient-to-br ${getRankBackground(index)}`}
+      >
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
+            <div className="flex items-center justify-center w-10 h-10 flex-shrink-0">
+              {getRankIcon(index)}
+            </div>
+
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#D71920] to-[#B91518] shadow-lg ring-4 ring-white">
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.userName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const parent = target.parentElement;
+                    if (parent) {
+                      parent.innerHTML = `<div class="w-full h-full flex items-center justify-center text-white font-bold text-2xl">${user.userName.charAt(0).toUpperCase()}</div>`;
+                    }
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white font-bold text-2xl">
+                  {user.userName.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <h3 className="font-bold text-base md:text-lg text-gray-900 truncate">
+                  {user.userName}
+                </h3>
+                {getRoleIcon(user.role)}
+                <BadgeDisplay
+                  rank={user.current_rank}
+                  size="sm"
+                  verifiedCrew={user.verified_crew}
+                />
+              </div>
+              <p className="text-xs md:text-sm text-gray-600 truncate">
+                {getRoleEmail(user.email, user.role)}
+              </p>
+              {user.daily_login_streak > 0 && (
+                <p className="text-xs md:text-sm text-orange-600 mt-1 font-medium">
+                  🔥 {user.daily_login_streak} day streak
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto md:ml-auto">
+            <div className="text-right">
+              <p className="text-2xl md:text-3xl font-bold text-[#D71920]">
+                {user.total_points.toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">points</p>
+            </div>
+          </div>
+        </div>
+
+        {user.achievements && user.achievements.length > 0 && (
+          <div className="mt-4 pt-4 border-t-2 border-white/40">
+            <div className="flex flex-wrap gap-2">
+              {user.achievements.map((achievement, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full"
+                >
+                  🏆 {achievement}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {user.bio && (
+          <div className="mt-3 pt-3 border-t border-white/40">
+            <p className="text-sm text-gray-700 line-clamp-2">{user.bio}</p>
+          </div>
+        )}
+      </motion.div>
+    );
   };
 
-  const toggleSection = (section: string) => {
-    setExpandedSection(expandedSection === section ? '' : section);
-  };
-
-  const renderUserList = (users: UserWithDetails[], sectionName: string, title: string) => {
-    const isExpanded = expandedSection === sectionName;
+  const renderSection = (users: UserWithDetails[], title: string, startIndex: number) => {
+    if (users.length === 0) return null;
 
     return (
-      <div className="mb-6">
-        <button
-          onClick={() => toggleSection(sectionName)}
-          className="w-full glass-card rounded-xl p-4 flex items-center justify-between hover:bg-white/60 transition"
-        >
+      <div className="mb-8">
+        <div className="glass-card rounded-xl p-4 mb-4 border-2 border-white/40">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
             <span className="px-3 py-1 bg-[#D71920] text-white rounded-full text-sm font-bold">
               {users.length}
             </span>
           </div>
-          {isExpanded ? <ChevronUp className="w-6 h-6 text-gray-600" /> : <ChevronDown className="w-6 h-6 text-gray-600" />}
-        </button>
-
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="space-y-3 mt-3"
-            >
-              {users.map((user, index) => (
-                <motion.div
-                  key={user.user_id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <div
-                    className={`${getRankBackground(index)} border-2 rounded-xl p-4 shadow-md hover:shadow-lg transition cursor-pointer`}
-                    onClick={() => toggleUserCard(user.user_id)}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center justify-center w-12 h-12 flex-shrink-0">
-                        {getRankIcon(index)}
-                      </div>
-
-                      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-gradient-to-br from-[#D71920] to-[#B91518]">
-                        {user.photoURL ? (
-                          <img
-                            src={user.photoURL}
-                            alt={user.userName}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-white font-bold text-lg">
-                            {user.userName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold text-lg text-gray-800">
-                            {user.userName}
-                          </h3>
-                          {getRoleIcon(user.role)}
-                          <BadgeDisplay
-                            rank={user.current_rank}
-                            size="sm"
-                            verifiedCrew={user.verified_crew}
-                          />
-                        </div>
-                        {user.daily_login_streak > 0 && (
-                          <p className="text-sm text-gray-600 mt-1">
-                            🔥 {user.daily_login_streak} day streak
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="text-right flex-shrink-0">
-                        <p className="text-2xl font-bold text-[#D71920]">
-                          {user.total_points.toLocaleString()}
-                        </p>
-                        <p className="text-sm text-gray-500">points</p>
-                      </div>
-
-                      <div className="flex-shrink-0">
-                        {expandedUserId === user.user_id ? (
-                          <ChevronUp className="w-5 h-5 text-gray-600" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-600" />
-                        )}
-                      </div>
-                    </div>
-
-                    <AnimatePresence>
-                      {expandedUserId === user.user_id && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="mt-4 pt-4 border-t-2 border-white/40"
-                        >
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Mail className="w-4 h-4 text-[#D71920]" />
-                                Contact
-                              </h4>
-                              <p className="text-sm text-gray-700 font-mono">
-                                {getRoleEmail(user.email, user.role)}
-                              </p>
-                              <p className="text-xs text-gray-600 mt-1 capitalize">
-                                Role: {user.role}
-                              </p>
-                            </div>
-
-                            <div>
-                              <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
-                                <Trophy className="w-4 h-4 text-[#D71920]" />
-                                Achievements
-                              </h4>
-                              {user.achievements && user.achievements.length > 0 ? (
-                                <div className="flex flex-wrap gap-1">
-                                  {user.achievements.map((achievement, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full"
-                                    >
-                                      {achievement}
-                                    </span>
-                                  ))}
-                                </div>
-                              ) : (
-                                <p className="text-sm text-gray-600">No achievements yet</p>
-                              )}
-                            </div>
-
-                            {user.bio && (
-                              <div className="md:col-span-2">
-                                <h4 className="font-bold text-gray-900 mb-2">Bio</h4>
-                                <p className="text-sm text-gray-700">{user.bio}</p>
-                              </div>
-                            )}
-
-                            <div className="md:col-span-2">
-                              <div className="glass-card rounded-lg p-3">
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                                  <div>
-                                    <p className="text-2xl font-bold text-[#D71920]">
-                                      {user.total_points.toLocaleString()}
-                                    </p>
-                                    <p className="text-xs text-gray-600">Total Points</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-2xl font-bold text-purple-600">
-                                      {user.current_rank}
-                                    </p>
-                                    <p className="text-xs text-gray-600">Rank</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-2xl font-bold text-orange-600">
-                                      {user.daily_login_streak}
-                                    </p>
-                                    <p className="text-xs text-gray-600">Day Streak</p>
-                                  </div>
-                                  <div>
-                                    <p className="text-2xl font-bold text-green-600">
-                                      {user.verified_crew ? 'YES' : 'NO'}
-                                    </p>
-                                    <p className="text-xs text-gray-600">Verified</p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        </div>
+        <div className="grid grid-cols-1 gap-4">
+          {users.map((user, index) => renderUserCard(user, index, startIndex + index))}
+        </div>
       </div>
     );
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-[#D71920] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  const totalUsers = groupedUsers.admins.length + groupedUsers.supportAgents.length +
+                     groupedUsers.mentors.length + groupedUsers.students.length;
+
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
-        <div className="glass-card rounded-2xl p-8 mb-6 border-2 border-white/40">
-          <div className="flex items-center gap-4 mb-6">
-            <TrendingUp className="w-12 h-12 text-[#D71920]" />
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Leaderboard</h1>
-              <p className="text-gray-700 mt-1">Academy Members Ranked by Performance</p>
+        <div className="glass-card rounded-2xl p-6 md:p-8 mb-6 border-2 border-white/40">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
+            <TrendingUp className="w-12 h-12 text-[#D71920] flex-shrink-0" />
+            <div className="flex-1">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Leaderboard</h1>
+              <p className="text-gray-700 mt-1">Top {totalUsers} Academy Members by Performance</p>
             </div>
           </div>
 
           <div className="glass-card rounded-xl p-4 bg-red-50 border-2 border-red-200">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-red-900">Security Notice</p>
                 <p className="text-xs text-red-800 mt-1">
                   Unauthorized external communication will result in a strike (warning).
@@ -355,17 +283,18 @@ export default function LeaderboardPage() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="w-12 h-12 border-4 border-[#D71920] border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-600 mt-4 font-semibold">Loading leaderboard...</p>
+        {totalUsers === 0 ? (
+          <div className="glass-card rounded-2xl p-12 text-center">
+            <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No Members Yet</h3>
+            <p className="text-gray-600">Be the first to join the leaderboard!</p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {groupedUsers.admins.length > 0 && renderUserList(groupedUsers.admins, 'admins', '👑 Admins (Governors)')}
-            {groupedUsers.supportAgents.length > 0 && renderUserList(groupedUsers.supportAgents, 'support', '💬 Support Agents')}
-            {groupedUsers.mentors.length > 0 && renderUserList(groupedUsers.mentors, 'mentors', '⭐ Mentors')}
-            {renderUserList(groupedUsers.students, 'students', '🎓 Students')}
+          <div className="space-y-8">
+            {renderSection(groupedUsers.admins, '👑 Admins', 0)}
+            {renderSection(groupedUsers.supportAgents, '💬 Support Agents', groupedUsers.admins.length)}
+            {renderSection(groupedUsers.mentors, '⭐ Mentors', groupedUsers.admins.length + groupedUsers.supportAgents.length)}
+            {renderSection(groupedUsers.students, '🎓 Students', groupedUsers.admins.length + groupedUsers.supportAgents.length + groupedUsers.mentors.length)}
           </div>
         )}
       </div>
