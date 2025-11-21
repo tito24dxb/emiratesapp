@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 export default function UpgradePlanPage() {
   const { currentUser } = useApp();
@@ -19,10 +19,40 @@ export default function UpgradePlanPage() {
 
     setLoading(planName);
     try {
-      alert('Stripe payment integration is currently being configured. Please check back soon or contact support for assistance.');
+      const { data: session } = await supabase.auth.getSession();
+
+      if (!session?.session?.access_token) {
+        alert('Please log in to upgrade your plan');
+        navigate('/login');
+        return;
+      }
+
+      const successUrl = `${window.location.origin}/dashboard?upgrade=success`;
+      const cancelUrl = `${window.location.origin}/upgrade-plan?upgrade=cancelled`;
+
+      const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+        body: {
+          price_id: priceId,
+          success_url: successUrl,
+          cancel_url: cancelUrl,
+          mode: 'subscription'
+        }
+      });
+
+      if (error) {
+        console.error('Stripe checkout error:', error);
+        throw new Error(error.message || 'Failed to create checkout session');
+      }
+
+      if (!data?.url) {
+        throw new Error('No checkout URL returned');
+      }
+
+      window.location.href = data.url;
     } catch (error) {
       console.error('Upgrade error:', error);
-      alert('Failed to initiate upgrade. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to initiate upgrade';
+      alert(errorMessage);
     } finally {
       setLoading(null);
     }
