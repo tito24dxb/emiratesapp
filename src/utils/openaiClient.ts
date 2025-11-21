@@ -29,10 +29,6 @@ export class OpenAIClient {
         throw new Error('User ID is required. Please log in.');
       }
 
-      const aiEndpoint = this.getAIEndpoint();
-      console.log('AI Endpoint:', aiEndpoint);
-      console.log('Sending request with userId:', userId);
-
       const { data: { session } } = await supabase.auth.getSession();
       const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -41,9 +37,12 @@ export class OpenAIClient {
       }
 
       const authToken = session?.access_token || anonKey;
+      const aiEndpoint = this.getAIEndpoint();
 
       const response = await fetch(aiEndpoint, {
         method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`,
