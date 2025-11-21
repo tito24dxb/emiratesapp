@@ -2,7 +2,16 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import Stripe from 'npm:stripe@17.7.0';
 import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
-const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
+const supabase = createClient(
+  Deno.env.get('SUPABASE_URL') ?? '',
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
 const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY')!;
 const stripe = new Stripe(stripeSecret, {
   appInfo: {
@@ -65,6 +74,8 @@ Deno.serve(async (req) => {
 
     const userId = firebase_uid;
 
+    console.log(`Looking up customer for Firebase UID: ${userId}`);
+
     const { data: customer, error: getCustomerError } = await supabase
       .from('stripe_customers')
       .select('customer_id')
@@ -73,9 +84,19 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (getCustomerError) {
-      console.error('Failed to fetch customer information from the database', getCustomerError);
+      console.error('Failed to fetch customer information from the database', {
+        error: getCustomerError,
+        code: getCustomerError.code,
+        message: getCustomerError.message,
+        details: getCustomerError.details,
+        hint: getCustomerError.hint
+      });
 
-      return corsResponse({ error: 'Failed to fetch customer information' }, 500);
+      return corsResponse({
+        error: 'Failed to fetch customer information',
+        details: getCustomerError.message,
+        code: getCustomerError.code
+      }, 500);
     }
 
     let customerId;
