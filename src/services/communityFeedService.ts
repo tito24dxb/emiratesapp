@@ -17,8 +17,7 @@ import {
   QueryDocumentSnapshot,
   DocumentData
 } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../lib/firebase';
+import { db } from '../lib/firebase';
 
 export interface CommunityPost {
   id: string;
@@ -27,7 +26,6 @@ export interface CommunityPost {
   userEmail: string;
   content: string;
   imageUrl?: string;
-  imagePath?: string;
   channel: 'announcements' | 'general' | 'study-room';
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -65,6 +63,17 @@ export interface CommunityReaction {
 export const POSTS_PER_PAGE = 10;
 
 export const communityFeedService = {
+  async convertImageToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
   async createPost(
     userId: string,
     userName: string,
@@ -74,14 +83,9 @@ export const communityFeedService = {
     imageFile?: File
   ): Promise<string> {
     let imageUrl = '';
-    let imagePath = '';
 
     if (imageFile) {
-      const timestamp = Date.now();
-      imagePath = `community_images/${userId}/${timestamp}_${imageFile.name}`;
-      const imageRef = ref(storage, imagePath);
-      await uploadBytes(imageRef, imageFile);
-      imageUrl = await getDownloadURL(imageRef);
+      imageUrl = await this.convertImageToBase64(imageFile);
     }
 
     const postData = {
@@ -90,7 +94,6 @@ export const communityFeedService = {
       userEmail,
       content,
       imageUrl,
-      imagePath,
       channel,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
@@ -119,38 +122,24 @@ export const communityFeedService = {
 
   async deletePost(postId: string): Promise<void> {
     const postRef = doc(db, 'community_posts', postId);
-    const postDoc = await getDoc(postRef);
 
-    if (postDoc.exists()) {
-      const postData = postDoc.data();
+    const commentsQuery = query(
+      collection(db, 'community_comments'),
+      where('postId', '==', postId)
+    );
+    const commentsSnapshot = await getDocs(commentsQuery);
+    const deletePromises = commentsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
 
-      if (postData.imagePath) {
-        try {
-          const imageRef = ref(storage, postData.imagePath);
-          await deleteObject(imageRef);
-        } catch (error) {
-          console.error('Error deleting image:', error);
-        }
-      }
+    const reactionsQuery = query(
+      collection(db, 'community_reactions'),
+      where('postId', '==', postId)
+    );
+    const reactionsSnapshot = await getDocs(reactionsQuery);
+    const reactionDeletePromises = reactionsSnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(reactionDeletePromises);
 
-      const commentsQuery = query(
-        collection(db, 'community_comments'),
-        where('postId', '==', postId)
-      );
-      const commentsSnapshot = await getDocs(commentsQuery);
-      const deletePromises = commentsSnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(deletePromises);
-
-      const reactionsQuery = query(
-        collection(db, 'community_reactions'),
-        where('postId', '==', postId)
-      );
-      const reactionsSnapshot = await getDocs(reactionsQuery);
-      const reactionDeletePromises = reactionsSnapshot.docs.map(doc => deleteDoc(doc.ref));
-      await Promise.all(reactionDeletePromises);
-
-      await deleteDoc(postRef);
-    }
+    await deleteDoc(postRef);
   },
 
   async getPosts(
