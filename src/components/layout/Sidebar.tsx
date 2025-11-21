@@ -19,7 +19,8 @@ import {
   BarChart3,
   Flag,
   HardDrive,
-  Clock
+  Clock,
+  Rss
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -67,6 +68,12 @@ export default function Sidebar() {
         label: 'Chat',
         locked: !chatAccess.allowed,
         feature: 'chat' as Feature
+      },
+      {
+        path: '/community-feed',
+        icon: Rss,
+        label: 'Community Feed',
+        feature: null
       },
       {
         path: '/recruiters',

@@ -42,6 +42,8 @@ import AnalyticsDashboard from './pages/governor/AnalyticsDashboard';
 import FeatureFlagsManager from './pages/governor/FeatureFlagsManager';
 import StorageManagerPage from './pages/StorageManagerPage';
 import LoginActivityPage from './pages/LoginActivityPage';
+import CommunityFeedPage from './pages/CommunityFeedPage';
+import AuditLogsPage from './pages/governor/AuditLogsPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -96,6 +98,7 @@ function AppContent() {
         <Route path="/modules/:moduleId" element={<ModuleViewerPage />} />
         <Route path="/video-course/:moduleId" element={<VideoCoursePage />} />
         <Route path="/chat" element={<CommunityPage />} />
+        <Route path="/community-feed" element={<CommunityFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/support" element={<SupportPage />} />
@@ -138,6 +141,7 @@ function AppContent() {
             <Route path="/governor/shutdown" element={<FeatureShutdownControl />} />
             <Route path="/governor/analytics" element={<AnalyticsDashboard />} />
             <Route path="/governor/feature-flags" element={<FeatureFlagsManager />} />
+            <Route path="/governor/audit-logs" element={<AuditLogsPage />} />
           </>
         )}
 
