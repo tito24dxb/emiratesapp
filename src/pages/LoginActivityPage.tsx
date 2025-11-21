@@ -25,12 +25,15 @@ export default function LoginActivityPage() {
     if (!currentUser) return;
 
     try {
+      console.log('Loading login activity for user:', currentUser.uid);
       const history = await getUserLoginHistory(currentUser.uid, 20);
+      console.log('Login history loaded:', history);
       setLoginHistory(history);
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       const failed = await getFailedLoginAttempts(currentUser.uid, thirtyDaysAgo);
+      console.log('Failed attempts loaded:', failed);
       setFailedAttempts(failed);
     } catch (error) {
       console.error('Error loading login activity:', error);
@@ -141,7 +144,8 @@ export default function LoginActivityPage() {
             {loginHistory.length === 0 ? (
               <div className="text-center py-12">
                 <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600">No login history available</p>
+                <p className="text-gray-600 mb-2">No login history available yet</p>
+                <p className="text-sm text-gray-500">Your login history will appear here after your next login</p>
               </div>
             ) : (
               loginHistory.map((activity, index) => (

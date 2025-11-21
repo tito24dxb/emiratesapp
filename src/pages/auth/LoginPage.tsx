@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
+import { recordLoginActivity } from '../../services/loginActivityService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -58,6 +59,9 @@ export default function LoginPage() {
 
       console.log('Setting current user:', currentUser);
       setCurrentUser(currentUser);
+
+      await recordLoginActivity(user.uid, true);
+
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
