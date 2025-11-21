@@ -487,11 +487,11 @@ export default function SupportPage() {
                       };
 
                       return (
-                        <div key={report.id} className="glass-card rounded-xl p-6 border border-gray-200 hover:shadow-md transition">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h4 className="text-lg font-bold text-gray-900">{report.title}</h4>
+                        <div key={report.id} className="glass-card rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition">
+                          <div className="space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                              <h4 className="text-base sm:text-lg font-bold text-gray-900 break-words">{report.title}</h4>
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${getStatusColor(report.status)}`}>
                                   {getStatusIcon(report.status)}
                                   <span className="capitalize">{report.status}</span>
@@ -500,23 +500,29 @@ export default function SupportPage() {
                                   {report.priority.toUpperCase()}
                                 </div>
                               </div>
-                              <p className="text-gray-600 text-sm mb-3">{report.description}</p>
-                              <div className="flex items-center gap-4 text-xs text-gray-500">
-                                <span className="font-semibold">Category: <span className="text-gray-700">{report.category}</span></span>
-                                <span>•</span>
-                                <span className="font-semibold">Reported by: <span className="text-gray-700">{report.reportedByName}</span></span>
-                                <span>•</span>
-                                <span className="font-semibold">Role: <span className="text-gray-700">{report.reportedByRole}</span></span>
-                                <span>•</span>
-                                <span>{new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}</span>
-                              </div>
-                              {report.assignedToName && (
-                                <div className="mt-2 text-xs text-gray-600">
-                                  <span className="font-semibold">Assigned to: </span>
-                                  <span className="text-blue-600">{report.assignedToName}</span>
-                                </div>
-                              )}
                             </div>
+
+                            <p className="text-gray-600 text-sm break-words">{report.description}</p>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold">Category: <span className="text-gray-700">{report.category}</span></span>
+                                <span className="hidden sm:inline">•</span>
+                                <span className="font-semibold">Reported by: <span className="text-gray-700 break-words">{report.reportedByName}</span></span>
+                              </div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold">Role: <span className="text-gray-700">{report.reportedByRole}</span></span>
+                                <span className="hidden sm:inline">•</span>
+                                <span className="whitespace-nowrap">{new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+
+                            {report.assignedToName && (
+                              <div className="text-xs text-gray-600">
+                                <span className="font-semibold">Assigned to: </span>
+                                <span className="text-blue-600 break-words">{report.assignedToName}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
