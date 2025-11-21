@@ -14,6 +14,9 @@ export class OpenAIClient {
   private getAIEndpoint(): string {
     // Always use the Supabase URL from environment variables
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    if (!supabaseUrl) {
+      throw new Error('Supabase URL is not configured. Please check your environment variables.');
+    }
     return `${supabaseUrl}/functions/v1/ai`;
   }
 
@@ -31,14 +34,20 @@ export class OpenAIClient {
       console.log('Sending request with userId:', userId);
 
       const { data: { session } } = await supabase.auth.getSession();
-      const authToken = session?.access_token || import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      if (!anonKey) {
+        throw new Error('Supabase anonymous key is not configured. Please check your environment variables.');
+      }
+
+      const authToken = session?.access_token || anonKey;
 
       const response = await fetch(aiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${authToken}`,
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'apikey': anonKey,
         },
         body: JSON.stringify({ messages, userId }),
       });
