@@ -75,6 +75,8 @@ Deno.serve(async (req) => {
     const userId = firebase_uid;
 
     console.log(`Looking up customer for Firebase UID: ${userId}`);
+    console.log(`Price ID received: ${price_id}`);
+    console.log(`Mode: ${mode}`);
 
     const { data: customer, error: getCustomerError } = await supabase
       .from('stripe_customers')
@@ -189,6 +191,8 @@ Deno.serve(async (req) => {
     }
 
     // create Checkout Session
+    console.log(`Creating checkout session with price_id: ${price_id}, mode: ${mode}, customer: ${customerId}`);
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
