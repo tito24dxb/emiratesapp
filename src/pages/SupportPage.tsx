@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { HelpCircle, Mail, MessageCircle, FileText, BookOpen, Bug, Send, AlertCircle, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { HelpCircle, Mail, MessageCircle, FileText, BookOpen, Bug, Send, AlertCircle, Clock, CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
-import { createSupportTicket, Department, Topic } from '../services/supportChatService';
+import { createSupportTicket, Department, Topic, getUserSupportTickets, SupportTicket } from '../services/supportChatService';
 import { createBugReport, BugPriority, getAllBugReports, BugReport } from '../services/bugReportService';
 
 type Tab = 'overview' | 'live-chat' | 'bug-report';
@@ -25,6 +25,8 @@ export default function SupportPage() {
   const [bugLoading, setBugLoading] = useState(false);
   const [bugReports, setBugReports] = useState<BugReport[]>([]);
   const [loadingReports, setLoadingReports] = useState(false);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [loadingTickets, setLoadingTickets] = useState(false);
 
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +43,8 @@ export default function SupportPage() {
         department,
         topic
       );
+
+      loadSupportTickets();
 
       navigate('/support-chat', {
         state: {
@@ -74,8 +78,10 @@ export default function SupportPage() {
   useEffect(() => {
     if (activeTab === 'bug-report') {
       loadBugReports();
+    } else if (activeTab === 'live-chat' && currentUser) {
+      loadSupportTickets();
     }
-  }, [activeTab]);
+  }, [activeTab, currentUser?.uid]);
 
   const loadBugReports = async () => {
     setLoadingReports(true);
@@ -86,6 +92,19 @@ export default function SupportPage() {
       console.error('Error loading bug reports:', error);
     } finally {
       setLoadingReports(false);
+    }
+  };
+
+  const loadSupportTickets = async () => {
+    if (!currentUser) return;
+    setLoadingTickets(true);
+    try {
+      const tickets = await getUserSupportTickets(currentUser.uid);
+      setSupportTickets(tickets);
+    } catch (error) {
+      console.error('Error loading support tickets:', error);
+    } finally {
+      setLoadingTickets(false);
     }
   };
 
@@ -337,6 +356,107 @@ export default function SupportPage() {
                   )}
                 </button>
               </form>
+
+              <div className="mt-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">Your Support Tickets</h3>
+
+                {loadingTickets ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-12 h-12 border-4 border-gray-200 border-t-[#D71921] rounded-full animate-spin"></div>
+                  </div>
+                ) : supportTickets.length === 0 ? (
+                  <div className="text-center py-12 glass-light rounded-2xl border border-gray-200">
+                    <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">No support tickets yet</p>
+                    <p className="text-sm text-gray-500 mt-2">Create a ticket above to get started</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {supportTickets.map((ticket) => {
+                      const getStatusColor = (status: string) => {
+                        switch (status) {
+                          case 'open': return 'text-yellow-600 bg-yellow-100';
+                          case 'in_progress': return 'text-blue-600 bg-blue-100';
+                          case 'resolved': return 'text-green-600 bg-green-100';
+                          case 'closed': return 'text-gray-600 bg-gray-100';
+                          default: return 'text-gray-600 bg-gray-100';
+                        }
+                      };
+
+                      const getPriorityColor = (priority: string) => {
+                        switch (priority) {
+                          case 'high': return 'text-red-600 bg-red-100';
+                          case 'medium': return 'text-yellow-600 bg-yellow-100';
+                          case 'low': return 'text-green-600 bg-green-100';
+                          default: return 'text-gray-600 bg-gray-100';
+                        }
+                      };
+
+                      const getStatusIcon = (status: string) => {
+                        switch (status) {
+                          case 'open': return <Clock className="w-4 h-4" />;
+                          case 'in_progress': return <AlertCircle className="w-4 h-4" />;
+                          case 'resolved': return <CheckCircle2 className="w-4 h-4" />;
+                          case 'closed': return <XCircle className="w-4 h-4" />;
+                          default: return <MessageCircle className="w-4 h-4" />;
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={ticket.id}
+                          onClick={() => navigate('/support-chat', { state: { ticket } })}
+                          className="glass-card rounded-xl p-4 sm:p-6 border border-gray-200 hover:shadow-md transition cursor-pointer hover:border-[#D71921]"
+                        >
+                          <div className="space-y-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-1">
+                                <h4 className="text-base sm:text-lg font-bold text-gray-900 break-words">{ticket.subject}</h4>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${getStatusColor(ticket.status)}`}>
+                                    {getStatusIcon(ticket.status)}
+                                    <span className="capitalize">{ticket.status.replace('_', ' ')}</span>
+                                  </div>
+                                  <div className={`px-2 py-1 rounded-lg text-xs font-bold ${getPriorityColor(ticket.priority)}`}>
+                                    {ticket.priority.toUpperCase()}
+                                  </div>
+                                </div>
+                              </div>
+                              <ExternalLink className="w-5 h-5 text-gray-400 hidden sm:block" />
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-gray-500">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold">Department: <span className="text-gray-700 capitalize">{ticket.department}</span></span>
+                                <span className="hidden sm:inline">•</span>
+                                <span className="font-semibold">Topic: <span className="text-gray-700 capitalize">{ticket.topic.replace('_', ' ')}</span></span>
+                              </div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="whitespace-nowrap">{new Date(ticket.createdAt?.toDate?.() || ticket.createdAt).toLocaleDateString()}</span>
+                                {ticket.unreadByUser > 0 && (
+                                  <>
+                                    <span className="hidden sm:inline">•</span>
+                                    <span className="px-2 py-1 bg-[#D71921] text-white rounded-full text-xs font-bold">
+                                      {ticket.unreadByUser} new
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {ticket.assignedToName && (
+                              <div className="text-xs text-gray-600">
+                                <span className="font-semibold">Assigned to: </span>
+                                <span className="text-blue-600 break-words">{ticket.assignedToName}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
