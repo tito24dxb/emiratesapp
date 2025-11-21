@@ -454,14 +454,28 @@ export async function getCurrentSystemAnnouncements() {
 
 export async function getActiveFeatureShutdowns() {
   try {
-    const shutdownsRef = collection(db, 'featureShutdowns');
-    const q = query(
-      shutdownsRef,
-      where('isActive', '==', true),
-      orderBy('createdAt', 'desc')
-    );
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const shutdownDocRef = doc(db, 'systemSettings', 'featuresShutdown');
+    const snapshot = await getDocs(query(collection(shutdownDocRef.parent), where('__name__', '==', 'featuresShutdown')));
+    
+    if (snapshot.empty) {
+      return [];
+    }
+    
+    const shutdownData = snapshot.docs[0].data();
+    const activeShutdowns = [];
+    
+    // Filter active shutdowns from the document data
+    for (const [featureName, shutdownInfo] of Object.entries(shutdownData)) {
+      if (shutdownInfo && typeof shutdownInfo === 'object' && shutdownInfo.isActive) {
+        activeShutdowns.push({
+          id: featureName,
+          featureName,
+          ...shutdownInfo,
+        });
+      }
+    }
+    
+    return activeShutdowns;
   } catch (error) {
     console.error('Error fetching feature shutdowns:', error);
     return [];
