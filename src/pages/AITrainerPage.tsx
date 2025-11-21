@@ -175,7 +175,7 @@ export default function AITrainerPage() {
           </div>
           <div>
             <h1 className="text-3xl font-bold text-[#000000]">Your AI Cabin Crew Trainer</h1>
-            <p className="text-gray-600">Get personalized help to craft the perfect Emirates-ready CV and receive recruiter-style feedback.</p>
+            <p className="text-gray-600">Get personalized help to craft the perfect airline-ready CV and receive recruiter-style feedback.</p>
           </div>
         </div>
       </motion.div>
@@ -418,7 +418,7 @@ Customer service professional with 3 years of experience in hospitality..."
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask me anything about Emirates cabin crew..."
+                placeholder="Ask me anything about cabin crew..."
                 className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
                 disabled={chatLoading}
               />

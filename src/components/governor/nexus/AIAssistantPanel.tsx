@@ -63,7 +63,7 @@ export default function AIAssistantPanel() {
       const chatMessages = [
         {
           role: 'system' as const,
-          content: 'You are an AI assistant for the Emirates Academy Governor Control Nexus. Provide helpful, concise responses about system operations, analytics, and management tasks.',
+          content: 'You are an AI assistant for The Crew Academy Governor Control Nexus. Provide helpful, concise responses about system operations, analytics, and management tasks.',
         },
         ...messages.map(m => ({
           role: m.role as 'user' | 'assistant',

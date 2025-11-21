@@ -64,7 +64,7 @@ export default function GroupChat() {
               Start the conversation!
             </h3>
             <p className="text-gray-500 max-w-md">
-              Everyone can see your message. Share your thoughts, ask questions, or help others in their Emirates cabin crew journey.
+              Everyone can see your message. Share your thoughts, ask questions, or help others in their cabin crew journey.
             </p>
           </div>
         ) : (

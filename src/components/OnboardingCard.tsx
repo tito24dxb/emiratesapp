@@ -29,7 +29,7 @@ export default function OnboardingCard({ userName, onComplete, onSkip }: Onboard
       id: 1,
       icon: <Plane className="w-16 h-16" />,
       title: `Welcome to Crews Academy, ${userName}! ✈️`,
-      description: "Your cabin crew journey starts here. We're here to help you achieve your dream of joining Emirates and other top airlines with our comprehensive training platform.",
+      description: "Your cabin crew journey starts here. We're here to help you achieve your dream of joining top airlines with our comprehensive training platform.",
       gradient: 'from-[#D71920] to-[#B91518]'
     },
     {

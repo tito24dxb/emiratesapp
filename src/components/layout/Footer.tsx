@@ -10,7 +10,7 @@ export default function Footer() {
         <div className="flex items-center justify-between text-xs text-gray-600">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <span>© {currentYear} Emirates Academy</span>
+              <span>© {currentYear} The Crew Academy</span>
             </div>
             <span className="hidden sm:inline text-gray-400">|</span>
             <div className="hidden sm:flex items-center gap-1">
