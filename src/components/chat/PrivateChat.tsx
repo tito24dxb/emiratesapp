@@ -156,7 +156,19 @@ export default function PrivateChat() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-full flex items-center justify-center text-white font-bold">
+                    {user.photoURL || user.profilePicture || user.photo_base64 ? (
+                      <img
+                        src={user.photoURL || user.profilePicture || user.photo_base64}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-full flex items-center justify-center text-white font-bold" style={{ display: user.photoURL || user.profilePicture || user.photo_base64 ? 'none' : 'flex' }}>
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -199,7 +211,19 @@ export default function PrivateChat() {
                 >
                   <Users className="w-5 h-5" />
                 </button>
-                <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-full flex items-center justify-center text-white font-bold">
+                {selectedUser.photoURL || selectedUser.profilePicture || selectedUser.photo_base64 ? (
+                  <img
+                    src={selectedUser.photoURL || selectedUser.profilePicture || selectedUser.photo_base64}
+                    alt={selectedUser.name}
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-full flex items-center justify-center text-white font-bold" style={{ display: selectedUser.photoURL || selectedUser.profilePicture || selectedUser.photo_base64 ? 'none' : 'flex' }}>
                   {selectedUser.name.charAt(0).toUpperCase()}
                 </div>
                 <div>

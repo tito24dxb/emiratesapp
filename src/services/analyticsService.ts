@@ -134,7 +134,18 @@ async function getUserGrowthData(days: number) {
   usersSnapshot.docs.forEach((doc) => {
     const user = doc.data();
     if (user.createdAt) {
-      const date = user.createdAt.toDate();
+      let date: Date;
+      if (user.createdAt.toDate && typeof user.createdAt.toDate === 'function') {
+        date = user.createdAt.toDate();
+      } else if (user.createdAt instanceof Date) {
+        date = user.createdAt;
+      } else if (typeof user.createdAt === 'string') {
+        date = new Date(user.createdAt);
+      } else if (typeof user.createdAt === 'number') {
+        date = new Date(user.createdAt);
+      } else {
+        return;
+      }
       const dateStr = date.toISOString().split('T')[0];
       dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
     }
@@ -164,7 +175,18 @@ async function getMessageActivityData(days: number) {
   messagesSnapshot.docs.forEach((doc) => {
     const message = doc.data();
     if (message.createdAt) {
-      const date = message.createdAt.toDate();
+      let date: Date;
+      if (message.createdAt.toDate && typeof message.createdAt.toDate === 'function') {
+        date = message.createdAt.toDate();
+      } else if (message.createdAt instanceof Date) {
+        date = message.createdAt;
+      } else if (typeof message.createdAt === 'string') {
+        date = new Date(message.createdAt);
+      } else if (typeof message.createdAt === 'number') {
+        date = new Date(message.createdAt);
+      } else {
+        return;
+      }
       const dateStr = date.toISOString().split('T')[0];
       dailyCounts[dateStr] = (dailyCounts[dateStr] || 0) + 1;
     }

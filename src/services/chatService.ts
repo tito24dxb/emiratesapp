@@ -48,6 +48,9 @@ export interface User {
   role: 'student' | 'mentor' | 'governor';
   country?: string;
   isOnline?: boolean;
+  photoURL?: string;
+  profilePicture?: string;
+  photo_base64?: string;
 }
 
 export const sendGroupMessage = async (
@@ -219,6 +222,9 @@ export const getAllUsers = async (): Promise<User[]> => {
       role: data.role || 'student',
       country: data.country,
       isOnline: data.isOnline || false,
+      photoURL: data.photoURL || '',
+      profilePicture: data.profilePicture || '',
+      photo_base64: data.photo_base64 || '',
     });
   });
 
