@@ -37,6 +37,7 @@ import LessonViewerPage from './pages/LessonViewerPage';
 import VideoCoursePage from './pages/VideoCoursePage';
 import CreateModulePage from './pages/CreateModulePage';
 import CreateCoursePage from './pages/CreateCoursePage';
+import SettingsPage from './pages/SettingsPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -80,6 +81,7 @@ function AppContent() {
         <Route path="/video-course/:moduleId" element={<VideoCoursePage />} />
         <Route path="/chat" element={<CommunityPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />

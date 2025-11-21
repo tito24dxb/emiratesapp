@@ -111,7 +111,7 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute right-0 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary"
+                    className="absolute right-0 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-50"
                   >
                     <Link
                       to="/profile"
@@ -121,16 +121,14 @@ export default function Navbar() {
                       <User className="w-4 h-4" />
                       <span>My Profile</span>
                     </Link>
-                    <button
-                      onClick={() => {
-                        setShowProfileMenu(false);
-                        alert('Settings page coming soon!');
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all w-full text-left"
+                    <Link
+                      to="/settings"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
-                    </button>
+                    </Link>
                     <hr className="my-2 border-white/20" />
                     <button
                       onClick={() => {
