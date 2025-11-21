@@ -128,7 +128,8 @@ export default function CommunityFeed() {
         currentUser!.email || '',
         formContent.trim(),
         formChannel,
-        imageFile || undefined
+        imageFile || undefined,
+        currentUser!.photoURL || ''
       );
 
       setFormContent('');

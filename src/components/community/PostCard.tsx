@@ -93,7 +93,18 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
 
       <div className="flex items-start justify-between mb-3 md:mb-4">
         <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center text-white font-bold text-base md:text-lg flex-shrink-0">
+          {post.userPhotoURL ? (
+            <img
+              src={post.userPhotoURL}
+              alt={post.userName}
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0 border-2 border-white shadow-md"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : null}
+          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center text-white font-bold text-base md:text-lg flex-shrink-0 ${post.userPhotoURL ? 'hidden' : ''}`}>
             {post.userName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">

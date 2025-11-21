@@ -24,12 +24,15 @@ export interface CommunityPost {
   userId: string;
   userName: string;
   userEmail: string;
+  userPhotoURL?: string;
   content: string;
   imageUrl?: string;
   channel: 'announcements' | 'general' | 'study-room';
   createdAt: Timestamp;
   updatedAt: Timestamp;
   commentsCount: number;
+  viewsCount: number;
+  viewedBy: string[];
   reactionsCount: {
     fire: number;
     heart: number;
@@ -89,7 +92,8 @@ export const communityFeedService = {
     userEmail: string,
     content: string,
     channel: 'announcements' | 'general' | 'study-room',
-    imageFile?: File
+    imageFile?: File,
+    userPhotoURL?: string
   ): Promise<string> {
     let imageUrl = '';
 
@@ -101,12 +105,15 @@ export const communityFeedService = {
       userId,
       userName,
       userEmail,
+      userPhotoURL: userPhotoURL || '',
       content,
       imageUrl,
       channel,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       commentsCount: 0,
+      viewsCount: 0,
+      viewedBy: [],
       reactionsCount: {
         fire: 0,
         heart: 0,
