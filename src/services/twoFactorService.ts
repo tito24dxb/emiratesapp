@@ -1,6 +1,6 @@
 import { db } from '../lib/firebase';
 import { doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
-import speakeasy from 'speakeasy';
+import * as speakeasy from 'speakeasy';
 import QRCode from 'qrcode';
 
 export interface TwoFactorData {
