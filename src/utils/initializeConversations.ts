@@ -21,12 +21,12 @@ export async function initializeTestConversations(): Promise<void> {
     const testConversation1 = doc(conversationsRef);
     await setDoc(testConversation1, {
       type: 'group',
-      title: 'Emirates Academy Support',
+      title: 'The Crew Academy Support',
       members: [userId],
       createdBy: userId,
       createdAt: Timestamp.now(),
       lastMessage: {
-        text: 'Welcome to Emirates Academy! How can we help you today?',
+        text: 'Welcome to The Crew Academy! How can we help you today?',
         senderId: 'system',
         createdAt: Timestamp.now(),
       },
@@ -39,7 +39,7 @@ export async function initializeTestConversations(): Promise<void> {
       messageId: 'welcome',
       senderId: 'system',
       senderName: 'System',
-      content: 'Welcome to Emirates Academy! How can we help you today?',
+      content: 'Welcome to The Crew Academy! How can we help you today?',
       contentType: 'text',
       createdAt: Timestamp.now(),
       deleted: false,

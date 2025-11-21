@@ -137,7 +137,7 @@ export default function UpgradePlanPage() {
       >
         <h1 className="text-4xl font-bold text-[#000000] mb-3">Choose Your Plan</h1>
         <p className="text-gray-600 text-lg">
-          Select the perfect plan for your Emirates cabin crew journey
+          Select the perfect plan for your cabin crew journey
         </p>
       </motion.div>
 

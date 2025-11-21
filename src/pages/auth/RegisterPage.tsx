@@ -132,7 +132,7 @@ export default function RegisterPage() {
             Join The Crew Academy
           </h1>
           <p className="text-center text-sm md:text-base text-gray-600 mb-4">
-            Start your Emirates cabin crew journey
+            Start your cabin crew journey
           </p>
 
           {selectedPlan && selectedPlan !== 'free' && (
