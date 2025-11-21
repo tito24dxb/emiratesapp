@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { communityFeedService, CommunityPost, POSTS_PER_PAGE } from '../../services/communityFeedService';
-import { MessageCircle, Image as ImageIcon, Plus, Filter } from 'lucide-react';
+import { MessageCircle, Image as ImageIcon, Plus, Filter, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import CreatePostModal from './CreatePostModal';
 import PostCard from './PostCard';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
@@ -16,12 +15,18 @@ export default function CommunityFeed() {
   const [loading, setLoading] = useState(true);
   const [selectedChannel, setSelectedChannel] = useState<Channel>('all');
   const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
-  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
-  const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [lastDoc, setLastDoc] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const [formContent, setFormContent] = useState('');
+  const [formChannel, setFormChannel] = useState<'announcements' | 'general' | 'study-room'>('general');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadPosts = useCallback(async (reset: boolean = false) => {
     if (!currentUser) return;
@@ -91,10 +96,53 @@ export default function CommunityFeed() {
     };
   }, [hasMore, loadingMore, loading, loadPosts]);
 
-  const handlePostCreated = () => {
-    setShowCreatePostModal(false);
-    setShowCreateMenu(false);
-    loadPosts(true);
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleSubmitPost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formContent.trim() || submitting) return;
+
+    setSubmitting(true);
+    try {
+      await communityFeedService.createPost(
+        currentUser!.uid,
+        currentUser!.name || currentUser!.email || 'Anonymous',
+        currentUser!.email || '',
+        formContent.trim(),
+        formChannel,
+        imageFile || undefined
+      );
+
+      setFormContent('');
+      setFormChannel('general');
+      setImageFile(null);
+      setImagePreview(null);
+      setShowCreateForm(false);
+      loadPosts(true);
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Failed to create post. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handlePostDeleted = () => {
@@ -108,6 +156,8 @@ export default function CommunityFeed() {
     return true;
   };
 
+  const canSelectAnnouncements = currentUser?.role === 'governor' || currentUser?.role === 'admin';
+
   const channels = [
     { id: 'all' as Channel, label: 'All Posts', icon: '📱' },
     { id: 'announcements' as Channel, label: 'Announcements', icon: '📢' },
@@ -119,6 +169,12 @@ export default function CommunityFeed() {
     { id: 'all' as FilterType, label: 'All', icon: Filter },
     { id: 'images' as FilterType, label: 'Images', icon: ImageIcon },
     { id: 'my-posts' as FilterType, label: 'My Posts', icon: MessageCircle }
+  ];
+
+  const postChannels = [
+    ...(canSelectAnnouncements ? [{ id: 'announcements' as const, label: 'Announcements', icon: '📢', description: 'Important updates' }] : []),
+    { id: 'general' as const, label: 'General', icon: '💬', description: 'General discussions' },
+    { id: 'study-room' as const, label: 'Study Room', icon: '📚', description: 'Study & learning' }
   ];
 
   if (!currentUser) {
@@ -139,41 +195,15 @@ export default function CommunityFeed() {
                 Community
               </h1>
               {canPost() && (
-                <div className="relative">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowCreateMenu(!showCreateMenu)}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-[#D71920] to-[#B91518] text-white flex items-center justify-center shadow-lg"
-                  >
-                    <Plus className="w-5 h-5 md:w-6 md:h-6" />
-                  </motion.button>
-
-                  <AnimatePresence>
-                    {showCreateMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                        className="absolute right-0 top-full mt-2 w-48 md:w-56 liquid-crystal-strong rounded-xl shadow-xl overflow-hidden z-50"
-                      >
-                        <button
-                          onClick={() => {
-                            setShowCreateMenu(false);
-                            setShowCreatePostModal(true);
-                          }}
-                          className="w-full px-4 py-3 text-left hover:bg-white/50 transition-all flex items-center gap-3"
-                        >
-                          <Plus className="w-5 h-5 text-[#D71920]" />
-                          <div>
-                            <p className="font-semibold text-gray-900 text-sm">Create Post</p>
-                            <p className="text-xs text-gray-500">Share with the community</p>
-                          </div>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowCreateForm(!showCreateForm)}
+                  className="flex items-center gap-2 px-3 md:px-4 py-2 md:py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold shadow-lg text-sm md:text-base"
+                >
+                  <Plus className="w-4 h-4 md:w-5 md:h-5" />
+                  <span>Create Post</span>
+                </motion.button>
               )}
             </div>
 
@@ -220,6 +250,128 @@ export default function CommunityFeed() {
             </div>
           </div>
 
+          <AnimatePresence>
+            {showCreateForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 overflow-hidden"
+              >
+                <form onSubmit={handleSubmitPost} className="liquid-crystal-panel p-4 md:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900">Create New Post</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateForm(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                    >
+                      <X className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Channel *</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {postChannels.map(channel => (
+                          <button
+                            key={channel.id}
+                            type="button"
+                            onClick={() => setFormChannel(channel.id)}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              formChannel === channel.id
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">{channel.icon}</span>
+                              <span className="font-bold text-sm text-gray-900">{channel.label}</span>
+                            </div>
+                            <p className="text-xs text-gray-600">{channel.description}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Content *</label>
+                      <textarea
+                        value={formContent}
+                        onChange={(e) => setFormContent(e.target.value)}
+                        placeholder="What's on your mind?"
+                        className="w-full chat-input-field resize-none"
+                        rows={6}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Image (Optional)</label>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                      />
+                      {imagePreview ? (
+                        <div className="relative rounded-xl overflow-hidden border-2 border-gray-200">
+                          <img src={imagePreview} alt="Preview" className="w-full h-64 object-cover" />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow-lg"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D71920] transition flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-[#D71920] bg-white/50 hover:bg-red-50"
+                        >
+                          <ImageIcon className="w-8 h-8" />
+                          <span className="font-semibold text-sm">Click to upload an image</span>
+                          <span className="text-xs text-gray-500">JPG, PNG, GIF (Max 5MB)</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <button
+                        type="submit"
+                        disabled={submitting || !formContent.trim()}
+                        className="flex-1 bg-gradient-to-r from-[#D71920] to-[#B91518] hover:shadow-lg text-white py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {submitting ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-sm sm:text-base">Posting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-5 h-5" />
+                            <span className="text-sm sm:text-base">Post</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateForm(false)}
+                        className="px-6 py-3 bg-white/70 hover:bg-white border-2 border-gray-300 rounded-xl font-bold text-gray-700 transition text-sm sm:text-base"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-10 w-10 md:h-12 md:w-12 border-4 border-[#D71920] border-t-transparent"></div>
@@ -254,17 +406,6 @@ export default function CommunityFeed() {
           )}
         </div>
       </div>
-
-      <AnimatePresence>
-        {showCreatePostModal && (
-          <CreatePostModal
-            currentUser={currentUser}
-            defaultChannel={selectedChannel === 'all' ? 'general' : selectedChannel}
-            onClose={() => setShowCreatePostModal(false)}
-            onPostCreated={handlePostCreated}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
