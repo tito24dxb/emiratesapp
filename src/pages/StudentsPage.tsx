@@ -38,7 +38,7 @@ export default function StudentsPage() {
   const loadStudents = async () => {
     try {
       const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('role', '==', 'student'), firestoreOrderBy('createdAt', 'desc'));
+      const q = query(usersRef, where('role', '==', 'student'));
       const querySnapshot = await getDocs(q);
 
       const studentsData: Student[] = [];
@@ -46,18 +46,19 @@ export default function StudentsPage() {
         const data = doc.data();
         studentsData.push({
           id: doc.id,
-          name: data.name || 'Unknown',
+          name: data.name || data.displayName || 'Unknown',
           email: data.email || '',
           country: data.country || 'Not specified',
-          plan: data.plan || 'free',
-          createdAt: data.createdAt || new Date().toISOString(),
-          updatedAt: data.updatedAt || new Date().toISOString(),
+          plan: data.plan || data.subscription || 'free',
+          createdAt: data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate().toISOString() : data.createdAt) : new Date().toISOString(),
+          updatedAt: data.updatedAt ? (typeof data.updatedAt.toDate === 'function' ? data.updatedAt.toDate().toISOString() : data.updatedAt) : new Date().toISOString(),
           bio: data.bio || '',
           photo_base64: data.photo_base64 || '',
           photoURL: data.photoURL || data.profilePicture || ''
         });
       });
 
+      studentsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       setStudents(studentsData);
     } catch (error) {
       console.error('Error loading students:', error);
