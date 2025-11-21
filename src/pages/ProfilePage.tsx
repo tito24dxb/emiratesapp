@@ -3,8 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Camera, MapPin, Mail, Shield, Save, Upload, FileText, Download, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '../lib/firebase';
+import { db } from '../lib/firebase';
 import CVAnalyzer from '../components/CVAnalyzer';
 import DeclareCrewButton from '../components/DeclareCrewButton';
 
@@ -77,47 +76,55 @@ export default function ProfilePage() {
       console.log('Starting CV upload for user:', currentUser.uid);
       console.log('File details:', { name: file.name, type: file.type, size: file.size });
 
-      const cvRef = ref(storage, `cvs/${currentUser.uid}/${Date.now()}_${file.name}`);
-      console.log('Upload reference created:', cvRef.fullPath);
+      const reader = new FileReader();
 
-      await uploadBytes(cvRef, file);
-      console.log('File uploaded successfully');
+      reader.onload = async () => {
+        try {
+          const base64String = reader.result as string;
+          console.log('File converted to base64');
 
-      const downloadURL = await getDownloadURL(cvRef);
-      console.log('Download URL obtained:', downloadURL);
+          const userDocRef = doc(db, 'users', currentUser.uid);
+          await updateDoc(userDocRef, {
+            cvData: base64String,
+            cvFileName: file.name,
+            cvFileType: file.type,
+            cvFileSize: file.size,
+            cvUploadedAt: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+          console.log('Firestore updated');
 
-      const userDocRef = doc(db, 'users', currentUser.uid);
-      await updateDoc(userDocRef, {
-        cvUrl: downloadURL,
-        cvFileName: file.name,
-        updated_at: new Date().toISOString(),
-      });
-      console.log('Firestore updated');
+          setCurrentUser({
+            ...currentUser,
+            cvData: base64String,
+            cvFileName: file.name,
+          });
 
-      setCurrentUser({
-        ...currentUser,
-        cvUrl: downloadURL,
-      });
+          alert('CV uploaded successfully!');
+        } catch (error: any) {
+          console.error('Error saving CV to Firestore:', error);
+          alert('Failed to upload CV. Please try again.');
+        } finally {
+          setUploadingCV(false);
+          if (cvInputRef.current) {
+            cvInputRef.current.value = '';
+          }
+        }
+      };
 
-      alert('CV uploaded successfully!');
+      reader.onerror = () => {
+        console.error('Error reading file');
+        alert('Failed to read file. Please try again.');
+        setUploadingCV(false);
+        if (cvInputRef.current) {
+          cvInputRef.current.value = '';
+        }
+      };
+
+      reader.readAsDataURL(file);
     } catch (error: any) {
       console.error('Error uploading CV:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-
-      let errorMessage = 'Failed to upload CV. ';
-      if (error.code === 'storage/unauthorized') {
-        errorMessage += 'You do not have permission to upload files. Please make sure storage rules are deployed.';
-      } else if (error.code === 'storage/canceled') {
-        errorMessage += 'Upload was canceled.';
-      } else if (error.code === 'storage/unknown') {
-        errorMessage += 'An unknown error occurred. Please check your internet connection.';
-      } else {
-        errorMessage += error.message || 'Please try again.';
-      }
-
-      alert(errorMessage);
-    } finally {
+      alert('Failed to upload CV. Please try again.');
       setUploadingCV(false);
       if (cvInputRef.current) {
         cvInputRef.current.value = '';
@@ -126,18 +133,23 @@ export default function ProfilePage() {
   };
 
   const handleDeleteCV = async () => {
-    if (!currentUser?.cvUrl || !window.confirm('Are you sure you want to delete your CV?')) return;
+    if (!currentUser?.cvData || !window.confirm('Are you sure you want to delete your CV?')) return;
 
     try {
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
-        cvUrl: null,
+        cvData: null,
+        cvFileName: null,
+        cvFileType: null,
+        cvFileSize: null,
+        cvUploadedAt: null,
         updated_at: new Date().toISOString(),
       });
 
       setCurrentUser({
         ...currentUser,
-        cvUrl: undefined,
+        cvData: undefined,
+        cvFileName: undefined,
       });
 
       alert('CV deleted successfully');
@@ -145,6 +157,20 @@ export default function ProfilePage() {
       console.error('Error deleting CV:', error);
       alert('Failed to delete CV. Please try again.');
     }
+  };
+
+  const handleDownloadCV = () => {
+    if (!currentUser?.cvData || !currentUser?.cvFileName) {
+      alert('No CV available to download');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = currentUser.cvData;
+    link.download = currentUser.cvFileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSave = async () => {
@@ -390,27 +416,27 @@ export default function ProfilePage() {
                   Upload your CV in PDF, DOC, or DOCX format (max 5MB)
                 </p>
 
-                {currentUser.cvUrl ? (
+                {currentUser.cvData ? (
                   <div className="flex items-center gap-3 p-4 glass-light rounded-xl border-2 border-gray-200">
                     <div className="w-12 h-12 bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-lg flex items-center justify-center">
                       <FileText className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-gray-900 text-sm">CV Uploaded</p>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {currentUser.cvFileName || 'CV Uploaded'}
+                      </p>
                       <p className="text-xs text-gray-500 truncate">
                         Click download to view your CV
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <a
-                        href={currentUser.cvUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={handleDownloadCV}
                         className="p-2 glass-card hover:glass-bubble rounded-lg border-2 border-gray-200 transition"
                         title="Download CV"
                       >
                         <Download className="w-5 h-5 text-gray-700" />
-                      </a>
+                      </button>
                       <button
                         onClick={handleDeleteCV}
                         className="p-2 glass-card hover:bg-red-50 rounded-lg border-2 border-gray-200 hover:border-red-300 transition"
