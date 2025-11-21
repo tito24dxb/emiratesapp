@@ -15,7 +15,11 @@ import {
   Zap,
   Shield,
   Trophy,
-  TrendingUp
+  TrendingUp,
+  BarChart3,
+  Flag,
+  HardDrive,
+  Clock
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -79,6 +83,8 @@ export default function Sidebar() {
         feature: 'opendays' as Feature
       },
       { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
+      { path: '/storage', icon: HardDrive, label: 'My Files', feature: null },
+      { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
@@ -102,6 +108,8 @@ export default function Sidebar() {
 
   const governorLinks = [
     { path: '/governor/nexus', icon: Zap, label: 'Control Nexus', highlight: true },
+    { path: '/governor/analytics', icon: BarChart3, label: 'Analytics', badge: 'NEW' },
+    { path: '/governor/feature-flags', icon: Flag, label: 'Feature Flags', badge: 'NEW' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: 'ALL' },
@@ -111,6 +119,8 @@ export default function Sidebar() {
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
+    { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
+    { path: '/login-activity', icon: Clock, label: 'Login Activity' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
     { path: '/support', icon: HelpCircle, label: 'Support' },
   ];
