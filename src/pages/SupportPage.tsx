@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { HelpCircle, Mail, MessageCircle, FileText, BookOpen, Bug, Send } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { HelpCircle, Mail, MessageCircle, FileText, BookOpen, Bug, Send, AlertCircle, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { createSupportTicket, Department, Topic } from '../services/supportChatService';
-import { createBugReport, BugPriority } from '../services/bugReportService';
+import { createBugReport, BugPriority, getAllBugReports, BugReport } from '../services/bugReportService';
 
 type Tab = 'overview' | 'live-chat' | 'bug-report';
 
@@ -23,6 +23,8 @@ export default function SupportPage() {
   const [bugCategory, setBugCategory] = useState('general');
   const [bugPriority, setBugPriority] = useState<BugPriority>('medium');
   const [bugLoading, setBugLoading] = useState(false);
+  const [bugReports, setBugReports] = useState<BugReport[]>([]);
+  const [loadingReports, setLoadingReports] = useState(false);
 
   const handleCreateTicket = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +71,24 @@ export default function SupportPage() {
     }
   };
 
+  useEffect(() => {
+    if (activeTab === 'bug-report') {
+      loadBugReports();
+    }
+  }, [activeTab]);
+
+  const loadBugReports = async () => {
+    setLoadingReports(true);
+    try {
+      const reports = await getAllBugReports();
+      setBugReports(reports);
+    } catch (error) {
+      console.error('Error loading bug reports:', error);
+    } finally {
+      setLoadingReports(false);
+    }
+  };
+
   const handleBugReport = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser || !bugTitle.trim() || !bugDescription.trim()) return;
@@ -90,6 +110,8 @@ export default function SupportPage() {
       setBugDescription('');
       setBugCategory('general');
       setBugPriority('medium');
+
+      loadBugReports();
     } catch (error) {
       console.error('Error submitting bug report:', error);
       alert('Failed to submit bug report. Please try again.');
@@ -417,6 +439,91 @@ export default function SupportPage() {
                   )}
                 </button>
               </form>
+
+              <div className="mt-12">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">All Bug Reports</h3>
+
+                {loadingReports ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-12 h-12 border-4 border-gray-200 border-t-orange-500 rounded-full animate-spin"></div>
+                  </div>
+                ) : bugReports.length === 0 ? (
+                  <div className="text-center py-12 glass-light rounded-2xl border border-gray-200">
+                    <Bug className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-600">No bug reports yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {bugReports.map((report) => {
+                      const getStatusColor = (status: string) => {
+                        switch (status) {
+                          case 'open': return 'text-blue-600 bg-blue-100';
+                          case 'in-progress': return 'text-yellow-600 bg-yellow-100';
+                          case 'escalated': return 'text-purple-600 bg-purple-100';
+                          case 'resolved': return 'text-green-600 bg-green-100';
+                          case 'closed': return 'text-gray-600 bg-gray-100';
+                          default: return 'text-gray-600 bg-gray-100';
+                        }
+                      };
+
+                      const getPriorityColor = (priority: string) => {
+                        switch (priority) {
+                          case 'critical': return 'text-red-600 bg-red-100';
+                          case 'high': return 'text-orange-600 bg-orange-100';
+                          case 'medium': return 'text-yellow-600 bg-yellow-100';
+                          case 'low': return 'text-green-600 bg-green-100';
+                          default: return 'text-gray-600 bg-gray-100';
+                        }
+                      };
+
+                      const getStatusIcon = (status: string) => {
+                        switch (status) {
+                          case 'open': return <Clock className="w-4 h-4" />;
+                          case 'in-progress': return <AlertCircle className="w-4 h-4" />;
+                          case 'resolved': return <CheckCircle2 className="w-4 h-4" />;
+                          case 'closed': return <XCircle className="w-4 h-4" />;
+                          default: return <Bug className="w-4 h-4" />;
+                        }
+                      };
+
+                      return (
+                        <div key={report.id} className="glass-card rounded-xl p-6 border border-gray-200 hover:shadow-md transition">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="text-lg font-bold text-gray-900">{report.title}</h4>
+                                <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold ${getStatusColor(report.status)}`}>
+                                  {getStatusIcon(report.status)}
+                                  <span className="capitalize">{report.status}</span>
+                                </div>
+                                <div className={`px-2 py-1 rounded-lg text-xs font-bold ${getPriorityColor(report.priority)}`}>
+                                  {report.priority.toUpperCase()}
+                                </div>
+                              </div>
+                              <p className="text-gray-600 text-sm mb-3">{report.description}</p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500">
+                                <span className="font-semibold">Category: <span className="text-gray-700">{report.category}</span></span>
+                                <span>•</span>
+                                <span className="font-semibold">Reported by: <span className="text-gray-700">{report.reportedByName}</span></span>
+                                <span>•</span>
+                                <span className="font-semibold">Role: <span className="text-gray-700">{report.reportedByRole}</span></span>
+                                <span>•</span>
+                                <span>{new Date(report.createdAt?.toDate?.() || report.createdAt).toLocaleDateString()}</span>
+                              </div>
+                              {report.assignedToName && (
+                                <div className="mt-2 text-xs text-gray-600">
+                                  <span className="font-semibold">Assigned to: </span>
+                                  <span className="text-blue-600">{report.assignedToName}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
