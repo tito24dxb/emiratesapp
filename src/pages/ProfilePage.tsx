@@ -74,15 +74,25 @@ export default function ProfilePage() {
 
     setUploadingCV(true);
     try {
+      console.log('Starting CV upload for user:', currentUser.uid);
+      console.log('File details:', { name: file.name, type: file.type, size: file.size });
+
       const cvRef = ref(storage, `cvs/${currentUser.uid}/${Date.now()}_${file.name}`);
+      console.log('Upload reference created:', cvRef.fullPath);
+
       await uploadBytes(cvRef, file);
+      console.log('File uploaded successfully');
+
       const downloadURL = await getDownloadURL(cvRef);
+      console.log('Download URL obtained:', downloadURL);
 
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
         cvUrl: downloadURL,
+        cvFileName: file.name,
         updated_at: new Date().toISOString(),
       });
+      console.log('Firestore updated');
 
       setCurrentUser({
         ...currentUser,
@@ -90,9 +100,23 @@ export default function ProfilePage() {
       });
 
       alert('CV uploaded successfully!');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading CV:', error);
-      alert('Failed to upload CV. Please try again.');
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+
+      let errorMessage = 'Failed to upload CV. ';
+      if (error.code === 'storage/unauthorized') {
+        errorMessage += 'You do not have permission to upload files. Please make sure storage rules are deployed.';
+      } else if (error.code === 'storage/canceled') {
+        errorMessage += 'Upload was canceled.';
+      } else if (error.code === 'storage/unknown') {
+        errorMessage += 'An unknown error occurred. Please check your internet connection.';
+      } else {
+        errorMessage += error.message || 'Please try again.';
+      }
+
+      alert(errorMessage);
     } finally {
       setUploadingCV(false);
       if (cvInputRef.current) {
