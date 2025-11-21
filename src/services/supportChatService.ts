@@ -70,6 +70,8 @@ export const createSupportTicket = async (
 
     console.log('Generated ticket ID:', ticketId);
 
+    const now = Timestamp.now();
+
     const ticketData: Omit<SupportTicket, 'id'> = {
       userId,
       userName,
@@ -84,7 +86,7 @@ export const createSupportTicket = async (
       lastMessageAt: serverTimestamp(),
       unreadByUser: 0,
       unreadByStaff: 1,
-      participants: [{ id: userId, name: userName, role: 'student', joinedAt: serverTimestamp() }],
+      participants: [{ id: userId, name: userName, role: 'student', joinedAt: now }],
     };
 
     console.log('Writing ticket to Firestore...');
@@ -229,7 +231,7 @@ export const escalateTicket = async (
         await updateDoc(doc(db, 'supportTickets', ticketId), {
           participants: [
             ...currentParticipants,
-            { id: escalatedToId, name: escalatedToName, role: escalatedToRole, joinedAt: serverTimestamp() }
+            { id: escalatedToId, name: escalatedToName, role: escalatedToRole, joinedAt: Timestamp.now() }
           ],
         });
       }
@@ -275,7 +277,7 @@ export const assignTicket = async (
         await updateDoc(doc(db, 'supportTickets', ticketId), {
           participants: [
             ...currentParticipants,
-            { id: assignedToId, name: assignedToName, role: assignedToRole, joinedAt: serverTimestamp() }
+            { id: assignedToId, name: assignedToName, role: assignedToRole, joinedAt: Timestamp.now() }
           ],
         });
       }
