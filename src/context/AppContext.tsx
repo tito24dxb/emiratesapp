@@ -47,6 +47,7 @@ export interface Banner {
 interface AppContextType {
   currentUser: User | null;
   setCurrentUser: (user: User | null) => void;
+  loading: boolean;
   maintenanceMode: boolean;
   setMaintenanceMode: (enabled: boolean) => void;
   maintenanceMessage: string;
@@ -63,6 +64,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const firestoreUnsubscribeRef = useRef<(() => void) | null>(null);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState('System under maintenance. Please check back soon.');
@@ -162,6 +164,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               };
 
               setCurrentUser(updatedUser);
+              setLoading(false);
               localStorage.setItem('currentUser', JSON.stringify(updatedUser));
 
               initializeUserPoints(firebaseUser.uid).catch(console.error);
@@ -207,6 +210,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       } else {
         console.log('User signed out');
         setCurrentUser(null);
+        setLoading(false);
         localStorage.removeItem('currentUser');
       }
     });
@@ -244,6 +248,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       value={{
         currentUser,
         setCurrentUser,
+        loading,
         maintenanceMode,
         setMaintenanceMode,
         maintenanceMessage,

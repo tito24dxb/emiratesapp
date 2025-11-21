@@ -54,7 +54,19 @@ function MaintenanceScreen({ message }: { message: string }) {
 }
 
 function AppContent() {
-  const { currentUser, maintenanceMode, maintenanceMessage } = useApp();
+  const { currentUser, loading, maintenanceMode, maintenanceMessage } = useApp();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] via-[#F5E6D3] to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-20 h-20 border-4 border-[#D71920] border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading...</h2>
+          <p className="text-gray-600">Please wait</p>
+        </div>
+      </div>
+    );
+  }
 
   if (maintenanceMode && currentUser?.role !== 'governor') {
     return <MaintenanceScreen message={maintenanceMessage} />;
