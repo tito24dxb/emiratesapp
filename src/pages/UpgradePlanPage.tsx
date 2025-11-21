@@ -94,7 +94,7 @@ export default function UpgradePlanPage() {
       plan: 'pro' as const,
       icon: Shield,
       price: '29',
-      priceId: 'price_REPLACE_WITH_YOUR_PRO_PRICE_ID', // TODO: Replace with your actual Stripe recurring price ID
+      priceId: 'price_1SUxeo02SYry0M3gdhJU01Xr',
       color: 'blue',
       popular: true,
       features: [
@@ -111,8 +111,8 @@ export default function UpgradePlanPage() {
       name: 'VIP',
       plan: 'vip' as const,
       icon: Crown,
-      price: '79',
-      priceId: 'price_REPLACE_WITH_YOUR_VIP_PRICE_ID', // TODO: Replace with your actual Stripe recurring price ID
+      price: '55',
+      priceId: 'price_1SUxfV02SYry0M3gjVKsRY8l',
       color: 'gold',
       features: [
         'Everything in Pro',
