@@ -1,5 +1,6 @@
 import { db } from '../lib/firebase';
-import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, where, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, doc, updateDoc, where, Timestamp, getDoc } from 'firebase/firestore';
+import { notifyBugReportComment, notifyBugReportStatus } from './notificationService';
 
 export type BugStatus = 'open' | 'in-progress' | 'escalated' | 'resolved' | 'closed';
 export type BugPriority = 'low' | 'medium' | 'high' | 'critical';
@@ -99,6 +100,11 @@ export const updateBugReportStatus = async (
 ): Promise<void> => {
   try {
     const reportRef = doc(db, 'bugReports', reportId);
+    const reportSnap = await getDoc(reportRef);
+
+    if (!reportSnap.exists()) return;
+
+    const reportData = reportSnap.data();
     const updateData: any = {
       status,
       updatedAt: Timestamp.now()
@@ -114,6 +120,13 @@ export const updateBugReportStatus = async (
     }
 
     await updateDoc(reportRef, updateData);
+
+    await notifyBugReportStatus(
+      reportData.reportedBy,
+      reportId,
+      reportData.title,
+      status
+    );
   } catch (error) {
     console.error('Error updating bug report status:', error);
     throw error;
@@ -163,6 +176,15 @@ export const addResponseToBugReport = async (
         responses: [...responses, response],
         updatedAt: Timestamp.now()
       });
+
+      if (response.userId !== currentData.reportedBy) {
+        await notifyBugReportComment(
+          currentData.reportedBy,
+          reportId,
+          currentData.title,
+          response.userName
+        );
+      }
     }
   } catch (error) {
     console.error('Error adding response to bug report:', error);
