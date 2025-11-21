@@ -177,7 +177,7 @@ export default function NotificationsPage() {
               </div>
               <div className="space-y-3">
                 {featureShutdowns.map((shutdown: any) => (
-                  <div key={shutdown.id} className="bg-red-50 rounded-xl p-4 border border-red-200">
+                  <div key={shutdown.id} className="glass-card rounded-xl p-4 border border-red-200">
                     <h3 className="font-bold text-red-900 mb-1">{shutdown.featureName || 'Feature'} - Temporarily Disabled</h3>
                     <p className="text-sm text-red-700">{shutdown.reason || 'Maintenance in progress'}</p>
                     {shutdown.estimatedRestoreTime && (
@@ -201,7 +201,7 @@ export default function NotificationsPage() {
               </div>
               <div className="space-y-3">
                 {systemAnnouncements.map((announcement: any) => (
-                  <div key={announcement.id} className="bg-purple-50 rounded-xl p-4 border border-purple-200">
+                  <div key={announcement.id} className="glass-card rounded-xl p-4 border border-purple-200">
                     <h3 className="font-bold text-purple-900 mb-1">{announcement.title || 'Announcement'}</h3>
                     <p className="text-sm text-purple-700">{announcement.message || announcement.text}</p>
                   </div>
@@ -222,7 +222,7 @@ export default function NotificationsPage() {
                 {activeBugReports.slice(0, 5).map((bug: any) => (
                   <motion.div
                     key={bug.id}
-                    className="bg-yellow-50 rounded-xl p-4 border border-yellow-200 cursor-pointer hover:bg-yellow-100 transition"
+                    className="glass-card rounded-xl p-4 border border-yellow-200 cursor-pointer hover:backdrop-blur-xl transition"
                     onClick={() => navigate(`/support?bugId=${bug.id}`)}
                     whileHover={{ scale: 1.02 }}
                   >
@@ -278,10 +278,10 @@ export default function NotificationsPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -100 }}
-                      className={`rounded-xl p-4 border-2 transition cursor-pointer ${
+                      className={`glass-card rounded-xl p-4 border-2 transition cursor-pointer ${
                         notification.read
-                          ? 'bg-gray-50 border-gray-200'
-                          : 'glass-card border-[#D71920]/20 shadow-md'
+                          ? 'border-white/40 opacity-75'
+                          : 'border-[#D71920]/20 shadow-md'
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
