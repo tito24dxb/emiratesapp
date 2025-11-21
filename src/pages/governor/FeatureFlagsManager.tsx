@@ -199,74 +199,74 @@ function CreateFlagDropdown({ onClose, currentUser }: CreateFlagDropdownProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="fixed md:absolute top-20 md:top-full left-1/2 md:left-auto right-auto md:right-0 -translate-x-1/2 md:translate-x-0 mt-2 w-[calc(100vw-2rem)] md:w-[500px] max-w-[500px] glass-card shadow-2xl rounded-2xl z-[104] overflow-hidden"
+      className="fixed inset-x-4 top-16 md:top-auto md:inset-x-auto md:absolute md:right-0 md:mt-2 md:w-[500px] glass-card shadow-2xl rounded-2xl z-[104] overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
       <div className="p-4 md:p-6 border-b-2 border-gray-200/50">
         <h2 className="text-lg md:text-xl font-bold text-gray-900">Create Feature Flag</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 max-h-[calc(100vh-12rem)] md:max-h-[70vh] overflow-y-auto">
+      <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-3 md:space-y-4 max-h-[calc(100vh-10rem)] md:max-h-[70vh] overflow-y-auto">
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Flag ID</label>
+          <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1.5">Flag ID</label>
           <input
             type="text"
             value={formData.id}
             onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-            className="w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm md:text-base"
+            className="w-full px-3 py-2.5 rounded-lg md:rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm"
             placeholder="ai-trainer-feature"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Display Name</label>
+          <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1.5">Display Name</label>
           <input
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm md:text-base"
+            className="w-full px-3 py-2.5 rounded-lg md:rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm"
             placeholder="AI Trainer Feature"
             required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
+          <label className="block text-xs md:text-sm font-bold text-gray-700 mb-1.5">Description</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm md:text-base"
+            className="w-full px-3 py-2.5 rounded-lg md:rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm resize-none"
             rows={3}
             placeholder="Enables the AI trainer feature for selected users"
             required
           />
         </div>
 
-        <div className="flex items-center gap-3 py-2">
+        <div className="flex items-center gap-2.5 py-1.5">
           <input
             type="checkbox"
             id="enabled"
             checked={formData.enabled}
             onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
-            className="w-5 h-5 rounded border-2 border-gray-300"
+            className="w-4 h-4 md:w-5 md:h-5 rounded border-2 border-gray-300"
           />
-          <label htmlFor="enabled" className="font-bold text-gray-700">
+          <label htmlFor="enabled" className="font-bold text-gray-700 text-xs md:text-sm">
             Enable immediately
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-2 md:gap-3 pt-4 border-t-2 border-gray-200/50">
+        <div className="flex items-center justify-end gap-2 pt-3 md:pt-4 border-t-2 border-gray-200/50">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 md:px-6 py-2 md:py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition text-sm md:text-base"
+            className="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg md:rounded-xl font-bold hover:bg-gray-300 transition text-sm"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition text-sm md:text-base"
+            className="px-4 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg md:rounded-xl font-bold hover:shadow-lg transition text-sm"
           >
             Create Flag
           </button>
