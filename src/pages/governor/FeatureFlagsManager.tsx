@@ -18,7 +18,9 @@ export default function FeatureFlagsManager() {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log('FeatureFlagsManager mounted - NEW DROPDOWN VERSION');
     const unsubscribe = subscribeToFeatureFlags((newFlags) => {
+      console.log('Feature flags loaded:', newFlags);
       setFlags(newFlags);
       setLoading(false);
     });
@@ -54,8 +56,8 @@ export default function FeatureFlagsManager() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Feature Flags</h1>
-            <p className="text-gray-600">Control feature rollouts and access</p>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Feature Flags Manager</h1>
+            <p className="text-gray-600">Control feature rollouts and access with dropdown menu</p>
           </div>
           <div className="relative" ref={dropdownRef}>
             <button
