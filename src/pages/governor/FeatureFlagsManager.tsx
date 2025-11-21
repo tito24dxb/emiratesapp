@@ -199,21 +199,21 @@ function CreateFlagDropdown({ onClose, currentUser }: CreateFlagDropdownProps) {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="absolute top-full right-0 mt-2 w-[500px] max-w-[calc(100vw-2rem)] glass-card shadow-2xl rounded-2xl z-[104] overflow-hidden"
+      className="fixed md:absolute top-20 md:top-full left-1/2 md:left-auto right-auto md:right-0 -translate-x-1/2 md:translate-x-0 mt-2 w-[calc(100vw-2rem)] md:w-[500px] max-w-[500px] glass-card shadow-2xl rounded-2xl z-[104] overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="p-6 border-b-2 border-gray-200/50">
-        <h2 className="text-xl font-bold text-gray-900">Create Feature Flag</h2>
+      <div className="p-4 md:p-6 border-b-2 border-gray-200/50">
+        <h2 className="text-lg md:text-xl font-bold text-gray-900">Create Feature Flag</h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+      <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-4 max-h-[calc(100vh-12rem)] md:max-h-[70vh] overflow-y-auto">
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">Flag ID</label>
           <input
             type="text"
             value={formData.id}
             onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none"
+            className="w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm md:text-base"
             placeholder="ai-trainer-feature"
             required
           />
@@ -225,7 +225,7 @@ function CreateFlagDropdown({ onClose, currentUser }: CreateFlagDropdownProps) {
             type="text"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none"
+            className="w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm md:text-base"
             placeholder="AI Trainer Feature"
             required
           />
@@ -236,7 +236,7 @@ function CreateFlagDropdown({ onClose, currentUser }: CreateFlagDropdownProps) {
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none"
+            className="w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 border-gray-200 focus:border-[#D71920] outline-none text-sm md:text-base"
             rows={3}
             placeholder="Enables the AI trainer feature for selected users"
             required
@@ -256,17 +256,17 @@ function CreateFlagDropdown({ onClose, currentUser }: CreateFlagDropdownProps) {
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-gray-200/50">
+        <div className="flex items-center justify-end gap-2 md:gap-3 pt-4 border-t-2 border-gray-200/50">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition"
+            className="px-4 md:px-6 py-2 md:py-3 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition text-sm md:text-base"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
+            className="px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition text-sm md:text-base"
           >
             Create Flag
           </button>
