@@ -58,7 +58,7 @@ export default function AnalyticsDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] via-[#F5E6D3] to-white p-8">
+    <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
