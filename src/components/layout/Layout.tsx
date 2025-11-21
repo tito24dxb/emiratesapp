@@ -6,6 +6,7 @@ import Footer from './Footer';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import OfflineIndicator from '../OfflineIndicator';
 
 interface LayoutProps {
   children: ReactNode;
@@ -60,6 +61,7 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen relative flex flex-col">
+      <OfflineIndicator />
       <Navbar />
 
       <AnimatePresence>

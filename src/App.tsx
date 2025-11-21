@@ -38,6 +38,10 @@ import VideoCoursePage from './pages/VideoCoursePage';
 import CreateModulePage from './pages/CreateModulePage';
 import CreateCoursePage from './pages/CreateCoursePage';
 import SettingsPage from './pages/SettingsPage';
+import AnalyticsDashboard from './pages/governor/AnalyticsDashboard';
+import FeatureFlagsManager from './pages/governor/FeatureFlagsManager';
+import StorageManagerPage from './pages/StorageManagerPage';
+import LoginActivityPage from './pages/LoginActivityPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -111,6 +115,8 @@ function AppContent() {
         <Route path="/main-modules/:moduleId" element={<MainModuleViewerPage />} />
         <Route path="/submodules/:submoduleId" element={<SubmoduleViewerPage />} />
         <Route path="/course/:courseId" element={<CourseViewerPage />} />
+        <Route path="/storage" element={<StorageManagerPage />} />
+        <Route path="/login-activity" element={<LoginActivityPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>
@@ -130,6 +136,8 @@ function AppContent() {
             <Route path="/governor/initialize" element={<InitializeData />} />
             <Route path="/governor/moderation" element={<ChatModerationConsole />} />
             <Route path="/governor/shutdown" element={<FeatureShutdownControl />} />
+            <Route path="/governor/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/governor/feature-flags" element={<FeatureFlagsManager />} />
           </>
         )}
 
