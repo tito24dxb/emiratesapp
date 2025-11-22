@@ -6,6 +6,7 @@ import { db, auth } from '../lib/firebase';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { countries } from '../data/countries';
 import { useNavigate } from 'react-router-dom';
+import TwoFactorSetup from '../components/TwoFactorSetup';
 
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'preferences' | 'privacy';
 
@@ -431,6 +432,14 @@ export default function SettingsPage() {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Two-Factor Authentication</h3>
+                  <p className="text-sm text-gray-600 mb-6">
+                    Add an extra layer of security to your account by enabling two-factor authentication.
+                  </p>
+                  <TwoFactorSetup />
                 </div>
               </form>
             )}
