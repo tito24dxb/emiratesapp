@@ -294,13 +294,22 @@ export const communityFeedService = {
       orderBy('createdAt', 'asc')
     );
 
-    return onSnapshot(q, (snapshot) => {
-      const comments = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as CommunityComment));
-      callback(comments);
-    });
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const comments = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        } as CommunityComment));
+        callback(comments);
+      },
+      (error) => {
+        console.error('❌ COMMENTS SUBSCRIPTION ERROR:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        console.error('PostId:', postId);
+      }
+    );
   },
 
   async toggleReaction(
