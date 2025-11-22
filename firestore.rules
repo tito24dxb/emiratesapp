@@ -104,6 +104,63 @@ service cloud.firestore {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // COMMUNITY FEED (Posts, Comments, Reactions)
+    ///////////////////////////////////////////////////////////////////////////
+    match /community_posts/{postId} {
+      allow read: if isAuthenticated();
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'userName', 'userEmail', 'content', 'channel', 'createdAt', 'updatedAt']) &&
+        (
+          request.resource.data.channel == 'general' ||
+          request.resource.data.channel == 'study-room' ||
+          (request.resource.data.channel == 'announcements' && (isGovernor() || hasRole('admin')))
+        );
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor() ||
+        hasPermission('moderateContent')
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor() ||
+        hasPermission('moderateContent')
+      );
+    }
+
+    match /community_comments/{commentId} {
+      allow read: if isAuthenticated();
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['postId', 'userId', 'userName', 'content', 'createdAt']);
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor() ||
+        hasPermission('moderateContent')
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor() ||
+        hasPermission('moderateContent')
+      );
+    }
+
+    match /community_reactions/{reactionId} {
+      allow read: if isAuthenticated();
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['postId', 'userId', 'reactionType', 'createdAt']);
+      allow delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor()
+      );
+      allow update: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // CONVERSATIONS (Private 1-on-1 and Groups) - SOCIAL COMMUNITY
     ///////////////////////////////////////////////////////////////////////////
     match /conversations/{conversationId} {
