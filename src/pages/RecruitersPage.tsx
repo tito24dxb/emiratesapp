@@ -14,7 +14,7 @@ export default function RecruitersPage() {
   const { currentUser } = useApp();
   const [recruiters, setRecruiters] = useState<Recruiter[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingRecruiter, setEditingRecruiter] = useState<Recruiter | null>(null);
   const [viewingRecruiter, setViewingRecruiter] = useState<Recruiter | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,7 +40,7 @@ export default function RecruitersPage() {
     setLoading(false);
   };
 
-  const handleOpenModal = (recruiter?: Recruiter) => {
+  const handleOpenForm = (recruiter?: Recruiter) => {
     if (recruiter) {
       setEditingRecruiter(recruiter);
       setFormData({
@@ -53,11 +53,11 @@ export default function RecruitersPage() {
       setEditingRecruiter(null);
       setFormData({ name: '', country: '', airline: '', notes: '' });
     }
-    setShowModal(true);
+    setShowForm(true);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleCloseForm = () => {
+    setShowForm(false);
     setEditingRecruiter(null);
     setFormData({ name: '', country: '', airline: '', notes: '' });
   };
@@ -70,13 +70,13 @@ export default function RecruitersPage() {
       const success = await updateRecruiter(editingRecruiter.id!, formData);
       if (success) {
         await loadRecruiters();
-        handleCloseModal();
+        handleCloseForm();
       }
     } else {
       const newRecruiter = await createRecruiter(formData, currentUser.uid);
       if (newRecruiter) {
         await loadRecruiters();
-        handleCloseModal();
+        handleCloseForm();
       }
     }
   };
@@ -131,14 +131,107 @@ export default function RecruitersPage() {
           </div>
           {isAdmin && (
             <button
-              onClick={() => handleOpenModal()}
+              onClick={() => setShowForm(!showForm)}
               className="mt-4 md:mt-0 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
             >
               <Plus className="w-5 h-5" />
-              Add Recruiter
+              {showForm ? 'Cancel' : 'Add Recruiter'}
             </button>
           )}
         </div>
+
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="mb-6 overflow-hidden"
+            >
+              <div className="glass-card rounded-2xl shadow-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {editingRecruiter ? 'Edit Recruiter' : 'Add New Recruiter'}
+                  </h2>
+                  <button
+                    onClick={handleCloseForm}
+                    className="p-2 hover:bg-gray-200 rounded-lg transition"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                        placeholder="Recruiter name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Airline *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.airline}
+                        onChange={(e) => setFormData({ ...formData, airline: e.target.value })}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                        placeholder="e.g., Emirates"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Country *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formData.country}
+                      onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                      placeholder="e.g., United Arab Emirates"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Notes *</label>
+                    <textarea
+                      required
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      rows={4}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition resize-none"
+                      placeholder="Additional information about this recruiter..."
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={handleCloseForm}
+                      className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-bold transition"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
+                    >
+                      {editingRecruiter ? 'Update Recruiter' : 'Create Recruiter'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1 relative">
@@ -199,7 +292,7 @@ export default function RecruitersPage() {
                   {isAdmin && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleOpenModal(recruiter)}
+                        onClick={() => handleOpenForm(recruiter)}
                         className="p-2 hover:glass-bubble rounded-lg transition"
                       >
                         <Edit className="w-4 h-4 text-blue-600" />
@@ -229,104 +322,6 @@ export default function RecruitersPage() {
           </div>
         )}
       </div>
-
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[99999]"
-            onClick={handleCloseModal}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="glass-card rounded-2xl shadow-2xl w-full max-w-lg p-6"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {editingRecruiter ? 'Edit Recruiter' : 'Add New Recruiter'}
-                </h2>
-                <button
-                  onClick={handleCloseModal}
-                  className="p-2 hover:glass-bubble rounded-lg transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
-                    placeholder="Recruiter name"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Airline</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.airline}
-                    onChange={(e) => setFormData({ ...formData, airline: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
-                    placeholder="e.g., Emirates"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.country}
-                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
-                    placeholder="e.g., United Arab Emirates"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
-                  <textarea
-                    required
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    rows={4}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition resize-none"
-                    placeholder="Additional information about this recruiter..."
-                  />
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={handleCloseModal}
-                    className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-bold transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
-                  >
-                    {editingRecruiter ? 'Update' : 'Create'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <AnimatePresence>
         {viewingRecruiter && (

@@ -30,6 +30,7 @@ export default function LeaderboardPage() {
     students: []
   });
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<UserWithDetails | null>(null);
 
   useEffect(() => {
     loadLeaderboard();
@@ -144,7 +145,8 @@ export default function LeaderboardPage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: globalIndex * 0.02 }}
-        className={`glass-card rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all border-2 bg-gradient-to-br ${getRankBackground(index)}`}
+        onClick={() => setSelectedUser(user)}
+        className={`glass-card rounded-2xl p-4 md:p-6 shadow-md hover:shadow-xl transition-all border-2 bg-gradient-to-br cursor-pointer ${getRankBackground(index)}`}
       >
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex items-center gap-3 md:gap-4 w-full md:w-auto">
@@ -311,6 +313,103 @@ export default function LeaderboardPage() {
           </div>
         )}
       </div>
+
+      {selectedUser && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[99999]"
+          onClick={() => setSelectedUser(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="glass-card rounded-2xl shadow-2xl w-full max-w-md p-6"
+          >
+            <div className="flex items-center gap-4 mb-6">
+              {selectedUser.photoURL ? (
+                <img
+                  src={selectedUser.photoURL}
+                  alt={selectedUser.userName}
+                  className="w-20 h-20 rounded-full object-cover border-4 border-white"
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-[#D71920] to-[#B91518] flex items-center justify-center text-white text-2xl font-bold">
+                  {selectedUser.userName.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedUser.userName}</h2>
+                <div className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold mt-1 ${getRoleDisplay(selectedUser.role).color}`}>
+                  {getRoleDisplay(selectedUser.role).icon} {getRoleDisplay(selectedUser.role).label}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Total Points</span>
+                  <span className="text-2xl font-bold text-[#D71920]">{selectedUser.total_points}</span>
+                </div>
+              </div>
+
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Current Rank</span>
+                  <BadgeDisplay rank={selectedUser.current_rank} size="md" />
+                </div>
+              </div>
+
+              <div className="glass-card rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600">Daily Streak</span>
+                  <span className="text-xl font-bold text-orange-600">{selectedUser.daily_login_streak} days</span>
+                </div>
+              </div>
+
+              {selectedUser.verified_crew && (
+                <div className="glass-card rounded-xl p-4 bg-gradient-to-r from-blue-50 to-blue-100 border-2 border-blue-300">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-blue-600" />
+                    <span className="font-bold text-blue-900">Verified Crew Member</span>
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.achievements && selectedUser.achievements.length > 0 && (
+                <div className="glass-card rounded-xl p-4">
+                  <h3 className="font-bold text-gray-900 mb-2">Achievements</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedUser.achievements.map((achievement, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-yellow-100 text-yellow-900 rounded-full text-sm font-semibold">
+                        {achievement}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedUser.bio && (
+                <div className="glass-card rounded-xl p-4">
+                  <h3 className="font-bold text-gray-900 mb-2">Bio</h3>
+                  <p className="text-gray-700">{selectedUser.bio}</p>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="w-full mt-6 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
+            >
+              Close
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }

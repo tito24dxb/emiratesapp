@@ -14,7 +14,7 @@ export default function OpenDaysPage() {
   const { currentUser } = useApp();
   const [openDays, setOpenDays] = useState<OpenDay[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [editingOpenDay, setEditingOpenDay] = useState<OpenDay | null>(null);
 
   const [formData, setFormData] = useState({
@@ -38,7 +38,7 @@ export default function OpenDaysPage() {
     setLoading(false);
   };
 
-  const handleOpenModal = (openDay?: OpenDay) => {
+  const handleOpenForm = (openDay?: OpenDay) => {
     if (openDay) {
       setEditingOpenDay(openDay);
       setFormData({
@@ -52,11 +52,11 @@ export default function OpenDaysPage() {
       setEditingOpenDay(null);
       setFormData({ city: '', country: '', date: '', recruiter: '', description: '' });
     }
-    setShowModal(true);
+    setShowForm(true);
   };
 
-  const handleCloseModal = () => {
-    setShowModal(false);
+  const handleCloseForm = () => {
+    setShowForm(false);
     setEditingOpenDay(null);
     setFormData({ city: '', country: '', date: '', recruiter: '', description: '' });
   };
@@ -69,13 +69,13 @@ export default function OpenDaysPage() {
       const success = await updateOpenDay(editingOpenDay.id!, formData);
       if (success) {
         await loadOpenDays();
-        handleCloseModal();
+        handleCloseForm();
       }
     } else {
       const newOpenDay = await createOpenDay(formData, currentUser.uid);
       if (newOpenDay) {
         await loadOpenDays();
-        handleCloseModal();
+        handleCloseForm();
       }
     }
   };
@@ -119,7 +119,7 @@ export default function OpenDaysPage() {
           </div>
           {isAdmin && (
             <button
-              onClick={() => handleOpenModal()}
+              onClick={() => handleOpenForm()}
               className="mt-4 md:mt-0 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
             >
               <Plus className="w-5 h-5" />
@@ -162,7 +162,7 @@ export default function OpenDaysPage() {
                   {isAdmin && (
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleOpenModal(openDay)}
+                        onClick={() => handleOpenForm(openDay)}
                         className="p-2 hover:bg-gray-100 rounded-lg transition"
                       >
                         <Edit className="w-4 h-4 text-blue-600" />
@@ -187,13 +187,13 @@ export default function OpenDaysPage() {
       </div>
 
       <AnimatePresence>
-        {showModal && (
+        {showForm && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-[99999]"
-            onClick={handleCloseModal}
+            onClick={handleCloseForm}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -207,7 +207,7 @@ export default function OpenDaysPage() {
                   {editingOpenDay ? 'Edit Open Day' : 'Add New Open Day'}
                 </h2>
                 <button
-                  onClick={handleCloseModal}
+                  onClick={handleCloseForm}
                   className="p-2 hover:bg-gray-100 rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
@@ -281,7 +281,7 @@ export default function OpenDaysPage() {
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={handleCloseModal}
+                    onClick={handleCloseForm}
                     className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl font-bold transition"
                   >
                     Cancel
