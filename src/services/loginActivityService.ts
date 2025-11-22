@@ -42,8 +42,8 @@ export async function recordLoginActivity(userId: string, success: boolean = tru
     browser: deviceInfo.browser,
     os: deviceInfo.os,
     userAgent: navigator.userAgent,
-    ipAddress: ipInfo.ip,
-    location: ipInfo.location,
+    ipAddress: ipInfo.ip || 'Unknown',
+    location: ipInfo.location || {},
     success,
   };
 
