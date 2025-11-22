@@ -55,113 +55,118 @@ export default function MyProgressPage() {
     try {
       setLoading(true);
 
-      // Fetch course enrollments
-      const courseEnrollments = await getCourseEnrollments(currentUser.uid);
-      console.log('Course enrollments:', courseEnrollments);
+      // Fetch ALL enrollments from course_enrollments collection
+      const enrollmentsQuery = query(
+        collection(db, 'course_enrollments'),
+        where('user_id', '==', currentUser.uid)
+      );
 
-      if (courseEnrollments.length === 0) {
-        console.log('No course enrollments found');
+      const enrollmentsSnap = await getDocs(enrollmentsQuery);
+      console.log('Total enrollments found:', enrollmentsSnap.size);
+
+      if (enrollmentsSnap.empty) {
+        console.log('No enrollments found');
         setEnrolledModules([]);
+        setStats({
+          totalEnrolled: 0,
+          completed: 0,
+          inProgress: 0,
+          averageProgress: 0
+        });
         setLoading(false);
         return;
       }
 
-      // Get all enrolled course IDs
-      const enrolledCourseIds = new Set(courseEnrollments.map(e => e.course_id));
-      console.log('Enrolled course IDs:', Array.from(enrolledCourseIds));
+      const enrolledModules: EnrolledItem[] = [];
 
-      // Fetch all modules
-      const allModules = await getAllMainModules();
-      console.log('All modules:', allModules.length);
+      for (const enrollDoc of enrollmentsSnap.docs) {
+        const enrollData = enrollDoc.data();
+        console.log('Processing enrollment:', enrollDoc.id, enrollData);
 
-      // Filter modules that have at least one enrolled course
-      const modulesWithProgress = await Promise.all(
-        allModules.map(async (module) => {
-          try {
-            // Collect all course IDs for this module
-            const courseIds = [
-              module.course_id,
-              module.course1_id,
-              module.course2_id
-            ].filter((id): id is string => !!id);
+        // The enrollment could be for a module_id or course_id
+        const moduleId = enrollData.module_id || enrollData.course_id;
 
-            console.log(`Module ${module.title} has courses:`, courseIds);
+        if (!moduleId) {
+          console.log('No module_id or course_id found in enrollment:', enrollDoc.id);
+          continue;
+        }
 
-            // Check if user has enrolled in any course in this module
-            const hasEnrolledCourse = courseIds.some(id => enrolledCourseIds.has(id));
+        try {
+          // Try to fetch as main module first
+          let module = await getMainModule(moduleId);
+          let moduleType: 'main_module' | 'submodule' | 'course' = 'main_module';
 
-            if (!hasEnrolledCourse) {
-              console.log(`User not enrolled in module: ${module.title}`);
-              return null;
-            }
-
-            // Calculate progress based on completed courses
-            const { progress, completedCount, totalCount } = await calculateModuleProgress(
-              currentUser.uid,
-              courseIds
-            );
-
-            console.log(`Module ${module.title} progress:`, { progress, completedCount, totalCount });
-
-            // Get last accessed time from course enrollments
-            let lastAccessed = new Date(0).toISOString();
-            let enrolledAt = new Date().toISOString();
-
-            for (const courseId of courseIds) {
-              const enrollment = courseEnrollments.find(e => e.course_id === courseId);
-              if (enrollment) {
-                // Handle both Timestamp objects and ISO strings
-                const lastAccessedValue = enrollment.last_accessed
-                  ? typeof enrollment.last_accessed === 'string'
-                    ? enrollment.last_accessed
-                    : enrollment.last_accessed.toDate?.().toISOString() || new Date(enrollment.last_accessed).toISOString()
-                  : null;
-
-                const enrolledAtValue = typeof enrollment.enrolled_at === 'string'
-                  ? enrollment.enrolled_at
-                  : enrollment.enrolled_at.toDate?.().toISOString() || new Date(enrollment.enrolled_at).toISOString();
-
-                if (lastAccessedValue && new Date(lastAccessedValue) > new Date(lastAccessed)) {
-                  lastAccessed = lastAccessedValue;
-                }
-                if (new Date(enrolledAtValue) < new Date(enrolledAt)) {
-                  enrolledAt = enrolledAtValue;
-                }
-              }
-            }
-
-            return {
-              id: module.id,
-              title: module.title,
-              description: module.description,
-              type: 'main_module' as const,
-              coverImage: module.coverImage,
-              enrolled_at: enrolledAt,
-              progress_percentage: progress,
-              completed: progress === 100,
-              last_accessed: lastAccessed > new Date(0).toISOString() ? lastAccessed : enrolledAt
-            };
-          } catch (error) {
-            console.error('Error processing module:', module.id, error);
-            return null;
+          // If not found as main module, try submodule
+          if (!module) {
+            console.log('Not found as main module, trying submodule:', moduleId);
+            module = await getSubmodule(moduleId);
+            moduleType = 'submodule';
           }
-        })
+
+          // If still not found, skip
+          if (!module) {
+            console.log('Module not found:', moduleId);
+            continue;
+          }
+
+          console.log('Found module:', module.title, 'type:', moduleType);
+
+          // Handle timestamps - convert Firestore Timestamp to ISO string
+          const convertTimestamp = (timestamp: any): string => {
+            if (!timestamp) return new Date().toISOString();
+            if (typeof timestamp === 'string') return timestamp;
+            if (timestamp.toDate) return timestamp.toDate().toISOString();
+            if (timestamp.seconds) return new Date(timestamp.seconds * 1000).toISOString();
+            return new Date(timestamp).toISOString();
+          };
+
+          const enrolledAt = convertTimestamp(enrollData.enrolled_at);
+          const lastAccessed = convertTimestamp(enrollData.last_accessed || enrollData.enrolled_at);
+          const progressPercentage = enrollData.progress_percentage || 0;
+          const completed = enrollData.completed || false;
+
+          enrolledModules.push({
+            id: moduleId,
+            title: module.title,
+            description: module.description,
+            type: moduleType,
+            coverImage: module.coverImage || '',
+            enrolled_at: enrolledAt,
+            progress_percentage: progressPercentage,
+            completed: completed,
+            last_accessed: lastAccessed
+          });
+
+          console.log('Added module to list:', module.title, 'progress:', progressPercentage);
+        } catch (error) {
+          console.error('Error processing module:', moduleId, error);
+        }
+      }
+
+      console.log('Total enrolled modules processed:', enrolledModules.length);
+
+      // Sort by last accessed (most recent first)
+      enrolledModules.sort((a, b) =>
+        new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime()
       );
 
-      const validModules = modulesWithProgress.filter((m): m is EnrolledItem => m !== null);
-      console.log('Valid modules with progress:', validModules);
-
-      validModules.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
-      setEnrolledModules(validModules);
+      setEnrolledModules(enrolledModules);
 
       // Calculate stats
-      const totalProgress = validModules.reduce((sum, item) => sum + item.progress_percentage, 0);
-      const avgProgress = validModules.length > 0 ? Math.round(totalProgress / validModules.length) : 0;
-      const completed = validModules.filter(item => item.completed).length;
-      const inProgress = validModules.filter(item => !item.completed && item.progress_percentage > 0).length;
+      const totalProgress = enrolledModules.reduce((sum, item) => sum + item.progress_percentage, 0);
+      const avgProgress = enrolledModules.length > 0 ? Math.round(totalProgress / enrolledModules.length) : 0;
+      const completed = enrolledModules.filter(item => item.completed).length;
+      const inProgress = enrolledModules.filter(item => !item.completed && item.progress_percentage > 0).length;
 
       setStats({
-        totalEnrolled: validModules.length,
+        totalEnrolled: enrolledModules.length,
+        completed,
+        inProgress,
+        averageProgress: avgProgress
+      });
+
+      console.log('Stats calculated:', {
+        totalEnrolled: enrolledModules.length,
         completed,
         inProgress,
         averageProgress: avgProgress
