@@ -21,7 +21,7 @@ export class OpenAIClient {
       }
 
       const { data, error } = await supabase.functions.invoke('ai', {
-        body: { messages, userId }
+        body: { messages, userId },
       });
 
       if (error) {
