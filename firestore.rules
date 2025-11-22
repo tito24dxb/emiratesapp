@@ -112,9 +112,15 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid;
       allow update: if request.auth != null && (
+        // Post owner can update their own content
         resource.data.userId == request.auth.uid ||
+        // Staff can moderate
         isGovernor() ||
-        hasPermission('moderateContent')
+        hasPermission('moderateContent') ||
+        // Any authenticated user can update view tracking and reaction counts
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount', 'reactionsCount', 'commentsCount', 'updatedAt'])
+        )
       );
       allow delete: if request.auth != null && (
         resource.data.userId == request.auth.uid ||
