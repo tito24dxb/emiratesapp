@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import MetricsCards from '../../components/governor/nexus/MetricsCards';
-import RealtimeLogs from '../../components/governor/nexus/RealtimeLogs';
 import CommandConsole from '../../components/governor/nexus/CommandConsole';
 import BackupControl from '../../components/governor/nexus/BackupControl';
 import AIAssistantPanel from '../../components/governor/nexus/AIAssistantPanel';
@@ -16,7 +15,6 @@ import FinancePanel from '../../components/governor/nexus/FinancePanel';
 import AnnouncementManager from './AnnouncementManager';
 import BugReportsManager from '../../components/governor/nexus/BugReportsManager';
 import ModuleManager from '../../components/governor/nexus/ModuleManager';
-import DataInitializer from '../../components/governor/nexus/DataInitializer';
 import FeatureShutdownControl from './FeatureShutdownControl';
 
 interface Announcement {
@@ -100,13 +98,8 @@ export default function GovernorControlNexus() {
         <FinancePanel />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <RealtimeLogs />
           <CommandConsole />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <BackupControl />
-          <DataInitializer />
         </div>
 
         <AIAssistantPanel />
