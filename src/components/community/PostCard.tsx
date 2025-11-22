@@ -240,7 +240,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
               }`}
             >
               <Icon className={`w-3.5 h-3.5 md:w-4 md:h-4 ${isActive ? 'text-white' : reaction.color}`} />
-              {reaction.count > 0 && <span>{reaction.count}</span>}
+              <span>{reaction.count}</span>
             </motion.button>
           );
         })}
@@ -252,7 +252,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
           className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-xl liquid-card-overlay text-gray-700 hover:bg-white/80 font-semibold text-xs md:text-sm transition ml-auto"
         >
           <MessageCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
-          {localPost.commentsCount > 0 && <span>{localPost.commentsCount}</span>}
+          <span>{localPost.commentsCount}</span>
           <span className="hidden sm:inline">Comments</span>
         </motion.button>
       </div>

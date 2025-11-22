@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 import PDFViewer from '../components/PDFViewer';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { markLessonWatched } from '../services/rewardsService';
-import { trackCourseProgress, getCourseProgress } from '../services/enrollmentService';
+import { trackCourseProgress, getCourseProgress, enrollInCourse, isEnrolledInCourse } from '../services/enrollmentService';
 import { getExamByCourseId, getUserExamResult, Exam, ExamResult } from '../services/examService';
 import FeatureAccessGuard from '../components/FeatureAccessGuard';
 import CourseExamInterface from '../components/CourseExamInterface';
@@ -107,6 +107,13 @@ function CourseViewerPageContent() {
         const unlocked = await isCourseUnlocked(currentUser.uid, courseData);
         console.log('CourseViewer: Course unlocked:', unlocked);
         setIsUnlocked(unlocked);
+
+        // Auto-enroll user in course when they open it
+        const enrolled = await isEnrolledInCourse(currentUser.uid, courseId);
+        if (!enrolled) {
+          await enrollInCourse(currentUser.uid, courseId);
+          console.log('CourseViewer: Auto-enrolled user in course');
+        }
       }
 
       const examData = await getExamByCourseId(courseId);

@@ -52,6 +52,7 @@ export async function recordLoginActivity(userId: string, success: boolean = tru
 }
 
 export async function getUserLoginHistory(userId: string, limitCount: number = 10): Promise<LoginActivity[]> {
+  // First get login history from loginActivity collection
   const q = query(
     collection(db, loginActivityCollection),
     where('userId', '==', userId),
@@ -60,7 +61,49 @@ export async function getUserLoginHistory(userId: string, limitCount: number = 1
   );
 
   const snapshot = await getDocs(q);
-  return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as LoginActivity));
+  const activities = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as LoginActivity));
+
+  // Also check user_points collection for last_login data
+  try {
+    const userPointsQuery = query(
+      collection(db, 'user_points'),
+      where('user_id', '==', userId),
+      limit(1)
+    );
+    const userPointsSnapshot = await getDocs(userPointsQuery);
+
+    if (!userPointsSnapshot.empty) {
+      const userPointsData = userPointsSnapshot.docs[0].data();
+
+      // If last_login exists and it's not already in activities, add it
+      if (userPointsData.last_login) {
+        const lastLoginTime = userPointsData.last_login;
+        const deviceInfo = getDeviceInfo();
+
+        // Check if this login is already recorded
+        const alreadyRecorded = activities.some(a =>
+          Math.abs(a.timestamp.toMillis() - lastLoginTime.toMillis()) < 60000 // within 1 minute
+        );
+
+        if (!alreadyRecorded) {
+          activities.unshift({
+            id: 'from_user_points',
+            userId,
+            timestamp: lastLoginTime,
+            deviceType: deviceInfo.deviceType,
+            browser: deviceInfo.browser,
+            os: deviceInfo.os,
+            userAgent: navigator.userAgent,
+            success: true
+          });
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching from user_points:', error);
+  }
+
+  return activities.slice(0, limitCount);
 }
 
 export async function getRecentLogins(limitCount: number = 50): Promise<LoginActivity[]> {

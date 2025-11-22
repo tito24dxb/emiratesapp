@@ -337,3 +337,133 @@ export const getInProgressModulesCount = async (userId: string): Promise<number>
     return 0;
   }
 };
+
+// Course Enrollments (using course_enrollments collection)
+export interface CourseEnrollment {
+  user_id: string;
+  course_id: string;
+  enrolled_at: Timestamp;
+  last_accessed: Timestamp;
+  progress_percentage: number;
+  completed: boolean;
+  completed_at?: Timestamp;
+  current_module?: string;
+  current_lesson?: string;
+}
+
+export const enrollInCourse = async (
+  userId: string,
+  courseId: string
+): Promise<void> => {
+  try {
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+
+    // Check if already enrolled
+    const existingEnrollment = await getDoc(enrollmentRef);
+    if (existingEnrollment.exists()) {
+      console.log('Already enrolled in course:', courseId);
+      return;
+    }
+
+    const enrollment: CourseEnrollment = {
+      user_id: userId,
+      course_id: courseId,
+      enrolled_at: Timestamp.now(),
+      last_accessed: Timestamp.now(),
+      progress_percentage: 0,
+      completed: false
+    };
+
+    await setDoc(enrollmentRef, enrollment);
+    console.log('Enrolled in course:', courseId);
+  } catch (error) {
+    console.error('Error enrolling in course:', error);
+    throw error;
+  }
+};
+
+export const isEnrolledInCourse = async (
+  userId: string,
+  courseId: string
+): Promise<boolean> => {
+  try {
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+    const enrollmentSnap = await getDoc(enrollmentRef);
+    return enrollmentSnap.exists();
+  } catch (error) {
+    console.error('Error checking course enrollment:', error);
+    return false;
+  }
+};
+
+export const getCourseEnrollment = async (
+  userId: string,
+  courseId: string
+): Promise<CourseEnrollment | null> => {
+  try {
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+    const enrollmentSnap = await getDoc(enrollmentRef);
+
+    if (enrollmentSnap.exists()) {
+      return enrollmentSnap.data() as CourseEnrollment;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting course enrollment:', error);
+    return null;
+  }
+};
+
+export const updateCourseProgress = async (
+  userId: string,
+  courseId: string,
+  progressPercentage: number,
+  currentModule?: string,
+  currentLesson?: string
+): Promise<void> => {
+  try {
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+    const isCompleted = progressPercentage >= 100;
+
+    const updates: any = {
+      last_accessed: Timestamp.now(),
+      progress_percentage: progressPercentage,
+      completed: isCompleted
+    };
+
+    if (currentModule) updates.current_module = currentModule;
+    if (currentLesson) updates.current_lesson = currentLesson;
+
+    if (isCompleted) {
+      const existingEnrollment = await getDoc(enrollmentRef);
+      if (existingEnrollment.exists() && !existingEnrollment.data().completed) {
+        updates.completed_at = Timestamp.now();
+      }
+    }
+
+    await setDoc(enrollmentRef, updates, { merge: true });
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      console.warn('⚠️ Course enrollment update permission denied - deploy Firestore rules to fix');
+      return;
+    }
+    console.error('Error updating course progress:', error);
+  }
+};
+
+export const getUserCourseEnrollments = async (
+  userId: string
+): Promise<CourseEnrollment[]> => {
+  try {
+    const enrollmentsQuery = query(
+      collection(db, 'course_enrollments'),
+      where('user_id', '==', userId)
+    );
+
+    const enrollmentsSnap = await getDocs(enrollmentsQuery);
+    return enrollmentsSnap.docs.map(doc => doc.data() as CourseEnrollment);
+  } catch (error) {
+    console.error('Error getting user course enrollments:', error);
+    return [];
+  }
+};

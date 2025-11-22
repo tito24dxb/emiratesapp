@@ -226,12 +226,6 @@ export default function LeaderboardPage() {
             </div>
           </div>
         )}
-
-        {user.bio && (
-          <div className="mt-3 pt-3 border-t border-white/40">
-            <p className="text-sm text-gray-700 line-clamp-2">{user.bio}</p>
-          </div>
-        )}
       </motion.div>
     );
   };
