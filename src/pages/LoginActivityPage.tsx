@@ -107,20 +107,22 @@ export default function LoginActivityPage() {
             <div className="space-y-3">
               {failedAttempts.slice(0, 5).map((attempt) => (
                 <div key={attempt.id} className="bg-red-50 rounded-xl p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {getDeviceIcon(attempt.deviceType)}
-                      <div>
-                        <p className="font-bold text-red-900">
+                  <div className="flex flex-col sm:flex-row items-start gap-3">
+                    <div className="flex items-start gap-3 flex-1 min-w-0 w-full">
+                      <div className="flex-shrink-0">
+                        {getDeviceIcon(attempt.deviceType)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-red-900 break-words">
                           {attempt.browser} on {attempt.os}
                         </p>
-                        <p className="text-sm text-red-700">
+                        <p className="text-sm text-red-700 break-words">
                           {attempt.timestamp.toDate().toLocaleString()}
                         </p>
                       </div>
                     </div>
                     {attempt.ipAddress && (
-                      <span className="text-sm text-red-700 font-mono">{attempt.ipAddress}</span>
+                      <span className="text-xs text-red-700 font-mono break-all sm:text-sm">{attempt.ipAddress}</span>
                     )}
                   </div>
                 </div>
@@ -164,49 +166,47 @@ export default function LoginActivityPage() {
                   transition={{ delay: index * 0.05 }}
                   className="glass-card rounded-xl p-4 hover:bg-white/40 transition"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white">
-                        {getDeviceIcon(activity.deviceType)}
+                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                    <div className="w-12 h-12 flex-shrink-0 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center text-white">
+                      {getDeviceIcon(activity.deviceType)}
+                    </div>
+
+                    <div className="flex-1 min-w-0 w-full">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                        <h3 className="font-bold text-gray-900 break-words">
+                          {activity.browser} on {activity.os}
+                        </h3>
+                        {index === 0 && (
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full w-fit">
+                            CURRENT
+                          </span>
+                        )}
                       </div>
 
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-bold text-gray-900">
-                            {activity.browser} on {activity.os}
-                          </h3>
-                          {index === 0 && (
-                            <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">
-                              CURRENT
-                            </span>
-                          )}
+                      <div className="flex flex-col gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <Clock className="w-4 h-4 flex-shrink-0" />
+                          <span className="break-words">{activity.timestamp.toDate().toLocaleString()}</span>
                         </div>
 
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{activity.timestamp.toDate().toLocaleString()}</span>
+                        {activity.ipAddress && (
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span className="font-mono text-xs break-all">{activity.ipAddress}</span>
                           </div>
+                        )}
 
-                          {activity.ipAddress && (
-                            <div className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4" />
-                              <span className="font-mono">{activity.ipAddress}</span>
-                            </div>
-                          )}
-
-                          {activity.location?.country && (
-                            <span>
-                              {activity.location.city && `${activity.location.city}, `}
-                              {activity.location.country}
-                            </span>
-                          )}
-                        </div>
-
-                        <p className="text-xs text-gray-500 mt-2 font-mono truncate">
-                          {activity.userAgent}
-                        </p>
+                        {activity.location?.country && (
+                          <div className="text-xs break-words">
+                            {activity.location.city && `${activity.location.city}, `}
+                            {activity.location.country}
+                          </div>
+                        )}
                       </div>
+
+                      <p className="text-xs text-gray-500 mt-2 break-all line-clamp-2">
+                        {activity.userAgent}
+                      </p>
                     </div>
                   </div>
                 </motion.div>
