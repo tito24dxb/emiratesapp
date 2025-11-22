@@ -260,19 +260,19 @@ const updateModuleEnrollmentProgress = async (
   progressPercentage: number
 ): Promise<void> => {
   try {
-    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
     const enrollmentSnap = await getDoc(enrollmentRef);
 
     if (enrollmentSnap.exists()) {
       const updates: any = {
         progress_percentage: progressPercentage,
-        last_accessed: new Date().toISOString()
+        last_accessed: Timestamp.now()
       };
 
       if (progressPercentage >= 100) {
         updates.completed = true;
         if (!enrollmentSnap.data().completed) {
-          updates.completed_at = new Date().toISOString();
+          updates.completed_at = Timestamp.now();
         }
       }
 

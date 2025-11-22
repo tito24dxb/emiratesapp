@@ -66,7 +66,7 @@ export async function getAnalyticsSummary(): Promise<AnalyticsData> {
       query(collection(db, 'messages'), where('createdAt', '>=', oneWeekAgo))
     ),
     getDocs(collection(db, 'courses')),
-    getCountFromServer(collection(db, 'enrollments')),
+    getCountFromServer(collection(db, 'course_enrollments')),
   ]);
 
   const usersSnapshot = await getDocs(collection(db, 'users'));

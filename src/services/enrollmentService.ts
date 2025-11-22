@@ -51,14 +51,15 @@ export const enrollInModule = async (
   moduleType: 'main_module' | 'submodule'
 ): Promise<void> => {
   try {
-    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
 
-    const enrollment: ModuleEnrollment = {
+    const enrollment = {
       user_id: userId,
+      course_id: moduleId,
       module_id: moduleId,
       module_type: moduleType,
-      enrolled_at: new Date().toISOString(),
-      last_accessed: new Date().toISOString(),
+      enrolled_at: Timestamp.now(),
+      last_accessed: Timestamp.now(),
       progress_percentage: 0,
       completed: false
     };
@@ -76,7 +77,7 @@ export const isEnrolledInModule = async (
   moduleId: string
 ): Promise<boolean> => {
   try {
-    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
     const enrollmentSnap = await getDoc(enrollmentRef);
     return enrollmentSnap.exists();
   } catch (error) {
@@ -90,7 +91,7 @@ export const getModuleEnrollment = async (
   moduleId: string
 ): Promise<ModuleEnrollment | null> => {
   try {
-    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
     const enrollmentSnap = await getDoc(enrollmentRef);
 
     if (enrollmentSnap.exists()) {
@@ -108,9 +109,9 @@ export const updateLastAccessed = async (
   moduleId: string
 ): Promise<void> => {
   try {
-    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
     await setDoc(enrollmentRef, {
-      last_accessed: new Date().toISOString()
+      last_accessed: Timestamp.now()
     }, { merge: true });
   } catch (error: any) {
     if (error?.code === 'permission-denied') {
@@ -216,17 +217,17 @@ export const updateModuleProgress = async (
     const progressPercentage = (completedCourses / totalCourses) * 100;
     const isModuleCompleted = progressPercentage === 100;
 
-    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
     const updates: any = {
       progress_percentage: progressPercentage,
       completed: isModuleCompleted,
-      last_accessed: new Date().toISOString()
+      last_accessed: Timestamp.now()
     };
 
     if (isModuleCompleted) {
       const enrollmentSnap = await getDoc(enrollmentRef);
       if (enrollmentSnap.exists() && !enrollmentSnap.data().completed) {
-        updates.completed_at = new Date().toISOString();
+        updates.completed_at = Timestamp.now();
       }
     }
 
@@ -289,7 +290,7 @@ export const getUserEnrollments = async (
 ): Promise<ModuleEnrollment[]> => {
   try {
     const enrollmentsQuery = query(
-      collection(db, 'enrollments'),
+      collection(db, 'course_enrollments'),
       where('user_id', '==', userId)
     );
 

@@ -58,7 +58,7 @@ function CoursesPageContent() {
 
   const checkEnrollment = async (userId: string, moduleId: string): Promise<boolean> => {
     try {
-      const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+      const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
       const enrollmentSnap = await getDoc(enrollmentRef);
       return enrollmentSnap.exists();
     } catch (error) {
