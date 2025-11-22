@@ -672,5 +672,176 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
       allow delete: if false;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // QUIZ RESULTS
+    ///////////////////////////////////////////////////////////////////////////
+    match /quizResults/{resultId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor() ||
+        isStaff()
+      );
+      allow list: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // COMMUNITY FLAGS (Content Moderation)
+    ///////////////////////////////////////////////////////////////////////////
+    match /community_flags/{flagId} {
+      allow read: if isAuthenticated() && (isGovernor() || hasPermission('moderateContent'));
+      allow create: if isAuthenticated() &&
+        request.resource.data.reporterId == request.auth.uid;
+      allow update: if isAuthenticated() && (isGovernor() || hasPermission('moderateContent'));
+      allow delete: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AUDIT LOGS (System-wide Activity)
+    ///////////////////////////////////////////////////////////////////////////
+    match /audit_logs/{logId} {
+      allow read: if isAuthenticated() && (isGovernor() || hasPermission('viewAudit'));
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    match /auditLogs/{logId} {
+      allow read: if isAuthenticated() && (isGovernor() || hasPermission('viewAudit'));
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    match /auditEvents/{eventId} {
+      allow read: if isAuthenticated() && (isGovernor() || hasPermission('viewAudit'));
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // USER PRESENCE (Online Status)
+    ///////////////////////////////////////////////////////////////////////////
+    match /userPresence/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // TYPING INDICATORS
+    ///////////////////////////////////////////////////////////////////////////
+    match /typingIndicators/{indicatorId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // FCM TOKENS (Push Notifications)
+    ///////////////////////////////////////////////////////////////////////////
+    match /fcmTokens/{tokenId} {
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor()
+      );
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor()
+      );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // FILE METADATA (Storage Management)
+    ///////////////////////////////////////////////////////////////////////////
+    match /fileMetadata/{fileId} {
+      allow read: if isAuthenticated() && (
+        resource.data.uploadedBy == request.auth.uid ||
+        isGovernor() ||
+        isStaff()
+      );
+      allow create: if isAuthenticated() &&
+        request.resource.data.uploadedBy == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.uploadedBy == request.auth.uid ||
+        isGovernor()
+      );
+      allow delete: if isAuthenticated() && (
+        resource.data.uploadedBy == request.auth.uid ||
+        isGovernor()
+      );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // STORAGE QUOTA
+    ///////////////////////////////////////////////////////////////////////////
+    match /storageQuota/{userId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isGovernor()
+      );
+      allow write: if isGovernor();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ANALYTICS EVENTS (Tracking)
+    ///////////////////////////////////////////////////////////////////////////
+    match /analyticsEvents/{eventId} {
+      allow read: if isAuthenticated() && (isGovernor() || hasPermission('viewAudit'));
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // MESSAGES (Legacy Support)
+    ///////////////////////////////////////////////////////////////////////////
+    match /messages/{messageId} {
+      allow read: if isAuthenticated() && (
+        resource.data.senderId == request.auth.uid ||
+        resource.data.recipientId == request.auth.uid ||
+        isGovernor()
+      );
+      allow create: if isAuthenticated() &&
+        request.resource.data.senderId == request.auth.uid;
+      allow update: if isAuthenticated() &&
+        resource.data.senderId == request.auth.uid;
+      allow delete: if isAuthenticated() && (
+        resource.data.senderId == request.auth.uid ||
+        isGovernor()
+      );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ONBOARDING DATA
+    ///////////////////////////////////////////////////////////////////////////
+    match /onboarding/{userId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isGovernor()
+      );
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // USER BADGES & ACHIEVEMENTS
+    ///////////////////////////////////////////////////////////////////////////
+    match /user_badges/{badgeId} {
+      allow read: if isAuthenticated();
+      allow write: if isGovernor();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // CREW DECLARATIONS
+    ///////////////////////////////////////////////////////////////////////////
+    match /crew_declarations/{declarationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isGovernor()
+      );
+    }
   }
 }
