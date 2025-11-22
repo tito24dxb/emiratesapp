@@ -15,19 +15,74 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   const [showComments, setShowComments] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [localPost, setLocalPost] = useState(post);
+
+  useEffect(() => {
+    setLocalPost(post);
+  }, [post]);
 
   useEffect(() => {
     loadUserReaction();
+
+    // Subscribe to real-time post updates for comment count and reactions
+    const unsubscribe = communityFeedService.subscribeToPost(post.id, (updatedPost) => {
+      if (updatedPost) {
+        setLocalPost(updatedPost);
+      }
+    });
+
+    return () => unsubscribe();
   }, [post.id, currentUser.uid]);
 
   const loadUserReaction = async () => {
-    const reaction = await communityFeedService.getUserReaction(post.id, currentUser.uid);
-    setUserReaction(reaction);
+    try {
+      const reaction = await communityFeedService.getUserReaction(post.id, currentUser.uid);
+      setUserReaction(reaction);
+    } catch (error) {
+      console.error('Error loading reaction:', error);
+    }
   };
 
   const handleReaction = async (type: 'fire' | 'heart' | 'thumbsUp' | 'laugh' | 'wow') => {
-    await communityFeedService.toggleReaction(post.id, currentUser.uid, type);
-    loadUserReaction();
+    try {
+      // Optimistic update
+      const previousReaction = userReaction;
+      const updatedPost = { ...localPost };
+
+      if (previousReaction === type) {
+        // Removing reaction
+        setUserReaction(null);
+        updatedPost.reactionsCount = {
+          ...updatedPost.reactionsCount,
+          [type]: Math.max(0, updatedPost.reactionsCount[type] - 1)
+        };
+      } else if (previousReaction) {
+        // Changing reaction
+        setUserReaction(type);
+        updatedPost.reactionsCount = {
+          ...updatedPost.reactionsCount,
+          [previousReaction]: Math.max(0, updatedPost.reactionsCount[previousReaction] - 1),
+          [type]: updatedPost.reactionsCount[type] + 1
+        };
+      } else {
+        // Adding new reaction
+        setUserReaction(type);
+        updatedPost.reactionsCount = {
+          ...updatedPost.reactionsCount,
+          [type]: updatedPost.reactionsCount[type] + 1
+        };
+      }
+
+      setLocalPost(updatedPost);
+
+      await communityFeedService.toggleReaction(post.id, currentUser.uid, type);
+      await loadUserReaction();
+    } catch (error) {
+      console.error('Error toggling reaction:', error);
+      // Revert on error
+      setLocalPost(post);
+      await loadUserReaction();
+    }
   };
 
   const handleDelete = async () => {
@@ -62,11 +117,11 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   const canFlag = currentUser.uid !== post.userId;
 
   const reactions = [
-    { type: 'fire' as const, icon: Flame, count: post.reactionsCount.fire, color: 'text-orange-500' },
-    { type: 'heart' as const, icon: Heart, count: post.reactionsCount.heart, color: 'text-red-500' },
-    { type: 'thumbsUp' as const, icon: ThumbsUp, count: post.reactionsCount.thumbsUp, color: 'text-blue-500' },
-    { type: 'laugh' as const, icon: Laugh, count: post.reactionsCount.laugh, color: 'text-yellow-500' },
-    { type: 'wow' as const, icon: AlertCircle, count: post.reactionsCount.wow, color: 'text-purple-500' }
+    { type: 'fire' as const, icon: Flame, count: localPost.reactionsCount.fire, color: 'text-orange-500' },
+    { type: 'heart' as const, icon: Heart, count: localPost.reactionsCount.heart, color: 'text-red-500' },
+    { type: 'thumbsUp' as const, icon: ThumbsUp, count: localPost.reactionsCount.thumbsUp, color: 'text-blue-500' },
+    { type: 'laugh' as const, icon: Laugh, count: localPost.reactionsCount.laugh, color: 'text-yellow-500' },
+    { type: 'wow' as const, icon: AlertCircle, count: localPost.reactionsCount.wow, color: 'text-purple-500' }
   ];
 
   const channelBadges = {
@@ -197,7 +252,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
           className="flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-xl liquid-card-overlay text-gray-700 hover:bg-white/80 font-semibold text-xs md:text-sm transition ml-auto"
         >
           <MessageCircle className="w-3.5 h-3.5 md:w-4 md:h-4" />
-          {post.commentsCount > 0 && <span>{post.commentsCount}</span>}
+          {localPost.commentsCount > 0 && <span>{localPost.commentsCount}</span>}
           <span className="hidden sm:inline">Comments</span>
         </motion.button>
       </div>

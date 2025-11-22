@@ -91,10 +91,12 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
 
       // Validate required fields
       if (!userId) {
-        throw new Error('User ID is required');
+        alert('Please log in to comment');
+        return;
       }
       if (!userName) {
-        throw new Error('User name is required');
+        alert('User information is incomplete');
+        return;
       }
 
       await communityFeedService.addComment(
@@ -111,16 +113,33 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
         }
       );
 
+      // Success - clear form
       setNewComment('');
       setReplyTo(null);
       removeImage();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding comment:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      if (errorMessage.includes('permissions')) {
-        alert('Permission denied. Please make sure you are logged in and try again.');
+
+      // Only show error if the comment wasn't actually added
+      if (error?.code === 'permission-denied') {
+        // Check if comment was actually added despite the error
+        const comments = await communityFeedService.getComments(postId);
+        const justAdded = comments.find(c =>
+          c.userId === (currentUser.uid || currentUser.id) &&
+          c.content === newComment.trim() &&
+          Date.now() - c.createdAt.toDate().getTime() < 5000
+        );
+
+        if (justAdded) {
+          // Comment was added successfully, just clear the form
+          setNewComment('');
+          setReplyTo(null);
+          removeImage();
+        } else {
+          alert('Failed to add comment. Please try again.');
+        }
       } else {
-        alert(`Failed to add comment: ${errorMessage}`);
+        alert('Failed to add comment. Please try again.');
       }
     } finally {
       setLoading(false);
