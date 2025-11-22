@@ -58,7 +58,7 @@ function CoursesPageContent() {
 
   const checkEnrollment = async (userId: string, moduleId: string): Promise<boolean> => {
     try {
-      const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${moduleId}`);
+      const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
       const enrollmentSnap = await getDoc(enrollmentRef);
       return enrollmentSnap.exists();
     } catch (error) {
@@ -183,22 +183,14 @@ function CoursesPageContent() {
     }
 
     try {
-      const moduleRef = doc(db, 'main_modules', moduleId);
-      const moduleSnap = await getDoc(moduleRef);
-
-      if (!moduleSnap.exists()) {
-        alert('Module not found');
-        return;
-      }
-
-      const moduleData = moduleSnap.data();
-      const courseId = moduleData.course_id;
-      const course1Id = moduleData.course1_id;
-      const course2Id = moduleData.course2_id;
-      const submoduleId = moduleData.submodule_id;
+      console.log('Enrolling in module:', moduleId, 'type:', moduleType);
 
       await enrollInModule(currentUser.uid, moduleId, moduleType);
+      console.log('Enrollment successful, reloading modules...');
+
       await loadMainModules();
+      console.log('Navigating to module viewer...');
+
       navigate(`/${moduleType === 'main_module' ? 'main-modules' : 'submodules'}/${moduleId}`);
     } catch (error) {
       console.error('Error enrolling:', error);
