@@ -449,11 +449,11 @@ export default function LandingPage() {
             <div className="text-center md:text-right">
               <p className="text-gray-400 mb-2">&copy; 2024 The Crew Academy. All rights reserved.</p>
               <div className="flex items-center justify-center md:justify-end gap-4 text-sm text-gray-500">
-                <button className="hover:text-white transition">Privacy Policy</button>
+                <button onClick={() => navigate('/privacy')} className="hover:text-white transition">Privacy Policy</button>
                 <span>•</span>
-                <button className="hover:text-white transition">Terms of Service</button>
+                <button onClick={() => navigate('/terms')} className="hover:text-white transition">Terms of Service</button>
                 <span>•</span>
-                <button className="hover:text-white transition">Contact Us</button>
+                <button onClick={() => navigate('/contact')} className="hover:text-white transition">Contact Us</button>
               </div>
             </div>
           </div>

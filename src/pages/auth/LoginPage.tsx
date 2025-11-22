@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { Plane, Lock, Mail, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { recordLoginActivity } from '../../services/loginActivityService';
 // import { twoFactorService } from '../../services/twoFactorService'; // TODO: Re-enable with browser-compatible library
@@ -75,6 +75,10 @@ export default function LoginPage() {
 
       console.log('Setting current user:', currentUser);
       setCurrentUser(currentUser);
+
+      await updateDoc(doc(db, 'users', user.uid), {
+        lastLogin: serverTimestamp()
+      });
 
       await recordLoginActivity(user.uid, true);
 
@@ -167,6 +171,11 @@ export default function LoginPage() {
       };
 
       setCurrentUser(currentUser);
+
+      await updateDoc(doc(db, 'users', user.uid), {
+        lastLogin: serverTimestamp()
+      });
+
       await recordLoginActivity(user.uid, true);
       navigate('/dashboard');
     } catch (err: any) {

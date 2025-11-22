@@ -189,9 +189,11 @@ export default function LeaderboardPage() {
                   verifiedCrew={user.verified_crew}
                 />
               </div>
-              <p className="text-xs md:text-sm text-gray-600 truncate">
-                {user.email}
-              </p>
+              {user.bio && (
+                <p className="text-xs md:text-sm text-gray-600 truncate line-clamp-1">
+                  {user.bio}
+                </p>
+              )}
               {user.daily_login_streak > 0 && (
                 <p className="text-xs md:text-sm text-orange-600 mt-1 font-medium">
                   🔥 {user.daily_login_streak} day streak

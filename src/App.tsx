@@ -44,6 +44,9 @@ import StorageManagerPage from './pages/StorageManagerPage';
 import LoginActivityPage from './pages/LoginActivityPage';
 import CommunityFeedPage from './pages/CommunityFeedPage';
 import AuditLogsPage from './pages/governor/AuditLogsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import ContactUsPage from './pages/ContactUsPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -84,6 +87,9 @@ function AppContent() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsOfServicePage />} />
+        <Route path="/contact" element={<ContactUsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     );
