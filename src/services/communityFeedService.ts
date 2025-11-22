@@ -17,7 +17,7 @@ import {
   QueryDocumentSnapshot,
   DocumentData
 } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 
 export interface CommunityPost {
   id: string;
@@ -317,6 +317,9 @@ export const communityFeedService = {
     userId: string,
     reactionType: 'fire' | 'heart' | 'thumbsUp' | 'laugh' | 'wow'
   ): Promise<void> {
+    console.log('🔵 toggleReaction:', { postId, userId, reactionType });
+    console.log('🔵 Auth user:', auth.currentUser?.uid);
+
     const reactionsQuery = query(
       collection(db, 'community_reactions'),
       where('postId', '==', postId),
@@ -324,12 +327,20 @@ export const communityFeedService = {
     );
 
     const snapshot = await getDocs(reactionsQuery);
+    console.log('🔵 Found reactions:', snapshot.size);
 
     if (!snapshot.empty) {
       const existingReaction = snapshot.docs[0];
       const existingType = existingReaction.data().reactionType;
 
-      await deleteDoc(existingReaction.ref);
+      console.log('🔵 Deleting:', existingReaction.id);
+      try {
+        await deleteDoc(existingReaction.ref);
+        console.log('✅ DELETE OK');
+      } catch (err: any) {
+        console.error('❌ DELETE FAIL:', err.code, err.message);
+        throw err;
+      }
 
       const postRef = doc(db, 'community_posts', postId);
       await updateDoc(postRef, {
@@ -349,13 +360,20 @@ export const communityFeedService = {
         });
       }
     } else {
+      console.log('🔵 Creating reaction');
       const reactionData = {
         postId,
         userId,
         reactionType,
         createdAt: Timestamp.now()
       };
-      await addDoc(collection(db, 'community_reactions'), reactionData);
+      try {
+        await addDoc(collection(db, 'community_reactions'), reactionData);
+        console.log('✅ CREATE OK');
+      } catch (err: any) {
+        console.error('❌ CREATE FAIL:', err.code, err.message);
+        throw err;
+      }
 
       const postRef = doc(db, 'community_posts', postId);
       await updateDoc(postRef, {
