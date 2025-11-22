@@ -52,22 +52,29 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
 
   const handleReaction = async (type: 'fire' | 'heart' | 'thumbsUp' | 'laugh' | 'wow') => {
     try {
-      console.log('🔵 Before toggle - Current counts:', localPost.reactionsCount);
       await communityFeedService.toggleReaction(post.id, currentUser.uid, type);
-
-      // Force reload user reaction
-      await loadUserReaction();
-
-      // Wait a bit for Firestore to update, then force re-fetch
-      setTimeout(async () => {
-        const postRef = await communityFeedService.getPostById(post.id);
-        if (postRef) {
-          console.log('🟢 After sync - New counts:', postRef.reactionsCount);
-          setLocalPost(postRef);
-        }
-      }, 500);
     } catch (error) {
       console.error('Error toggling reaction:', error);
+    }
+
+    // Always reload user reaction and post data, even if there was an error
+    // This ensures UI stays in sync with the database
+    try {
+      await loadUserReaction();
+
+      // Wait for Firestore to sync, then refresh the post
+      setTimeout(async () => {
+        try {
+          const postRef = await communityFeedService.getPostById(post.id);
+          if (postRef) {
+            setLocalPost(postRef);
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing post:', refreshError);
+        }
+      }, 800);
+    } catch (loadError) {
+      console.error('Error loading reaction state:', loadError);
     }
   };
 
