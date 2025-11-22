@@ -222,6 +222,15 @@ export const communityFeedService = {
     };
   },
 
+  async getPostById(postId: string): Promise<CommunityPost | null> {
+    const postRef = doc(db, 'community_posts', postId);
+    const postSnap = await getDoc(postRef);
+    if (postSnap.exists()) {
+      return { id: postSnap.id, ...postSnap.data() } as CommunityPost;
+    }
+    return null;
+  },
+
   subscribeToPost(postId: string, callback: (post: CommunityPost | null) => void) {
     const postRef = doc(db, 'community_posts', postId);
     return onSnapshot(postRef, (doc) => {
