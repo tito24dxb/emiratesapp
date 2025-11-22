@@ -12,6 +12,7 @@ import {
 } from '../services/systemControlService';
 import { handleDailyLogin, initializeUserPoints } from '../services/rewardsService';
 import { startAutoRestoreScheduler } from '../services/featureShutdownService';
+import { initializeUpdates } from '../utils/initializeUpdates';
 
 export type Role = 'student' | 'mentor' | 'governor';
 export type Plan = 'free' | 'pro' | 'vip';
@@ -102,7 +103,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     };
 
+    const initializeSystemData = async () => {
+      await initializeUpdates();
+    };
+
     loadSystemControl();
+    initializeSystemData();
 
     const unsubscribe = subscribeToSystemControl((control) => {
       console.log('AppContext - System control updated:', control);
