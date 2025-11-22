@@ -84,24 +84,30 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
       }
 
       // Ensure we have the correct user data structure
-      const userData = {
-        uid: currentUser.uid || currentUser.id,
-        displayName: currentUser.displayName || currentUser.name || currentUser.userName || 'Anonymous',
-        email: currentUser.email || '',
-        photoURL: currentUser.photoURL || currentUser.profilePicture || ''
-      };
+      const userId = currentUser.uid || currentUser.id;
+      const userName = currentUser.displayName || currentUser.name || currentUser.userName || 'Anonymous';
+      const userEmail = currentUser.email || '';
+      const userPhotoURL = currentUser.photoURL || currentUser.profilePicture || '';
+
+      // Validate required fields
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
+      if (!userName) {
+        throw new Error('User name is required');
+      }
 
       await communityFeedService.addComment(
         postId,
-        userData.uid,
-        userData.displayName,
-        userData.email,
+        userId,
+        userName,
+        userEmail,
         newComment.trim(),
         {
           imageUrl,
           replyTo: replyTo?.id,
           replyToName: replyTo?.name,
-          userPhotoURL: userData.photoURL
+          userPhotoURL: userPhotoURL
         }
       );
 
