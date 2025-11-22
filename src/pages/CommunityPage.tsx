@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Users, Search, ChevronLeft, Plus, UserPlus, X, Check, Info } from 'lucide-react';
+import { MessageCircle, Users, Search, ChevronLeft, Plus, UserPlus, X, Check, Info, Bot, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageBubble from '../components/community/MessageBubble';
 import MessageComposer from '../components/community/MessageComposer';
@@ -28,7 +28,17 @@ export default function CommunityPage() {
   const [availableUsers, setAvailableUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showRules, setShowRules] = useState(false);
+  const [showAIBanner, setShowAIBanner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const hasSeenChatAIBanner = localStorage.getItem('hasSeenChatAIBanner');
+    if (!hasSeenChatAIBanner && selectedConversationId) {
+      setShowAIBanner(true);
+      localStorage.setItem('hasSeenChatAIBanner', 'true');
+      setTimeout(() => setShowAIBanner(false), 10000);
+    }
+  }, [selectedConversationId]);
 
   useEffect(() => {
     const initCommunityChat = async () => {
@@ -505,6 +515,37 @@ export default function CommunityPage() {
             </div>
           ) : (
             <div className="space-y-3 md:space-y-4">
+              {showAIBanner && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="p-3 md:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl mx-1"
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-bold text-blue-900 text-sm">AI Moderator Active</h4>
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                      </div>
+                      <p className="text-xs md:text-sm text-blue-800 leading-relaxed">
+                        👋 Welcome! All messages in this chat are monitored by AI to ensure a safe and respectful community. Please keep conversations positive and appropriate.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowAIBanner(false)}
+                      className="text-blue-600 hover:text-blue-800 transition p-1 flex-shrink-0"
+                      aria-label="Dismiss"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
               {messages.map((message) => (
                 <MessageBubble
                   key={message.messageId}
@@ -542,6 +583,12 @@ export default function CommunityPage() {
 
         <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex-shrink-0">
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
+          <div className="flex items-center justify-center mt-2">
+            <div className="flex items-center gap-1.5 text-xs text-blue-600">
+              <Shield className="w-3 h-3" />
+              <span className="font-medium">AI Moderated</span>
+            </div>
+          </div>
         </div>
       </div>
     );

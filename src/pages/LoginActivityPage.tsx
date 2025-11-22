@@ -145,7 +145,15 @@ export default function LoginActivityPage() {
               <div className="text-center py-12">
                 <Shield className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-600 mb-2">No login history available yet</p>
-                <p className="text-sm text-gray-500">Your login history will appear here after your next login</p>
+                <p className="text-sm text-gray-500 mb-4">Your login history will appear here after your next login</p>
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-md mx-auto">
+                  <p className="text-sm text-blue-800 mb-3">
+                    <strong>Note:</strong> Login activity tracking is enabled. Your current session and future logins will be recorded here for security monitoring.
+                  </p>
+                  <p className="text-xs text-blue-600">
+                    If you just logged in and don't see any data, please log out and log back in to initialize tracking.
+                  </p>
+                </div>
               </div>
             ) : (
               loginHistory.map((activity, index) => (
