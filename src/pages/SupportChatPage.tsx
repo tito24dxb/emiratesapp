@@ -151,7 +151,7 @@ export default function SupportChatPage() {
                             : 'bg-gray-100 text-gray-900'
                         }`}>
                           <p className="text-xs font-bold mb-1 opacity-80">{message.senderName}</p>
-                          <p className="text-sm md:text-base">{message.content}</p>
+                          <p className="text-sm md:text-base">{message.message}</p>
                         </div>
                         <p className="text-xs text-gray-400 mt-1">
                           {message.timestamp?.toDate?.().toLocaleTimeString([], {

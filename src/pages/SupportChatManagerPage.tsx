@@ -76,7 +76,7 @@ export default function SupportChatManagerPage() {
   };
 
   const handleOpenChat = (ticket: SupportTicket) => {
-    navigate('/support-chat', { state: { ticketId: ticket.id } });
+    navigate('/support-chat', { state: { ticket } });
   };
 
   const getStatusIcon = (status: string) => {
