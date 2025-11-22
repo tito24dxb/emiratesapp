@@ -105,25 +105,32 @@ service cloud.firestore {
 
     ///////////////////////////////////////////////////////////////////////////
     // COMMUNITY FEED (Posts, Comments, Reactions)
-    // LAST UPDATED: 2025-11-22 - Community reactions and comments enabled
+    // LAST UPDATED: 2025-11-22 - Updated permissions for community features
+    // - Anyone can create posts
+    // - Anyone can react and comment on posts
+    // - Users can delete their own posts
+    // - Only governors and moderators can delete any post
     ///////////////////////////////////////////////////////////////////////////
     match /community_posts/{postId} {
       allow read, list: if request.auth != null;
+
+      // Anyone authenticated can create a post
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid;
+
+      // Post owner can update their own content, or staff can moderate
+      // Any authenticated user can update view tracking and reaction counts
       allow update: if request.auth != null && (
-        // Post owner can update their own content
         resource.data.userId == request.auth.uid ||
-        // Staff can moderate
         isGovernor() ||
         hasPermission('moderateContent') ||
-        // Any authenticated user can update view tracking and reaction counts
         (
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount', 'reactionsCount', 'commentsCount', 'updatedAt'])
         )
       );
+
+      // Only governors and moderators can delete any post
       allow delete: if request.auth != null && (
-        resource.data.userId == request.auth.uid ||
         isGovernor() ||
         hasPermission('moderateContent')
       );
@@ -131,6 +138,8 @@ service cloud.firestore {
 
     match /community_comments/{commentId} {
       allow read, list: if request.auth != null;
+
+      // Anyone authenticated can create a comment
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid &&
         request.resource.data.postId is string &&
@@ -141,13 +150,18 @@ service cloud.firestore {
         request.resource.data.content.size() > 0 &&
         request.resource.data.createdAt is timestamp &&
         request.resource.data.updatedAt is timestamp;
+
+      // Comment owner can update their own comment, or staff can moderate
+      // Anyone can update reactions on comments
       allow update: if request.auth != null && (
         resource.data.userId == request.auth.uid ||
         isGovernor() ||
-        hasPermission('moderateContent')
+        hasPermission('moderateContent') ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
       );
+
+      // Only governors and moderators can delete any comment
       allow delete: if request.auth != null && (
-        resource.data.userId == request.auth.uid ||
         isGovernor() ||
         hasPermission('moderateContent')
       );
@@ -155,12 +169,19 @@ service cloud.firestore {
 
     match /community_reactions/{reactionId} {
       allow read, list: if request.auth != null;
+
+      // Anyone authenticated can create a reaction
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid;
+
+      // Users can delete their own reactions, governors can delete any
       allow delete: if request.auth != null && (
         resource.data.userId == request.auth.uid ||
-        isGovernor()
+        isGovernor() ||
+        hasPermission('moderateContent')
       );
+
+      // Reactions cannot be updated, only created or deleted
       allow update: if false;
     }
 
@@ -194,6 +215,23 @@ service cloud.firestore {
                      );
         allow delete: if false; // Deletes via callable functions only
       }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // COMMUNITY REPORTS (Posts & Comments)
+    ///////////////////////////////////////////////////////////////////////////
+    match /community_flags/{flagId} {
+      // Anyone can create a report
+      allow create: if isAuthenticated() &&
+        request.resource.data.reporterId == request.auth.uid;
+
+      // Only governors and moderators can read and update reports
+      allow read, update: if isAuthenticated() && (
+        isGovernor() ||
+        hasPermission('moderateContent')
+      );
+
+      allow delete: if false;
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -691,16 +729,6 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-    ///////////////////////////////////////////////////////////////////////////
-    // COMMUNITY FLAGS (Content Moderation)
-    ///////////////////////////////////////////////////////////////////////////
-    match /community_flags/{flagId} {
-      allow read: if isAuthenticated() && (isGovernor() || hasPermission('moderateContent'));
-      allow create: if isAuthenticated() &&
-        request.resource.data.reporterId == request.auth.uid;
-      allow update: if isAuthenticated() && (isGovernor() || hasPermission('moderateContent'));
-      allow delete: if false;
-    }
 
     ///////////////////////////////////////////////////////////////////////////
     // AUDIT LOGS (System-wide Activity)
