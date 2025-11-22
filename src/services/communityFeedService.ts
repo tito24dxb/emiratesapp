@@ -235,6 +235,11 @@ export const communityFeedService = {
       userPhotoURL?: string;
     }
   ): Promise<string> {
+    // Validate required fields
+    if (!userId || !userName || !content.trim()) {
+      throw new Error('Missing required fields for comment creation');
+    }
+
     const commentData = {
       postId,
       userId,
@@ -254,14 +259,19 @@ export const communityFeedService = {
       updatedAt: Timestamp.now()
     };
 
-    const docRef = await addDoc(collection(db, 'community_comments'), commentData);
+    try {
+      const docRef = await addDoc(collection(db, 'community_comments'), commentData);
 
-    const postRef = doc(db, 'community_posts', postId);
-    await updateDoc(postRef, {
-      commentsCount: increment(1)
-    });
+      const postRef = doc(db, 'community_posts', postId);
+      await updateDoc(postRef, {
+        commentsCount: increment(1)
+      });
 
-    return docRef.id;
+      return docRef.id;
+    } catch (error) {
+      console.error('Error in addComment service:', error);
+      throw error;
+    }
   },
 
   async deleteComment(commentId: string, postId: string): Promise<void> {

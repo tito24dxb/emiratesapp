@@ -83,17 +83,25 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
         imageUrl = await communityFeedService.convertImageToBase64(selectedImage);
       }
 
+      // Ensure we have the correct user data structure
+      const userData = {
+        uid: currentUser.uid || currentUser.id,
+        displayName: currentUser.displayName || currentUser.name || currentUser.userName || 'Anonymous',
+        email: currentUser.email || '',
+        photoURL: currentUser.photoURL || currentUser.profilePicture || ''
+      };
+
       await communityFeedService.addComment(
         postId,
-        currentUser.uid,
-        currentUser.displayName || currentUser.name || 'Anonymous',
-        currentUser.email || '',
+        userData.uid,
+        userData.displayName,
+        userData.email,
         newComment.trim(),
         {
           imageUrl,
           replyTo: replyTo?.id,
           replyToName: replyTo?.name,
-          userPhotoURL: currentUser.photoURL || currentUser.profilePicture || ''
+          userPhotoURL: userData.photoURL
         }
       );
 
@@ -102,7 +110,12 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
       removeImage();
     } catch (error) {
       console.error('Error adding comment:', error);
-      alert('Failed to add comment');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      if (errorMessage.includes('permissions')) {
+        alert('Permission denied. Please make sure you are logged in and try again.');
+      } else {
+        alert(`Failed to add comment: ${errorMessage}`);
+      }
     } finally {
       setLoading(false);
     }

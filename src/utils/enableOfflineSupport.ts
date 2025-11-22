@@ -26,6 +26,12 @@ export async function enableOfflineSupport() {
 
 export function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
+    // Check if we're in StackBlitz environment
+    if (window.location.hostname.includes('stackblitz') || window.location.hostname.includes('webcontainer')) {
+      console.log('⚠️ Service Worker not supported in StackBlitz environment');
+      return;
+    }
+
     window.addEventListener('load', () => {
       navigator.serviceWorker
         .register('/service-worker.js')
@@ -47,9 +53,15 @@ export function registerServiceWorker() {
           });
         })
         .catch((error) => {
-          console.error('Service Worker registration failed:', error);
+          if (error.message && error.message.includes('StackBlitz')) {
+            console.log('⚠️ Service Worker not supported in current environment');
+          } else {
+            console.error('Service Worker registration failed:', error);
+          }
         });
     });
+  } else {
+    console.log('⚠️ Service Worker not supported in this browser');
   }
 }
 
