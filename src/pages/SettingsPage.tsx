@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, Lock, Bell, Globe, Palette, Shield, Trash2, Mail, Camera, Save } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
+import { User, Lock, Bell, Globe, Palette, Shield, Trash2, Mail, Camera, Save, Smartphone, Monitor, MapPin, Clock } from 'lucide-react';
+import { doc, updateDoc, collection, query, where, getDocs, orderBy, limit as limitQuery, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { countries } from '../data/countries';
+import { useNavigate } from 'react-router-dom';
 
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'preferences' | 'privacy';
 
 export default function SettingsPage() {
   const { currentUser, setCurrentUser } = useApp();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -32,14 +34,65 @@ export default function SettingsPage() {
   const [theme, setTheme] = useState<'light' | 'dark' | 'auto'>('light');
   const [language, setLanguage] = useState('en');
 
+  const [loginSessions, setLoginSessions] = useState<any[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name || '');
       setBio(currentUser.bio || '');
       setCountry(currentUser.country || '');
       setPhotoURL(currentUser.photoURL || '');
+
+      if (activeTab === 'privacy') {
+        loadLoginSessions();
+      }
     }
-  }, [currentUser]);
+  }, [currentUser, activeTab]);
+
+  const loadLoginSessions = async () => {
+    if (!currentUser) return;
+
+    setLoadingSessions(true);
+    try {
+      const q = query(
+        collection(db, 'loginActivity'),
+        where('userId', '==', currentUser.uid),
+        where('success', '==', true),
+        orderBy('timestamp', 'desc'),
+        limitQuery(10)
+      );
+
+      const snapshot = await getDocs(q);
+      const sessions = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setLoginSessions(sessions);
+    } catch (error) {
+      console.error('Error loading login sessions:', error);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId: string) => {
+    if (!confirm('Revoke this session? You will need to log in again from that device.')) return;
+
+    try {
+      await deleteDoc(doc(db, 'loginActivity', sessionId));
+      setLoginSessions(prev => prev.filter(s => s.id !== sessionId));
+      setMessage('Session revoked successfully!');
+    } catch (error) {
+      console.error('Error revoking session:', error);
+      setMessage('Failed to revoke session.');
+    }
+  };
+
+  const getDeviceIcon = (deviceType: string) => {
+    return deviceType === 'mobile' ? <Smartphone className="w-5 h-5" /> : <Monitor className="w-5 h-5" />;
+  };
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -536,6 +589,85 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-4">
+                  <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
+                    <h3 className="font-bold text-blue-900 mb-2 flex items-center gap-2">
+                      <Lock className="w-5 h-5 text-blue-600" />
+                      Two-Factor Authentication (2FA)
+                    </h3>
+                    <p className="text-sm text-blue-800 mb-4">
+                      Add an extra layer of security to your account with Google Authenticator.
+                    </p>
+                    <button
+                      onClick={() => navigate('/settings/security/2fa')}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+                    >
+                      Setup 2FA (Coming Soon)
+                    </button>
+                  </div>
+
+                  <div className="p-6 bg-gray-50 rounded-xl">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                        <Monitor className="w-5 h-5 text-[#D71921]" />
+                        Active Login Sessions
+                      </h3>
+                      <button
+                        onClick={() => navigate('/login-activity')}
+                        className="text-sm text-[#D71921] hover:underline font-semibold"
+                      >
+                        View All Activity →
+                      </button>
+                    </div>
+
+                    {loadingSessions ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="w-8 h-8 border-4 border-[#D71920] border-t-transparent rounded-full animate-spin"></div>
+                      </div>
+                    ) : loginSessions.length === 0 ? (
+                      <p className="text-sm text-gray-600 py-4">No active sessions found.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {loginSessions.slice(0, 3).map((session, index) => (
+                          <div key={session.id} className="flex items-start justify-between p-4 bg-white rounded-lg border border-gray-200">
+                            <div className="flex items-start gap-3 flex-1">
+                              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600">
+                                {getDeviceIcon(session.deviceType)}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-gray-900 text-sm">
+                                  {session.browser} on {session.os}
+                                  {index === 0 && (
+                                    <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                                      CURRENT
+                                    </span>
+                                  )}
+                                </p>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-600">
+                                  <Clock className="w-3 h-3" />
+                                  <span>{session.timestamp?.toDate?.()?.toLocaleString() || 'Just now'}</span>
+                                </div>
+                                {session.ipAddress && (
+                                  <div className="flex items-center gap-2 mt-1 text-xs text-gray-600">
+                                    <MapPin className="w-3 h-3" />
+                                    <span className="font-mono">{session.ipAddress}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {index !== 0 && (
+                              <button
+                                onClick={() => handleRevokeSession(session.id)}
+                                className="ml-3 px-3 py-1 text-xs bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition"
+                              >
+                                Revoke
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <div className="p-6 bg-gray-50 rounded-xl">
                     <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
                       <Shield className="w-5 h-5 text-[#D71921]" />

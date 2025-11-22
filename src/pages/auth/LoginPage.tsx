@@ -171,7 +171,24 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Google sign-in error:', err);
-      setError(err.message || 'Failed to sign in with Google');
+
+      let errorMessage = 'Failed to sign in with Google';
+
+      if (err.code === 'auth/configuration-not-found' || err.code === 'auth/invalid-api-key') {
+        errorMessage = '🔧 Google Sign-In Coming Soon! This feature is currently being configured. Please use email/password login for now.';
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in cancelled. Please try again.';
+      } else if (err.code === 'auth/popup-blocked') {
+        errorMessage = 'Pop-up blocked by browser. Please allow pop-ups and try again.';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        errorMessage = '🔧 Google Sign-In Coming Soon! Domain authorization is being set up. Use email/password login for now.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        errorMessage = '🔧 Google Sign-In Coming Soon! This sign-in method is being activated. Use email/password for now.';
+      } else if (err.message && !err.message.includes('Firebase')) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

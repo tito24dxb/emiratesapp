@@ -109,13 +109,18 @@ export default function LeaderboardPage() {
     return 'from-white to-gray-50 border-gray-200';
   };
 
-  const getRoleEmail = (email: string, role: string) => {
+  const getRoleDisplay = (role: string) => {
     const roleLower = role.toLowerCase();
-    if (roleLower === 'student') {
-      return email;
+    if (roleLower === 'governor' || roleLower === 'admin') {
+      return { label: 'Governor', color: 'bg-red-100 text-red-900', icon: '👑' };
     }
-    const emailParts = email.split('@');
-    return `${emailParts[0]}@thecrewacademy.co`;
+    if (roleLower === 'support' || roleLower === 'support-agent') {
+      return { label: 'Support Agent', color: 'bg-blue-100 text-blue-900', icon: '💬' };
+    }
+    if (roleLower === 'mentor' || roleLower === 'coach') {
+      return { label: 'Mentor', color: 'bg-purple-100 text-purple-900', icon: '⭐' };
+    }
+    return { label: 'Student', color: 'bg-green-100 text-green-900', icon: '🎓' };
   };
 
   const getRoleIcon = (role: string) => {
@@ -174,7 +179,10 @@ export default function LeaderboardPage() {
                 <h3 className="font-bold text-base md:text-lg text-gray-900 truncate">
                   {user.userName}
                 </h3>
-                {getRoleIcon(user.role)}
+                <span className={`px-2 py-0.5 rounded-full text-xs font-bold flex items-center gap-1 ${getRoleDisplay(user.role).color}`}>
+                  <span>{getRoleDisplay(user.role).icon}</span>
+                  <span>{getRoleDisplay(user.role).label}</span>
+                </span>
                 <BadgeDisplay
                   rank={user.current_rank}
                   size="sm"
@@ -182,7 +190,7 @@ export default function LeaderboardPage() {
                 />
               </div>
               <p className="text-xs md:text-sm text-gray-600 truncate">
-                {getRoleEmail(user.email, user.role)}
+                {user.email}
               </p>
               {user.daily_login_streak > 0 && (
                 <p className="text-xs md:text-sm text-orange-600 mt-1 font-medium">
@@ -226,17 +234,26 @@ export default function LeaderboardPage() {
     );
   };
 
-  const renderSection = (users: UserWithDetails[], title: string, startIndex: number) => {
+  const renderSection = (users: UserWithDetails[], title: string, icon: string, gradient: string, startIndex: number) => {
     if (users.length === 0) return null;
 
     return (
       <div className="mb-8">
-        <div className="glass-card rounded-xl p-4 mb-4 border-2 border-white/40">
-          <div className="flex items-center gap-3">
-            <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-            <span className="px-3 py-1 bg-[#D71920] text-white rounded-full text-sm font-bold">
-              {users.length}
-            </span>
+        <div className={`rounded-2xl p-6 mb-4 shadow-lg bg-gradient-to-br ${gradient} border-2 border-white/40`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <span className="text-3xl">{icon}</span>
+              <div>
+                <h2 className="text-2xl font-bold text-white">{title}</h2>
+                <p className="text-white/80 text-sm">{users.length} member{users.length !== 1 ? 's' : ''}</p>
+              </div>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl">
+              <p className="text-white font-bold text-sm">Total Points</p>
+              <p className="text-white text-xl font-bold">
+                {users.reduce((sum, u) => sum + u.total_points, 0).toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 gap-4">
@@ -291,10 +308,10 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            {renderSection(groupedUsers.admins, '👑 Admins', 0)}
-            {renderSection(groupedUsers.supportAgents, '💬 Support Agents', groupedUsers.admins.length)}
-            {renderSection(groupedUsers.mentors, '⭐ Mentors', groupedUsers.admins.length + groupedUsers.supportAgents.length)}
-            {renderSection(groupedUsers.students, '🎓 Students', groupedUsers.admins.length + groupedUsers.supportAgents.length + groupedUsers.mentors.length)}
+            {renderSection(groupedUsers.admins, 'Admins', '👑', 'from-red-500 to-red-600', 0)}
+            {renderSection(groupedUsers.supportAgents, 'Support Agents', '💬', 'from-blue-500 to-blue-600', groupedUsers.admins.length)}
+            {renderSection(groupedUsers.mentors, 'Mentors', '⭐', 'from-purple-500 to-purple-600', groupedUsers.admins.length + groupedUsers.supportAgents.length)}
+            {renderSection(groupedUsers.students, 'Students', '🎓', 'from-green-500 to-green-600', groupedUsers.admins.length + groupedUsers.supportAgents.length + groupedUsers.mentors.length)}
           </div>
         )}
       </div>
