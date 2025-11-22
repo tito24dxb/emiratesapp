@@ -166,25 +166,32 @@ export const addResponseToBugReport = async (
 ): Promise<void> => {
   try {
     const reportRef = doc(db, 'bugReports', reportId);
-    const report = await getDocs(query(collection(db, 'bugReports'), where('__name__', '==', reportId)));
+    const reportSnap = await getDoc(reportRef);
 
-    if (!report.empty) {
-      const currentData = report.docs[0].data();
-      const responses = currentData.responses || [];
+    if (!reportSnap.exists()) {
+      throw new Error('Bug report not found');
+    }
 
-      await updateDoc(reportRef, {
-        responses: [...responses, response],
-        updatedAt: Timestamp.now()
-      });
+    const currentData = reportSnap.data();
+    const responses = currentData.responses || [];
 
-      if (response.userId !== currentData.reportedBy) {
-        await notifyBugReportComment(
-          currentData.reportedBy,
-          reportId,
-          currentData.title,
-          response.userName
-        );
-      }
+    await updateDoc(reportRef, {
+      responses: [...responses, {
+        ...response,
+        createdAt: Timestamp.now()
+      }],
+      updatedAt: Timestamp.now()
+    });
+
+    console.log('Response added successfully to bug report:', reportId);
+
+    if (response.userId !== currentData.reportedBy) {
+      await notifyBugReportComment(
+        currentData.reportedBy,
+        reportId,
+        currentData.title,
+        response.userName
+      );
     }
   } catch (error) {
     console.error('Error adding response to bug report:', error);

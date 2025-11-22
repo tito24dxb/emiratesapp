@@ -66,6 +66,9 @@ export default function BugReportsManager() {
     if (!selectedReport || !responseMessage.trim() || !currentUser) return;
 
     try {
+      console.log('Adding response to bug report:', selectedReport.id);
+      console.log('Current user:', currentUser.name, currentUser.role);
+
       await addResponseToBugReport(selectedReport.id!, {
         id: Date.now().toString(),
         userId: currentUser.uid,
@@ -75,13 +78,20 @@ export default function BugReportsManager() {
         createdAt: new Date()
       });
 
+      console.log('Response added successfully');
       setResponseMessage('');
       await loadReports();
+
       const updatedReport = reports.find(r => r.id === selectedReport.id);
-      if (updatedReport) setSelectedReport(updatedReport);
+      if (updatedReport) {
+        setSelectedReport(updatedReport);
+        console.log('Updated report with new responses:', updatedReport.responses?.length);
+      }
+
+      alert('Response added successfully!');
     } catch (error) {
       console.error('Error adding response:', error);
-      alert('Failed to add response');
+      alert('Failed to add response: ' + (error as Error).message);
     }
   };
 
