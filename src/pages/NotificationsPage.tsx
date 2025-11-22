@@ -1,8 +1,8 @@
-import { Bell, Check, CheckCheck, Bug, AlertTriangle, MessageCircle, Award, BookOpen, Settings, Lock, Unlock, Megaphone, TrendingUp, X } from 'lucide-react';
+import { Bell, Check, CheckCheck, Bug, AlertTriangle, MessageCircle, Award, BookOpen, Settings, Lock, Unlock, Megaphone, TrendingUp, X, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Notification,
   subscribeToUserNotifications,
@@ -14,11 +14,15 @@ import {
   getCurrentSystemAnnouncements,
   getActiveFeatureShutdowns,
 } from '../services/notificationService';
+import { updatesService, Update } from '../services/updatesService';
 
 export default function NotificationsPage() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [updates, setUpdates] = useState<Update[]>([]);
   const [activeBugReports, setActiveBugReports] = useState<any[]>([]);
   const [systemAnnouncements, setSystemAnnouncements] = useState<any[]>([]);
   const [featureShutdowns, setFeatureShutdowns] = useState<any[]>([]);
@@ -43,15 +47,17 @@ export default function NotificationsPage() {
   }, [currentUser]);
 
   async function loadSystemEvents() {
-    const [bugs, announcements, shutdowns] = await Promise.all([
+    const [bugs, announcements, shutdowns, recentUpdates] = await Promise.all([
       getAllActiveBugReports(),
       getCurrentSystemAnnouncements(),
       getActiveFeatureShutdowns(),
+      updatesService.getRecentUpdates(30),
     ]);
 
     setActiveBugReports(bugs);
     setSystemAnnouncements(announcements);
     setFeatureShutdowns(shutdowns);
+    setUpdates(recentUpdates);
   }
 
   const handleMarkAsRead = async (id: string) => {
@@ -168,8 +174,69 @@ export default function NotificationsPage() {
           )}
         </div>
 
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap transition ${activeTab === 'all' ? 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setActiveTab('updates')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold whitespace-nowrap transition ${activeTab === 'updates' ? 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          >
+            <Sparkles className="w-4 h-4" />
+            What's New
+          </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap transition ${activeTab === 'notifications' ? 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          >
+            Notifications
+          </button>
+        </div>
+
         <div className="space-y-6">
-          {featureShutdowns.length > 0 && (
+          {(activeTab === 'all' || activeTab === 'updates') && updates.length > 0 && (
+            <div className="glass-card rounded-2xl p-6 border-2 border-blue-200">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">What's New - Latest Updates</h2>
+              </div>
+              <div className="space-y-3">
+                {updates.map((update) => (
+                  <div key={update.id} className="glass-card rounded-xl p-4 border border-blue-200">
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 bg-gradient-to-r ${updatesService.getUpdateColor(update.type)} rounded-full flex items-center justify-center text-white flex-shrink-0`}>
+                        <span className="text-lg">{updatesService.getUpdateIcon(update.type)}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-bold text-gray-900">{update.title}</h3>
+                          <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-900 rounded-full font-bold uppercase">
+                            {update.type}
+                          </span>
+                          {update.version && (
+                            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-mono">
+                              v{update.version}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-700 mb-2">{update.description}</p>
+                        <p className="text-xs text-gray-500">
+                          {update.createdAt.toDate().toLocaleDateString()} • {update.createdAt.toDate().toLocaleTimeString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {(activeTab === 'all' || activeTab === 'notifications') && featureShutdowns.length > 0 && (
             <div className="glass-card rounded-2xl p-6 border-2 border-red-200">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white">
@@ -193,7 +260,7 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          {systemAnnouncements.length > 0 && (
+          {(activeTab === 'all' || activeTab === 'notifications') && systemAnnouncements.length > 0 && (
             <div className="glass-card rounded-2xl p-6 border-2 border-purple-200">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white">
@@ -212,7 +279,7 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          {activeBugReports.length > 0 && (
+          {(activeTab === 'all' || activeTab === 'notifications') && activeBugReports.length > 0 && (
             <div className="glass-card rounded-2xl p-6 border-2 border-yellow-200">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white">
@@ -260,13 +327,14 @@ export default function NotificationsPage() {
             </div>
           )}
 
-          <div className="glass-card rounded-2xl p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Bell className="w-6 h-6 text-[#D71920]" />
-              Your Notifications
-            </h2>
+          {(activeTab === 'all' || activeTab === 'notifications') && (
+            <div className="glass-card rounded-2xl p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Bell className="w-6 h-6 text-[#D71920]" />
+                Your Notifications
+              </h2>
 
-            {notifications.length === 0 ? (
+              {notifications.length === 0 ? (
               <div className="text-center py-12">
                 <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-600">No notifications yet</p>
@@ -344,7 +412,8 @@ export default function NotificationsPage() {
                 </AnimatePresence>
               </div>
             )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
