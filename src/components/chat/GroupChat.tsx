@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, Bot, Shield } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import {
   sendGroupMessage,
@@ -7,12 +7,14 @@ import {
   GroupMessage,
 } from '../../services/chatService';
 import MessageBubble from './MessageBubble';
+import { motion } from 'framer-motion';
 
 export default function GroupChat() {
   const { currentUser } = useApp();
   const [messages, setMessages] = useState<GroupMessage[]>([]);
   const [messageText, setMessageText] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [showAIBanner, setShowAIBanner] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,6 +23,16 @@ export default function GroupChat() {
     });
 
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const hasSeenAIWelcome = localStorage.getItem('hasSeenGroupChatAIWelcome');
+    if (!hasSeenAIWelcome) {
+      setShowAIBanner(true);
+      localStorage.setItem('hasSeenGroupChatAIWelcome', 'true');
+    } else {
+      setShowAIBanner(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -56,7 +68,37 @@ export default function GroupChat() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-2">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-3">
+        {showAIBanner && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mb-3 p-3 md:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl"
+          >
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bot className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-bold text-blue-900 text-sm">AI Moderator</h4>
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                </div>
+                <p className="text-xs md:text-sm text-blue-800 leading-relaxed">
+                  👋 Welcome! I'm the AI moderator for this chat. I'm here 24/7 to keep our conversations safe and respectful. All messages are automatically reviewed to maintain a positive community environment.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAIBanner(false)}
+                className="text-blue-600 hover:text-blue-800 transition p-1 flex-shrink-0"
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-12">
             <MessageCircle className="w-16 h-16 text-gray-300 mb-4" />
@@ -104,9 +146,15 @@ export default function GroupChat() {
             <span className="hidden sm:inline">Send</span>
           </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
-          Press Enter to send, Shift+Enter for new line
-        </p>
+        <div className="flex items-center justify-between mt-2">
+          <p className="text-xs text-gray-500">
+            Press Enter to send, Shift+Enter for new line
+          </p>
+          <div className="flex items-center gap-1.5 text-xs text-blue-600">
+            <Shield className="w-3 h-3" />
+            <span className="font-medium">AI Moderated</span>
+          </div>
+        </div>
       </div>
     </div>
   );
