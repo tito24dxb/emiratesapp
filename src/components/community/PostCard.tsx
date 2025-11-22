@@ -24,6 +24,13 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   useEffect(() => {
     loadUserReaction();
 
+    // Track view when post is displayed
+    if (currentUser && post.id) {
+      communityFeedService.trackPostView(post.id, currentUser.uid).catch(err => {
+        console.error('Error tracking view:', err);
+      });
+    }
+
     // Subscribe to real-time post updates for comment count and reactions
     const unsubscribe = communityFeedService.subscribeToPost(post.id, (updatedPost) => {
       if (updatedPost) {
@@ -45,43 +52,10 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
 
   const handleReaction = async (type: 'fire' | 'heart' | 'thumbsUp' | 'laugh' | 'wow') => {
     try {
-      // Optimistic update
-      const previousReaction = userReaction;
-      const updatedPost = { ...localPost };
-
-      if (previousReaction === type) {
-        // Removing reaction
-        setUserReaction(null);
-        updatedPost.reactionsCount = {
-          ...updatedPost.reactionsCount,
-          [type]: Math.max(0, updatedPost.reactionsCount[type] - 1)
-        };
-      } else if (previousReaction) {
-        // Changing reaction
-        setUserReaction(type);
-        updatedPost.reactionsCount = {
-          ...updatedPost.reactionsCount,
-          [previousReaction]: Math.max(0, updatedPost.reactionsCount[previousReaction] - 1),
-          [type]: updatedPost.reactionsCount[type] + 1
-        };
-      } else {
-        // Adding new reaction
-        setUserReaction(type);
-        updatedPost.reactionsCount = {
-          ...updatedPost.reactionsCount,
-          [type]: updatedPost.reactionsCount[type] + 1
-        };
-      }
-
-      setLocalPost(updatedPost);
-
       await communityFeedService.toggleReaction(post.id, currentUser.uid, type);
-      await loadUserReaction();
+      // Real-time listener will update the counts automatically
     } catch (error) {
       console.error('Error toggling reaction:', error);
-      // Revert on error
-      setLocalPost(post);
-      await loadUserReaction();
     }
   };
 

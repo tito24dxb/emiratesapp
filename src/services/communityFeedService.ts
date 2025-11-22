@@ -125,6 +125,17 @@ export const communityFeedService = {
     };
 
     const docRef = await addDoc(collection(db, 'community_posts'), postData);
+
+    // Create notification for new post
+    await this.createNotification(
+      'post',
+      userId,
+      userName,
+      docRef.id,
+      '',
+      ''
+    );
+
     return docRef.id;
   },
 
@@ -261,11 +272,23 @@ export const communityFeedService = {
 
     const docRef = await addDoc(collection(db, 'community_comments'), commentData);
 
-    // Update comment count on the post
-    const postRef = doc(db, 'community_posts', postId);
-    await updateDoc(postRef, {
-      commentsCount: increment(1)
-    });
+    // Sync comment count from actual collection
+    await this.syncCommentsCount(postId);
+
+    // Get post owner info for notification
+    const postDoc = await getDoc(doc(db, 'community_posts', postId));
+    if (postDoc.exists()) {
+      const postData = postDoc.data();
+      // Create notification for comment
+      await this.createNotification(
+        'comment',
+        userId,
+        userName,
+        postId,
+        postData.userId,
+        postData.userName
+      );
+    }
 
     return docRef.id;
   },
@@ -273,10 +296,8 @@ export const communityFeedService = {
   async deleteComment(commentId: string, postId: string): Promise<void> {
     await deleteDoc(doc(db, 'community_comments', commentId));
 
-    const postRef = doc(db, 'community_posts', postId);
-    await updateDoc(postRef, {
-      commentsCount: increment(-1)
-    });
+    // Sync comment count from actual collection
+    await this.syncCommentsCount(postId);
   },
 
   async getComments(postId: string): Promise<CommunityComment[]> {
@@ -332,6 +353,16 @@ export const communityFeedService = {
     const snapshot = await getDocs(reactionsQuery);
     const postRef = doc(db, 'community_posts', postId);
 
+    // Get post owner info
+    const postDoc = await getDoc(postRef);
+    const postData = postDoc.data();
+
+    // Get current user info
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userName = userDoc.exists() ? (userDoc.data().name || userDoc.data().displayName || 'Someone') : 'Someone';
+
+    let shouldCreateNotification = false;
+
     if (!snapshot.empty) {
       const existingReaction = snapshot.docs[0];
       const existingType = existingReaction.data().reactionType as 'fire' | 'heart' | 'thumbsUp' | 'laugh' | 'wow';
@@ -339,31 +370,9 @@ export const communityFeedService = {
       // If clicking the same reaction, remove it
       if (existingType === reactionType) {
         await deleteDoc(existingReaction.ref);
-
-        // Get current count and ensure it doesn't go below 0
-        const postDoc = await getDoc(postRef);
-        const currentCount = postDoc.data()?.reactionsCount?.[existingType] || 0;
-
-        if (currentCount > 0) {
-          await updateDoc(postRef, {
-            [`reactionsCount.${existingType}`]: increment(-1)
-          });
-        }
       } else {
         // Switching to a different reaction
         await deleteDoc(existingReaction.ref);
-
-        // Get current counts
-        const postDoc = await getDoc(postRef);
-        const postData = postDoc.data();
-        const currentOldCount = postData?.reactionsCount?.[existingType] || 0;
-
-        // Decrease old reaction count (ensure it doesn't go below 0)
-        if (currentOldCount > 0) {
-          await updateDoc(postRef, {
-            [`reactionsCount.${existingType}`]: increment(-1)
-          });
-        }
 
         // Add new reaction
         const newReactionData = {
@@ -373,11 +382,7 @@ export const communityFeedService = {
           createdAt: Timestamp.now()
         };
         await addDoc(collection(db, 'community_reactions'), newReactionData);
-
-        // Increase new reaction count
-        await updateDoc(postRef, {
-          [`reactionsCount.${reactionType}`]: increment(1)
-        });
+        shouldCreateNotification = true;
       }
     } else {
       // Adding a new reaction
@@ -388,10 +393,23 @@ export const communityFeedService = {
         createdAt: Timestamp.now()
       };
       await addDoc(collection(db, 'community_reactions'), reactionData);
+      shouldCreateNotification = true;
+    }
 
-      await updateDoc(postRef, {
-        [`reactionsCount.${reactionType}`]: increment(1)
-      });
+    // Sync all reaction counts from actual collection
+    await this.syncReactionCounts(postId);
+
+    // Create notification for new reaction (not for removal or switching from same user)
+    if (shouldCreateNotification && postData) {
+      await this.createNotification(
+        'reaction',
+        userId,
+        userName,
+        postId,
+        postData.userId,
+        postData.userName,
+        reactionType
+      );
     }
   },
 
@@ -457,5 +475,118 @@ export const communityFeedService = {
       id: doc.id,
       ...doc.data()
     } as CommunityPost));
+  },
+
+  // Sync reaction counts from community_reactions collection
+  async syncReactionCounts(postId: string): Promise<void> {
+    const reactionsQuery = query(
+      collection(db, 'community_reactions'),
+      where('postId', '==', postId)
+    );
+
+    const snapshot = await getDocs(reactionsQuery);
+
+    const counts = {
+      fire: 0,
+      heart: 0,
+      thumbsUp: 0,
+      laugh: 0,
+      wow: 0
+    };
+
+    snapshot.docs.forEach(doc => {
+      const reactionType = doc.data().reactionType;
+      if (counts.hasOwnProperty(reactionType)) {
+        counts[reactionType as keyof typeof counts]++;
+      }
+    });
+
+    const postRef = doc(db, 'community_posts', postId);
+    await updateDoc(postRef, {
+      reactionsCount: counts
+    });
+  },
+
+  // Sync comment count from community_comments collection
+  async syncCommentsCount(postId: string): Promise<void> {
+    const commentsQuery = query(
+      collection(db, 'community_comments'),
+      where('postId', '==', postId)
+    );
+
+    const snapshot = await getDocs(commentsQuery);
+    const count = snapshot.size;
+
+    const postRef = doc(db, 'community_posts', postId);
+    await updateDoc(postRef, {
+      commentsCount: count
+    });
+  },
+
+  // Track post view
+  async trackPostView(postId: string, userId: string): Promise<void> {
+    const postRef = doc(db, 'community_posts', postId);
+    const postDoc = await getDoc(postRef);
+
+    if (postDoc.exists()) {
+      const postData = postDoc.data();
+      const viewedBy = postData.viewedBy || [];
+
+      // Only add if user hasn't viewed before
+      if (!viewedBy.includes(userId)) {
+        await updateDoc(postRef, {
+          viewedBy: [...viewedBy, userId],
+          viewsCount: viewedBy.length + 1
+        });
+      }
+    }
+  },
+
+  // Create notification
+  async createNotification(
+    type: 'post' | 'comment' | 'reaction',
+    actorId: string,
+    actorName: string,
+    postId: string,
+    targetUserId: string,
+    targetUserName: string,
+    reactionType?: string
+  ): Promise<void> {
+    // Don't notify yourself
+    if (actorId === targetUserId) return;
+
+    let message = '';
+    switch (type) {
+      case 'post':
+        message = `${actorName} created a new post`;
+        break;
+      case 'comment':
+        message = `${actorName} commented on a post created by ${targetUserName}`;
+        break;
+      case 'reaction':
+        const reactionEmojis = {
+          fire: '🔥',
+          heart: '❤️',
+          thumbsUp: '👍',
+          laugh: '😂',
+          wow: '😮'
+        };
+        const emoji = reactionType ? reactionEmojis[reactionType as keyof typeof reactionEmojis] : '';
+        message = `${actorName} ${emoji} reacted to a post created by ${targetUserName}`;
+        break;
+    }
+
+    const notificationData = {
+      type,
+      actorId,
+      actorName,
+      postId,
+      targetUserId,
+      message,
+      read: false,
+      createdAt: Timestamp.now()
+    };
+
+    await addDoc(collection(db, 'community_notifications'), notificationData);
   }
 };
