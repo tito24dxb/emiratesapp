@@ -38,6 +38,7 @@ import VideoCoursePage from './pages/VideoCoursePage';
 import CreateModulePage from './pages/CreateModulePage';
 import CreateCoursePage from './pages/CreateCoursePage';
 import SettingsPage from './pages/SettingsPage';
+import NotificationSettingsPage from './pages/NotificationSettingsPage';
 import AnalyticsDashboard from './pages/governor/AnalyticsDashboard';
 import FeatureFlagsManager from './pages/governor/FeatureFlagsManager';
 import StorageManagerPage from './pages/StorageManagerPage';
@@ -107,6 +108,7 @@ function AppContent() {
         <Route path="/community-feed" element={<CommunityFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />

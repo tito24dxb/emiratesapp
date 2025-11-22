@@ -2,19 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, Check, CheckCheck, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FCMNotification,
+  Notification,
   subscribeToUserNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
   getUnreadCount,
-} from '../services/fcmNotificationService';
+} from '../services/unifiedNotificationService';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function NotificationBell() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState<FCMNotification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -47,13 +47,13 @@ export default function NotificationBell() {
     };
   }, [isOpen]);
 
-  const handleNotificationClick = async (notification: FCMNotification) => {
+  const handleNotificationClick = async (notification: Notification) => {
     if (!notification.read) {
       await markNotificationAsRead(notification.id!);
     }
     setIsOpen(false);
-    if (notification.actionUrl) {
-      navigate(notification.actionUrl);
+    if (notification.action_url) {
+      navigate(notification.action_url);
     }
   };
 
@@ -172,10 +172,10 @@ export default function NotificationBell() {
                               <div className="w-2 h-2 bg-[#D71920] rounded-full flex-shrink-0 mt-1" />
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 line-clamp-2">{notification.body}</p>
+                          <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
                           <span className="text-xs text-gray-500 mt-1 block">
-                            {notification.createdAt?.toDate
-                              ? formatTimestamp(notification.createdAt.toDate())
+                            {notification.created_at
+                              ? formatTimestamp(new Date(notification.created_at))
                               : 'Just now'}
                           </span>
                         </div>
