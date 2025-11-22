@@ -7,7 +7,7 @@ import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { recordLoginActivity } from '../../services/loginActivityService';
-import { twoFactorService } from '../../services/twoFactorService';
+// import { twoFactorService } from '../../services/twoFactorService'; // TODO: Re-enable with browser-compatible library
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -61,16 +61,17 @@ export default function LoginPage() {
         updatedAt: userData.updatedAt || new Date().toISOString(),
       };
 
-      console.log('Checking 2FA status');
-      const has2FA = await twoFactorService.isTwoFactorEnabled(user.uid);
+      // TODO: Re-enable 2FA with browser-compatible TOTP library
+      // console.log('Checking 2FA status');
+      // const has2FA = await twoFactorService.isTwoFactorEnabled(user.uid);
 
-      if (has2FA) {
-        console.log('2FA enabled, showing verification');
-        setPendingUserId(user.uid);
-        setShow2FA(true);
-        setLoading(false);
-        return;
-      }
+      // if (has2FA) {
+      //   console.log('2FA enabled, showing verification');
+      //   setPendingUserId(user.uid);
+      //   setShow2FA(true);
+      //   setLoading(false);
+      //   return;
+      // }
 
       console.log('Setting current user:', currentUser);
       setCurrentUser(currentUser);
@@ -137,14 +138,15 @@ export default function LoginPage() {
 
       const userData = userDoc.data()!;
 
-      const has2FA = await twoFactorService.isTwoFactorEnabled(user.uid);
+      // TODO: Re-enable 2FA with browser-compatible TOTP library
+      // const has2FA = await twoFactorService.isTwoFactorEnabled(user.uid);
 
-      if (has2FA) {
-        setPendingUserId(user.uid);
-        setShow2FA(true);
-        setLoading(false);
-        return;
-      }
+      // if (has2FA) {
+      //   setPendingUserId(user.uid);
+      //   setShow2FA(true);
+      //   setLoading(false);
+      //   return;
+      // }
 
       const currentUser = {
         uid: user.uid,
@@ -175,53 +177,54 @@ export default function LoginPage() {
     }
   };
 
-  const handleVerify2FA = async () => {
-    if (!twoFactorCode || twoFactorCode.length !== 6 || !pendingUserId) {
-      setError('Please enter a 6-digit code');
-      return;
-    }
+  // TODO: Re-enable 2FA with browser-compatible TOTP library
+  // const handleVerify2FA = async () => {
+  //   if (!twoFactorCode || twoFactorCode.length !== 6 || !pendingUserId) {
+  //     setError('Please enter a 6-digit code');
+  //     return;
+  //   }
 
-    setLoading(true);
-    setError('');
+  //   setLoading(true);
+  //   setError('');
 
-    try {
-      const valid = await twoFactorService.verifyToken(pendingUserId, twoFactorCode);
+  //   try {
+  //     const valid = await twoFactorService.verifyToken(pendingUserId, twoFactorCode);
 
-      if (valid) {
-        const userDoc = await getDoc(doc(db, 'users', pendingUserId));
-        const userData = userDoc.data()!;
+  //     if (valid) {
+  //       const userDoc = await getDoc(doc(db, 'users', pendingUserId));
+  //       const userData = userDoc.data()!;
 
-        const currentUser = {
-          uid: pendingUserId,
-          email: userData.email,
-          name: userData.name || 'User',
-          role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
-          plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
-          country: userData.country || '',
-          bio: userData.bio || '',
-          expectations: userData.expectations || '',
-          photoURL: userData.photo_base64 || '',
-          hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
-          hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
-          onboardingCompletedAt: userData.onboardingCompletedAt,
-          welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
-          createdAt: userData.createdAt || new Date().toISOString(),
-          updatedAt: userData.updatedAt || new Date().toISOString(),
-        };
+  //       const currentUser = {
+  //         uid: pendingUserId,
+  //         email: userData.email,
+  //         name: userData.name || 'User',
+  //         role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
+  //         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
+  //         country: userData.country || '',
+  //         bio: userData.bio || '',
+  //         expectations: userData.expectations || '',
+  //         photoURL: userData.photo_base64 || '',
+  //         hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+  //         hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+  //         onboardingCompletedAt: userData.onboardingCompletedAt,
+  //         welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+  //         createdAt: userData.createdAt || new Date().toISOString(),
+  //         updatedAt: userData.updatedAt || new Date().toISOString(),
+  //       };
 
-        setCurrentUser(currentUser);
-        await recordLoginActivity(pendingUserId, true);
-        navigate('/dashboard');
-      } else {
-        setError('Invalid verification code. Please try again.');
-      }
-    } catch (err: any) {
-      console.error('2FA verification error:', err);
-      setError('Verification failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //       setCurrentUser(currentUser);
+  //       await recordLoginActivity(pendingUserId, true);
+  //       navigate('/dashboard');
+  //     } else {
+  //       setError('Invalid verification code. Please try again.');
+  //     }
+  //   } catch (err: any) {
+  //     console.error('2FA verification error:', err);
+  //     setError('Verification failed. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -396,7 +399,7 @@ export default function LoginPage() {
                 Cancel
               </button>
               <button
-                onClick={handleVerify2FA}
+                onClick={() => {/* TODO: handleVerify2FA */}}
                 disabled={loading || twoFactorCode.length !== 6}
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
