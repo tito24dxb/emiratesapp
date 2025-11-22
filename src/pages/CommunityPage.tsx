@@ -649,6 +649,28 @@ export default function CommunityPage() {
             className="w-full pl-10 pr-4 py-2 glass-bubble rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20"
           />
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-3 md:mt-4 p-3 md:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Bot className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-bold text-blue-900 text-sm md:text-base">AI Moderator Active</h3>
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              </div>
+              <p className="text-xs md:text-sm text-blue-800 leading-relaxed">
+                All conversations are monitored by AI to ensure a safe and respectful community. Please keep your messages positive and appropriate.
+              </p>
+            </div>
+            <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 hidden md:block" />
+          </div>
+        </motion.div>
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0">
