@@ -110,11 +110,22 @@ export default function MyProgressPage() {
             for (const courseId of courseIds) {
               const enrollment = courseEnrollments.find(e => e.course_id === courseId);
               if (enrollment) {
-                if (enrollment.last_accessed && new Date(enrollment.last_accessed) > new Date(lastAccessed)) {
-                  lastAccessed = enrollment.last_accessed;
+                // Handle both Timestamp objects and ISO strings
+                const lastAccessedValue = enrollment.last_accessed
+                  ? typeof enrollment.last_accessed === 'string'
+                    ? enrollment.last_accessed
+                    : enrollment.last_accessed.toDate?.().toISOString() || new Date(enrollment.last_accessed).toISOString()
+                  : null;
+
+                const enrolledAtValue = typeof enrollment.enrolled_at === 'string'
+                  ? enrollment.enrolled_at
+                  : enrollment.enrolled_at.toDate?.().toISOString() || new Date(enrollment.enrolled_at).toISOString();
+
+                if (lastAccessedValue && new Date(lastAccessedValue) > new Date(lastAccessed)) {
+                  lastAccessed = lastAccessedValue;
                 }
-                if (new Date(enrollment.enrolled_at) < new Date(enrolledAt)) {
-                  enrolledAt = enrollment.enrolled_at;
+                if (new Date(enrolledAtValue) < new Date(enrolledAt)) {
+                  enrolledAt = enrolledAtValue;
                 }
               }
             }
