@@ -105,6 +105,7 @@ service cloud.firestore {
 
     ///////////////////////////////////////////////////////////////////////////
     // COMMUNITY FEED (Posts, Comments, Reactions)
+    // LAST UPDATED: 2025-11-22 - Community reactions and comments enabled
     ///////////////////////////////////////////////////////////////////////////
     match /community_posts/{postId} {
       allow read: if isAuthenticated();
