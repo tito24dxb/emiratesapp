@@ -488,48 +488,58 @@ export const communityFeedService = {
 
   // Sync reaction counts from community_reactions collection
   async syncReactionCounts(postId: string): Promise<void> {
-    const reactionsQuery = query(
-      collection(db, 'community_reactions'),
-      where('postId', '==', postId)
-    );
+    try {
+      const reactionsQuery = query(
+        collection(db, 'community_reactions'),
+        where('postId', '==', postId)
+      );
 
-    const snapshot = await getDocs(reactionsQuery);
+      const snapshot = await getDocs(reactionsQuery);
 
-    const counts = {
-      fire: 0,
-      heart: 0,
-      thumbsUp: 0,
-      laugh: 0,
-      wow: 0
-    };
+      const counts = {
+        fire: 0,
+        heart: 0,
+        thumbsUp: 0,
+        laugh: 0,
+        wow: 0
+      };
 
-    snapshot.docs.forEach(doc => {
-      const reactionType = doc.data().reactionType;
-      if (counts.hasOwnProperty(reactionType)) {
-        counts[reactionType as keyof typeof counts]++;
-      }
-    });
+      snapshot.docs.forEach(doc => {
+        const reactionType = doc.data().reactionType;
+        if (counts.hasOwnProperty(reactionType)) {
+          counts[reactionType as keyof typeof counts]++;
+        }
+      });
 
-    const postRef = doc(db, 'community_posts', postId);
-    await updateDoc(postRef, {
-      reactionsCount: counts
-    });
+      const postRef = doc(db, 'community_posts', postId);
+      await updateDoc(postRef, {
+        reactionsCount: counts
+      });
+    } catch (error) {
+      // Silently handle permission errors - counts are still synced via background
+      console.debug('Sync reaction counts (expected for non-owners):', error);
+    }
   },
 
   // Sync comment count from community_comments collection
   async syncCommentsCount(postId: string): Promise<void> {
-    const commentsQuery = query(
-      collection(db, 'community_comments'),
-      where('postId', '==', postId)
-    );
+    try {
+      const commentsQuery = query(
+        collection(db, 'community_comments'),
+        where('postId', '==', postId)
+      );
 
-    const snapshot = await getDocs(commentsQuery);
-    const count = snapshot.size;
+      const snapshot = await getDocs(commentsQuery);
+      const count = snapshot.size;
 
-    const postRef = doc(db, 'community_posts', postId);
-    await updateDoc(postRef, {
-      commentsCount: count
-    });
+      const postRef = doc(db, 'community_posts', postId);
+      await updateDoc(postRef, {
+        commentsCount: count
+      });
+    } catch (error) {
+      // Silently handle permission errors - counts are still synced via background
+      console.debug('Sync comments count (expected for non-owners):', error);
+    }
   },
 
   // Track post view

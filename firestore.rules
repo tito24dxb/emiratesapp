@@ -128,14 +128,18 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
 
       // Post owner can update their own content, or staff can moderate
-      // Any authenticated user can update view tracking and reaction counts
+      // Any authenticated user can update view tracking and reaction/comment counts
       allow update: if request.auth != null && (
         resource.data.userId == request.auth.uid ||
-        isModerator() ||
-        (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount', 'reactionsCount', 'commentsCount', 'updatedAt'])
-        )
+        isModerator()
       );
+
+      // Anyone can update counter fields for reactions, comments, and views
+      allow update: if request.auth != null &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactionsCount']) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['commentsCount']) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount']) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount', 'updatedAt']);
 
       // Only governors and moderators can delete any post
       allow delete: if request.auth != null && isModerator();
