@@ -561,7 +561,7 @@ export const communityFeedService = {
     }
   },
 
-  // Create notification
+  // Create notification - uses Supabase unified notification service
   async createNotification(
     type: 'post' | 'comment' | 'reaction',
     actorId: string,
@@ -574,38 +574,56 @@ export const communityFeedService = {
     // Don't notify yourself
     if (actorId === targetUserId) return;
 
-    let message = '';
-    switch (type) {
-      case 'post':
-        message = `${actorName} created a new post`;
-        break;
-      case 'comment':
-        message = `${actorName} commented on a post created by ${targetUserName}`;
-        break;
-      case 'reaction':
-        const reactionEmojis = {
-          fire: '🔥',
-          heart: '❤️',
-          thumbsUp: '👍',
-          laugh: '😂',
-          wow: '😮'
-        };
-        const emoji = reactionType ? reactionEmojis[reactionType as keyof typeof reactionEmojis] : '';
-        message = `${actorName} ${emoji} reacted to a post created by ${targetUserName}`;
-        break;
+    try {
+      // Import dynamically to avoid circular dependencies
+      const { createNotification } = await import('./unifiedNotificationService');
+
+      let title = '';
+      let message = '';
+      let notifType: any = 'community_post';
+
+      switch (type) {
+        case 'post':
+          title = 'New Post';
+          message = `${actorName} created a new post`;
+          notifType = 'community_post';
+          break;
+        case 'comment':
+          title = 'New Comment';
+          message = `${actorName} commented on your post`;
+          notifType = 'community_comment';
+          break;
+        case 'reaction':
+          const reactionEmojis = {
+            fire: '🔥',
+            heart: '❤️',
+            thumbsUp: '👍',
+            laugh: '😂',
+            wow: '😮'
+          };
+          const emoji = reactionType ? reactionEmojis[reactionType as keyof typeof reactionEmojis] : '';
+          title = 'New Reaction';
+          message = `${actorName} ${emoji} reacted to your post`;
+          notifType = 'community_reaction';
+          break;
+      }
+
+      await createNotification({
+        user_id: targetUserId,
+        type: notifType,
+        title,
+        message,
+        priority: 'low',
+        action_url: `/community?postId=${postId}`,
+        metadata: {
+          actorId,
+          actorName,
+          postId,
+          reactionType: reactionType || ''
+        }
+      });
+    } catch (error) {
+      console.error('Error creating notification:', error);
     }
-
-    const notificationData = {
-      type,
-      actorId,
-      actorName,
-      postId,
-      targetUserId,
-      message,
-      read: false,
-      createdAt: Timestamp.now()
-    };
-
-    await addDoc(collection(db, 'community_notifications'), notificationData);
   }
 };
