@@ -292,7 +292,7 @@ export default function MarketplaceCheckoutPage() {
 
           {/* Payment Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-white/30 p-6 lg:p-8 relative z-10">
+            <div className="bg-gray-900/10 backdrop-blur-sm rounded-xl shadow-2xl border border-white/20 p-6 lg:p-8 relative z-10">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Details</h2>
 
               <Elements stripe={stripePromise}>

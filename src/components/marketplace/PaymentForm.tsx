@@ -15,16 +15,16 @@ const CARD_ELEMENT_OPTIONS = {
   style: {
     base: {
       fontSize: '16px',
-      color: '#424770',
-      fontFamily: '"Lato", sans-serif',
+      color: '#1f2937',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
       '::placeholder': {
-        color: '#aab7c4',
+        color: '#9ca3af',
       },
-      iconColor: '#666EE8',
+      iconColor: '#3b82f6',
     },
     invalid: {
-      color: '#fa755a',
-      iconColor: '#fa755a',
+      color: '#ef4444',
+      iconColor: '#ef4444',
     },
   },
   hidePostalCode: false,
@@ -169,7 +169,7 @@ export default function PaymentForm({
             type="text"
             value={billingDetails.name}
             onChange={(e) => setBillingDetails({ ...billingDetails, name: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             placeholder="John Doe"
             disabled={loading}
           />
@@ -183,7 +183,7 @@ export default function PaymentForm({
             type="email"
             value={billingDetails.email}
             onChange={(e) => setBillingDetails({ ...billingDetails, email: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             placeholder="john@example.com"
             disabled={loading}
           />
@@ -200,7 +200,7 @@ export default function PaymentForm({
               ...billingDetails,
               address: { ...billingDetails.address, line1: e.target.value }
             })}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
             placeholder="123 Main St"
             disabled={loading}
           />
@@ -218,7 +218,7 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, city: e.target.value }
               })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               placeholder="City"
               disabled={loading}
             />
@@ -235,7 +235,7 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, state: e.target.value }
               })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               placeholder="State"
               disabled={loading}
             />
@@ -254,7 +254,7 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, postal_code: e.target.value }
               })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               placeholder="12345"
               disabled={loading}
             />
@@ -270,14 +270,83 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, country: e.target.value }
               })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               disabled={loading}
             >
               <option value="US">United States</option>
-              <option value="GB">United Kingdom</option>
               <option value="AE">United Arab Emirates</option>
+              <option value="GB">United Kingdom</option>
               <option value="CA">Canada</option>
               <option value="AU">Australia</option>
+              <option value="AF">Afghanistan</option>
+              <option value="AL">Albania</option>
+              <option value="DZ">Algeria</option>
+              <option value="AR">Argentina</option>
+              <option value="AT">Austria</option>
+              <option value="BH">Bahrain</option>
+              <option value="BD">Bangladesh</option>
+              <option value="BE">Belgium</option>
+              <option value="BR">Brazil</option>
+              <option value="BG">Bulgaria</option>
+              <option value="CN">China</option>
+              <option value="CO">Colombia</option>
+              <option value="HR">Croatia</option>
+              <option value="CY">Cyprus</option>
+              <option value="CZ">Czech Republic</option>
+              <option value="DK">Denmark</option>
+              <option value="EG">Egypt</option>
+              <option value="EE">Estonia</option>
+              <option value="FI">Finland</option>
+              <option value="FR">France</option>
+              <option value="DE">Germany</option>
+              <option value="GR">Greece</option>
+              <option value="HK">Hong Kong</option>
+              <option value="HU">Hungary</option>
+              <option value="IS">Iceland</option>
+              <option value="IN">India</option>
+              <option value="ID">Indonesia</option>
+              <option value="IE">Ireland</option>
+              <option value="IL">Israel</option>
+              <option value="IT">Italy</option>
+              <option value="JP">Japan</option>
+              <option value="JO">Jordan</option>
+              <option value="KE">Kenya</option>
+              <option value="KW">Kuwait</option>
+              <option value="LV">Latvia</option>
+              <option value="LB">Lebanon</option>
+              <option value="LT">Lithuania</option>
+              <option value="LU">Luxembourg</option>
+              <option value="MY">Malaysia</option>
+              <option value="MT">Malta</option>
+              <option value="MX">Mexico</option>
+              <option value="MA">Morocco</option>
+              <option value="NL">Netherlands</option>
+              <option value="NZ">New Zealand</option>
+              <option value="NG">Nigeria</option>
+              <option value="NO">Norway</option>
+              <option value="OM">Oman</option>
+              <option value="PK">Pakistan</option>
+              <option value="PH">Philippines</option>
+              <option value="PL">Poland</option>
+              <option value="PT">Portugal</option>
+              <option value="QA">Qatar</option>
+              <option value="RO">Romania</option>
+              <option value="RU">Russia</option>
+              <option value="SA">Saudi Arabia</option>
+              <option value="SG">Singapore</option>
+              <option value="SK">Slovakia</option>
+              <option value="SI">Slovenia</option>
+              <option value="ZA">South Africa</option>
+              <option value="KR">South Korea</option>
+              <option value="ES">Spain</option>
+              <option value="LK">Sri Lanka</option>
+              <option value="SE">Sweden</option>
+              <option value="CH">Switzerland</option>
+              <option value="TW">Taiwan</option>
+              <option value="TH">Thailand</option>
+              <option value="TR">Turkey</option>
+              <option value="UA">Ukraine</option>
+              <option value="VN">Vietnam</option>
             </select>
           </div>
         </div>
@@ -288,7 +357,7 @@ export default function PaymentForm({
         <label className="block text-sm font-medium text-gray-900 mb-2">
           Card Details *
         </label>
-        <div className="relative p-4 border-2 border-gray-300 rounded-lg bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-all min-h-[44px] z-30">
+        <div className="relative p-4 border-2 border-gray-300 rounded-lg bg-transparent focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-all min-h-[44px] z-30" style={{ pointerEvents: 'auto' }}>
           <CardElement
             options={CARD_ELEMENT_OPTIONS}
             onChange={(e) => {

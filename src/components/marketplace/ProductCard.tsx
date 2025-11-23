@@ -58,12 +58,12 @@ export default function ProductCard({
 
   return (
     <motion.div
-      whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)' }}
-      className="bg-white/70 backdrop-blur-md rounded-xl overflow-hidden border border-gray-200/50 cursor-pointer group shadow-lg hover:shadow-2xl transition-all"
+      whileHover={{ y: -2, scale: 1.02 }}
+      className="bg-white/50 backdrop-blur-sm rounded-lg overflow-hidden border border-gray-200/30 cursor-pointer group transition-all"
       onClick={handleCardClick}
     >
       {/* Product Image */}
-      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+      <div className="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         <img
           src={productImage}
           alt={product.title}
@@ -72,7 +72,7 @@ export default function ProductCard({
         />
 
         {/* Product Type Badge */}
-        <div className="absolute top-3 left-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-medium">
+        <div className="absolute top-2 left-2 flex items-center gap-0.5 bg-white/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[10px] font-medium">
           {getProductIcon()}
           <span className="capitalize">{product.product_type}</span>
         </div>
@@ -81,13 +81,13 @@ export default function ProductCard({
         {showActions && (
           <button
             onClick={handleFavoriteClick}
-            className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+            className={`absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
               isFavorite
                 ? 'bg-red-500 text-white'
                 : 'bg-white/90 backdrop-blur-sm text-gray-600 hover:bg-red-500 hover:text-white'
             }`}
           >
-            <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+            <Heart className={`w-3 h-3 ${isFavorite ? 'fill-current' : ''}`} />
           </button>
         )}
 
@@ -100,37 +100,37 @@ export default function ProductCard({
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
+      <div className="p-3">
         {/* Title */}
-        <h3 className="font-bold text-gray-900 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="font-semibold text-sm text-gray-900 line-clamp-1 mb-1 group-hover:text-blue-600 transition-colors">
           {product.title}
         </h3>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+        <p className="text-xs text-gray-500 line-clamp-1 mb-2">
           {product.description}
         </p>
 
         {/* Category & Stats */}
-        <div className="flex items-center gap-3 mb-3 text-xs text-gray-500">
-          <div className="flex items-center gap-1">
-            <Eye className="w-3 h-3" />
+        <div className="flex items-center gap-2 mb-2 text-[10px] text-gray-500">
+          <div className="flex items-center gap-0.5">
+            <Eye className="w-2.5 h-2.5" />
             <span>{product.views_count || 0}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Heart className="w-3 h-3" />
+          <div className="flex items-center gap-0.5">
+            <Heart className="w-2.5 h-2.5" />
             <span>{product.likes_count || 0}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <ShoppingCart className="w-3 h-3" />
+          <div className="flex items-center gap-0.5">
+            <ShoppingCart className="w-2.5 h-2.5" />
             <span>{product.sales_count || 0} sold</span>
           </div>
         </div>
 
         {/* Price & Action */}
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div>
-            <div className="text-2xl font-bold text-gray-900">
+            <div className="text-lg font-bold text-gray-900">
               {formatPrice(product.price, product.currency)}
             </div>
             {product.product_type === 'physical' && product.stock_quantity !== undefined && (
@@ -143,28 +143,28 @@ export default function ProductCard({
           {showActions && product.stock_quantity !== 0 && (
             <button
               onClick={handleBuyClick}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors flex items-center gap-2"
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium text-xs transition-colors flex items-center gap-1"
             >
-              <ShoppingCart className="w-4 h-4" />
-              Buy Now
+              <ShoppingCart className="w-3 h-3" />
+              Buy
             </button>
           )}
         </div>
 
         {/* Seller Info */}
-        <div className="mt-3 pt-3 border-t border-gray-100 flex items-center gap-2">
+        <div className="mt-2 pt-2 border-t border-gray-100 flex items-center gap-1.5">
           {product.seller_photo_url ? (
             <img
               src={product.seller_photo_url}
               alt={product.seller_name}
-              className="w-6 h-6 rounded-full"
+              className="w-4 h-4 rounded-full"
             />
           ) : (
-            <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-bold text-gray-600">
+            <div className="w-4 h-4 rounded-full bg-gray-300 flex items-center justify-center text-[8px] font-bold text-gray-600">
               {product.seller_name.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="text-xs text-gray-600">{product.seller_name}</span>
+          <span className="text-[10px] text-gray-500 truncate">{product.seller_name}</span>
         </div>
       </div>
     </motion.div>
