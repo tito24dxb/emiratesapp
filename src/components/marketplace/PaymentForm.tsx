@@ -1,7 +1,8 @@
-import { useState, FormEvent } from 'react';
-import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Lock, CreditCard } from 'lucide-react';
+import { useState, useEffect, FormEvent } from 'react';
+import { CardElement, PaymentRequestButtonElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Lock, CreditCard, Smartphone, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
+import type { PaymentRequest, PaymentMethod } from '@stripe/stripe-js';
 
 interface PaymentFormProps {
   amount: number;
@@ -43,6 +44,8 @@ export default function PaymentForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [cardComplete, setCardComplete] = useState(false);
+  const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
+  const [walletPaymentAvailable, setWalletPaymentAvailable] = useState(false);
   const [billingDetails, setBillingDetails] = useState({
     name: '',
     email: '',
@@ -54,6 +57,73 @@ export default function PaymentForm({
       country: 'US'
     }
   });
+
+  // Initialize Apple Pay and Google Pay
+  useEffect(() => {
+    if (!stripe || !clientSecret) {
+      return;
+    }
+
+    const pr = stripe.paymentRequest({
+      country: currency === 'AED' ? 'AE' : 'US',
+      currency: currency.toLowerCase(),
+      total: {
+        label: 'Total',
+        amount: amount,
+      },
+      requestPayerName: true,
+      requestPayerEmail: true,
+    });
+
+    // Check if Apple Pay or Google Pay is available
+    pr.canMakePayment().then((result) => {
+      if (result) {
+        setPaymentRequest(pr);
+        setWalletPaymentAvailable(true);
+      }
+    });
+
+    // Handle the payment method from Apple Pay or Google Pay
+    pr.on('paymentmethod', async (e) => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const { error: confirmError, paymentIntent } = await stripe.confirmCardPayment(
+          clientSecret,
+          { payment_method: e.paymentMethod.id },
+          { handleActions: false }
+        );
+
+        if (confirmError) {
+          e.complete('fail');
+          throw new Error(confirmError.message);
+        }
+
+        e.complete('success');
+
+        if (paymentIntent && paymentIntent.status === 'succeeded') {
+          onSuccess(paymentIntent.id);
+        } else if (paymentIntent && paymentIntent.status === 'requires_action') {
+          const { error: nextActionError } = await stripe.confirmCardPayment(clientSecret);
+          if (nextActionError) {
+            throw new Error(nextActionError.message);
+          } else {
+            onSuccess(paymentIntent.id);
+          }
+        } else {
+          throw new Error('Payment was not successful');
+        }
+      } catch (err: any) {
+        console.error('Wallet payment error:', err);
+        const errorMessage = err.message || 'Wallet payment failed. Please try again.';
+        setError(errorMessage);
+        onError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    });
+  }, [stripe, clientSecret, amount, currency, onSuccess, onError]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -152,6 +222,33 @@ export default function PaymentForm({
         >
           {error}
         </motion.div>
+      )}
+
+      {/* Apple Pay and Google Pay */}
+      {walletPaymentAvailable && paymentRequest && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Wallet className="w-5 h-5 text-gray-700" />
+            <h3 className="font-semibold text-gray-900">Express Checkout</h3>
+          </div>
+          <div className="p-4 border-2 border-gray-300 rounded-lg bg-transparent">
+            <PaymentRequestButtonElement
+              options={{ paymentRequest }}
+              className="w-full"
+            />
+          </div>
+          <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+            <Smartphone className="w-3 h-3" />
+            Apple Pay or Google Pay (faster checkout)
+          </p>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-gray-300"></div>
+            <span className="text-sm text-gray-500 font-medium">OR PAY WITH CARD</span>
+            <div className="flex-1 h-px bg-gray-300"></div>
+          </div>
+        </div>
       )}
 
       {/* Billing Details */}
