@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Heart, Eye, Package, Download, Mail, Share2, Tag } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ArrowLeft, ShoppingCart, Heart, Eye, Package, Download, Mail, Share2, Tag, MessageCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
   getProduct,
@@ -11,6 +11,7 @@ import {
   MarketplaceProduct
 } from '../services/marketplaceService';
 import { formatPrice } from '../services/stripeService';
+import MarketplaceChat from '../components/marketplace/MarketplaceChat';
 
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
@@ -20,6 +21,8 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFav, setIsFav] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
 
   useEffect(() => {
     if (productId && currentUser) {
@@ -72,11 +75,29 @@ export default function ProductDetailPage() {
   };
 
   const handleContactSeller = () => {
-    if (!product) return;
-    window.location.href = `mailto:${product.seller_email}?subject=Inquiry about ${product.title}`;
+    if (!product || !currentUser) return;
+    if (currentUser.uid === product.seller_id) {
+      alert('You cannot message yourself');
+      return;
+    }
+    setShowChat(true);
   };
 
   const handleShare = () => {
+    if (!product) return;
+    const url = `${window.location.origin}/marketplace/product/${product.id}`;
+    setShowShareMenu(true);
+  };
+
+  const copyInternalLink = () => {
+    if (!product) return;
+    const internalLink = `/marketplace/product/${product.id}`;
+    navigator.clipboard.writeText(internalLink);
+    alert('Internal link copied! You can share this in community chat.');
+    setShowShareMenu(false);
+  };
+
+  const copyFullLink = () => {
     const url = window.location.href;
     if (navigator.share) {
       navigator.share({
@@ -305,9 +326,10 @@ export default function ProductDetailPage() {
 
                 <button
                   onClick={handleContactSeller}
-                  className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 rounded-lg transition-colors flex items-center justify-center gap-2"
+                  disabled={currentUser?.uid === product.seller_id}
+                  className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
-                  <Mail className="w-4 h-4" />
+                  <MessageCircle className="w-4 h-4" />
                   Contact Seller
                 </button>
               </div>
@@ -315,6 +337,59 @@ export default function ProductDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Marketplace Chat */}
+      <AnimatePresence>
+        {showChat && product && currentUser && (
+          <MarketplaceChat
+            productId={product.id}
+            productTitle={product.title}
+            productImage={product.images?.[0]}
+            sellerId={product.seller_id}
+            sellerName={product.seller_name}
+            onClose={() => setShowChat(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Share Menu */}
+      <AnimatePresence>
+        {showShareMenu && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowShareMenu(false)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl p-6 max-w-md w-full mx-4"
+            >
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Share Product</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={copyInternalLink}
+                  className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+                >
+                  <Share2 className="w-5 h-5" />
+                  Copy Internal Link (for Community Chat)
+                </button>
+                <button
+                  onClick={copyFullLink}
+                  className="w-full px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition-all flex items-center justify-center gap-2"
+                >
+                  <Share2 className="w-5 h-5" />
+                  Share Full Link
+                </button>
+                <button
+                  onClick={() => setShowShareMenu(false)}
+                  className="w-full px-4 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

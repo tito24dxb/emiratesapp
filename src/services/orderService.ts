@@ -329,6 +329,58 @@ export const getMySales = async (userId: string): Promise<MarketplaceOrder[]> =>
   }
 };
 
+export interface Order {
+  id: string;
+  buyer_name: string;
+  buyer_email: string;
+  buyer_phone?: string;
+  amount: number;
+  currency: string;
+  status: string;
+  payment_method?: string;
+  product_title: string;
+  created_at: any;
+  shipping_address?: {
+    line1: string;
+    city: string;
+    state: string;
+    country: string;
+    postal_code: string;
+  };
+}
+
+export const getSellerOrders = async (sellerId: string): Promise<Order[]> => {
+  try {
+    const ordersRef = collection(db, 'marketplace_orders');
+    const q = query(
+      ordersRef,
+      where('seller_id', '==', sellerId),
+      orderBy('created_at', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        buyer_name: data.buyer_name || 'Unknown',
+        buyer_email: data.buyer_email || '',
+        buyer_phone: data.metadata?.buyer_phone,
+        amount: data.total_amount || data.price || 0,
+        currency: data.currency || 'USD',
+        status: data.payment_status || 'pending',
+        payment_method: data.payment_method || `${data.payment_method_brand || 'Card'} ****${data.payment_method_last4 || 'XXXX'}`,
+        product_title: data.product_title || '',
+        created_at: data.created_at,
+        shipping_address: data.metadata?.shipping_address,
+      } as Order;
+    });
+  } catch (error) {
+    console.error('Error getting seller orders:', error);
+    return [];
+  }
+};
+
 export const completeOrder = async (
   orderId: string,
   productId: string,

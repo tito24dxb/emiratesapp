@@ -40,6 +40,8 @@ export interface MarketplaceProduct {
   likes_count: number;
   sales_count: number;
   tags?: string[];
+  custom_cta_text?: string;
+  custom_cta_enabled?: boolean;
 }
 
 export interface ProductFormData {
@@ -55,6 +57,8 @@ export interface ProductFormData {
   digital_file_size?: number;
   stock_quantity?: number;
   tags?: string[];
+  custom_cta_text?: string;
+  custom_cta_enabled?: boolean;
 }
 
 export const createProduct = async (
@@ -102,6 +106,11 @@ export const createProduct = async (
 
     if (productData.stock_quantity !== undefined) {
       product.stock_quantity = productData.stock_quantity;
+    }
+
+    if (productData.custom_cta_text) {
+      product.custom_cta_text = productData.custom_cta_text;
+      product.custom_cta_enabled = productData.custom_cta_enabled !== false;
     }
 
     await setDoc(productRef, product);
@@ -266,6 +275,10 @@ export const getMyProducts = async (userId: string): Promise<MarketplaceProduct[
     console.error('Error getting my products:', error);
     return [];
   }
+};
+
+export const getSellerProducts = async (sellerId: string): Promise<MarketplaceProduct[]> => {
+  return getMyProducts(sellerId);
 };
 
 export const incrementProductViews = async (productId: string): Promise<void> => {

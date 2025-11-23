@@ -54,6 +54,8 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import MarketplaceCheckoutPage from './pages/MarketplaceCheckoutPage';
 import MyProductsPage from './pages/MyProductsPage';
 import MyOrdersPage from './pages/MyOrdersPage';
+import SellerDashboard from './pages/SellerDashboard';
+import SellerBillingDashboard from './pages/SellerBillingDashboard';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -141,6 +143,8 @@ function AppContent() {
         <Route path="/marketplace/checkout/:productId" element={<MarketplaceCheckoutPage />} />
         <Route path="/marketplace/my-products" element={<MyProductsPage />} />
         <Route path="/marketplace/orders" element={<MyOrdersPage />} />
+        <Route path="/seller/dashboard" element={<SellerDashboard />} />
+        <Route path="/seller/billing" element={<SellerBillingDashboard />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>
