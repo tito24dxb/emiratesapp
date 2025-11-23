@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { getProduct, MarketplaceProduct } from '../services/marketplaceService';
 import { createOrder } from '../services/orderService';
-import { getStripe, createPaymentIntent, formatPrice } from '../services/stripeService';
+import { getStripe, createMarketplacePaymentIntent, formatPrice } from '../services/stripeService';
 import PaymentForm from '../components/marketplace/PaymentForm';
 
 export default function MarketplaceCheckoutPage() {
@@ -73,12 +73,17 @@ export default function MarketplaceCheckoutPage() {
 
       setOrderId(newOrderId);
 
-      const paymentIntent = await createPaymentIntent({
-        orderId: newOrderId,
+      const paymentIntent = await createMarketplacePaymentIntent({
+        firebase_buyer_uid: currentUser.uid,
+        firebase_seller_uid: fetchedProduct.seller_id,
+        firebase_order_id: newOrderId,
+        product_id: fetchedProduct.id,
+        product_title: fetchedProduct.title,
+        product_type: fetchedProduct.product_type,
+        quantity: quantity,
         amount: fetchedProduct.price * quantity,
         currency: fetchedProduct.currency,
-        productId: fetchedProduct.id,
-        productTitle: fetchedProduct.title
+        seller_email: fetchedProduct.seller_email
       });
 
       setClientSecret(paymentIntent.clientSecret);

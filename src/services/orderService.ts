@@ -34,6 +34,15 @@ export interface MarketplaceOrder {
   payment_status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
   payment_intent_id?: string;
   payment_method?: string;
+  payment_method_brand?: string;
+  payment_method_last4?: string;
+  stripe_customer_id?: string;
+  stripe_charge_id?: string;
+  stripe_fee?: number;
+  net_amount?: number;
+  payment_created_at?: any;
+  payment_succeeded_at?: any;
+  payment_failed_at?: any;
   delivery_status: 'pending' | 'delivered' | 'failed';
   digital_download_url?: string;
   digital_download_expires?: any;
@@ -42,9 +51,9 @@ export interface MarketplaceOrder {
   created_at: any;
   completed_at?: any;
   metadata?: {
-    stripe_customer_id?: string;
-    stripe_charge_id?: string;
     buyer_ip?: string;
+    transaction_id?: string;
+    [key: string]: any;
   };
 }
 
@@ -123,6 +132,18 @@ export const getOrder = async (orderId: string): Promise<MarketplaceOrder | null
   }
 };
 
+export interface UpdatePaymentDetails {
+  payment_status: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
+  payment_intent_id?: string;
+  payment_method?: string;
+  payment_method_brand?: string;
+  payment_method_last4?: string;
+  stripe_customer_id?: string;
+  stripe_charge_id?: string;
+  stripe_fee?: number;
+  net_amount?: number;
+}
+
 export const updateOrderPaymentStatus = async (
   orderId: string,
   paymentStatus: 'pending' | 'processing' | 'completed' | 'failed' | 'refunded',
@@ -145,12 +166,48 @@ export const updateOrderPaymentStatus = async (
 
     if (paymentStatus === 'completed') {
       updates.completed_at = Timestamp.now();
+      updates.payment_succeeded_at = Timestamp.now();
+    } else if (paymentStatus === 'failed') {
+      updates.payment_failed_at = Timestamp.now();
     }
 
     await updateDoc(orderRef, updates);
     console.log('Order payment status updated:', orderId, paymentStatus);
   } catch (error) {
     console.error('Error updating order payment status:', error);
+    throw error;
+  }
+};
+
+export const updateOrderWithFullPaymentDetails = async (
+  orderId: string,
+  paymentDetails: UpdatePaymentDetails
+): Promise<void> => {
+  try {
+    const orderRef = doc(db, 'marketplace_orders', orderId);
+    const updates: any = {
+      payment_status: paymentDetails.payment_status,
+      payment_intent_id: paymentDetails.payment_intent_id,
+      payment_method: paymentDetails.payment_method,
+      payment_method_brand: paymentDetails.payment_method_brand,
+      payment_method_last4: paymentDetails.payment_method_last4,
+      stripe_customer_id: paymentDetails.stripe_customer_id,
+      stripe_charge_id: paymentDetails.stripe_charge_id,
+      stripe_fee: paymentDetails.stripe_fee,
+      net_amount: paymentDetails.net_amount
+    };
+
+    if (paymentDetails.payment_status === 'completed') {
+      updates.completed_at = Timestamp.now();
+      updates.payment_succeeded_at = Timestamp.now();
+    } else if (paymentDetails.payment_status === 'failed') {
+      updates.payment_failed_at = Timestamp.now();
+    }
+
+    await updateDoc(orderRef, updates);
+    console.log('Order updated with full payment details:', orderId);
+  } catch (error) {
+    console.error('Error updating order with payment details:', error);
     throw error;
   }
 };
