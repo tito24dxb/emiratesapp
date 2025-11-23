@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, Lock, Bell, Globe, Palette, Shield, Trash2, Mail, Camera, Save, Smartphone, Monitor, MapPin, Clock } from 'lucide-react';
+import { User, Lock, Bell, Globe, Palette, Shield, Trash2, Mail, Camera, Save, Smartphone, Monitor, MapPin, Clock, Fingerprint } from 'lucide-react';
 import { doc, updateDoc, collection, query, where, getDocs, orderBy, limit as limitQuery, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { countries } from '../data/countries';
 import { useNavigate } from 'react-router-dom';
 import TwoFactorSetup from '../components/TwoFactorSetup';
+import EnableBiometricModal from '../components/biometric/EnableBiometricModal';
+import { useBiometric } from '../hooks/useBiometric';
 
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'preferences' | 'privacy';
 
@@ -38,6 +40,10 @@ export default function SettingsPage() {
   const [loginSessions, setLoginSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
 
+  const [showBiometricModal, setShowBiometricModal] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const { isBiometricAvailable } = useBiometric();
+
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name || '');
@@ -48,8 +54,16 @@ export default function SettingsPage() {
       if (activeTab === 'privacy') {
         loadLoginSessions();
       }
+      if (activeTab === 'account') {
+        checkBiometricAvailability();
+      }
     }
   }, [currentUser, activeTab]);
+
+  const checkBiometricAvailability = async () => {
+    const available = await isBiometricAvailable();
+    setBiometricAvailable(available);
+  };
 
   const loadLoginSessions = async () => {
     if (!currentUser) return;
@@ -441,8 +455,57 @@ export default function SettingsPage() {
                   </p>
                   <TwoFactorSetup />
                 </div>
+
+                <div className="mt-8 pt-8 border-t border-gray-200">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Fingerprint className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 mb-2">Biometric Login</h3>
+                      <p className="text-sm text-gray-600 mb-4">
+                        Sign in securely using Face ID, Touch ID, or Windows Hello. No password needed.
+                      </p>
+
+                      {!biometricAvailable && (
+                        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                          <p className="text-sm text-amber-800">
+                            <strong>Note:</strong> Your device or browser doesn't support biometric authentication. This feature requires a modern browser (Chrome, Safari, Edge, Firefox) and a device with biometric capabilities (Face ID, Touch ID, Windows Hello, or fingerprint sensor).
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <button
+                          onClick={() => setShowBiometricModal(true)}
+                          disabled={!biometricAvailable}
+                          className="flex-1 py-3 px-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          <Fingerprint className="w-5 h-5" />
+                          Enable Biometric Login
+                        </button>
+                        <button
+                          onClick={() => navigate('/settings/devices')}
+                          className="py-3 px-4 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition flex items-center justify-center gap-2"
+                        >
+                          <Smartphone className="w-5 h-5" />
+                          Manage Devices
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </form>
             )}
+
+            <EnableBiometricModal
+              isOpen={showBiometricModal}
+              onClose={() => setShowBiometricModal(false)}
+              onSuccess={() => {
+                setMessage('Biometric login enabled successfully! Save your backup codes.');
+                setTimeout(() => setMessage(''), 5000);
+              }}
+            />
 
             {activeTab === 'notifications' && (
               <div className="space-y-6">
