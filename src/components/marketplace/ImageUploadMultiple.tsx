@@ -101,7 +101,7 @@ export default function ImageUploadMultiple({
           type="button"
           onClick={handleUploadClick}
           disabled={uploading || images.length >= maxImages}
-          className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-3 border-2 border-dashed border-gray-300/50 rounded-lg hover:border-blue-500 hover:bg-blue-500/10 bg-white/30 backdrop-blur-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex flex-col items-center gap-2">
             <Upload className="w-8 h-8 text-gray-400" />
@@ -128,7 +128,7 @@ export default function ImageUploadMultiple({
 
       {/* Error Message */}
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
+        <div className="p-3 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-lg text-sm text-red-600 shadow-sm">
           {error}
         </div>
       )}

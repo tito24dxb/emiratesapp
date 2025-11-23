@@ -221,8 +221,8 @@ export default function EnhancedProductForm({
                 onClick={() => setFormData({ ...formData, product_type: type as any })}
                 className={`p-2 sm:p-3 border-2 rounded-lg flex flex-col items-center gap-1 sm:gap-2 transition-all ${
                   formData.product_type === type
-                    ? 'border-blue-500 bg-blue-50 text-blue-600'
-                    : 'border-gray-200 hover:border-gray-300 text-gray-600'
+                    ? 'border-blue-500 bg-blue-500/20 backdrop-blur-sm text-blue-600'
+                    : 'border-gray-200/50 bg-white/30 backdrop-blur-sm hover:border-gray-300 hover:bg-white/50 text-gray-600'
                 }`}
               >
                 {getProductTypeIcon(type)}
@@ -347,7 +347,7 @@ export default function EnhancedProductForm({
             <button
               type="button"
               onClick={handleAddTag}
-              className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+              className="px-3 py-2 bg-white/50 backdrop-blur-sm hover:bg-white/70 text-gray-700 rounded-lg transition-colors border border-gray-200/50"
             >
               <Tag className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
@@ -357,7 +357,7 @@ export default function EnhancedProductForm({
               {formData.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs sm:text-sm"
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-blue-500/20 backdrop-blur-sm text-blue-700 rounded-full text-xs sm:text-sm border border-blue-200/50"
                 >
                   {tag}
                   <button
@@ -408,7 +408,7 @@ export default function EnhancedProductForm({
             ))}
 
             {formData.images.length < 5 && (
-              <label className="aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 cursor-pointer flex flex-col items-center justify-center gap-1 sm:gap-2 bg-gray-50 hover:bg-blue-50 transition-colors">
+              <label className="aspect-square border-2 border-dashed border-gray-300/50 rounded-lg hover:border-blue-500 cursor-pointer flex flex-col items-center justify-center gap-1 sm:gap-2 bg-white/30 backdrop-blur-sm hover:bg-blue-500/10 transition-colors">
                 <Package className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400" />
                 <span className="text-xs text-gray-500">Add Image</span>
                 <input
@@ -437,7 +437,7 @@ export default function EnhancedProductForm({
               type="button"
               onClick={onCancel}
               disabled={loading}
-              className="w-full sm:flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 text-sm sm:text-base"
+              className="w-full sm:flex-1 px-4 py-2.5 border border-gray-300/50 text-gray-700 rounded-lg hover:bg-white/30 bg-white/20 backdrop-blur-sm transition-colors disabled:opacity-50 text-sm sm:text-base"
             >
               Cancel
             </button>
@@ -445,7 +445,7 @@ export default function EnhancedProductForm({
           <button
             type="submit"
             disabled={loading || processingImages}
-            className="w-full sm:flex-1 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base"
+            className="w-full sm:flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-lg font-medium transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-sm sm:text-base shadow-lg"
           >
             <Save className="w-4 h-4 sm:w-5 sm:h-5" />
             {loading ? 'Saving...' : isEdit ? 'Update Product' : 'Create Product'}
