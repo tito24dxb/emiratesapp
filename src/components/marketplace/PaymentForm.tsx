@@ -284,11 +284,11 @@ export default function PaymentForm({
       </div>
 
       {/* Card Element */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="relative z-20">
+        <label className="block text-sm font-medium text-gray-900 mb-2">
           Card Details *
         </label>
-        <div className="p-4 border-2 border-gray-300 rounded-lg focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+        <div className="relative p-4 border-2 border-gray-300 rounded-lg bg-white focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-all min-h-[44px] z-30">
           <CardElement
             options={CARD_ELEMENT_OPTIONS}
             onChange={(e) => {
@@ -301,7 +301,7 @@ export default function PaymentForm({
             }}
           />
         </div>
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-gray-900 mt-2">
           <Lock className="w-3 h-3 inline mr-1" />
           Your payment information is encrypted and secure
         </p>
