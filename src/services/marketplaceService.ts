@@ -67,7 +67,7 @@ export const createProduct = async (
   try {
     const productRef = doc(collection(db, 'marketplace_products'));
 
-    const product: Omit<MarketplaceProduct, 'id'> = {
+    const product: any = {
       seller_id: userId,
       seller_name: userName,
       seller_email: userEmail,
@@ -79,11 +79,7 @@ export const createProduct = async (
       category: productData.category,
       product_type: productData.product_type,
       images: productData.images,
-      digital_file_url: productData.digital_file_url,
-      digital_file_name: productData.digital_file_name,
-      digital_file_size: productData.digital_file_size,
       status: 'draft',
-      stock_quantity: productData.stock_quantity,
       created_at: Timestamp.now(),
       updated_at: Timestamp.now(),
       views_count: 0,
@@ -91,6 +87,22 @@ export const createProduct = async (
       sales_count: 0,
       tags: productData.tags || []
     };
+
+    if (productData.digital_file_url) {
+      product.digital_file_url = productData.digital_file_url;
+    }
+
+    if (productData.digital_file_name) {
+      product.digital_file_name = productData.digital_file_name;
+    }
+
+    if (productData.digital_file_size) {
+      product.digital_file_size = productData.digital_file_size;
+    }
+
+    if (productData.stock_quantity !== undefined) {
+      product.stock_quantity = productData.stock_quantity;
+    }
 
     await setDoc(productRef, product);
     console.log('Product created:', productRef.id);

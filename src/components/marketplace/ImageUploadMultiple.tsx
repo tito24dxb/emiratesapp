@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { processProductImage } from '../../utils/imageProcessing';
 
 interface ImageUploadMultipleProps {
   images: string[];
@@ -49,8 +50,8 @@ export default function ImageUploadMultiple({
           continue;
         }
 
-        const base64 = await fileToBase64(file);
-        newImages.push(base64 as string);
+        const processed = await processProductImage(file, true, 1200, 1200);
+        newImages.push(processed.base64);
       }
 
       onChange([...images, ...newImages]);
@@ -106,7 +107,7 @@ export default function ImageUploadMultiple({
             <Upload className="w-8 h-8 text-gray-400" />
             <div className="text-sm text-gray-600">
               {uploading ? (
-                'Uploading...'
+                'Processing images...'
               ) : images.length >= maxImages ? (
                 `Maximum ${maxImages} images reached`
               ) : (
@@ -116,6 +117,8 @@ export default function ImageUploadMultiple({
                   <span className="text-xs text-gray-500">
                     PNG, JPG, GIF up to {maxSizePerImageMB}MB ({images.length}/{maxImages})
                   </span>
+                  <br />
+                  <span className="text-xs text-blue-600">White backgrounds auto-removed</span>
                 </>
               )}
             </div>
