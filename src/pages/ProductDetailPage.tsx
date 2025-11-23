@@ -333,7 +333,7 @@ export default function ProductDetailPage() {
                     </div>
                   )}
                   <div>
-                    <div className="font-medium text-gray-900">{product.seller_name}</div>
+                    <div className="font-medium text-gray-900">{product.seller_name?.includes('@') ? product.seller_name.split('@')[0] : product.seller_name}</div>
                     <div className="text-sm text-gray-600">Verified Seller</div>
                   </div>
                 </div>
