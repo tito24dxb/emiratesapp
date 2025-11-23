@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Send, X, MessageCircle, Package } from 'lucide-react';
+import { Send, X, MessageCircle, Package, Minus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../context/AppContext';
 import {
@@ -31,6 +31,7 @@ export default function MarketplaceChat({
   const [conversation, setConversation] = useState<MarketplaceConversation | null>(null);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -118,6 +119,34 @@ export default function MarketplaceChat({
 
   const isSeller = currentUser.uid === sellerId;
 
+  if (isMinimized) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="fixed bottom-4 right-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-xl shadow-2xl cursor-pointer hover:shadow-3xl transition-shadow z-50"
+        onClick={() => setIsMinimized(false)}
+      >
+        <div className="flex items-center gap-3">
+          <MessageCircle className="w-5 h-5" />
+          <div>
+            <p className="font-bold text-sm">{isSeller ? 'Chat with Buyer' : sellerName}</p>
+            <p className="text-xs text-blue-100">{productTitle}</p>
+          </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -134,12 +163,22 @@ export default function MarketplaceChat({
             <p className="text-xs text-blue-100">About: {productTitle}</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 hover:bg-white/20 rounded-lg transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setIsMinimized(true)}
+            className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+            title="Minimize"
+          >
+            <Minus className="w-5 h-5" />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+            title="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       {/* Product Info */}
