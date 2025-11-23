@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Bell, ChevronDown, User, Settings, LogOut, Menu, X, ShoppingBag, Package, DollarSign } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
@@ -132,6 +132,31 @@ export default function Navbar() {
               >
                 <Settings className="w-4 h-4" />
                 <span>Settings</span>
+              </Link>
+              <hr className="my-2 border-white/20" />
+              <Link
+                to="/marketplace"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Marketplace</span>
+              </Link>
+              <Link
+                to="/seller/dashboard"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <Package className="w-4 h-4" />
+                <span>Seller Dashboard</span>
+              </Link>
+              <Link
+                to="/seller/billing"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span>My Earnings</span>
               </Link>
               <hr className="my-2 border-white/20" />
               <button
