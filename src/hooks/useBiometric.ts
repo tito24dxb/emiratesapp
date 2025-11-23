@@ -79,6 +79,9 @@ export const useBiometric = () => {
     setError(null);
 
     try {
+      // Check if functions are deployed
+      throw new Error('Biometric authentication requires Firebase Cloud Functions to be deployed. Please run: firebase deploy --only functions');
+
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User must be authenticated');

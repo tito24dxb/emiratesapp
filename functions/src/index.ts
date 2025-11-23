@@ -1055,3 +1055,11 @@ export const updateLeaderboard = functions.pubsub.schedule('every 15 minutes').o
 export { createPaymentIntent } from './stripe/createPaymentIntent';
 export { stripeWebhook } from './stripe/handleWebhook';
 export { generateDownloadLink } from './stripe/generateDownloadLink';
+
+// WebAuthn / Biometric Authentication Functions
+export { registerBegin } from './webauthn/registerBegin';
+export { registerComplete } from './webauthn/registerComplete';
+export { loginBegin } from './webauthn/loginBegin';
+export { loginComplete } from './webauthn/loginComplete';
+export { revokeDevice } from './devices/revokeDevice';
+export { generateBackupCodes } from './backup/generateCodes';
