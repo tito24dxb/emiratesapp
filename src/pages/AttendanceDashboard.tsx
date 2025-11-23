@@ -100,7 +100,7 @@ export default function AttendanceDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Attendees</span>
@@ -113,7 +113,7 @@ export default function AttendanceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Activities</span>
@@ -126,7 +126,7 @@ export default function AttendanceDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Revenue</span>
@@ -139,14 +139,14 @@ export default function AttendanceDashboard() {
         </div>
 
         {/* Filters and Actions */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
+        <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="flex-1">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by Activity</label>
               <select
                 value={selectedActivity}
                 onChange={(e) => setSelectedActivity(e.target.value)}
-                className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/10 backdrop-blur-sm"
+                className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/20 backdrop-blur-xl"
               >
                 <option value="all">All Activities</option>
                 {activities.map(activity => (
@@ -179,7 +179,7 @@ export default function AttendanceDashboard() {
         </div>
 
         {/* Attendance Table */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Attendance Records</h2>
           </div>

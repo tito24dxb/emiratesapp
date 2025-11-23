@@ -102,7 +102,7 @@ export default function SellerDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Products</span>
@@ -115,7 +115,7 @@ export default function SellerDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Views</span>
@@ -128,7 +128,7 @@ export default function SellerDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Sales</span>
@@ -141,7 +141,7 @@ export default function SellerDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-600 text-sm">Total Revenue</span>
@@ -164,7 +164,7 @@ export default function SellerDashboard() {
           </button>
           <button
             onClick={() => navigate('/seller/billing')}
-            className="px-6 py-3 bg-white/10 backdrop-blur-sm hover:bg-white/20 border border-gray-200/50 text-gray-900 rounded-lg font-medium transition-all flex items-center gap-2"
+            className="px-6 py-3 bg-white/20 backdrop-blur-xl hover:bg-white/30 border border-white/30 text-gray-900 rounded-lg font-medium transition-all flex items-center gap-2 shadow-xl"
           >
             <BarChart3 className="w-5 h-5" />
             View Billing
@@ -172,7 +172,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Your Products</h2>
           </div>
@@ -196,7 +196,7 @@ export default function SellerDashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-white/5 backdrop-blur-sm">
+                <thead className="bg-white/10 backdrop-blur-xl">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
@@ -221,9 +221,9 @@ export default function SellerDashboard() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white/5 backdrop-blur-sm divide-y divide-gray-200/50">
+                <tbody className="bg-white/10 backdrop-blur-xl divide-y divide-gray-200/50">
                   {products.map((product) => (
-                    <tr key={product.id} className="hover:bg-white/10 transition-colors">
+                    <tr key={product.id} className="hover:bg-white/20 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <img

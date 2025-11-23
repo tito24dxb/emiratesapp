@@ -207,7 +207,7 @@ export default function SellerBillingDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg"
+            className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-green-100 text-sm">Total Earnings</span>
@@ -220,7 +220,7 @@ export default function SellerBillingDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg"
+            className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-yellow-100 text-sm">Pending Payments</span>
@@ -233,7 +233,7 @@ export default function SellerBillingDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white shadow-lg"
+            className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-red-100 text-sm">Processed Refunds</span>
@@ -246,7 +246,7 @@ export default function SellerBillingDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg"
+            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-blue-100 text-sm">Total Customers</span>
@@ -257,7 +257,7 @@ export default function SellerBillingDashboard() {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
+        <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -266,14 +266,14 @@ export default function SellerBillingDashboard() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by customer, product, or order ID..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/10 backdrop-blur-sm"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/20 backdrop-blur-xl"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/10 backdrop-blur-sm"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/20 backdrop-blur-xl"
             >
               <option value="all">All Status</option>
               <option value="completed">Completed</option>
@@ -293,7 +293,7 @@ export default function SellerBillingDashboard() {
         </div>
 
         {/* Transactions Table */}
-        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Transaction History</h2>
           </div>
@@ -388,7 +388,7 @@ export default function SellerBillingDashboard() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white/10 backdrop-blur-md rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200/50"
+              className="bg-white/10 backdrop-blur-md rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/30"
             >
               <h3 className="text-xl font-bold text-gray-900 mb-4">Transaction Details</h3>
 
@@ -421,7 +421,7 @@ export default function SellerBillingDashboard() {
                       <MapPin className="w-4 h-4" />
                       Shipping Address
                     </label>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-sm text-gray-900">
+                    <div className="bg-white/20 backdrop-blur-xl rounded-lg p-4 text-sm text-gray-900">
                       <p>{selectedTransaction.address.line1}</p>
                       <p>
                         {selectedTransaction.address.city}, {selectedTransaction.address.state}{' '}
