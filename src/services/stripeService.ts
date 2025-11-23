@@ -1,6 +1,6 @@
 import { loadStripe, Stripe, StripeElements } from '@stripe/stripe-js';
-import { httpsCallable } from 'firebase/functions';
-import { functions } from '../lib/firebase';
+import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 let stripePromise: Promise<Stripe | null> | null = null;
 
@@ -16,32 +16,62 @@ export const getStripe = (): Promise<Stripe | null> => {
   return stripePromise;
 };
 
-export interface CreatePaymentIntentData {
-  orderId: string;
+export interface CreateMarketplacePaymentIntentData {
+  firebase_buyer_uid: string;
+  firebase_seller_uid: string;
+  firebase_order_id: string;
+  product_id: string;
+  product_title: string;
+  product_type: 'digital' | 'physical' | 'service';
+  quantity: number;
   amount: number;
   currency: string;
-  productId: string;
-  productTitle: string;
+  seller_email: string;
 }
 
 export interface PaymentIntentResponse {
   clientSecret: string;
   paymentIntentId: string;
+  customerId?: string;
 }
 
-export const createPaymentIntent = async (
-  data: CreatePaymentIntentData
+export const createMarketplacePaymentIntent = async (
+  data: CreateMarketplacePaymentIntentData
 ): Promise<PaymentIntentResponse> => {
   try {
-    const createPaymentIntentFn = httpsCallable<CreatePaymentIntentData, PaymentIntentResponse>(
-      functions,
-      'createPaymentIntent'
-    );
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    const result = await createPaymentIntentFn(data);
-    return result.data;
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase configuration missing');
+    }
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const idToken = await currentUser.getIdToken();
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/marketplace-payment-intent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+        'apikey': supabaseAnonKey
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to create payment intent');
+    }
+
+    const result = await response.json();
+    return result;
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error('Error creating marketplace payment intent:', error);
     throw error;
   }
 };
@@ -112,16 +142,44 @@ export interface GenerateDownloadLinkResponse {
 }
 
 export const generateDownloadLink = async (
-  orderId: string
+  orderId: string,
+  buyerUid: string
 ): Promise<GenerateDownloadLinkResponse> => {
   try {
-    const generateDownloadLinkFn = httpsCallable<GenerateDownloadLinkData, GenerateDownloadLinkResponse>(
-      functions,
-      'generateDownloadLink'
-    );
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    const result = await generateDownloadLinkFn({ orderId });
-    return result.data;
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error('Supabase configuration missing');
+    }
+
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      throw new Error('User not authenticated');
+    }
+
+    const idToken = await currentUser.getIdToken();
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/marketplace-generate-download`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`,
+        'apikey': supabaseAnonKey
+      },
+      body: JSON.stringify({
+        firebase_order_id: orderId,
+        firebase_buyer_uid: buyerUid
+      })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to generate download link');
+    }
+
+    const result = await response.json();
+    return result;
   } catch (error) {
     console.error('Error generating download link:', error);
     throw error;

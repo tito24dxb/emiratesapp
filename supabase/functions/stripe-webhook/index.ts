@@ -13,6 +13,10 @@ const stripe = new Stripe(stripeSecret, {
 
 const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
+const firebaseProjectId = Deno.env.get('FIREBASE_PROJECT_ID')!;
+const firebaseClientEmail = Deno.env.get('FIREBASE_CLIENT_EMAIL')!;
+const firebasePrivateKey = Deno.env.get('FIREBASE_PRIVATE_KEY')!.replace(/\\n/g, '\n');
+
 Deno.serve(async (req) => {
   try {
     if (req.method === 'OPTIONS') {
@@ -49,6 +53,119 @@ Deno.serve(async (req) => {
   }
 });
 
+async function getFirebaseAccessToken(): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const expiry = now + 3600;
+
+  const header = {
+    alg: 'RS256',
+    typ: 'JWT'
+  };
+
+  const payload = {
+    iss: firebaseClientEmail,
+    sub: firebaseClientEmail,
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: expiry,
+    scope: 'https://www.googleapis.com/auth/firebase.database https://www.googleapis.com/auth/userinfo.email'
+  };
+
+  const encoder = new TextEncoder();
+  const headerBase64 = btoa(JSON.stringify(header)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+  const payloadBase64 = btoa(JSON.stringify(payload)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+
+  const signatureInput = `${headerBase64}.${payloadBase64}`;
+
+  const pemHeader = '-----BEGIN PRIVATE KEY-----';
+  const pemFooter = '-----END PRIVATE KEY-----';
+  const pemContents = firebasePrivateKey.replace(pemHeader, '').replace(pemFooter, '').replace(/\s/g, '');
+
+  const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+
+  const key = await crypto.subtle.importKey(
+    'pkcs8',
+    binaryDer,
+    {
+      name: 'RSASSA-PKCS1-v1_5',
+      hash: 'SHA-256',
+    },
+    false,
+    ['sign']
+  );
+
+  const signature = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    key,
+    encoder.encode(signatureInput)
+  );
+
+  const signatureBase64 = btoa(String.fromCharCode(...new Uint8Array(signature)))
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+
+  const jwt = `${signatureInput}.${signatureBase64}`;
+
+  const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion: jwt,
+    }),
+  });
+
+  const tokenData = await tokenResponse.json();
+  return tokenData.access_token;
+}
+
+async function updateFirestoreOrder(orderId: string, paymentDetails: any): Promise<boolean> {
+  try {
+    const accessToken = await getFirebaseAccessToken();
+
+    const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${firebaseProjectId}/databases/(default)/documents/marketplace_orders/${orderId}`;
+
+    const response = await fetch(`${firestoreUrl}?updateMask.fieldPaths=payment_status&updateMask.fieldPaths=payment_intent_id&updateMask.fieldPaths=payment_method&updateMask.fieldPaths=completed_at&updateMask.fieldPaths=metadata`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fields: {
+          payment_status: { stringValue: paymentDetails.status },
+          payment_intent_id: { stringValue: paymentDetails.payment_intent_id },
+          payment_method: { stringValue: paymentDetails.payment_method || 'card' },
+          completed_at: { timestampValue: new Date().toISOString() },
+          metadata: {
+            mapValue: {
+              fields: {
+                stripe_customer_id: { stringValue: paymentDetails.stripe_customer_id || '' },
+                stripe_charge_id: { stringValue: paymentDetails.stripe_charge_id || '' }
+              }
+            }
+          }
+        }
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Failed to update Firestore order:', error);
+      return false;
+    }
+
+    console.log(`Successfully updated Firestore order ${orderId}`);
+    return true;
+  } catch (error) {
+    console.error('Error updating Firestore:', error);
+    return false;
+  }
+}
+
 async function handleEvent(event: Stripe.Event) {
   const stripeData = event?.data?.object ?? {};
 
@@ -56,11 +173,21 @@ async function handleEvent(event: Stripe.Event) {
     return;
   }
 
-  if (!('customer' in stripeData)) {
-    return;
+  if (event.type === 'payment_intent.succeeded') {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+    if (paymentIntent.metadata?.marketplace_order === 'true') {
+      console.info('Processing marketplace payment intent');
+      await handleMarketplacePayment(paymentIntent);
+      return;
+    }
+
+    if (paymentIntent.invoice !== null) {
+      return;
+    }
   }
 
-  if (event.type === 'payment_intent.succeeded' && event.data.object.invoice === null) {
+  if (!('customer' in stripeData)) {
     return;
   }
 
@@ -175,5 +302,61 @@ async function syncCustomerFromStripe(customerId: string) {
   } catch (error) {
     console.error(`Failed to sync subscription for customer ${customerId}:`, error);
     throw error;
+  }
+}
+
+async function handleMarketplacePayment(paymentIntent: Stripe.PaymentIntent) {
+  try {
+    const {
+      id: payment_intent_id,
+      amount,
+      currency,
+      customer,
+      charges,
+      metadata
+    } = paymentIntent;
+
+    const firebase_order_id = metadata.firebase_order_id;
+
+    if (!firebase_order_id) {
+      console.error('No firebase_order_id in payment intent metadata');
+      return;
+    }
+
+    console.log(`Processing marketplace payment for order: ${firebase_order_id}`);
+
+    const charge = charges.data[0];
+    const paymentMethod = charge?.payment_method_details;
+
+    const { error: updateError } = await supabase
+      .from('marketplace_payment_intents')
+      .update({
+        status: 'succeeded',
+        updated_at: new Date().toISOString()
+      })
+      .eq('payment_intent_id', payment_intent_id);
+
+    if (updateError) {
+      console.error('Failed to update payment intent status:', updateError);
+    }
+
+    const paymentDetails = {
+      status: 'completed',
+      payment_intent_id,
+      payment_method: paymentMethod?.type || 'card',
+      stripe_customer_id: customer as string,
+      stripe_charge_id: charge?.id || ''
+    };
+
+    const success = await updateFirestoreOrder(firebase_order_id, paymentDetails);
+
+    if (success) {
+      console.log(`Successfully processed marketplace payment for order ${firebase_order_id}`);
+    } else {
+      console.error(`Failed to update Firebase for order ${firebase_order_id}`);
+    }
+
+  } catch (error) {
+    console.error('Error handling marketplace payment:', error);
   }
 }
