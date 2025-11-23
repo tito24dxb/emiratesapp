@@ -92,7 +92,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading product...</p>
@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
@@ -123,7 +123,7 @@ export default function ProductDetailPage() {
     : 'https://images.unsplash.com/photo-1557821552-17105176677c?w=800&h=600&fit=crop';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
@@ -135,7 +135,7 @@ export default function ProductDetailPage() {
         </button>
 
         {/* Product Detail */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white/30 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 overflow-hidden">
           <div className="grid md:grid-cols-2 gap-8 p-6 lg:p-8">
             {/* Images */}
             <div>

@@ -46,13 +46,6 @@ export const createMarketplacePaymentIntent = async (
       throw new Error('Supabase configuration missing');
     }
 
-    const currentUser = auth.currentUser;
-    if (!currentUser) {
-      throw new Error('User not authenticated');
-    }
-
-    const idToken = await currentUser.getIdToken();
-
     console.log('💳 Creating marketplace payment intent:', {
       ...data,
       firebase_buyer_uid: data.firebase_buyer_uid.substring(0, 8) + '...'
@@ -62,7 +55,7 @@ export const createMarketplacePaymentIntent = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
         'apikey': supabaseAnonKey
       },
       body: JSON.stringify(data)
