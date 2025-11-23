@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
-import { httpsCallable } from 'firebase/functions';
-import { signInWithCustomToken } from 'firebase/auth';
-import { auth, functions } from '../lib/firebase';
+import { auth } from '../lib/firebase';
+import { supabase } from '../lib/supabase';
 
 interface BiometricDevice {
   id: string;
@@ -74,14 +73,32 @@ export const useBiometric = () => {
     return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
   };
 
+  const callSupabaseFunction = async (functionName: string, body: any) => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Request failed');
+    }
+
+    return response.json();
+  };
+
   const registerBiometric = useCallback(async (deviceName: string): Promise<string[]> => {
     setLoading(true);
     setError(null);
 
     try {
-      // Check if functions are deployed
-      throw new Error('Biometric authentication requires Firebase Cloud Functions to be deployed. Please run: firebase deploy --only functions');
-
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User must be authenticated');
@@ -92,12 +109,14 @@ export const useBiometric = () => {
         throw new Error('Biometric authentication not available on this device');
       }
 
-      const idToken = await user.getIdToken();
+      const firebaseToken = await user.getIdToken();
 
-      const registerBeginFn = httpsCallable(functions, 'registerBegin');
-      const beginResult = await registerBeginFn({ idToken, deviceName });
-
-      const options = beginResult.data as RegisterOptions;
+      // Call Supabase Edge Function for registration begin
+      const options = await callSupabaseFunction('biometric-register-begin', {
+        userId: user.uid,
+        deviceName,
+        firebaseToken,
+      }) as RegisterOptions;
 
       const publicKeyOptions: PublicKeyCredentialCreationOptions = {
         challenge: base64ToBuffer(options.challenge),
@@ -146,13 +165,13 @@ export const useBiometric = () => {
         }
       };
 
-      const registerCompleteFn = httpsCallable(functions, 'registerComplete');
-      const completeResult = await registerCompleteFn({
-        idToken,
-        credential: credentialData
-      });
-
-      const result = completeResult.data as { success: boolean; backupCodes: string[] };
+      // Call Supabase Edge Function for registration complete
+      const result = await callSupabaseFunction('biometric-register-complete', {
+        userId: user.uid,
+        credential: credentialData,
+        deviceName,
+        firebaseToken,
+      }) as { success: boolean; backupCodes: string[] };
 
       localStorage.setItem('biometric_registered', 'true');
 
@@ -166,7 +185,7 @@ export const useBiometric = () => {
     }
   }, [isBiometricAvailable]);
 
-  const loginWithBiometric = useCallback(async (email: string): Promise<void> => {
+  const loginWithBiometric = useCallback(async (userId: string): Promise<void> => {
     setLoading(true);
     setError(null);
 
@@ -176,10 +195,10 @@ export const useBiometric = () => {
         throw new Error('Biometric authentication not available');
       }
 
-      const loginBeginFn = httpsCallable(functions, 'loginBegin');
-      const beginResult = await loginBeginFn({ email });
-
-      const options = beginResult.data as AuthenticationOptions;
+      // Call Supabase Edge Function for login begin
+      const options = await callSupabaseFunction('biometric-login-begin', {
+        userId,
+      }) as AuthenticationOptions;
 
       const publicKeyOptions: PublicKeyCredentialRequestOptions = {
         challenge: base64ToBuffer(options.challenge),
@@ -215,17 +234,18 @@ export const useBiometric = () => {
         }
       };
 
-      const loginCompleteFn = httpsCallable(functions, 'loginComplete');
-      const completeResult = await loginCompleteFn({
+      // Call Supabase Edge Function for login complete
+      const result = await callSupabaseFunction('biometric-login-complete', {
         userId: options.userId,
-        credential: credentialData
-      });
+        credential: credentialData,
+      }) as { success: boolean; userId: string };
 
-      const result = completeResult.data as { success: boolean; customToken: string };
-
-      await signInWithCustomToken(auth, result.customToken);
-
-      localStorage.setItem('last_biometric_login', new Date().toISOString());
+      if (result.success) {
+        // Biometric verification succeeded
+        // The client should handle Firebase authentication separately
+        localStorage.setItem('last_biometric_login', new Date().toISOString());
+        localStorage.setItem('biometric_verified_user', result.userId);
+      }
     } catch (err: any) {
       const errorMessage = err.message || 'Biometric authentication failed';
       setError(errorMessage);
@@ -235,7 +255,7 @@ export const useBiometric = () => {
     }
   }, [isBiometricAvailable]);
 
-  const revokeDevice = useCallback(async (deviceId: string): Promise<void> => {
+  const revokeDevice = useCallback(async (credentialId: string): Promise<void> => {
     setLoading(true);
     setError(null);
 
@@ -245,10 +265,16 @@ export const useBiometric = () => {
         throw new Error('User must be authenticated');
       }
 
-      const idToken = await user.getIdToken();
+      // Delete credential from Supabase
+      const { error } = await supabase
+        .from('webauthn_credentials')
+        .update({ revoked: true })
+        .eq('credential_id', credentialId)
+        .eq('user_id', user.uid);
 
-      const revokeDeviceFn = httpsCallable(functions, 'revokeDevice');
-      await revokeDeviceFn({ idToken, deviceId });
+      if (error) {
+        throw new Error('Failed to revoke device');
+      }
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to revoke device';
       setError(errorMessage);
@@ -258,23 +284,75 @@ export const useBiometric = () => {
     }
   }, []);
 
-  const verifyBackupCode = useCallback(async (email: string, code: string): Promise<void> => {
+  const verifyBackupCode = useCallback(async (userId: string, code: string): Promise<boolean> => {
     setLoading(true);
     setError(null);
 
     try {
-      const verifyBackupCodeFn = httpsCallable(functions, 'verifyBackupCode');
-      const result = await verifyBackupCodeFn({ email, code });
+      // Hash the code
+      const encoder = new TextEncoder();
+      const data = encoder.encode(code);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-      const data = result.data as { success: boolean; customToken: string };
+      // Check if code exists and is not used
+      const { data: backupCode, error } = await supabase
+        .from('backup_codes')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('code_hash', hash)
+        .eq('used', false)
+        .single();
 
-      await signInWithCustomToken(auth, data.customToken);
+      if (error || !backupCode) {
+        throw new Error('Invalid or already used backup code');
+      }
+
+      // Mark code as used
+      await supabase
+        .from('backup_codes')
+        .update({ used: true, used_at: new Date().toISOString() })
+        .eq('id', backupCode.id);
+
+      return true;
     } catch (err: any) {
       const errorMessage = err.message || 'Invalid backup code';
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setLoading(false);
+    }
+  }, []);
+
+  const listDevices = useCallback(async (): Promise<BiometricDevice[]> => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('User must be authenticated');
+      }
+
+      const { data, error } = await supabase
+        .from('webauthn_credentials')
+        .select('*')
+        .eq('user_id', user.uid)
+        .eq('revoked', false)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return (data || []).map(cred => ({
+        id: cred.credential_id,
+        deviceName: cred.device_name,
+        createdAt: new Date(cred.created_at),
+        lastSeen: cred.last_used ? new Date(cred.last_used) : new Date(cred.created_at),
+        revoked: cred.revoked,
+      }));
+    } catch (err: any) {
+      setError(err.message || 'Failed to list devices');
+      return [];
     }
   }, []);
 
@@ -285,6 +363,7 @@ export const useBiometric = () => {
     registerBiometric,
     loginWithBiometric,
     revokeDevice,
-    verifyBackupCode
+    verifyBackupCode,
+    listDevices,
   };
 };

@@ -533,13 +533,6 @@ export default function SettingsPage() {
                     </button>
                   </div>
 
-                  <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                    <p className="text-sm text-amber-800">
-                      <strong>Notice:</strong> Biometric authentication requires Firebase Cloud Functions to be deployed.
-                      Please run: <code className="bg-amber-100 px-2 py-0.5 rounded">firebase deploy --only functions</code>
-                    </p>
-                  </div>
-
                   {!biometricAvailable && (
                     <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
                       <p className="text-sm text-red-800">
