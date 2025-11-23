@@ -13,7 +13,7 @@ interface EnhancedComment extends CommunityComment {
     thumbsUp: number;
     laugh: number;
   };
-  userReactions?: string[];
+  userReactions?: Record<string, string>;
   replyTo?: string;
   replyToName?: string;
 }
@@ -403,23 +403,43 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
               <div className="flex items-center gap-4 ml-10 mt-2">
                 <button
                   onClick={() => handleReaction(comment.id, 'heart')}
-                  className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-500 transition"
+                  className={`flex items-center gap-1 text-sm transition ${
+                    comment.userReactions?.[currentUser.uid || currentUser.id] === 'heart'
+                      ? 'text-red-500 font-bold'
+                      : 'text-gray-600 hover:text-red-500'
+                  }`}
                 >
-                  <Heart className="w-4 h-4" />
+                  <Heart className={`w-4 h-4 ${
+                    comment.userReactions?.[currentUser.uid || currentUser.id] === 'heart'
+                      ? 'fill-red-500'
+                      : ''
+                  }`} />
                   <span>{comment.reactions?.heart || 0}</span>
                 </button>
 
                 <button
                   onClick={() => handleReaction(comment.id, 'thumbsUp')}
-                  className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-500 transition"
+                  className={`flex items-center gap-1 text-sm transition ${
+                    comment.userReactions?.[currentUser.uid || currentUser.id] === 'thumbsUp'
+                      ? 'text-blue-500 font-bold'
+                      : 'text-gray-600 hover:text-blue-500'
+                  }`}
                 >
-                  <ThumbsUp className="w-4 h-4" />
+                  <ThumbsUp className={`w-4 h-4 ${
+                    comment.userReactions?.[currentUser.uid || currentUser.id] === 'thumbsUp'
+                      ? 'fill-blue-500'
+                      : ''
+                  }`} />
                   <span>{comment.reactions?.thumbsUp || 0}</span>
                 </button>
 
                 <button
                   onClick={() => handleReaction(comment.id, 'laugh')}
-                  className="text-sm text-gray-600 hover:text-yellow-500 transition"
+                  className={`text-sm transition flex items-center gap-1 ${
+                    comment.userReactions?.[currentUser.uid || currentUser.id] === 'laugh'
+                      ? 'text-yellow-500 font-bold'
+                      : 'text-gray-600 hover:text-yellow-500'
+                  }`}
                 >
                   😂 <span>{comment.reactions?.laugh || 0}</span>
                 </button>
