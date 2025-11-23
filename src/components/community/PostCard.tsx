@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical, ShoppingBag } from 'lucide-react';
+import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical, ShoppingBag, Send, Smile, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CommunityPost, communityFeedService } from '../../services/communityFeedService';
 import EnhancedCommentsSection from './EnhancedCommentsSection';
@@ -22,6 +22,9 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   const [localPost, setLocalPost] = useState(post);
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [commentText, setCommentText] = useState('');
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     setLocalPost(post);
@@ -115,6 +118,44 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
     } catch (error) {
       console.error('Error flagging post:', error);
       alert('Failed to flag post');
+    }
+  };
+
+  const handleQuickComment = async () => {
+    if (!commentText.trim() || isSubmittingComment) return;
+
+    // Block free users from commenting
+    if (currentUser.plan === 'free') {
+      if (confirm('Upgrade to Pro or VIP to comment on posts. Go to upgrade page?')) {
+        navigate('/upgrade');
+      }
+      return;
+    }
+
+    setIsSubmittingComment(true);
+    try {
+      const userId = currentUser.uid || currentUser.id;
+      const userName = currentUser.displayName || currentUser.name || currentUser.userName || 'Anonymous';
+
+      await communityFeedService.addComment(post.id, {
+        userId,
+        userName,
+        userEmail: currentUser.email || '',
+        userPhotoURL: currentUser.photoURL || currentUser.profilePicture || '',
+        content: commentText,
+        imageUrl: '',
+        reactions: { heart: 0, thumbsUp: 0, laugh: 0 },
+        userReactions: {},
+        repliesCount: 0
+      });
+
+      setCommentText('');
+      setShowComments(true);
+    } catch (error) {
+      console.error('Error posting comment:', error);
+      alert('Failed to post comment');
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
@@ -306,6 +347,80 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
           <span>{localPost.commentsCount}</span>
           <span className="hidden sm:inline">Comments</span>
         </motion.button>
+      </div>
+
+      {/* Always Visible Comment Input */}
+      <div className="mt-4 pt-4 border-t-2 border-gray-200/50">
+        <div className="flex gap-2 md:gap-3 items-start">
+          {currentUser.photoURL ? (
+            <img
+              src={currentUser.photoURL}
+              alt="You"
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover flex-shrink-0 border-2 border-white shadow-md"
+            />
+          ) : (
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+              {currentUser.displayName?.charAt(0).toUpperCase() || 'U'}
+            </div>
+          )}
+          <div className="flex-1 relative">
+            <textarea
+              ref={commentInputRef}
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleQuickComment();
+                }
+              }}
+              placeholder={currentUser.plan === 'free' ? '🔒 Upgrade to Pro/VIP to comment...' : 'Write a comment...'}
+              disabled={currentUser.plan === 'free' || isSubmittingComment}
+              rows={1}
+              className={`w-full px-3 md:px-4 py-2 md:py-3 rounded-xl border-2 text-sm md:text-base resize-none focus:outline-none transition-all ${
+                currentUser.plan === 'free'
+                  ? 'bg-gray-100 border-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'liquid-glass border-gray-300 focus:border-[#D71920] text-gray-800'
+              }`}
+            />
+            <div className="absolute right-2 bottom-2 flex items-center gap-1">
+              {currentUser.plan !== 'free' && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleQuickComment}
+                  disabled={!commentText.trim() || isSubmittingComment}
+                  className={`p-2 rounded-lg transition ${
+                    commentText.trim() && !isSubmittingComment
+                      ? 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white shadow-md hover:shadow-lg'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {isSubmittingComment ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                    >
+                      <MessageCircle className="w-4 h-4" />
+                    </motion.div>
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
+                </motion.button>
+              )}
+            </div>
+          </div>
+        </div>
+        {currentUser.plan === 'free' && (
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => navigate('/upgrade')}
+            className="mt-2 w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition"
+          >
+            Upgrade to Comment & Engage
+          </motion.button>
+        )}
       </div>
 
       {showComments && (

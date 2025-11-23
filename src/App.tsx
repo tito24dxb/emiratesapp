@@ -20,6 +20,7 @@ import ChatModerationConsole from './pages/governor/ChatModerationConsole';
 import FeatureShutdownControl from './pages/governor/FeatureShutdownControl';
 import PlaceholderPage from './pages/PlaceholderPage';
 import NotificationsPage from './pages/NotificationsPage';
+import WhatsNewPage from './pages/WhatsNewPage';
 import AITrainerPage from './pages/AITrainerPage';
 import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
 import RecruiterListPage from './pages/RecruiterListPage';
@@ -123,6 +124,7 @@ function AppContent() {
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/whats-new" element={<WhatsNewPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="/ai-trainer" element={<AITrainerPage />} />
         <Route path="/open-day" element={<OpenDaySimulatorPage />} />

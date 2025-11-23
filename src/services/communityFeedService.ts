@@ -18,6 +18,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
+import { notifyPostComment, notifyPostReaction, notifyCommentReply } from './comprehensiveNotificationService';
 
 export interface CommunityPost {
   id: string;
@@ -306,7 +307,36 @@ export const communityFeedService = {
     const postDoc = await getDoc(doc(db, 'community_posts', postId));
     if (postDoc.exists()) {
       const postData = postDoc.data();
-      // Create notification for comment
+
+      // Don't notify if commenting on own post
+      if (postData.userId !== userId) {
+        // Send comprehensive notification to post author
+        await notifyPostComment(
+          postData.userId,
+          userName,
+          postData.content?.substring(0, 50) || 'your post',
+          content,
+          postId
+        );
+      }
+
+      // If this is a reply, notify the original commenter
+      if (options?.replyTo && options.replyToName) {
+        const originalCommentDoc = await getDoc(doc(db, 'community_comments', options.replyTo));
+        if (originalCommentDoc.exists()) {
+          const originalCommentData = originalCommentDoc.data();
+          if (originalCommentData.userId !== userId) {
+            await notifyCommentReply(
+              originalCommentData.userId,
+              userName,
+              content,
+              postId
+            );
+          }
+        }
+      }
+
+      // Old notification system (keep for backward compatibility)
       await this.createNotification(
         'comment',
         userId,
@@ -428,6 +458,19 @@ export const communityFeedService = {
 
     // Create notification for new reaction (not for removal or switching from same user)
     if (shouldCreateNotification && postData) {
+      // Don't notify if reacting to own post
+      if (postData.userId !== userId) {
+        // Send comprehensive notification
+        await notifyPostReaction(
+          postData.userId,
+          userName,
+          reactionType,
+          postData.content?.substring(0, 50) || 'your post',
+          postId
+        );
+      }
+
+      // Old notification system (keep for backward compatibility)
       await this.createNotification(
         'reaction',
         userId,
