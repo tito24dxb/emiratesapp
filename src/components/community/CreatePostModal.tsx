@@ -21,8 +21,8 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
   const [targetAudience, setTargetAudience] = useState<'all' | 'free' | 'pro' | 'vip' | 'pro-vip'>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Only Governors and Mentors can target specific audiences
-  const canTargetAudience = currentUser?.role === 'governor' || currentUser?.role === 'mentor';
+  // Only Governors, Admins, and Mentors can target specific audiences
+  const canTargetAudience = currentUser?.role === 'governor' || currentUser?.role === 'mentor' || currentUser?.role === 'admin';
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
