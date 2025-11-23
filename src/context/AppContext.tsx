@@ -140,6 +140,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (firebaseUser) {
         console.log('User authenticated:', firebaseUser.uid);
 
+        if (sessionStorage.getItem('pending2FA') === 'true') {
+          console.log('2FA pending, skipping auto-login');
+          setLoading(false);
+          return;
+        }
+
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const unsubscribeFirestore = onSnapshot(
           userDocRef,

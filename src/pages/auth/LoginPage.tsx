@@ -40,6 +40,12 @@ export default function LoginPage() {
 
       if (has2FA) {
         console.log('2FA enabled, showing verification dropdown');
+
+        sessionStorage.setItem('pending2FA', 'true');
+
+        await auth.signOut();
+        console.log('Signed out to prevent auto-login during 2FA');
+
         const userDocRef = doc(db, 'users', tempUser.uid);
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.data();
@@ -297,9 +303,11 @@ export default function LoginPage() {
         }
       }
 
-      console.log('2FA verification successful, completing login');
+      console.log('2FA verification successful, signing back in');
 
-      setCurrentUser(pendingUserData);
+      sessionStorage.removeItem('pending2FA');
+
+      await signInWithEmailAndPassword(auth, email, password);
 
       await updateDoc(doc(db, 'users', pendingUserId), {
         lastLogin: serverTimestamp()
@@ -307,7 +315,6 @@ export default function LoginPage() {
 
       await recordLoginActivity(pendingUserId, true);
 
-      sessionStorage.removeItem('pending2FA');
       sessionStorage.removeItem('pending2FAEmail');
       sessionStorage.removeItem('pending2FAPassword');
       sessionStorage.removeItem('pendingUserId');
