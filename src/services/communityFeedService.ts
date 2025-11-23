@@ -27,6 +27,7 @@ export interface CommunityPost {
   userPhotoURL?: string;
   content: string;
   imageUrl?: string;
+  imageUrls?: string[];
   channel: 'announcements' | 'general' | 'study-room';
   createdAt: Timestamp;
   updatedAt: Timestamp;
@@ -92,13 +93,24 @@ export const communityFeedService = {
     userEmail: string,
     content: string,
     channel: 'announcements' | 'general' | 'study-room',
-    imageFile?: File,
+    imageFile?: File | File[],
     userPhotoURL?: string
   ): Promise<string> {
     let imageUrl = '';
+    let imageUrls: string[] = [];
 
     if (imageFile) {
-      imageUrl = await this.convertImageToBase64(imageFile);
+      if (Array.isArray(imageFile)) {
+        imageUrls = await Promise.all(
+          imageFile.map(file => this.convertImageToBase64(file))
+        );
+        if (imageUrls.length > 0) {
+          imageUrl = imageUrls[0];
+        }
+      } else {
+        imageUrl = await this.convertImageToBase64(imageFile);
+        imageUrls = [imageUrl];
+      }
     }
 
     const postData = {
@@ -108,6 +120,7 @@ export const communityFeedService = {
       userPhotoURL: userPhotoURL || '',
       content,
       imageUrl,
+      imageUrls,
       channel,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),

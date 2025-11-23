@@ -13,27 +13,36 @@ interface CreatePostModalProps {
 export default function CreatePostModal({ currentUser, defaultChannel, onClose, onPostCreated }: CreatePostModalProps) {
   const [content, setContent] = useState('');
   const [selectedChannel, setSelectedChannel] = useState(defaultChannel);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+      const validFiles = files.slice(0, 10);
+      const newImageFiles = [...imageFiles, ...validFiles].slice(0, 10);
+      setImageFiles(newImageFiles);
+
+      const newPreviews: string[] = [];
+      validFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newPreviews.push(reader.result as string);
+          if (newPreviews.length === validFiles.length) {
+            setImagePreviews([...imagePreviews, ...newPreviews].slice(0, 10));
+          }
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
 
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    if (fileInputRef.current) {
+  const handleRemoveImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    if (fileInputRef.current && imageFiles.length === 1) {
       fileInputRef.current.value = '';
     }
   };
@@ -50,7 +59,7 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
         currentUser.email || '',
         content.trim(),
         selectedChannel,
-        imageFile || undefined
+        imageFiles.length > 0 ? imageFiles : undefined
       );
       onPostCreated();
       onClose();
@@ -173,24 +182,47 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Image (Optional)</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                Images (Optional) - {imageFiles.length}/10
+              </label>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleImageSelect}
                 className="hidden"
               />
-              {imagePreview ? (
-                <div className="relative rounded-xl overflow-hidden border-2 border-gray-200">
-                  <img src={imagePreview} alt="Preview" className="w-full h-64 object-cover" />
-                  <button
-                    type="button"
-                    onClick={handleRemoveImage}
-                    className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow-lg"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+
+              {imagePreviews.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative rounded-lg overflow-hidden border-2 border-gray-200 aspect-square">
+                        <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute top-1 right-1 p-1.5 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow-lg"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <div className="absolute bottom-1 left-1 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                          {index + 1}/{imagePreviews.length}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {imageFiles.length < 10 && (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full px-4 py-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D71920] transition flex items-center justify-center gap-2 text-gray-600 hover:text-[#D71920] bg-gray-50 hover:bg-red-50"
+                    >
+                      <ImageIcon className="w-5 h-5" />
+                      <span className="font-semibold text-sm">Add more images</span>
+                    </button>
+                  )}
                 </div>
               ) : (
                 <button
@@ -199,8 +231,8 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
                   className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D71920] transition flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-[#D71920] bg-gray-50 hover:bg-red-50"
                 >
                   <ImageIcon className="w-8 h-8" />
-                  <span className="font-semibold text-sm">Click to upload an image</span>
-                  <span className="text-xs text-gray-500">JPG, PNG, GIF (Max 5MB)</span>
+                  <span className="font-semibold text-sm">Click to upload images</span>
+                  <span className="text-xs text-gray-500">JPG, PNG, GIF (Max 10 images, 5MB each)</span>
                 </button>
               )}
             </div>

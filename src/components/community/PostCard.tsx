@@ -4,6 +4,7 @@ import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag
 import { CommunityPost, communityFeedService } from '../../services/communityFeedService';
 import EnhancedCommentsSection from './EnhancedCommentsSection';
 import ImageViewerModal from './ImageViewerModal';
+import ImageCarousel from './ImageCarousel';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -18,6 +19,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   const [isDeleting, setIsDeleting] = useState(false);
   const [localPost, setLocalPost] = useState(post);
   const [showImageViewer, setShowImageViewer] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     setLocalPost(post);
@@ -212,19 +214,31 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
 
       <p className="text-gray-800 mb-3 md:mb-4 whitespace-pre-wrap text-sm md:text-base leading-relaxed">{post.content}</p>
 
-      {post.imageUrl && (
+      {(post.imageUrls && post.imageUrls.length > 0) ? (
+        <ImageCarousel
+          images={post.imageUrls}
+          onImageClick={(index) => {
+            setSelectedImageIndex(index);
+            setShowImageViewer(true);
+          }}
+        />
+      ) : post.imageUrl ? (
         <div className="mb-3 md:mb-4 rounded-2xl overflow-hidden">
           <img
             src={post.imageUrl}
             alt="Post"
             className="w-full max-h-[300px] md:max-h-[500px] object-cover cursor-pointer hover:opacity-95 transition"
-            onClick={() => setShowImageViewer(true)}
+            onClick={() => {
+              setSelectedImageIndex(0);
+              setShowImageViewer(true);
+            }}
           />
         </div>
-      )}
+      ) : null}
 
       <ImageViewerModal
-        imageUrl={post.imageUrl || ''}
+        imageUrls={post.imageUrls || (post.imageUrl ? [post.imageUrl] : [])}
+        initialIndex={selectedImageIndex}
         isOpen={showImageViewer}
         onClose={() => setShowImageViewer(false)}
         onDoubleClick={() => handleReaction('heart')}
