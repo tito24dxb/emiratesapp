@@ -381,25 +381,24 @@ export default function NotificationsPage() {
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-4">
-                          <div
-                            className={`w-10 h-10 bg-gradient-to-br ${getNotificationColor(
-                              notification.type,
-                              notification.priority
-                            )} rounded-full flex items-center justify-center text-white flex-shrink-0`}
-                          >
-                            {getNotificationIcon(notification.type)}
-                          </div>
+                      <div className="flex items-start gap-4">
+                        <div
+                          className={`w-10 h-10 bg-gradient-to-br ${getNotificationColor(
+                            notification.type,
+                            notification.priority
+                          )} rounded-full flex items-center justify-center text-white flex-shrink-0`}
+                        >
+                          {getNotificationIcon(notification.type)}
+                        </div>
 
-                          <div className="flex-1 min-w-0">
-                            <h3 className={`font-bold mb-2 ${notification.read ? 'text-gray-700' : 'text-gray-900'}`}>
-                              {notification.title}
-                            </h3>
-                            <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-700'} mb-2`}>
-                              {notification.message}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className="flex-1 min-w-0">
+                          <h3 className={`font-bold mb-2 ${notification.read ? 'text-gray-700' : 'text-gray-900'}`}>
+                            {notification.title}
+                          </h3>
+                          <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-700'} mb-2`}>
+                            {notification.message}
+                          </p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
                             <span>
                               {notification.createdAt
                                 ? new Date(notification.createdAt.toDate()).toLocaleString()
@@ -420,24 +419,6 @@ export default function NotificationsPage() {
                             )}
                           </div>
                         </div>
-                      </div>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleMarkAsRead(notification.id!);
-                          }}
-                          disabled={notification.read}
-                          className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl text-lg font-bold transition shadow-lg hover:shadow-xl ${
-                            notification.read
-                              ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-2 border-gray-300'
-                              : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white border-2 border-green-500'
-                          }`}
-                          title={notification.read ? 'Already read' : 'Mark as read'}
-                        >
-                          <Check className="w-7 h-7" />
-                          <span>{notification.read ? 'MARKED AS READ ✓' : 'MARK AS READ'}</span>
-                        </button>
                       </div>
                     </motion.div>
                   ))}
