@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { Plane, Lock, Mail, Shield } from 'lucide-react';
+import { Plane, Lock, Mail, Shield, Key } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { recordLoginActivity } from '../../services/loginActivityService';
-// import { twoFactorService } from '../../services/twoFactorService'; // TODO: Re-enable with browser-compatible library
+import { totpService } from '../../services/totpService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -17,6 +17,8 @@ export default function LoginPage() {
   const [show2FA, setShow2FA] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingUserData, setPendingUserData] = useState<any>(null);
+  const [useBackupCode, setUseBackupCode] = useState(false);
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
 
@@ -61,17 +63,18 @@ export default function LoginPage() {
         updatedAt: userData.updatedAt || new Date().toISOString(),
       };
 
-      // TODO: Re-enable 2FA with browser-compatible TOTP library
-      // console.log('Checking 2FA status');
-      // const has2FA = await twoFactorService.isTwoFactorEnabled(user.uid);
+      console.log('Checking 2FA status');
+      const has2FA = await totpService.check2FAStatus(user.uid);
 
-      // if (has2FA) {
-      //   console.log('2FA enabled, showing verification');
-      //   setPendingUserId(user.uid);
-      //   setShow2FA(true);
-      //   setLoading(false);
-      //   return;
-      // }
+      if (has2FA) {
+        console.log('2FA enabled, showing verification');
+        setPendingUserId(user.uid);
+        setPendingUserData(currentUser);
+        setShow2FA(true);
+        setLoading(false);
+        await auth.signOut();
+        return;
+      }
 
       console.log('Setting current user:', currentUser);
       setCurrentUser(currentUser);
@@ -142,19 +145,9 @@ export default function LoginPage() {
 
       const userData = userDoc.data()!;
 
-      // TODO: Re-enable 2FA with browser-compatible TOTP library
-      // const has2FA = await twoFactorService.isTwoFactorEnabled(user.uid);
-
-      // if (has2FA) {
-      //   setPendingUserId(user.uid);
-      //   setShow2FA(true);
-      //   setLoading(false);
-      //   return;
-      // }
-
       const currentUser = {
         uid: user.uid,
-        email: userData.email || user.email || '',
+        email: userData.email || user.email,
         name: userData.name || user.displayName || 'User',
         role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
@@ -169,6 +162,17 @@ export default function LoginPage() {
         createdAt: userData.createdAt || new Date().toISOString(),
         updatedAt: userData.updatedAt || new Date().toISOString(),
       };
+
+      const has2FA = await totpService.check2FAStatus(user.uid);
+
+      if (has2FA) {
+        setPendingUserId(user.uid);
+        setPendingUserData(currentUser);
+        setShow2FA(true);
+        setLoading(false);
+        await auth.signOut();
+        return;
+      }
 
       setCurrentUser(currentUser);
 
@@ -251,6 +255,55 @@ export default function LoginPage() {
   //     setLoading(false);
   //   }
   // };
+
+  const handle2FAVerification = async () => {
+    if (!pendingUserId || !twoFactorCode || !pendingUserData) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      let isValid = false;
+
+      if (useBackupCode) {
+        isValid = await totpService.verifyBackupCode(pendingUserId, twoFactorCode);
+        if (!isValid) {
+          setError('Invalid backup code. Please try again.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        isValid = await totpService.verifyUserToken(pendingUserId, twoFactorCode);
+        if (!isValid) {
+          setError('Invalid verification code. Please try again.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      await signInWithEmailAndPassword(auth, email, password);
+
+      setCurrentUser(pendingUserData);
+
+      await updateDoc(doc(db, 'users', pendingUserId), {
+        lastLogin: serverTimestamp()
+      });
+
+      await recordLoginActivity(pendingUserId, true);
+
+      setShow2FA(false);
+      setPendingUserId(null);
+      setPendingUserData(null);
+      setTwoFactorCode('');
+
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('2FA verification error:', err);
+      setError('Verification failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -388,11 +441,13 @@ export default function LoginPage() {
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+                {useBackupCode ? <Key className="w-6 h-6 text-white" /> : <Shield className="w-6 h-6 text-white" />}
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">Two-Factor Authentication</h2>
-                <p className="text-sm text-gray-600">Enter code from your authenticator app</p>
+                <p className="text-sm text-gray-600">
+                  {useBackupCode ? 'Enter a backup code' : 'Enter code from your authenticator app'}
+                </p>
               </div>
             </div>
 
@@ -405,28 +460,47 @@ export default function LoginPage() {
             <input
               type="text"
               value={twoFactorCode}
-              onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="000000"
+              onChange={(e) => {
+                if (useBackupCode) {
+                  setTwoFactorCode(e.target.value.toUpperCase().slice(0, 8));
+                } else {
+                  setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                }
+              }}
+              placeholder={useBackupCode ? 'ABC12345' : '000000'}
               className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-mono text-2xl text-center tracking-widest focus:border-[#D71920] outline-none mb-4"
-              maxLength={6}
+              maxLength={useBackupCode ? 8 : 6}
               autoFocus
             />
+
+            <button
+              onClick={() => {
+                setUseBackupCode(!useBackupCode);
+                setTwoFactorCode('');
+                setError('');
+              }}
+              className="w-full text-sm text-[#D71920] hover:underline mb-4"
+            >
+              {useBackupCode ? 'Use authenticator code instead' : 'Use backup code instead'}
+            </button>
 
             <div className="flex gap-3">
               <button
                 onClick={() => {
                   setShow2FA(false);
                   setPendingUserId(null);
+                  setPendingUserData(null);
                   setTwoFactorCode('');
                   setError('');
+                  setUseBackupCode(false);
                 }}
                 className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {/* TODO: handleVerify2FA */}}
-                disabled={loading || twoFactorCode.length !== 6}
+                onClick={handle2FAVerification}
+                disabled={loading || (useBackupCode ? twoFactorCode.length !== 8 : twoFactorCode.length !== 6)}
                 className="flex-1 px-4 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Verifying...' : 'Verify'}
