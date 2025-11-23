@@ -85,10 +85,8 @@ export default function Layout({ children }: LayoutProps) {
 
       <div className="flex flex-col md:flex-row relative z-10 flex-1">
         <Sidebar />
-        <main className="flex-1 p-6 md:p-8 lg:p-10 w-full overflow-x-hidden pb-20">
-          <div className="max-w-6xl mx-auto">
-            {children}
-          </div>
+        <main className="flex-1 w-full overflow-x-hidden">
+          {children}
         </main>
       </div>
 
