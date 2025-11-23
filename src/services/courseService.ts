@@ -37,7 +37,8 @@ export interface Enrollment {
   user_id: string;
   course_id: string;
   enrolled_at: string;
-  progress: number;
+  progress?: number;
+  progress_percentage?: number;
   completed: boolean;
   last_accessed?: string;
 }
@@ -46,7 +47,11 @@ export const getUserEnrollments = async (userId: string): Promise<Enrollment[]> 
   const enrollmentsRef = collection(db, 'course_enrollments');
   const q = query(enrollmentsRef, where('user_id', '==', userId), orderBy('enrolled_at', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Enrollment[];
+  return snapshot.docs.map(doc => {
+    const data = doc.data();
+    const progress = data.progress_percentage || data.progress || 0;
+    return { id: doc.id, ...data, progress } as Enrollment;
+  });
 };
 
 export const getEnrolledCourses = async (userId: string): Promise<Course[]> => {

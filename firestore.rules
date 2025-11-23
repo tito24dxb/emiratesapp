@@ -148,8 +148,11 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount']) ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewedBy', 'viewsCount', 'updatedAt']);
 
-      // Only governors and moderators can delete any post
-      allow delete: if request.auth != null && isModerator();
+      // Users can delete their own posts, or governors and moderators can delete any post
+      allow delete: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isModerator()
+      );
     }
 
     match /community_comments/{commentId} {
@@ -175,8 +178,11 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions'])
       );
 
-      // Only governors and moderators can delete any comment
-      allow delete: if request.auth != null && isModerator();
+      // Users can delete their own comments, or governors and moderators can delete any comment
+      allow delete: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        isModerator()
+      );
     }
 
     match /community_reactions/{reactionId} {
