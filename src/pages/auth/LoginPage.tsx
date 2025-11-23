@@ -47,8 +47,6 @@ export default function LoginPage() {
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.data();
 
-        await auth.signOut();
-        console.log('Signed out to prevent auto-login during 2FA');
 
         setPendingUserId(tempUser.uid);
         setPendingUserData({
