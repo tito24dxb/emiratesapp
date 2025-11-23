@@ -34,14 +34,14 @@ export default function CreateProductPage() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50">
+          <Package className="w-16 h-16 text-blue-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Required</h2>
           <p className="text-gray-600 mb-4">Please login to create products</p>
           <button
             onClick={() => navigate('/login')}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
           >
             Login
           </button>
@@ -51,7 +51,7 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -73,7 +73,7 @@ export default function CreateProductPage() {
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:p-8">
+        <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 p-6 lg:p-8">
           <ProductForm
             onSubmit={handleSubmit}
             onCancel={() => navigate('/marketplace')}
@@ -82,7 +82,7 @@ export default function CreateProductPage() {
         </div>
 
         {/* Tips */}
-        <div className="mt-8 bg-blue-50 rounded-xl p-6 border border-blue-200">
+        <div className="mt-8 bg-blue-500/10 backdrop-blur-sm rounded-xl p-6 border border-blue-200/50 shadow-lg">
           <h3 className="font-semibold text-blue-900 mb-3">Tips for a successful listing:</h3>
           <ul className="space-y-2 text-sm text-blue-800">
             <li className="flex items-start gap-2">
