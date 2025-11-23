@@ -73,6 +73,9 @@ export default function MarketplaceCheckoutPage() {
 
       setOrderId(newOrderId);
 
+      // Price is already in cents from Firestore, so divide by 100 to get dollars
+      const priceInDollars = fetchedProduct.price / 100;
+
       const paymentIntent = await createMarketplacePaymentIntent({
         firebase_buyer_uid: currentUser.uid,
         firebase_seller_uid: fetchedProduct.seller_id,
@@ -81,7 +84,7 @@ export default function MarketplaceCheckoutPage() {
         product_title: fetchedProduct.title,
         product_type: fetchedProduct.product_type,
         quantity: quantity,
-        amount: fetchedProduct.price * quantity,
+        amount: priceInDollars * quantity,
         currency: fetchedProduct.currency,
         seller_email: fetchedProduct.seller_email
       });
@@ -112,7 +115,7 @@ export default function MarketplaceCheckoutPage() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Required</h2>
@@ -130,7 +133,7 @@ export default function MarketplaceCheckoutPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Preparing checkout...</p>
@@ -141,7 +144,7 @@ export default function MarketplaceCheckoutPage() {
 
   if (!product || !clientSecret) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Checkout Error</h2>
@@ -160,7 +163,7 @@ export default function MarketplaceCheckoutPage() {
   const totalAmount = product.price * quantity;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Back Button */}
         <button
@@ -183,7 +186,7 @@ export default function MarketplaceCheckoutPage() {
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="bg-white rounded-xl p-8 max-w-md text-center"
+                className="bg-white/90 backdrop-blur-xl rounded-xl p-8 max-w-md text-center border border-white/30 shadow-2xl"
               >
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="w-10 h-10 text-green-600" />
@@ -202,7 +205,7 @@ export default function MarketplaceCheckoutPage() {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-8">
+            <div className="bg-white/30 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 p-6 sticky top-8">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
 
               {/* Product */}
@@ -281,7 +284,7 @@ export default function MarketplaceCheckoutPage() {
 
           {/* Payment Form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:p-8">
+            <div className="bg-white/30 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 p-6 lg:p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Details</h2>
 
               <Elements stripe={stripePromise}>

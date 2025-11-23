@@ -53,6 +53,11 @@ export const createMarketplacePaymentIntent = async (
 
     const idToken = await currentUser.getIdToken();
 
+    console.log('💳 Creating marketplace payment intent:', {
+      ...data,
+      firebase_buyer_uid: data.firebase_buyer_uid.substring(0, 8) + '...'
+    });
+
     const response = await fetch(`${supabaseUrl}/functions/v1/marketplace-payment-intent`, {
       method: 'POST',
       headers: {
@@ -63,8 +68,17 @@ export const createMarketplacePaymentIntent = async (
       body: JSON.stringify(data)
     });
 
+    console.log('📡 Payment intent response status:', response.status);
+
     if (!response.ok) {
-      const error = await response.json();
+      const errorText = await response.text();
+      console.error('❌ Payment intent error response:', errorText);
+      let error;
+      try {
+        error = JSON.parse(errorText);
+      } catch {
+        throw new Error(`Failed to create payment intent: ${errorText}`);
+      }
       throw new Error(error.error || 'Failed to create payment intent');
     }
 
