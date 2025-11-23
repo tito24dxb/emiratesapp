@@ -41,14 +41,16 @@ export default function LoginPage() {
       if (has2FA) {
         console.log('2FA enabled, showing verification dropdown');
 
-        sessionStorage.setItem('pending2FA', 'true');
-
-        await auth.signOut();
-        console.log('Signed out to prevent auto-login during 2FA');
-
         const userDocRef = doc(db, 'users', tempUser.uid);
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.data();
+
+        sessionStorage.setItem('pending2FA', 'true');
+        sessionStorage.setItem('pending2FAEmail', email);
+        sessionStorage.setItem('pending2FAPassword', password);
+
+        await auth.signOut();
+        console.log('Signed out to prevent auto-login during 2FA');
 
         setPendingUserId(tempUser.uid);
         setPendingUserData({
@@ -111,6 +113,11 @@ export default function LoginPage() {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
+
+      if (err.code === 'permission-denied') {
+        console.log('Permission error during 2FA setup, continuing...');
+        return;
+      }
 
       let errorMessage = 'Invalid email or password';
 
@@ -307,7 +314,10 @@ export default function LoginPage() {
 
       sessionStorage.removeItem('pending2FA');
 
-      await signInWithEmailAndPassword(auth, email, password);
+      const storedEmail = sessionStorage.getItem('pending2FAEmail') || email;
+      const storedPassword = sessionStorage.getItem('pending2FAPassword') || password;
+
+      await signInWithEmailAndPassword(auth, storedEmail, storedPassword);
 
       await updateDoc(doc(db, 'users', pendingUserId), {
         lastLogin: serverTimestamp()
