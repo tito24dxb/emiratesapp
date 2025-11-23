@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Trash2, Heart, ThumbsUp, Smile, Image as ImageIcon, Reply, MoreVertical, Flag } from 'lucide-react';
+import { Send, Trash2, Heart, ThumbsUp, Smile, Image as ImageIcon, Reply, MoreVertical, Flag, Loader2 } from 'lucide-react';
 import { CommunityComment, communityFeedService } from '../../services/communityFeedService';
 import EmojiPicker from 'emoji-picker-react';
+import { useNavigate } from 'react-router-dom';
 
 interface EnhancedComment extends CommunityComment {
   userPhotoURL?: string;
@@ -24,9 +25,11 @@ interface EnhancedCommentsSectionProps {
 }
 
 export default function EnhancedCommentsSection({ postId, currentUser }: EnhancedCommentsSectionProps) {
+  const navigate = useNavigate();
   const [comments, setComments] = useState<EnhancedComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -230,10 +233,21 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
             Upgrade to Pro or VIP to comment on posts and engage with the community!
           </p>
           <button
-            onClick={() => window.location.href = '/upgrade'}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
+            onClick={() => {
+              setUpgradeLoading(true);
+              navigate('/upgrade');
+            }}
+            disabled={upgradeLoading}
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
           >
-            Upgrade Now
+            {upgradeLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              'Upgrade Now'
+            )}
           </button>
         </div>
       ) : !replyTo ? (
