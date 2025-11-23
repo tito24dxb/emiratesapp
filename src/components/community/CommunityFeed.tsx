@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { communityFeedService, CommunityPost, POSTS_PER_PAGE } from '../../services/communityFeedService';
-import { MessageCircle, Image as ImageIcon, Plus, Filter, X, Send, Bot, Shield } from 'lucide-react';
+import { MessageCircle, Image as ImageIcon, Plus, Filter, X, Send, Bot, Shield, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PostCard from './PostCard';
-import CreatePostModal from './CreatePostModal';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
 
 type Channel = 'all' | 'announcements' | 'general' | 'study-room';
@@ -27,6 +26,8 @@ export default function CommunityFeed() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [postType, setPostType] = useState<'text' | 'product'>('text');
+  const [productLink, setProductLink] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadPosts = useCallback(async (reset: boolean = false) => {
@@ -121,6 +122,11 @@ export default function CommunityFeed() {
     e.preventDefault();
     if (!formContent.trim() || submitting) return;
 
+    if (postType === 'product' && !productLink.trim()) {
+      alert('Please enter a product ID');
+      return;
+    }
+
     setSubmitting(true);
     try {
       await communityFeedService.createPost(
@@ -130,13 +136,16 @@ export default function CommunityFeed() {
         formContent.trim(),
         formChannel,
         imageFile || undefined,
-        currentUser!.photoURL || ''
+        currentUser!.photoURL || '',
+        postType === 'product' ? productLink.trim() : undefined
       );
 
       setFormContent('');
       setFormChannel('general');
       setImageFile(null);
       setImagePreview(null);
+      setPostType('text');
+      setProductLink('');
       setShowCreateForm(false);
       loadPosts(true);
     } catch (error) {
@@ -297,15 +306,205 @@ export default function CommunityFeed() {
 
           <AnimatePresence>
             {showCreateForm && (
-              <CreatePostModal
-                currentUser={currentUser!}
-                defaultChannel={formChannel}
-                onClose={() => setShowCreateForm(false)}
-                onPostCreated={() => {
-                  setShowCreateForm(false);
-                  loadPosts(true);
-                }}
-              />
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-4 overflow-hidden"
+              >
+                <form onSubmit={handleSubmitPost} className="liquid-crystal-panel p-4 md:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900">Create New Post</h3>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateForm(false)}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                    >
+                      <X className="w-5 h-5 text-gray-600" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Post Type *</label>
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <button
+                          type="button"
+                          onClick={() => setPostType('text')}
+                          className={`p-3 rounded-xl border-2 transition text-left ${
+                            postType === 'text'
+                              ? 'border-[#D71920] bg-red-50'
+                              : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <Send className="w-5 h-5" />
+                            <span className="font-bold text-sm text-gray-900">Regular Post</span>
+                          </div>
+                          <p className="text-xs text-gray-600">Share your thoughts</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPostType('product')}
+                          className={`p-3 rounded-xl border-2 transition text-left ${
+                            postType === 'product'
+                              ? 'border-[#D71920] bg-red-50'
+                              : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <Package className="w-5 h-5" />
+                            <span className="font-bold text-sm text-gray-900">Product Post</span>
+                          </div>
+                          <p className="text-xs text-gray-600">Share a product</p>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Channel *</label>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        {currentUser?.role === 'governor' && (
+                          <button
+                            type="button"
+                            onClick={() => setFormChannel('announcements')}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              formChannel === 'announcements'
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">📢</span>
+                              <span className="font-bold text-sm text-gray-900">Announcements</span>
+                            </div>
+                            <p className="text-xs text-gray-600">Important updates</p>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => setFormChannel('general')}
+                          className={`p-3 rounded-xl border-2 transition text-left ${
+                            formChannel === 'general'
+                              ? 'border-[#D71920] bg-red-50'
+                              : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">💬</span>
+                            <span className="font-bold text-sm text-gray-900">General</span>
+                          </div>
+                          <p className="text-xs text-gray-600">General discussions</p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormChannel('study-room')}
+                          className={`p-3 rounded-xl border-2 transition text-left ${
+                            formChannel === 'study-room'
+                              ? 'border-[#D71920] bg-red-50'
+                              : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">📚</span>
+                            <span className="font-bold text-sm text-gray-900">Study Room</span>
+                          </div>
+                          <p className="text-xs text-gray-600">Study & learning</p>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Content *</label>
+                      <textarea
+                        value={formContent}
+                        onChange={(e) => setFormContent(e.target.value)}
+                        placeholder="What's on your mind?"
+                        className="w-full chat-input-field resize-none"
+                        rows={6}
+                        required
+                      />
+                    </div>
+
+                    {postType === 'product' && (
+                      <div>
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Product ID *</label>
+                        <input
+                          type="text"
+                          value={productLink}
+                          onChange={(e) => setProductLink(e.target.value)}
+                          placeholder="Enter product ID (e.g., abc123def456)"
+                          className="w-full chat-input-field"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          The product ID from the marketplace URL
+                        </p>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Image (Optional)</label>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                      />
+                      {imagePreview ? (
+                        <div className="relative rounded-xl overflow-hidden border-2 border-gray-200">
+                          <img src={imagePreview} alt="Preview" className="w-full h-64 object-cover" />
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition shadow-lg"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#D71920] transition flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-[#D71920] bg-white/50 hover:bg-red-50"
+                        >
+                          <ImageIcon className="w-8 h-8" />
+                          <span className="font-semibold text-sm">Click to upload an image</span>
+                          <span className="text-xs text-gray-500">JPG, PNG, GIF (Max 5MB)</span>
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <button
+                        type="submit"
+                        disabled={submitting || !formContent.trim()}
+                        className="flex-1 bg-gradient-to-r from-[#D71920] to-[#B91518] hover:shadow-lg text-white py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {submitting ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            <span className="text-sm sm:text-base">Posting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-5 h-5" />
+                            <span className="text-sm sm:text-base">Post</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateForm(false)}
+                        className="px-6 py-3 bg-white/70 hover:bg-white border-2 border-gray-300 rounded-xl font-bold text-gray-700 transition text-sm sm:text-base"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </motion.div>
             )}
           </AnimatePresence>
 
