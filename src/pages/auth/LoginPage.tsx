@@ -210,9 +210,9 @@ export default function LoginPage() {
       } else if (err.code === 'auth/popup-closed-by-user') {
         errorMessage = 'Sign-in cancelled. Please try again.';
       } else if (err.code === 'auth/popup-blocked') {
-        errorMessage = 'Pop-up blocked by browser. Please allow pop-ups and try again.';
+        errorMessage = 'Pop-up blocked! Please allow pop-ups for this site in your browser settings and try again.';
       } else if (err.code === 'auth/unauthorized-domain') {
-        errorMessage = '🔧 Google Sign-In Coming Soon! Domain authorization is being set up. Use email/password login for now.';
+        errorMessage = 'Domain not authorized. Please contact support.';
       } else if (err.code === 'auth/operation-not-allowed') {
         errorMessage = '🔧 Google Sign-In Coming Soon! This sign-in method is being activated. Use email/password for now.';
       } else if (err.message && !err.message.includes('Firebase')) {
