@@ -24,7 +24,7 @@ export default function CreateProductPage() {
     try {
       const productId = await createProduct(
         currentUser.uid,
-        currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
+        currentUser.name || 'Anonymous',
         currentUser.email || '',
         currentUser.photoURL || undefined,
         data
