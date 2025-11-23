@@ -86,15 +86,15 @@ export default function SellerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <ShoppingBag className="w-8 h-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+            <ShoppingBag className="w-8 h-8 text-blue-300" />
             Seller Dashboard
           </h1>
-          <p className="text-gray-600 mt-1">Manage your products and track performance</p>
+          <p className="text-gray-200 mt-1">Manage your products and track performance</p>
         </div>
 
         {/* Stats Grid */}
@@ -105,10 +105,10 @@ export default function SellerDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Total Products</span>
+              <span className="text-gray-300 text-sm">Total Products</span>
               <Package className="w-5 h-5 text-blue-600" />
             </div>
-            <div className="text-3xl font-bold text-gray-900">{stats.totalProducts}</div>
+            <div className="text-3xl font-bold text-white">{stats.totalProducts}</div>
           </motion.div>
 
           <motion.div
@@ -118,10 +118,10 @@ export default function SellerDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Total Views</span>
+              <span className="text-gray-300 text-sm">Total Views</span>
               <Eye className="w-5 h-5 text-purple-600" />
             </div>
-            <div className="text-3xl font-bold text-gray-900">{stats.totalViews}</div>
+            <div className="text-3xl font-bold text-white">{stats.totalViews}</div>
           </motion.div>
 
           <motion.div
@@ -131,10 +131,10 @@ export default function SellerDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Total Sales</span>
+              <span className="text-gray-300 text-sm">Total Sales</span>
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
-            <div className="text-3xl font-bold text-gray-900">{stats.totalSales}</div>
+            <div className="text-3xl font-bold text-white">{stats.totalSales}</div>
           </motion.div>
 
           <motion.div
@@ -144,10 +144,10 @@ export default function SellerDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-600 text-sm">Total Revenue</span>
+              <span className="text-gray-300 text-sm">Total Revenue</span>
               <DollarSign className="w-5 h-5 text-emerald-600" />
             </div>
-            <div className="text-3xl font-bold text-gray-900">
+            <div className="text-3xl font-bold text-white">
               {formatPrice(stats.totalRevenue, 'USD')}
             </div>
           </motion.div>
@@ -164,7 +164,7 @@ export default function SellerDashboard() {
           </button>
           <button
             onClick={() => navigate('/seller/billing')}
-            className="px-6 py-3 bg-white/20 backdrop-blur-xl hover:bg-white/30 border border-white/30 text-gray-900 rounded-lg font-medium transition-all flex items-center gap-2 shadow-xl"
+            className="px-6 py-3 bg-white/20 backdrop-blur-xl hover:bg-white/30 border border-white/30 text-white rounded-lg font-medium transition-all flex items-center gap-2 shadow-xl"
           >
             <BarChart3 className="w-5 h-5" />
             View Billing
@@ -174,7 +174,7 @@ export default function SellerDashboard() {
         {/* Products Table */}
         <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Your Products</h2>
+            <h2 className="text-xl font-bold text-white">Your Products</h2>
           </div>
 
           {loading ? (
@@ -232,18 +232,18 @@ export default function SellerDashboard() {
                             className="w-12 h-12 rounded-lg object-cover"
                           />
                           <div>
-                            <div className="font-medium text-gray-900">{product.title}</div>
+                            <div className="font-medium text-white">{product.title}</div>
                             <div className="text-xs text-gray-500">{product.category}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">{getStatusBadge(product)}</td>
-                      <td className="px-6 py-4 text-gray-900 font-medium">
+                      <td className="px-6 py-4 text-white font-medium">
                         {formatPrice(product.price, product.currency)}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{product.views_count || 0}</td>
-                      <td className="px-6 py-4 text-gray-600">{product.sales_count || 0}</td>
-                      <td className="px-6 py-4 text-gray-900 font-medium">
+                      <td className="px-6 py-4 text-gray-300">{product.views_count || 0}</td>
+                      <td className="px-6 py-4 text-gray-300">{product.sales_count || 0}</td>
+                      <td className="px-6 py-4 text-white font-medium">
                         {formatPrice((product.sales_count || 0) * product.price, product.currency)}
                       </td>
                       <td className="px-6 py-4">
