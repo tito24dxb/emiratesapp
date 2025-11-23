@@ -5,6 +5,8 @@ import { useState, useRef, useEffect } from 'react';
 import { analyzeCVForEmirates, getCabinCrewGuidance, optimizeCVForATS } from '../utils/aiService';
 import CVAnalyzer from '../components/CVAnalyzer';
 import { parseDocument } from '../utils/documentParser';
+import { checkFeatureAccess } from '../utils/featureAccess';
+import FeatureLock from '../components/FeatureLock';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -14,6 +16,21 @@ interface ChatMessage {
 
 export default function AITrainerPage() {
   const { currentUser } = useApp();
+
+  // Check feature access
+  if (!currentUser) return null;
+
+  const aiTrainerAccess = checkFeatureAccess(currentUser, 'ai-trainer');
+  if (!aiTrainerAccess.allowed) {
+    return (
+      <FeatureLock
+        requiredPlan={aiTrainerAccess.requiresPlan || 'vip'}
+        featureName="AI Trainer"
+        description={aiTrainerAccess.message}
+      />
+    );
+  }
+
   const [activeTab, setActiveTab] = useState<'cv' | 'chat'>('cv');
 
   const [cvText, setCvText] = useState('');

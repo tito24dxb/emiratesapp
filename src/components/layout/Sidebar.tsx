@@ -28,15 +28,11 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
-import { useState } from 'react';
 import { checkFeatureAccess, Feature } from '../../utils/featureAccess';
-import UpgradePrompt from '../UpgradePrompt';
-import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar() {
   const { currentUser } = useApp();
   const location = useLocation();
-  const [upgradePrompt, setUpgradePrompt] = useState<{ isOpen: boolean; feature: Feature; featureName: string } | null>(null);
 
   if (!currentUser) return null;
 
@@ -188,13 +184,7 @@ export default function Sidebar() {
               return (
                 <Link
                   key={link.path}
-                  to={isLocked ? '#' : link.path}
-                  onClick={(e) => {
-                    if (isLocked && 'feature' in link && link.feature) {
-                      e.preventDefault();
-                      setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
-                    }
-                  }}
+                  to={link.path}
                   className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition-all whitespace-nowrap ${
                     isActive
                       ? 'glass-primary text-gray-900 shadow-xl'
@@ -240,13 +230,7 @@ export default function Sidebar() {
             return (
               <Link
                 key={link.path}
-                to={isLocked ? '#' : link.path}
-                onClick={(e) => {
-                  if (isLocked && 'feature' in link && link.feature) {
-                    e.preventDefault();
-                    setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
-                  }
-                }}
+                to={link.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative transition-all ${
                   isActive
                     ? 'glass-primary text-gray-900'
@@ -277,16 +261,6 @@ export default function Sidebar() {
         </nav>
       </div>
     </aside>
-
-    {upgradePrompt && (
-      <UpgradePrompt
-        isOpen={upgradePrompt.isOpen}
-        onClose={() => setUpgradePrompt(null)}
-        requiredPlan={checkFeatureAccess(currentUser, upgradePrompt.feature).requiresPlan || 'pro'}
-        message={checkFeatureAccess(currentUser, upgradePrompt.feature).message || ''}
-        feature={upgradePrompt.featureName}
-      />
-    )}
     </>
   );
 }

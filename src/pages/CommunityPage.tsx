@@ -7,6 +7,9 @@ import { communityChatService, Message, Conversation } from '../services/communi
 import { presenceService, TypingData } from '../services/presenceService';
 import { auth, db } from '../lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
+import { useApp } from '../context/AppContext';
+import { checkFeatureAccess } from '../utils/featureAccess';
+import FeatureLock from '../components/FeatureLock';
 
 interface User {
   uid: string;
@@ -15,6 +18,7 @@ interface User {
 }
 
 export default function CommunityPage() {
+  const { currentUser } = useApp();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -30,6 +34,20 @@ export default function CommunityPage() {
   const [showRules, setShowRules] = useState(false);
   const [showAIBanner, setShowAIBanner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Check feature access
+  if (!currentUser) return null;
+
+  const chatAccess = checkFeatureAccess(currentUser, 'chat');
+  if (!chatAccess.allowed) {
+    return (
+      <FeatureLock
+        requiredPlan={chatAccess.requiresPlan || 'pro'}
+        featureName="Group Chat"
+        description={chatAccess.message}
+      />
+    );
+  }
 
   useEffect(() => {
     const hasSeenChatAIBanner = localStorage.getItem('hasSeenChatAIBanner');
