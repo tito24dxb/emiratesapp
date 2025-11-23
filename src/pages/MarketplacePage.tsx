@@ -135,14 +135,14 @@ export default function MarketplacePage() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50">
+          <Package className="w-16 h-16 text-blue-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Marketplace</h2>
           <p className="text-gray-600 mb-4">Please login to browse products</p>
           <button
             onClick={() => navigate('/login')}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
           >
             Login
           </button>
@@ -152,9 +152,9 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -217,28 +217,28 @@ export default function MarketplacePage() {
       {/* Stats Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 shadow-lg border border-blue-400/20">
+            <div className="flex items-center gap-2 text-blue-50 text-sm mb-1">
               <TrendingUp className="w-4 h-4" />
               Total Products
             </div>
-            <div className="text-2xl font-bold text-gray-900">{products.length}</div>
+            <div className="text-2xl font-bold text-white">{products.length}</div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-4 shadow-lg border border-purple-400/20">
+            <div className="flex items-center gap-2 text-purple-50 text-sm mb-1">
               <Filter className="w-4 h-4" />
               Filtered
             </div>
-            <div className="text-2xl font-bold text-gray-900">{filteredProducts.length}</div>
+            <div className="text-2xl font-bold text-white">{filteredProducts.length}</div>
           </div>
 
-          <div className="bg-white rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg p-4 shadow-lg border border-pink-400/20">
+            <div className="flex items-center gap-2 text-pink-50 text-sm mb-1">
               <Heart className="w-4 h-4" />
               Favorites
             </div>
-            <div className="text-2xl font-bold text-gray-900">{favorites.size}</div>
+            <div className="text-2xl font-bold text-white">{favorites.size}</div>
           </div>
         </div>
       </div>
@@ -248,8 +248,8 @@ export default function MarketplacePage() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-200 animate-pulse">
-                <div className="h-48 bg-gray-200" />
+              <div key={i} className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 animate-pulse shadow-lg">
+                <div className="h-48 bg-gradient-to-br from-gray-200 to-gray-300" />
                 <div className="p-4 space-y-3">
                   <div className="h-4 bg-gray-200 rounded" />
                   <div className="h-4 bg-gray-200 rounded w-2/3" />

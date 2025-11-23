@@ -58,12 +58,12 @@ export default function ProductCard({
 
   return (
     <motion.div
-      whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}
-      className="bg-white rounded-xl overflow-hidden border border-gray-200 cursor-pointer group"
+      whileHover={{ y: -4, boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)' }}
+      className="bg-white/70 backdrop-blur-md rounded-xl overflow-hidden border border-gray-200/50 cursor-pointer group shadow-lg hover:shadow-2xl transition-all"
       onClick={handleCardClick}
     >
       {/* Product Image */}
-      <div className="relative h-48 bg-gray-100 overflow-hidden">
+      <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
         <img
           src={productImage}
           alt={product.title}
