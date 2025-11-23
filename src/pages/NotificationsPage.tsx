@@ -203,10 +203,10 @@ export default function NotificationsPage() {
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">What's New - Latest Updates</h2>
+                <h2 className="text-xl font-bold text-gray-900">What's New - Latest Update</h2>
               </div>
               <div className="space-y-3">
-                {updates.map((update) => (
+                {updates.slice(0, 1).map((update) => (
                   <div key={update.id} className="glass-card rounded-xl p-4 border border-blue-200">
                     <div className="flex flex-col sm:flex-row items-start gap-3">
                       <div className={`w-10 h-10 bg-gradient-to-r ${updatesService.getUpdateColor(update.type)} rounded-full flex items-center justify-center text-white flex-shrink-0`}>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Shield, Key, CheckCircle, XCircle, Copy, Download } from 'lucide-react';
+import { Shield, Key, CheckCircle, XCircle, Copy, Download, Lock, AlertTriangle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { totpService } from '../services/totpService';
-import Disable2FAModal from './Disable2FAModal';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../lib/firebase';
 
 export default function TwoFactorSetup() {
   const { currentUser } = useApp();
@@ -16,7 +17,8 @@ export default function TwoFactorSetup() {
   const [showBackupCodes, setShowBackupCodes] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [showDisableModal, setShowDisableModal] = useState(false);
+  const [showDisableConfirm, setShowDisableConfirm] = useState(false);
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     checkStatus();
@@ -90,12 +92,36 @@ export default function TwoFactorSetup() {
   };
 
   const handleDisable = () => {
-    setShowDisableModal(true);
+    setShowDisableConfirm(true);
+    setError('');
+    setPassword('');
   };
 
-  const handleDisableSuccess = () => {
-    setEnabled(false);
-    setSuccess('Two-factor authentication disabled successfully');
+  const handleVerifyPasswordAndDisable = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentUser || !password) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      await signInWithEmailAndPassword(auth, currentUser.email, password);
+      await totpService.disable2FA(currentUser.uid);
+      setEnabled(false);
+      setShowDisableConfirm(false);
+      setPassword('');
+      setSuccess('Two-factor authentication disabled successfully');
+    } catch (err: any) {
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('Incorrect password. Please try again.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many attempts. Please try again later.');
+      } else {
+        setError('Failed to disable 2FA. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const copySecret = () => {
@@ -287,13 +313,61 @@ export default function TwoFactorSetup() {
         </div>
       )}
 
-      <Disable2FAModal
-        isOpen={showDisableModal}
-        onClose={() => setShowDisableModal(false)}
-        userEmail={currentUser.email}
-        userId={currentUser.uid}
-        onSuccess={handleDisableSuccess}
-      />
+      {showDisableConfirm && (
+        <div className="p-6 border-2 border-red-300 rounded-xl bg-red-50 space-y-4">
+          <div className="flex items-start gap-3 mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-lg font-bold text-red-900 mb-1">
+                Disable Two-Factor Authentication
+              </h3>
+              <p className="text-sm text-red-700">
+                Disabling 2FA will make your account less secure. Enter your password to confirm.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleVerifyPasswordAndDisable} className="space-y-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-900 mb-2">
+                Confirm Your Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Enter your password"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-red-500 outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowDisableConfirm(false);
+                  setPassword('');
+                  setError('');
+                }}
+                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading || !password}
+                className="flex-1 px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Disabling...' : 'Disable 2FA'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
