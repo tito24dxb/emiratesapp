@@ -76,7 +76,6 @@ export default function MarketplaceChatModal({
       // Send the message
       await communityChatService.sendMessage(
         convId,
-        currentUser.uid,
         newMessage,
         'text'
       );
