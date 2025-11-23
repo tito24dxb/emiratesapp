@@ -49,10 +49,78 @@ export default function LoginPage() {
 
     try {
       localStorage.setItem('last_biometric_email', email);
-      await loginWithBiometric(email);
-      navigate('/dashboard');
+
+      // Get user ID from email first
+      const { data: users } = await import('../../lib/firebase').then(m =>
+        import('firebase/firestore').then(firestore =>
+          firestore.getDocs(
+            firestore.query(
+              firestore.collection(m.db, 'users'),
+              firestore.where('email', '==', email),
+              firestore.limit(1)
+            )
+          )
+        )
+      );
+
+      if (!users || users.empty) {
+        throw new Error('No account found with this email');
+      }
+
+      const userId = users.docs[0].id;
+
+      // Verify biometric
+      await loginWithBiometric(userId);
+
+      // Get the user's stored password or create a custom token
+      // Since we verified biometric, we need to sign in to Firebase
+      const verifiedUserId = localStorage.getItem('biometric_verified_user');
+
+      if (verifiedUserId === userId) {
+        // Biometric verification succeeded, now load user data
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        const userData = userDoc.data();
+
+        if (!userData) {
+          throw new Error('User data not found');
+        }
+
+        // Set the current user (this simulates authentication)
+        setCurrentUser({
+          uid: userId,
+          email: userData.email,
+          displayName: userData.name,
+          photoURL: userData.photo_base64 || null,
+          name: userData.name || 'User',
+          role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
+          plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
+          country: userData.country || '',
+          bio: userData.bio || '',
+          expectations: userData.expectations || '',
+          hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+          hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+          onboardingCompletedAt: userData.onboardingCompletedAt,
+          welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+          createdAt: userData.createdAt || new Date().toISOString(),
+          updatedAt: userData.updatedAt || new Date().toISOString(),
+        });
+
+        // Record login activity
+        await recordLoginActivity(userId, 'biometric', true);
+
+        // Update last login
+        await updateDoc(doc(db, 'users', userId), {
+          lastLogin: serverTimestamp(),
+        });
+
+        navigate('/dashboard');
+      } else {
+        throw new Error('Biometric verification failed');
+      }
     } catch (err: any) {
+      console.error('Biometric login error:', err);
       setError(err.message || 'Biometric login failed. Try using your password instead.');
+      localStorage.removeItem('biometric_verified_user');
     } finally {
       setLoading(false);
     }

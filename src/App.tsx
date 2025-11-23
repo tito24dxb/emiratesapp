@@ -60,6 +60,7 @@ import SellerBillingDashboard from './pages/SellerBillingDashboard';
 import AttendanceDashboard from './pages/AttendanceDashboard';
 import FinanceDashboard from './pages/FinanceDashboard';
 import ModeratorDashboard from './pages/ModeratorDashboard';
+import DevicesPage from './pages/DevicesPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -121,6 +122,7 @@ function AppContent() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
+        <Route path="/settings/devices" element={<DevicesPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
