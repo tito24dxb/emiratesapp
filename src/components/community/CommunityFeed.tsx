@@ -161,6 +161,9 @@ export default function CommunityFeed() {
   };
 
   const canPost = () => {
+    // Block free users from posting
+    if (currentUser?.plan === 'free') return false;
+
     if (selectedChannel === 'announcements') {
       return currentUser?.role === 'governor' || currentUser?.role === 'admin';
     }
