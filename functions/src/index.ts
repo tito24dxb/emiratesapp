@@ -1051,3 +1051,7 @@ export const updateLeaderboard = functions.pubsub.schedule('every 15 minutes').o
     console.error('Error updating leaderboard:', error);
   }
 });
+
+export { createPaymentIntent } from './stripe/createPaymentIntent';
+export { stripeWebhook } from './stripe/handleWebhook';
+export { generateDownloadLink } from './stripe/generateDownloadLink';

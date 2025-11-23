@@ -48,6 +48,12 @@ import AuditLogsPage from './pages/governor/AuditLogsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import ContactUsPage from './pages/ContactUsPage';
+import MarketplacePage from './pages/MarketplacePage';
+import CreateProductPage from './pages/CreateProductPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import MarketplaceCheckoutPage from './pages/MarketplaceCheckoutPage';
+import MyProductsPage from './pages/MyProductsPage';
+import MyOrdersPage from './pages/MyOrdersPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -128,6 +134,13 @@ function AppContent() {
         <Route path="/course/:courseId" element={<CourseViewerPage />} />
         <Route path="/storage" element={<StorageManagerPage />} />
         <Route path="/login-activity" element={<LoginActivityPage />} />
+
+        <Route path="/marketplace" element={<MarketplacePage />} />
+        <Route path="/marketplace/create" element={<CreateProductPage />} />
+        <Route path="/marketplace/product/:productId" element={<ProductDetailPage />} />
+        <Route path="/marketplace/checkout/:productId" element={<MarketplaceCheckoutPage />} />
+        <Route path="/marketplace/my-products" element={<MyProductsPage />} />
+        <Route path="/marketplace/orders" element={<MyOrdersPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>

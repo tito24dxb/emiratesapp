@@ -20,7 +20,8 @@ import {
   Flag,
   HardDrive,
   Clock,
-  Rss
+  Rss,
+  ShoppingBag
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -89,6 +90,7 @@ export default function Sidebar() {
         feature: 'opendays' as Feature
       },
       { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
+      { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', feature: null, badge: 'NEW' },
       { path: '/storage', icon: HardDrive, label: 'My Files', feature: null },
       { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
@@ -110,6 +112,7 @@ export default function Sidebar() {
     { path: '/community-feed', icon: Rss, label: 'Community Feed' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
+    { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -126,6 +129,7 @@ export default function Sidebar() {
     { path: '/community-feed', icon: Rss, label: 'Community Feed', badge: 'NEW' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
+    { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
