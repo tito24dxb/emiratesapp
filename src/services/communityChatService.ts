@@ -37,6 +37,7 @@ export interface Conversation {
   pinned?: boolean;
   mutedBy?: Record<string, boolean>;
   isArchivedBy?: Record<string, boolean>;
+  category?: 'general' | 'marketplace';
 }
 
 export interface Message {
@@ -114,7 +115,8 @@ export const communityChatService = {
   async createConversation(
     type: 'group' | 'private',
     title: string,
-    memberIds: string[]
+    memberIds: string[],
+    category?: 'general' | 'marketplace'
   ): Promise<string> {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
@@ -149,6 +151,7 @@ export const communityChatService = {
       pinned: false,
       mutedBy: {},
       isArchivedBy: {},
+      category: category || 'general',
     };
 
     await setDoc(conversationRef, conversationData);

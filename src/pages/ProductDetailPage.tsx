@@ -11,6 +11,7 @@ import {
   MarketplaceProduct
 } from '../services/marketplaceService';
 import { formatPrice } from '../services/stripeService';
+import MarketplaceChatModal from '../components/marketplace/MarketplaceChatModal';
 
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
@@ -21,6 +22,7 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFav, setIsFav] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [showChatModal, setShowChatModal] = useState(false);
 
   useEffect(() => {
     if (productId && currentUser) {
@@ -72,49 +74,21 @@ export default function ProductDetailPage() {
     navigate(`/marketplace/checkout/${product.id}`);
   };
 
-  const handleContactSeller = async () => {
+  const handleContactSeller = () => {
     if (!product || !currentUser) return;
     if (currentUser.uid === product.seller_id) {
       alert('You cannot message yourself');
       return;
     }
+    setShowChatModal(true);
+  };
 
-    try {
-      // Import the community chat service
-      const { communityChatService } = await import('../services/communityChatService');
-      const { unifiedNotificationService } = await import('../services/unifiedNotificationService');
+  const handleChatModalClose = () => {
+    setShowChatModal(false);
+  };
 
-      // Create private conversation between buyer and seller
-      const conversationId = await communityChatService.createConversation(
-        'private',
-        `Chat about: ${product.title}`,
-        [currentUser.uid, product.seller_id]
-      );
-
-      // Send initial system message with product info
-      await communityChatService.sendMessage(
-        conversationId,
-        currentUser.uid,
-        `Hi! I'm interested in your product: ${product.title}`,
-        'text'
-      );
-
-      // Send notification to seller
-      await unifiedNotificationService.sendNotification({
-        userId: product.seller_id,
-        type: 'marketplace',
-        title: 'New Message About Your Product',
-        message: `${currentUser.displayName || 'Someone'} is interested in "${product.title}"`,
-        link: `/community?chat=${conversationId}`,
-        priority: 'high'
-      });
-
-      // Redirect to community chat with the conversation open
-      navigate(`/community?chat=${conversationId}`);
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-      alert('Failed to start conversation. Please try again.');
-    }
+  const handleConversationCreated = (conversationId: string) => {
+    console.log('Conversation created:', conversationId);
   };
 
   const handleShare = () => {
@@ -425,6 +399,20 @@ export default function ProductDetailPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Marketplace Chat Modal */}
+      {product && (
+        <MarketplaceChatModal
+          isOpen={showChatModal}
+          onClose={handleChatModalClose}
+          productId={product.id}
+          productTitle={product.title}
+          productImage={product.images?.[0]}
+          sellerId={product.seller_id}
+          sellerName={product.seller_name}
+          onConversationCreated={handleConversationCreated}
+        />
+      )}
     </div>
   );
 }
