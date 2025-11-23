@@ -427,3 +427,32 @@ export const searchProducts = async (
     return [];
   }
 };
+
+// Update seller name on all products for a given seller
+export const updateSellerNameOnProducts = async (
+  sellerId: string,
+  newSellerName: string
+): Promise<number> => {
+  try {
+    const productsRef = collection(db, 'marketplace_products');
+    const q = query(productsRef, where('seller_id', '==', sellerId));
+    const snapshot = await getDocs(q);
+
+    let updatedCount = 0;
+    const updatePromises = snapshot.docs.map(async (docSnapshot) => {
+      const productRef = doc(db, 'marketplace_products', docSnapshot.id);
+      await updateDoc(productRef, {
+        seller_name: newSellerName,
+        updated_at: Timestamp.now()
+      });
+      updatedCount++;
+    });
+
+    await Promise.all(updatePromises);
+    console.log(`✅ Updated seller name on ${updatedCount} products`);
+    return updatedCount;
+  } catch (error) {
+    console.error('Error updating seller name on products:', error);
+    throw error;
+  }
+};

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Package, Eye, TrendingUp, DollarSign, Edit, Trash2, BarChart3, ShoppingBag } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { getSellerProducts, deleteProduct, MarketplaceProduct } from '../services/marketplaceService';
+import { getSellerProducts, deleteProduct, MarketplaceProduct, updateSellerNameOnProducts } from '../services/marketplaceService';
 import { formatPrice } from '../services/stripeService';
 
 export default function SellerDashboard() {
@@ -17,6 +17,7 @@ export default function SellerDashboard() {
     totalSales: 0,
     totalRevenue: 0,
   });
+  const [updatingNames, setUpdatingNames] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
@@ -61,6 +62,24 @@ export default function SellerDashboard() {
     }
   };
 
+  const handleUpdateSellerNames = async () => {
+    if (!currentUser) return;
+
+    if (!confirm(`Update all your products to show "${currentUser.name}" as the seller name?`)) return;
+
+    setUpdatingNames(true);
+    try {
+      const count = await updateSellerNameOnProducts(currentUser.uid, currentUser.name);
+      alert(`✅ Successfully updated ${count} product(s)!`);
+      await loadProducts();
+    } catch (error) {
+      console.error('Error updating seller names:', error);
+      alert('Failed to update seller names');
+    } finally {
+      setUpdatingNames(false);
+    }
+  };
+
   const getStatusBadge = (product: MarketplaceProduct) => {
     if (product.status === 'pending') {
       return <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Pending Review</span>;
@@ -89,12 +108,22 @@ export default function SellerDashboard() {
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <ShoppingBag className="w-8 h-8 text-blue-600" />
-            Seller Dashboard
-          </h1>
-          <p className="text-gray-600 mt-1">Manage your products and track performance</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <ShoppingBag className="w-8 h-8 text-blue-600" />
+              Seller Dashboard
+            </h1>
+            <p className="text-gray-600 mt-1">Manage your products and track performance</p>
+          </div>
+          <button
+            onClick={handleUpdateSellerNames}
+            disabled={updatingNames || products.length === 0}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <Edit className="w-4 h-4" />
+            {updatingNames ? 'Updating...' : 'Update Seller Name'}
+          </button>
         </div>
 
         {/* Stats Grid */}
