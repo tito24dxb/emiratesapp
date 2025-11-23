@@ -33,6 +33,7 @@ export default function NotificationsPage() {
     if (!currentUser) return;
 
     const unsubscribe = subscribeToUserNotifications(currentUser.uid, (notifs) => {
+      console.log('📬 Notifications received:', notifs.length, notifs);
       setNotifications(notifs);
       setLoading(false);
     });
@@ -341,18 +342,33 @@ export default function NotificationsPage() {
 
           {(activeTab === 'all' || activeTab === 'notifications') && (
             <div className="glass-card rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Bell className="w-6 h-6 text-[#D71920]" />
-                Your Notifications
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Bell className="w-6 h-6 text-[#D71920]" />
+                  Your Notifications ({notifications.length})
+                </h2>
+                {notifications.length > 0 && (
+                  <button
+                    onClick={handleMarkAllAsRead}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition shadow-md"
+                  >
+                    <CheckCheck className="w-4 h-4 inline mr-2" />
+                    Mark All Read
+                  </button>
+                )}
+              </div>
 
-              {notifications.length === 0 ? (
+              {loading ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-600">Loading notifications...</p>
+                </div>
+              ) : notifications.length === 0 ? (
               <div className="text-center py-12">
                 <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <p className="text-gray-600">No notifications yet</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <AnimatePresence>
                   {notifications.map((notification) => (
                     <motion.div
