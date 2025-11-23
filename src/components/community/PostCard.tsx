@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical } from 'lucide-react';
 import { CommunityPost, communityFeedService } from '../../services/communityFeedService';
 import EnhancedCommentsSection from './EnhancedCommentsSection';
+import ImageViewerModal from './ImageViewerModal';
 
 interface PostCardProps {
   post: CommunityPost;
@@ -16,6 +17,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [localPost, setLocalPost] = useState(post);
+  const [showImageViewer, setShowImageViewer] = useState(false);
 
   useEffect(() => {
     setLocalPost(post);
@@ -212,9 +214,21 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
 
       {post.imageUrl && (
         <div className="mb-3 md:mb-4 rounded-2xl overflow-hidden">
-          <img src={post.imageUrl} alt="Post" className="w-full max-h-[300px] md:max-h-[500px] object-cover" />
+          <img
+            src={post.imageUrl}
+            alt="Post"
+            className="w-full max-h-[300px] md:max-h-[500px] object-cover cursor-pointer hover:opacity-95 transition"
+            onClick={() => setShowImageViewer(true)}
+          />
         </div>
       )}
+
+      <ImageViewerModal
+        imageUrl={post.imageUrl || ''}
+        isOpen={showImageViewer}
+        onClose={() => setShowImageViewer(false)}
+        onDoubleClick={() => handleReaction('heart')}
+      />
 
       <div className="flex items-center gap-1.5 md:gap-2 mb-3 md:mb-4 flex-wrap">
         {reactions.map(reaction => {
