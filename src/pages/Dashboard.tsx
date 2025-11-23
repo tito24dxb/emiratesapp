@@ -37,6 +37,13 @@ export default function Dashboard() {
       navigate('/login', { replace: true });
       return;
     }
+
+    // Redirect to role-specific dashboards
+    if (currentUser.role === 'finance') {
+      navigate('/finance-dashboard', { replace: true });
+    } else if (currentUser.role === 'moderator') {
+      navigate('/moderator-dashboard', { replace: true });
+    }
   }, [currentUser, navigate]);
 
   useEffect(() => {

@@ -57,6 +57,8 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerBillingDashboard from './pages/SellerBillingDashboard';
 import AttendanceDashboard from './pages/AttendanceDashboard';
+import FinanceDashboard from './pages/FinanceDashboard';
+import ModeratorDashboard from './pages/ModeratorDashboard';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -147,6 +149,16 @@ function AppContent() {
         <Route path="/seller/dashboard" element={<SellerDashboard />} />
         <Route path="/seller/billing" element={<SellerBillingDashboard />} />
         <Route path="/attendance" element={<AttendanceDashboard />} />
+
+        {/* Finance Dashboard */}
+        {(currentUser.role === 'finance' || currentUser.role === 'governor') && (
+          <Route path="/finance-dashboard" element={<FinanceDashboard />} />
+        )}
+
+        {/* Moderator Dashboard */}
+        {(currentUser.role === 'moderator' || currentUser.role === 'governor') && (
+          <Route path="/moderator-dashboard" element={<ModeratorDashboard />} />
+        )}
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>

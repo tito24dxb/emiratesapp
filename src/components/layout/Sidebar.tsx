@@ -109,7 +109,7 @@ export default function Sidebar() {
 
   const mentorLinks = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
+    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard', highlight: true },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/community-feed', icon: Rss, label: 'Community Feed' },
@@ -119,6 +119,24 @@ export default function Sidebar() {
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
+    { path: '/profile', icon: UserCircle, label: 'Profile' },
+  ];
+
+  const financeLinks = [
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/finance-dashboard', icon: DollarSign, label: 'Finance Dashboard', highlight: true, badge: 'NEW' },
+    { path: '/seller/billing', icon: TrendingUp, label: 'Revenue Overview' },
+    { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace' },
+    { path: '/community-feed', icon: Rss, label: 'Community Feed' },
+    { path: '/profile', icon: UserCircle, label: 'Profile' },
+  ];
+
+  const moderatorLinks = [
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/moderator-dashboard', icon: Shield, label: 'Moderator Dashboard', highlight: true, badge: 'NEW' },
+    { path: '/community-feed', icon: Rss, label: 'Community Feed' },
+    { path: '/chat', icon: MessageCircle, label: 'Chat' },
+    { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -150,6 +168,8 @@ export default function Sidebar() {
   const links =
     currentUser.role === 'governor' ? governorLinks :
     currentUser.role === 'mentor' ? mentorLinks :
+    currentUser.role === 'finance' ? financeLinks :
+    currentUser.role === 'moderator' ? moderatorLinks :
     studentLinks;
 
   return (
