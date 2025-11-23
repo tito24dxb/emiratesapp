@@ -223,7 +223,20 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
     <div className="border-t-2 border-gray-200/50 pt-4 mt-4">
       <h4 className="font-bold text-gray-900 mb-4">Comments ({comments.length})</h4>
 
-      {!replyTo && (
+      {currentUser.plan === 'free' ? (
+        <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl text-center">
+          <p className="text-sm font-semibold text-purple-900 mb-2">💬 Join the Conversation</p>
+          <p className="text-xs text-purple-700 mb-3">
+            Upgrade to Pro or VIP to comment on posts and engage with the community!
+          </p>
+          <button
+            onClick={() => window.location.href = '/upgrade'}
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-pink-700 transition-all"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      ) : !replyTo ? (
         <form onSubmit={handleSubmit} className="mb-4">
         {imagePreview && (
           <div className="mb-2 relative inline-block">
@@ -307,7 +320,7 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
           </div>
         )}
       </form>
-      )}
+      ) : null}
 
       <div className="space-y-3">
         <AnimatePresence>

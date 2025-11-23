@@ -266,17 +266,26 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
       />
 
       <div className="flex items-center gap-1.5 md:gap-2 mb-3 md:mb-4 flex-wrap">
+        {currentUser.plan === 'free' && (
+          <div className="text-xs text-purple-700 bg-purple-50 px-2 py-1 rounded-lg font-semibold flex items-center gap-1">
+            🔒 Reactions: Pro/VIP only
+          </div>
+        )}
         {reactions.map(reaction => {
           const Icon = reaction.icon;
           const isActive = userReaction === reaction.type;
+          const isFreeUser = currentUser.plan === 'free';
           return (
             <motion.button
               key={reaction.type}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={!isFreeUser ? { scale: 1.05 } : {}}
+              whileTap={!isFreeUser ? { scale: 0.95 } : {}}
               onClick={() => handleReaction(reaction.type)}
+              disabled={isFreeUser}
               className={`flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 rounded-xl font-semibold text-xs md:text-sm transition ${
-                isActive
+                isFreeUser
+                  ? 'liquid-card-overlay text-gray-400 cursor-not-allowed opacity-60'
+                  : isActive
                   ? 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white shadow-lg'
                   : 'liquid-card-overlay text-gray-700 hover:bg-white/80'
               }`}
