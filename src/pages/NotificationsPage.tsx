@@ -1,4 +1,4 @@
-import { Bell, Check, CheckCheck, Bug, AlertTriangle, MessageCircle, Award, BookOpen, Settings, Lock, Unlock, Megaphone, TrendingUp, X, Sparkles } from 'lucide-react';
+import { Bell, Check, CheckCheck, Bug, AlertTriangle, MessageCircle, Award, BookOpen, Settings, Lock, Unlock, Megaphone, TrendingUp, X, Sparkles, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState, useEffect } from 'react';
@@ -27,6 +27,7 @@ export default function NotificationsPage() {
   const [systemAnnouncements, setSystemAnnouncements] = useState<any[]>([]);
   const [featureShutdowns, setFeatureShutdowns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updatesExpanded, setUpdatesExpanded] = useState(false);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -199,42 +200,51 @@ export default function NotificationsPage() {
         <div className="space-y-6">
           {(activeTab === 'all' || activeTab === 'updates') && updates.length > 0 && (
             <div className="glass-card rounded-2xl p-6 border-2 border-blue-200">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white">
-                  <Sparkles className="w-5 h-5" />
+              <button
+                onClick={() => setUpdatesExpanded(!updatesExpanded)}
+                className="w-full flex items-center justify-between gap-3 mb-4 hover:opacity-80 transition"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">What's New - Latest Updates</h2>
                 </div>
-                <h2 className="text-xl font-bold text-gray-900">What's New - Latest Update</h2>
-              </div>
-              <div className="space-y-3">
-                {updates.slice(0, 1).map((update) => (
-                  <div key={update.id} className="glass-card rounded-xl p-4 border border-blue-200">
-                    <div className="flex flex-col sm:flex-row items-start gap-3">
-                      <div className={`w-10 h-10 bg-gradient-to-r ${updatesService.getUpdateColor(update.type)} rounded-full flex items-center justify-center text-white flex-shrink-0`}>
-                        <span className="text-lg">{updatesService.getUpdateIcon(update.type)}</span>
-                      </div>
-                      <div className="flex-1 min-w-0 w-full">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-                          <h3 className="font-bold text-gray-900 break-words">{update.title}</h3>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-900 rounded-full font-bold uppercase w-fit">
-                              {update.type}
-                            </span>
-                            {update.version && (
-                              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-mono w-fit">
-                                v{update.version}
-                              </span>
-                            )}
-                          </div>
+                {updatesExpanded ? <ChevronUp className="w-5 h-5 text-gray-600" /> : <ChevronDown className="w-5 h-5 text-gray-600" />}
+              </button>
+
+              {updatesExpanded && (
+                <div className="space-y-3">
+                  {updates.map((update) => (
+                    <div key={update.id} className="glass-card rounded-xl p-4 border border-blue-200">
+                      <div className="flex flex-col sm:flex-row items-start gap-3">
+                        <div className={`w-10 h-10 bg-gradient-to-r ${updatesService.getUpdateColor(update.type)} rounded-full flex items-center justify-center text-white flex-shrink-0`}>
+                          <span className="text-lg">{updatesService.getUpdateIcon(update.type)}</span>
                         </div>
-                        <p className="text-sm text-gray-700 mb-2 break-words">{update.description}</p>
-                        <p className="text-xs text-gray-500 break-words">
-                          {update.createdAt.toDate().toLocaleDateString()} • {update.createdAt.toDate().toLocaleTimeString()}
-                        </p>
+                        <div className="flex-1 min-w-0 w-full">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+                            <h3 className="font-bold text-gray-900 break-words">{update.title}</h3>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-900 rounded-full font-bold uppercase w-fit">
+                                {update.type}
+                              </span>
+                              {update.version && (
+                                <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full font-mono w-fit">
+                                  v{update.version}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-700 mb-2 break-words">{update.description}</p>
+                          <p className="text-xs text-gray-500 break-words">
+                            {update.createdAt.toDate().toLocaleDateString()} • {update.createdAt.toDate().toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -378,11 +388,11 @@ export default function NotificationsPage() {
                                   e.stopPropagation();
                                   handleMarkAsRead(notification.id!);
                                 }}
-                                className="flex items-center gap-1 px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-bold transition"
+                                className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold transition shadow-md hover:shadow-lg flex-shrink-0"
                                 title="Mark as read"
                               >
                                 <Check className="w-4 h-4" />
-                                <span>Mark Read</span>
+                                Mark Read
                               </button>
                             )}
                           </div>
