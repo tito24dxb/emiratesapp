@@ -33,6 +33,13 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
+    if (!currentUser) {
+      navigate('/login', { replace: true });
+      return;
+    }
+  }, [currentUser, navigate]);
+
+  useEffect(() => {
     const checkOnboardingStatus = async () => {
       if (!currentUser) return;
 
