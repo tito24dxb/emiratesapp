@@ -17,14 +17,19 @@ interface HeartAnimation {
 export default function ImageCarousel({ images, onImageClick, onDoubleTap }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hearts, setHearts] = useState<HeartAnimation[]>([]);
+  const [isPressing, setIsPressing] = useState(false);
+  const [pressProgress, setPressProgress] = useState(0);
 
   const lastTapTimeRef = useRef<number>(0);
   const singleTapTimerRef = useRef<NodeJS.Timeout | null>(null);
   const tapCountRef = useRef<number>(0);
   const heartIdRef = useRef<number>(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const TAP_DELAY = 300;
+  const PRESS_HOLD_DELAY = 300;
 
   if (!images || images.length === 0) return null;
 
@@ -50,6 +55,41 @@ export default function ImageCarousel({ images, onImageClick, onDoubleTap }: Ima
 
     onDoubleTap?.(index);
   }, [onDoubleTap]);
+
+  const handlePressStart = (e: React.MouseEvent | React.TouchEvent, index: number) => {
+    e.preventDefault();
+    setIsPressing(true);
+    setPressProgress(0);
+
+    const startTime = Date.now();
+    progressIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / PRESS_HOLD_DELAY) * 100, 100);
+      setPressProgress(progress);
+    }, 16);
+
+    longPressTimerRef.current = setTimeout(() => {
+      setIsPressing(false);
+      setPressProgress(0);
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current);
+      }
+      onImageClick(index);
+    }, PRESS_HOLD_DELAY);
+  };
+
+  const handlePressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    setIsPressing(false);
+    setPressProgress(0);
+  };
 
   const handleImageTap = (e: React.MouseEvent | React.TouchEvent, index: number) => {
     e.stopPropagation();
@@ -87,7 +127,6 @@ export default function ImageCarousel({ images, onImageClick, onDoubleTap }: Ima
 
       singleTapTimerRef.current = setTimeout(() => {
         if (tapCountRef.current === 1) {
-          onImageClick(index);
         }
         tapCountRef.current = 0;
       }, TAP_DELAY);
@@ -117,14 +156,45 @@ export default function ImageCarousel({ images, onImageClick, onDoubleTap }: Ima
         ref={imageContainerRef}
         className="mb-3 md:mb-4 rounded-2xl overflow-hidden relative"
       >
-        <img
-          src={images[0]}
-          alt="Post"
-          className="w-full max-h-[300px] md:max-h-[500px] object-cover cursor-pointer hover:opacity-95 transition select-none"
-          onClick={(e) => handleImageTap(e, 0)}
-          onTouchEnd={(e) => handleImageTap(e, 0)}
-          draggable={false}
-        />
+        <div className="relative">
+          <img
+            src={images[0]}
+            alt="Post"
+            className={`w-full max-h-[300px] md:max-h-[500px] object-cover cursor-pointer hover:opacity-95 transition-all select-none ${
+              isPressing ? 'scale-95 brightness-90' : ''
+            }`}
+            onClick={(e) => handleImageTap(e, 0)}
+            onTouchStart={(e) => handlePressStart(e, 0)}
+            onTouchEnd={(e) => {
+              handlePressEnd();
+              handleImageTap(e, 0);
+            }}
+            onMouseDown={(e) => handlePressStart(e, 0)}
+            onMouseUp={() => handlePressEnd()}
+            onMouseLeave={() => handlePressEnd()}
+            draggable={false}
+          />
+
+          {isPressing && (
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center">
+                  <svg className="w-16 h-16 -rotate-90">
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="28"
+                      stroke="white"
+                      strokeWidth="4"
+                      fill="none"
+                      strokeDasharray={`${(pressProgress / 100) * 176} 176`}
+                      className="transition-all duration-75"
+                    />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
 
         <AnimatePresence>
           {hearts.map((heart) => (
@@ -159,6 +229,7 @@ export default function ImageCarousel({ images, onImageClick, onDoubleTap }: Ima
             </motion.div>
           ))}
         </AnimatePresence>
+        </div>
       </div>
     );
   }
@@ -170,19 +241,53 @@ export default function ImageCarousel({ images, onImageClick, onDoubleTap }: Ima
     >
       <div className="relative">
         <AnimatePresence mode="wait">
-          <motion.img
+          <motion.div
             key={currentIndex}
-            src={images[currentIndex]}
-            alt={`Post image ${currentIndex + 1}`}
-            className="w-full max-h-[300px] md:max-h-[500px] object-cover cursor-pointer select-none"
-            onClick={(e) => handleImageTap(e, currentIndex)}
-            onTouchEnd={(e) => handleImageTap(e, currentIndex)}
-            draggable={false}
+            className="relative"
             initial={{ opacity: 0, x: 100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
             transition={{ duration: 0.3 }}
-          />
+          >
+            <img
+              src={images[currentIndex]}
+              alt={`Post image ${currentIndex + 1}`}
+              className={`w-full max-h-[300px] md:max-h-[500px] object-cover cursor-pointer select-none transition-all ${
+                isPressing ? 'scale-95 brightness-90' : ''
+              }`}
+              onClick={(e) => handleImageTap(e, currentIndex)}
+              onTouchStart={(e) => handlePressStart(e, currentIndex)}
+              onTouchEnd={(e) => {
+                handlePressEnd();
+                handleImageTap(e, currentIndex);
+              }}
+              onMouseDown={(e) => handlePressStart(e, currentIndex)}
+              onMouseUp={() => handlePressEnd()}
+              onMouseLeave={() => handlePressEnd()}
+              draggable={false}
+            />
+
+            {isPressing && (
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center">
+                    <svg className="w-16 h-16 -rotate-90">
+                      <circle
+                        cx="32"
+                        cy="32"
+                        r="28"
+                        stroke="white"
+                        strokeWidth="4"
+                        fill="none"
+                        strokeDasharray={`${(pressProgress / 100) * 176} 176`}
+                        className="transition-all duration-75"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
         </AnimatePresence>
 
         <AnimatePresence>

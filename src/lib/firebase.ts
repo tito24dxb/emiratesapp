@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, setPersistence, browserSessionPersistence } from 'firebase/auth';
+import { getAuth, setPersistence, browserSessionPersistence, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
@@ -26,6 +26,11 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
+
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 setPersistence(auth, browserSessionPersistence).catch((error) => {
   console.error('Error setting auth persistence:', error);
