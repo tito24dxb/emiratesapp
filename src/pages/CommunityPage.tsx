@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Users, Search, ChevronLeft, Plus, UserPlus, X, Check, Info, Bot, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import MessageBubble from '../components/community/MessageBubble';
 import MessageComposer from '../components/community/MessageComposer';
 import { communityChatService, Message, Conversation } from '../services/communityChatService';
@@ -19,6 +20,7 @@ interface User {
 
 export default function CommunityPage() {
   const { currentUser } = useApp();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -34,6 +36,19 @@ export default function CommunityPage() {
   const [showRules, setShowRules] = useState(false);
   const [showAIBanner, setShowAIBanner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Handle chat parameter from URL (e.g., from marketplace)
+  useEffect(() => {
+    const chatId = searchParams.get('chat');
+    if (chatId && conversations.length > 0) {
+      const conversation = conversations.find(c => c.id === chatId);
+      if (conversation) {
+        setSelectedConversationId(chatId);
+        // Clear the URL parameter
+        setSearchParams({});
+      }
+    }
+  }, [searchParams, conversations]);
 
   // Check feature access
   if (!currentUser) return null;

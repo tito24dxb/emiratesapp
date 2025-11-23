@@ -292,9 +292,13 @@ export const getSellerProducts = async (sellerId: string): Promise<MarketplacePr
 export const incrementProductViews = async (productId: string): Promise<void> => {
   try {
     const productRef = doc(db, 'marketplace_products', productId);
-    await updateDoc(productRef, {
-      views_count: increment(1)
-    });
+    const productSnap = await getDoc(productRef);
+    if (productSnap.exists()) {
+      const currentViews = productSnap.data().views_count || 0;
+      await updateDoc(productRef, {
+        views_count: currentViews + 1
+      });
+    }
   } catch (error) {
     console.error('Error incrementing views:', error);
   }
