@@ -303,15 +303,19 @@ export default function LoginPage() {
         }
       }
 
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
 
       setCurrentUser(pendingUserData);
 
-      await updateDoc(doc(db, 'users', pendingUserId), {
-        lastLogin: serverTimestamp()
-      });
+      try {
+        await updateDoc(doc(db, 'users', pendingUserId), {
+          lastLogin: serverTimestamp()
+        });
 
-      await recordLoginActivity(pendingUserId, true);
+        await recordLoginActivity(pendingUserId, true);
+      } catch (dbError) {
+        console.log('Firestore update deferred (will be handled by auth listener)');
+      }
 
       sessionStorage.removeItem('pending2FA');
       sessionStorage.removeItem('pending2FAEmail');
@@ -400,9 +404,89 @@ export default function LoginPage() {
               </motion.div>
             )}
 
+            {show2FA && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="border-2 border-[#D71920]/30 rounded-xl p-5 bg-gradient-to-br from-red-50 to-white"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  {useBackupCode ? (
+                    <Key className="w-6 h-6 text-[#D71920]" />
+                  ) : (
+                    <Shield className="w-6 h-6 text-[#D71920]" />
+                  )}
+                  <div>
+                    <h3 className="font-bold text-gray-900">Two-Factor Authentication</h3>
+                    <p className="text-xs text-gray-600">
+                      {useBackupCode ? 'Enter a backup code' : 'Enter code from your authenticator app'}
+                    </p>
+                  </div>
+                </div>
+
+                <input
+                  type="text"
+                  value={twoFactorCode}
+                  onChange={(e) => {
+                    if (useBackupCode) {
+                      setTwoFactorCode(e.target.value.toUpperCase().slice(0, 8));
+                    } else {
+                      setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6));
+                    }
+                  }}
+                  placeholder={useBackupCode ? 'ABC12345' : '000000'}
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-mono text-xl text-center tracking-widest focus:border-[#D71920] outline-none mb-3"
+                  maxLength={useBackupCode ? 8 : 6}
+                  autoFocus
+                />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUseBackupCode(!useBackupCode);
+                    setTwoFactorCode('');
+                    setError('');
+                  }}
+                  className="w-full text-xs text-[#D71920] hover:underline mb-3"
+                >
+                  {useBackupCode ? 'Use authenticator code instead' : 'Use backup code instead'}
+                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sessionStorage.removeItem('pending2FA');
+                      sessionStorage.removeItem('pending2FAEmail');
+                      sessionStorage.removeItem('pending2FAPassword');
+                      sessionStorage.removeItem('pendingUserId');
+                      sessionStorage.removeItem('pendingUserData');
+                      setShow2FA(false);
+                      setPendingUserId(null);
+                      setPendingUserData(null);
+                      setTwoFactorCode('');
+                      setError('');
+                      setUseBackupCode(false);
+                    }}
+                    className="flex-1 px-4 py-2.5 border-2 border-gray-300 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handle2FAVerification}
+                    disabled={loading || (useBackupCode ? twoFactorCode.length !== 8 : twoFactorCode.length !== 6)}
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl text-sm font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Verifying...' : 'Verify'}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || show2FA}
               className="w-full liquid-button-primary text-white py-3.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing In...' : 'Sign In'}
@@ -448,104 +532,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.div>
-
-      {show2FA && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-          onClick={() => {
-            sessionStorage.removeItem('pending2FA');
-            sessionStorage.removeItem('pending2FAEmail');
-            sessionStorage.removeItem('pending2FAPassword');
-            sessionStorage.removeItem('pendingUserId');
-            sessionStorage.removeItem('pendingUserData');
-            setShow2FA(false);
-            setPendingUserId(null);
-            setTwoFactorCode('');
-          }}
-        >
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            onClick={(e) => e.stopPropagation()}
-            className="liquid-crystal-panel p-8 max-w-md w-full"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center">
-                {useBackupCode ? <Key className="w-6 h-6 text-white" /> : <Shield className="w-6 h-6 text-white" />}
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Two-Factor Authentication</h2>
-                <p className="text-sm text-gray-600">
-                  {useBackupCode ? 'Enter a backup code' : 'Enter code from your authenticator app'}
-                </p>
-              </div>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-                {error}
-              </div>
-            )}
-
-            <input
-              type="text"
-              value={twoFactorCode}
-              onChange={(e) => {
-                if (useBackupCode) {
-                  setTwoFactorCode(e.target.value.toUpperCase().slice(0, 8));
-                } else {
-                  setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6));
-                }
-              }}
-              placeholder={useBackupCode ? 'ABC12345' : '000000'}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-mono text-2xl text-center tracking-widest focus:border-[#D71920] outline-none mb-4"
-              maxLength={useBackupCode ? 8 : 6}
-              autoFocus
-            />
-
-            <button
-              onClick={() => {
-                setUseBackupCode(!useBackupCode);
-                setTwoFactorCode('');
-                setError('');
-              }}
-              className="w-full text-sm text-[#D71920] hover:underline mb-4"
-            >
-              {useBackupCode ? 'Use authenticator code instead' : 'Use backup code instead'}
-            </button>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  sessionStorage.removeItem('pending2FA');
-                  sessionStorage.removeItem('pending2FAEmail');
-                  sessionStorage.removeItem('pending2FAPassword');
-                  sessionStorage.removeItem('pendingUserId');
-                  sessionStorage.removeItem('pendingUserData');
-                  setShow2FA(false);
-                  setPendingUserId(null);
-                  setPendingUserData(null);
-                  setTwoFactorCode('');
-                  setError('');
-                  setUseBackupCode(false);
-                }}
-                className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handle2FAVerification}
-                disabled={loading || (useBackupCode ? twoFactorCode.length !== 8 : twoFactorCode.length !== 6)}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Verifying...' : 'Verify'}
-              </button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
     </div>
   );
 }
