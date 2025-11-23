@@ -22,22 +22,6 @@ export default function LoginPage() {
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const pending2FA = sessionStorage.getItem('pending2FA');
-    const savedEmail = sessionStorage.getItem('pending2FAEmail');
-    const savedPassword = sessionStorage.getItem('pending2FAPassword');
-    const savedUserId = sessionStorage.getItem('pendingUserId');
-    const savedUserData = sessionStorage.getItem('pendingUserData');
-
-    if (pending2FA === 'true' && savedEmail && savedPassword && savedUserId && savedUserData) {
-      console.log('Restoring 2FA modal state after signout');
-      setEmail(savedEmail);
-      setPassword(savedPassword);
-      setPendingUserId(savedUserId);
-      setPendingUserData(JSON.parse(savedUserData));
-      setShow2FA(true);
-    }
-  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,25 +30,54 @@ export default function LoginPage() {
 
     try {
       console.log('Attempting login with email:', email);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      console.log('Firebase Auth successful, user:', user.uid);
 
-      const userDocRef = doc(db, 'users', user.uid);
+      const tempCredential = await signInWithEmailAndPassword(auth, email, password);
+      const tempUser = tempCredential.user;
+      console.log('Checking 2FA status for user:', tempUser.uid);
+
+      const has2FA = await totpService.check2FAStatus(tempUser.uid);
+
+      if (has2FA) {
+        console.log('2FA enabled, showing verification dropdown');
+        const userDocRef = doc(db, 'users', tempUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+
+        setPendingUserId(tempUser.uid);
+        setPendingUserData({
+          uid: tempUser.uid,
+          email: userData?.email || tempUser.email,
+          name: userData?.name || 'User',
+          role: (userData?.role || 'student') as 'student' | 'mentor' | 'governor',
+          plan: (userData?.plan || 'free') as 'free' | 'pro' | 'vip',
+          country: userData?.country || '',
+          bio: userData?.bio || '',
+          expectations: userData?.expectations || '',
+          photoURL: userData?.photo_base64 || '',
+          hasCompletedOnboarding: userData?.hasCompletedOnboarding || false,
+          hasSeenWelcomeBanner: userData?.hasSeenWelcomeBanner || false,
+          onboardingCompletedAt: userData?.onboardingCompletedAt,
+          welcomeBannerSeenAt: userData?.welcomeBannerSeenAt,
+          createdAt: userData?.createdAt || new Date().toISOString(),
+          updatedAt: userData?.updatedAt || new Date().toISOString(),
+        });
+        setShow2FA(true);
+        setLoading(false);
+        return;
+      }
+
+      console.log('No 2FA, proceeding with login');
+      const userDocRef = doc(db, 'users', tempUser.uid);
       const userDoc = await getDoc(userDocRef);
-      console.log('Firestore user doc exists:', userDoc.exists());
 
       if (!userDoc.exists()) {
-        console.error('User document not found in Firestore for uid:', user.uid);
         throw new Error('User profile not found. Please contact support.');
       }
 
       const userData = userDoc.data();
-      console.log('User data from Firestore:', userData);
-
       const currentUser = {
-        uid: user.uid,
-        email: userData.email || user.email,
+        uid: tempUser.uid,
+        email: userData.email || tempUser.email,
         name: userData.name || 'User',
         role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
@@ -80,38 +93,17 @@ export default function LoginPage() {
         updatedAt: userData.updatedAt || new Date().toISOString(),
       };
 
-      console.log('Checking 2FA status');
-      const has2FA = await totpService.check2FAStatus(user.uid);
-
-      if (has2FA) {
-        console.log('2FA enabled, showing verification modal');
-        sessionStorage.setItem('pending2FA', 'true');
-        sessionStorage.setItem('pending2FAEmail', email);
-        sessionStorage.setItem('pending2FAPassword', password);
-        sessionStorage.setItem('pendingUserData', JSON.stringify(currentUser));
-        sessionStorage.setItem('pendingUserId', user.uid);
-        setPendingUserId(user.uid);
-        setPendingUserData(currentUser);
-        setShow2FA(true);
-        setLoading(false);
-        await auth.signOut();
-        return;
-      }
-
-      console.log('Setting current user:', currentUser);
       setCurrentUser(currentUser);
 
-      await updateDoc(doc(db, 'users', user.uid), {
+      await updateDoc(doc(db, 'users', tempUser.uid), {
         lastLogin: serverTimestamp()
       });
 
-      await recordLoginActivity(user.uid, true);
+      await recordLoginActivity(tempUser.uid, true);
 
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
-      console.error('Error code:', err.code);
-      console.error('Error message:', err.message);
 
       let errorMessage = 'Invalid email or password';
 
@@ -285,6 +277,7 @@ export default function LoginPage() {
     setError('');
 
     try {
+      console.log('Verifying 2FA code...');
       let isValid = false;
 
       if (useBackupCode) {
@@ -303,19 +296,15 @@ export default function LoginPage() {
         }
       }
 
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('2FA verification successful, completing login');
 
       setCurrentUser(pendingUserData);
 
-      try {
-        await updateDoc(doc(db, 'users', pendingUserId), {
-          lastLogin: serverTimestamp()
-        });
+      await updateDoc(doc(db, 'users', pendingUserId), {
+        lastLogin: serverTimestamp()
+      });
 
-        await recordLoginActivity(pendingUserId, true);
-      } catch (dbError) {
-        console.log('Firestore update deferred (will be handled by auth listener)');
-      }
+      await recordLoginActivity(pendingUserId, true);
 
       sessionStorage.removeItem('pending2FA');
       sessionStorage.removeItem('pending2FAEmail');
