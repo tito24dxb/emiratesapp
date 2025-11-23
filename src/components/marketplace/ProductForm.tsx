@@ -118,7 +118,7 @@ export default function ProductForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+        <div className="p-4 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-lg text-red-600 shadow-sm">
           {error}
         </div>
       )}
@@ -132,7 +132,7 @@ export default function ProductForm({
           type="text"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
           placeholder="Enter product title"
           maxLength={100}
         />
@@ -148,7 +148,7 @@ export default function ProductForm({
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           rows={6}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+          className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/50 backdrop-blur-sm"
           placeholder="Describe your product in detail..."
           maxLength={2000}
         />
@@ -187,7 +187,7 @@ export default function ProductForm({
         <select
           value={formData.category}
           onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
         >
           {CATEGORIES.map((category) => (
             <option key={category} value={category}>
@@ -224,7 +224,7 @@ export default function ProductForm({
           <select
             value={formData.currency}
             onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
           >
             <option value="USD">USD ($)</option>
             <option value="EUR">EUR (€)</option>
@@ -245,7 +245,7 @@ export default function ProductForm({
             min="0"
             value={formData.stock_quantity || 0}
             onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) || 0 })}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
             placeholder="Enter available quantity"
           />
         </div>
@@ -253,7 +253,7 @@ export default function ProductForm({
 
       {/* Digital File URL (Digital products only) */}
       {formData.product_type === 'digital' && (
-        <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="space-y-4 p-4 bg-blue-500/10 backdrop-blur-sm rounded-lg border border-blue-200/50 shadow-sm">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Digital File URL (Optional)
@@ -262,7 +262,7 @@ export default function ProductForm({
               type="url"
               value={formData.digital_file_url || ''}
               onChange={(e) => setFormData({ ...formData, digital_file_url: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
               placeholder="https://example.com/file.pdf"
             />
             <p className="text-xs text-gray-600 mt-1">
@@ -278,7 +278,7 @@ export default function ProductForm({
               type="text"
               value={formData.digital_file_name || ''}
               onChange={(e) => setFormData({ ...formData, digital_file_name: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
               placeholder="product-file.pdf"
             />
           </div>

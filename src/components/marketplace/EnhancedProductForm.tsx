@@ -165,14 +165,14 @@ export default function EnhancedProductForm({
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         <AnimatePresence>
           {error && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
-              className="p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
+              className="p-3 sm:p-4 bg-red-50/80 backdrop-blur-sm border border-red-200/50 rounded-lg text-red-600 text-sm shadow-sm"
             >
               {error}
             </motion.div>
@@ -187,7 +187,7 @@ export default function EnhancedProductForm({
             type="text"
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
             placeholder="Enter product title"
             maxLength={100}
           />
@@ -202,7 +202,7 @@ export default function EnhancedProductForm({
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             rows={4}
-            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white/50 backdrop-blur-sm"
             placeholder="Describe your product..."
             maxLength={2000}
           />
@@ -239,7 +239,7 @@ export default function EnhancedProductForm({
           <select
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
           >
             {CATEGORIES.map((category) => (
               <option key={category} value={category}>
@@ -275,7 +275,7 @@ export default function EnhancedProductForm({
             <select
               value={formData.currency}
               onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
             >
               <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
@@ -295,14 +295,14 @@ export default function EnhancedProductForm({
               min="0"
               value={formData.stock_quantity || 0}
               onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) || 0 })}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
               placeholder="Enter quantity"
             />
           </div>
         )}
 
         {formData.product_type === 'digital' && (
-          <div className="space-y-3 p-3 sm:p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="space-y-3 p-3 sm:p-4 bg-blue-500/10 backdrop-blur-sm rounded-lg border border-blue-200/50 shadow-sm">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">
                 Digital File URL (Optional)
@@ -311,7 +311,7 @@ export default function EnhancedProductForm({
                 type="url"
                 value={formData.digital_file_url || ''}
                 onChange={(e) => setFormData({ ...formData, digital_file_url: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
                 placeholder="https://example.com/file.pdf"
               />
             </div>
@@ -324,7 +324,7 @@ export default function EnhancedProductForm({
                 type="text"
                 value={formData.digital_file_name || ''}
                 onChange={(e) => setFormData({ ...formData, digital_file_name: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
                 placeholder="product-file.pdf"
               />
             </div>
@@ -341,7 +341,7 @@ export default function EnhancedProductForm({
               value={tagInput}
               onChange={(e) => setTagInput(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-              className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="flex-1 px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
               placeholder="Add tag"
             />
             <button
@@ -377,7 +377,7 @@ export default function EnhancedProductForm({
           <label className="block text-sm font-medium text-gray-700">
             Product Images * (Max 5)
           </label>
-          <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-center gap-2 p-2 bg-blue-500/10 backdrop-blur-sm rounded-lg border border-blue-200/50">
             <Info className="w-4 h-4 text-blue-600 flex-shrink-0" />
             <p className="text-xs text-blue-700">
               White backgrounds will be automatically removed for better display
