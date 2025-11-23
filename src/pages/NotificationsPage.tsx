@@ -8,8 +8,6 @@ import {
   subscribeToUserNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-} from '../services/unifiedNotificationService';
-import {
   getAllActiveBugReports,
   getCurrentSystemAnnouncements,
   getActiveFeatureShutdowns,
@@ -73,8 +71,8 @@ export default function NotificationsPage() {
 
   const handleNotificationClick = (notification: Notification) => {
     handleMarkAsRead(notification.id!);
-    if (notification.action_url) {
-      navigate(notification.action_url);
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
     }
   };
 
@@ -403,8 +401,8 @@ export default function NotificationsPage() {
                             </p>
                             <div className="flex items-center gap-2 text-xs text-gray-500">
                             <span>
-                              {notification.created_at
-                                ? new Date(notification.created_at).toLocaleString()
+                              {notification.createdAt
+                                ? new Date(notification.createdAt.toDate()).toLocaleString()
                                 : 'Just now'}
                             </span>
                             {notification.priority && notification.priority !== 'low' && (

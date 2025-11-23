@@ -6,8 +6,7 @@ import {
   subscribeToUserNotifications,
   markNotificationAsRead,
   markAllNotificationsAsRead,
-  getUnreadCount,
-} from '../services/unifiedNotificationService';
+} from '../services/notificationService';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -52,8 +51,8 @@ export default function NotificationBell() {
       await markNotificationAsRead(notification.id!);
     }
     setIsOpen(false);
-    if (notification.action_url) {
-      navigate(notification.action_url);
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
     }
   };
 
@@ -174,8 +173,8 @@ export default function NotificationBell() {
                           </div>
                           <p className="text-xs text-gray-600 line-clamp-2">{notification.message}</p>
                           <span className="text-xs text-gray-500 mt-1 block">
-                            {notification.created_at
-                              ? formatTimestamp(new Date(notification.created_at))
+                            {notification.createdAt
+                              ? formatTimestamp(new Date(notification.createdAt.toDate()))
                               : 'Just now'}
                           </span>
                         </div>
