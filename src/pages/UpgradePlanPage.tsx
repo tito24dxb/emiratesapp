@@ -10,6 +10,29 @@ export default function UpgradePlanPage() {
   const [loading, setLoading] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Hide upgrade page for VIP users - they're already at max tier
+  if (currentUser && currentUser.plan === 'vip') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50 max-w-md">
+          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
+            <Crown className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">You're a VIP!</h2>
+          <p className="text-gray-600 mb-6">
+            You're already on the highest tier plan with access to all features. Enjoy your VIP benefits!
+          </p>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 text-white rounded-lg hover:from-yellow-700 hover:to-orange-700 transition-all shadow-lg font-semibold"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const handleUpgrade = async (planName: string, priceId: string) => {
     if (!currentUser) {
       alert('Please log in to upgrade your plan');

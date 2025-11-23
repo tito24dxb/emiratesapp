@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Upload, Trash2, Download, Eye, EyeOff, Search, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Upload, Trash2, Download, Eye, EyeOff, Search, Filter, HardDrive, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
@@ -14,6 +15,7 @@ import {
 
 export default function StorageManagerPage() {
   const { currentUser } = useApp();
+  const navigate = useNavigate();
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [quota, setQuota] = useState<StorageQuota | null>(null);
   const [loading, setLoading] = useState(true);
@@ -90,6 +92,35 @@ export default function StorageManagerPage() {
 
   const categories = Array.from(new Set(files.map((f) => f.category || 'general')));
   const percentUsed = quota ? (quota.usedBytes / quota.limitBytes) * 100 : 0;
+
+  // Block free users from file management
+  if (currentUser && currentUser.plan === 'free') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50 max-w-md">
+          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+            <HardDrive className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">File Management</h2>
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              File management is available for <strong>Pro</strong> and <strong>VIP</strong> members only.
+            </p>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Upgrade to store and manage your files securely in the cloud.
+          </p>
+          <button
+            onClick={() => navigate('/upgrade')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-lg hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg font-semibold"
+          >
+            <Crown className="w-5 h-5 inline mr-2" />
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

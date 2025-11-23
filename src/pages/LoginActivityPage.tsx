@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Shield, Smartphone, Monitor, Tablet, MapPin, Clock, AlertTriangle, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Shield, Smartphone, Monitor, Tablet, MapPin, Clock, AlertTriangle, Trash2, Crown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import InspectionProtection from '../components/InspectionProtection';
@@ -12,6 +13,7 @@ import {
 
 export default function LoginActivityPage() {
   const { currentUser } = useApp();
+  const navigate = useNavigate();
   const [loginHistory, setLoginHistory] = useState<LoginActivity[]>([]);
   const [failedAttempts, setFailedAttempts] = useState<LoginActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +67,35 @@ export default function LoginActivityPage() {
         return <Monitor className="w-5 h-5" />;
     }
   };
+
+  // Block free users from login activity
+  if (currentUser && currentUser.plan === 'free') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50 max-w-md">
+          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+            <Shield className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Login Activity</h2>
+          <div className="mb-4 p-4 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-sm text-green-800">
+              Login activity tracking is available for <strong>Pro</strong> and <strong>VIP</strong> members only.
+            </p>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Upgrade to monitor your account security and login history.
+          </p>
+          <button
+            onClick={() => navigate('/upgrade')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all shadow-lg font-semibold"
+          >
+            <Crown className="w-5 h-5 inline mr-2" />
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

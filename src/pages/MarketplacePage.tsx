@@ -153,6 +153,34 @@ export default function MarketplacePage() {
     );
   }
 
+  // Block free users from marketplace
+  if (currentUser.plan === 'free') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50 max-w-md">
+          <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+            <Package className="w-10 h-10 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Marketplace Access</h2>
+          <div className="mb-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <p className="text-sm text-purple-800">
+              The marketplace is available for <strong>Pro</strong> and <strong>VIP</strong> members only.
+            </p>
+          </div>
+          <p className="text-gray-600 mb-6">
+            Upgrade your plan to access exclusive products, services, and opportunities.
+          </p>
+          <button
+            onClick={() => navigate('/upgrade')}
+            className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all shadow-lg font-semibold"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen">
       {/* Header */}
