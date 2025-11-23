@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useApp } from '../../context/AppContext';
 import { communityFeedService, CommunityPost, POSTS_PER_PAGE } from '../../services/communityFeedService';
-import { MessageCircle, Image as ImageIcon, Plus, Filter, X, Send, Bot, Shield, Package } from 'lucide-react';
+import { MessageCircle, Image as ImageIcon, Plus, Filter, X, Send, Bot, Shield, Package, Users, Lock, Zap, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PostCard from './PostCard';
 import { QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
@@ -28,7 +28,10 @@ export default function CommunityFeed() {
   const [submitting, setSubmitting] = useState(false);
   const [postType, setPostType] = useState<'text' | 'product'>('text');
   const [productLink, setProductLink] = useState('');
+  const [targetAudience, setTargetAudience] = useState<'all' | 'free' | 'pro' | 'vip' | 'pro-vip'>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const canTargetAudience = currentUser?.role === 'governor' || currentUser?.role === 'mentor' || currentUser?.role === 'admin';
 
   const loadPosts = useCallback(async (reset: boolean = false) => {
     if (!currentUser) return;
@@ -138,7 +141,8 @@ export default function CommunityFeed() {
         formChannel,
         imageFile || undefined,
         currentUser!.photoURL || '',
-        postType === 'product' ? productLink.trim() : undefined
+        postType === 'product' ? productLink.trim() : undefined,
+        canTargetAudience ? targetAudience : 'all'
       );
 
       setFormContent('');
@@ -147,6 +151,7 @@ export default function CommunityFeed() {
       setImagePreview(null);
       setPostType('text');
       setProductLink('');
+      setTargetAudience('all');
       setShowCreateForm(false);
       loadPosts(true);
     } catch (error) {
@@ -417,6 +422,105 @@ export default function CommunityFeed() {
                         </button>
                       </div>
                     </div>
+
+                    {canTargetAudience && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Users className="w-4 h-4 text-[#D71920]" />
+                          <label className="block text-sm font-bold text-gray-700">
+                            Target Audience *
+                          </label>
+                          <span className="px-2 py-0.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white text-xs font-bold rounded-full">
+                            Governor/Mentor Only
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setTargetAudience('all')}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              targetAudience === 'all'
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Users className="w-4 h-4" />
+                              <span className="font-bold text-xs text-gray-900">All Users</span>
+                            </div>
+                            <p className="text-[10px] text-gray-600">Everyone can see</p>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setTargetAudience('free')}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              targetAudience === 'free'
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Lock className="w-4 h-4 text-gray-500" />
+                              <span className="font-bold text-xs text-gray-900">Free Only</span>
+                            </div>
+                            <p className="text-[10px] text-gray-600">Free users only</p>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setTargetAudience('pro')}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              targetAudience === 'pro'
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Zap className="w-4 h-4 text-[#FF3B3F]" />
+                              <span className="font-bold text-xs text-gray-900">Pro Only</span>
+                            </div>
+                            <p className="text-[10px] text-gray-600">Pro subscribers</p>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setTargetAudience('vip')}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              targetAudience === 'vip'
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Crown className="w-4 h-4 text-[#3D4A52]" />
+                              <span className="font-bold text-xs text-gray-900">VIP Only</span>
+                            </div>
+                            <p className="text-[10px] text-gray-600">VIP members</p>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setTargetAudience('pro-vip')}
+                            className={`p-3 rounded-xl border-2 transition text-left ${
+                              targetAudience === 'pro-vip'
+                                ? 'border-[#D71920] bg-red-50'
+                                : 'border-gray-200 hover:border-gray-300 bg-white/50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <Crown className="w-4 h-4 text-purple-600" />
+                              <span className="font-bold text-xs text-gray-900">Pro + VIP</span>
+                            </div>
+                            <p className="text-[10px] text-gray-600">Paid members</p>
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
+                          <span className="text-blue-600">ℹ️</span>
+                          <span>This post will only be visible to users with the selected plan(s)</span>
+                        </p>
+                      </div>
+                    )}
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">Content *</label>
