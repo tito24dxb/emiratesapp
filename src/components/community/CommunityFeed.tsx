@@ -56,33 +56,11 @@ export default function CommunityFeed() {
         filters
       );
 
-      // Filter posts based on targetAudience
-      const userPlan = currentUser.plan || 'free';
-      const filteredPosts = newPosts.filter(post => {
-        const target = post.targetAudience || 'all';
-
-        // If target is 'all', everyone can see
-        if (target === 'all') return true;
-
-        // If target is 'free', only free users
-        if (target === 'free') return userPlan === 'free';
-
-        // If target is 'pro', only pro users
-        if (target === 'pro') return userPlan === 'pro';
-
-        // If target is 'vip', only vip users
-        if (target === 'vip') return userPlan === 'vip';
-
-        // If target is 'pro-vip', pro or vip users
-        if (target === 'pro-vip') return userPlan === 'pro' || userPlan === 'vip';
-
-        return true;
-      });
-
+      // Don't filter posts - show all posts (locked state handled in PostCard)
       if (reset) {
-        setPosts(filteredPosts);
+        setPosts(newPosts);
       } else {
-        setPosts(prev => [...prev, ...filteredPosts]);
+        setPosts(prev => [...prev, ...newPosts]);
       }
 
       setLastDoc(newLastDoc);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical, ShoppingBag, Send, Smile, Image as ImageIcon } from 'lucide-react';
+import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical, ShoppingBag, Send, Smile, Image as ImageIcon, Lock, Crown, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { CommunityPost, communityFeedService } from '../../services/communityFeedService';
 import EnhancedCommentsSection from './EnhancedCommentsSection';
@@ -162,6 +162,29 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
   const canDelete = currentUser.uid === post.userId || currentUser.role === 'governor' || currentUser.role === 'admin';
   const canFlag = currentUser.uid !== post.userId;
 
+  // Check if post should be locked for current user
+  const userPlan = currentUser?.plan || 'free';
+  const targetAudience = post.targetAudience || 'all';
+
+  const isPostLocked = (() => {
+    // If target is 'all', never lock
+    if (targetAudience === 'all') return false;
+
+    // If target is 'free', only lock for non-free users (actually free users can see it)
+    if (targetAudience === 'free') return userPlan !== 'free';
+
+    // If target is 'pro', lock for free users
+    if (targetAudience === 'pro') return userPlan === 'free';
+
+    // If target is 'vip', lock for free and pro users
+    if (targetAudience === 'vip') return userPlan !== 'vip';
+
+    // If target is 'pro-vip', lock for free users only
+    if (targetAudience === 'pro-vip') return userPlan === 'free';
+
+    return false;
+  })();
+
   const reactions = [
     { type: 'fire' as const, icon: Flame, count: localPost.reactionsCount.fire, color: 'text-orange-500' },
     { type: 'heart' as const, icon: Heart, count: localPost.reactionsCount.heart, color: 'text-red-500' },
@@ -178,6 +201,152 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
 
   const badge = channelBadges[post.channel];
 
+  // Helper function to get upgrade plan name
+  const getRequiredPlan = () => {
+    if (targetAudience === 'pro') return 'Pro';
+    if (targetAudience === 'vip') return 'VIP';
+    if (targetAudience === 'pro-vip') return 'Pro or VIP';
+    return 'Premium';
+  };
+
+  // Helper function to get upgrade icon
+  const getUpgradeIcon = () => {
+    if (targetAudience === 'vip') return Crown;
+    if (targetAudience === 'pro' || targetAudience === 'pro-vip') return Zap;
+    return Lock;
+  };
+
+  // If post is locked, show locked state
+  if (isPostLocked) {
+    const UpgradeIcon = getUpgradeIcon();
+    const requiredPlan = getRequiredPlan();
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        className="liquid-crystal-panel p-4 md:p-6 relative overflow-hidden"
+      >
+        {/* Header - Same structure as regular post */}
+        <div className="flex items-start justify-between mb-3 md:mb-4">
+          <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0">
+            {post.userPhotoURL ? (
+              <img
+                src={post.userPhotoURL}
+                alt={post.userName}
+                className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0 border-2 border-white shadow-md"
+              />
+            ) : (
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center text-white font-bold text-base md:text-lg flex-shrink-0">
+                {post.userName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-gray-900 text-sm md:text-base truncate">{post.userName}</h3>
+              <div className="flex items-center gap-1.5 md:gap-2 flex-wrap">
+                <p className="text-xs text-gray-600">
+                  {post.createdAt.toDate().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </p>
+                <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${badge.color}`}>
+                  <span className="mr-1">{badge.label}</span>
+                  <span className="hidden sm:inline">{badge.shortLabel}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Locked Content Area - Takes same space as regular post */}
+        <div className="relative min-h-[300px] flex flex-col items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-amber-100 rounded-2xl p-8 border-2 border-amber-200">
+          {/* Lock Icon with Glow Effect */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="relative mb-6"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
+            <div className="relative w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center shadow-2xl">
+              <UpgradeIcon className="w-10 h-10 md:w-12 md:h-12 text-white" />
+            </div>
+          </motion.div>
+
+          {/* Upgrade Message */}
+          <div className="text-center space-y-3 md:space-y-4 max-w-md">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+              {requiredPlan} Exclusive Content
+            </h3>
+            <p className="text-sm md:text-base text-gray-700 leading-relaxed">
+              This post is exclusive to <span className="font-bold text-amber-700">{requiredPlan}</span> members.
+              Upgrade now to unlock this content and access all premium features!
+            </p>
+
+            {/* Benefits List */}
+            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 text-left space-y-2 mt-4">
+              <p className="text-xs md:text-sm font-bold text-gray-900 mb-2">✨ What you'll get:</p>
+              <ul className="text-xs md:text-sm text-gray-700 space-y-1.5">
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>Access to exclusive posts and content</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-600">✓</span>
+                  <span>Full community engagement features</span>
+                </li>
+                {(targetAudience === 'vip' || targetAudience === 'pro-vip') && (
+                  <>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      <span>AI Trainer & Open Day Simulator</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-600">✓</span>
+                      <span>Direct recruiter access</span>
+                    </li>
+                  </>
+                )}
+              </ul>
+            </div>
+
+            {/* Upgrade Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/upgrade')}
+              className="w-full px-6 py-3 md:py-4 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-600 hover:via-yellow-600 hover:to-amber-700 text-white rounded-xl font-bold text-sm md:text-base shadow-xl hover:shadow-2xl transition-all flex items-center justify-center gap-2"
+            >
+              <Crown className="w-5 h-5" />
+              Upgrade to {requiredPlan}
+            </motion.button>
+
+            <button
+              onClick={() => navigate('/upgrade')}
+              className="text-xs md:text-sm text-gray-600 hover:text-gray-900 underline transition"
+            >
+              Learn more about our plans
+            </button>
+          </div>
+        </div>
+
+        {/* Footer Stats - Maintain layout consistency */}
+        <div className="flex items-center gap-2 mt-4 opacity-50">
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <MessageCircle className="w-4 h-4" />
+            <span>{localPost.commentsCount}</span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-gray-500">
+            <Heart className="w-4 h-4" />
+            <span>
+              {Object.values(localPost.reactionsCount).reduce((sum, count) => sum + count, 0)}
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  // Regular post rendering (not locked)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
