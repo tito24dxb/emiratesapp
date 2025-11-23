@@ -65,7 +65,7 @@ export default function MarketplaceCheckoutPage() {
 
       const newOrderId = await createOrder({
         buyer_id: currentUser.uid,
-        buyer_name: currentUser.displayName || currentUser.email || 'Anonymous',
+        buyer_name: currentUser.displayName || currentUser.email?.split('@')[0] || 'Anonymous',
         buyer_email: currentUser.email || '',
         seller_id: fetchedProduct.seller_id,
         seller_name: fetchedProduct.seller_name,

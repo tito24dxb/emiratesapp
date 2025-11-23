@@ -185,17 +185,17 @@ export default function SellerBillingDashboard() {
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-300">Please login to access billing dashboard</p>
+        <p className="text-gray-600">Please login to access billing dashboard</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <DollarSign className="w-8 h-8 text-green-300" />
             Billing Dashboard
           </h1>
@@ -207,7 +207,7 @@ export default function SellerBillingDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white shadow-2xl"
+            className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-gray-900 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-green-100 text-sm">Total Earnings</span>
@@ -220,7 +220,7 @@ export default function SellerBillingDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-2xl"
+            className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-6 text-gray-900 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-yellow-100 text-sm">Pending Payments</span>
@@ -233,7 +233,7 @@ export default function SellerBillingDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-white shadow-2xl"
+            className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl p-6 text-gray-900 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-red-100 text-sm">Processed Refunds</span>
@@ -246,7 +246,7 @@ export default function SellerBillingDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-2xl"
+            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-gray-900 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="text-blue-100 text-sm">Total Customers</span>
@@ -284,7 +284,7 @@ export default function SellerBillingDashboard() {
 
             <button
               onClick={exportToCSV}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-gray-900 rounded-lg font-medium transition-all flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
               Export CSV
@@ -295,18 +295,18 @@ export default function SellerBillingDashboard() {
         {/* Transactions Table */}
         <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-white">Transaction History</h2>
+            <h2 className="text-xl font-bold text-gray-900">Transaction History</h2>
           </div>
 
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-300 mt-4">Loading transactions...</p>
+              <p className="text-gray-600 mt-4">Loading transactions...</p>
             </div>
           ) : filteredTransactions.length === 0 ? (
             <div className="p-12 text-center">
               <DollarSign className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-300">No transactions found</p>
+              <p className="text-gray-600">No transactions found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -339,18 +339,18 @@ export default function SellerBillingDashboard() {
                 <tbody className="bg-white/5 backdrop-blur-sm divide-y divide-gray-200/50">
                   {filteredTransactions.map((transaction) => (
                     <tr key={transaction.id} className="hover:bg-white/10 transition-colors">
-                      <td className="px-6 py-4 text-sm text-white">
+                      <td className="px-6 py-4 text-sm text-gray-900">
                         {transaction.createdAt.toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-white">{transaction.buyerName}</div>
+                        <div className="text-sm font-medium text-gray-900">{transaction.buyerName}</div>
                         <div className="text-xs text-gray-500">{transaction.buyerEmail}</div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-white">{transaction.productTitle}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-white">
+                      <td className="px-6 py-4 text-sm text-gray-900">{transaction.productTitle}</td>
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {formatPrice(transaction.amount, transaction.currency)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-300">{transaction.paymentMethod}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{transaction.paymentMethod}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(transaction.status)}`}>
                           {transaction.status}
@@ -390,38 +390,38 @@ export default function SellerBillingDashboard() {
               animate={{ opacity: 1, scale: 1 }}
               className="bg-white/10 backdrop-blur-md rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/30"
             >
-              <h3 className="text-xl font-bold text-white mb-4">Transaction Details</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Transaction Details</h3>
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Order ID</label>
-                  <p className="text-white">{selectedTransaction.orderId}</p>
+                  <label className="text-sm font-medium text-gray-600">Order ID</label>
+                  <p className="text-gray-900">{selectedTransaction.orderId}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Customer Name</label>
-                  <p className="text-white">{selectedTransaction.buyerName}</p>
+                  <label className="text-sm font-medium text-gray-600">Customer Name</label>
+                  <p className="text-gray-900">{selectedTransaction.buyerName}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Email</label>
-                  <p className="text-white">{selectedTransaction.buyerEmail}</p>
+                  <label className="text-sm font-medium text-gray-600">Email</label>
+                  <p className="text-gray-900">{selectedTransaction.buyerEmail}</p>
                 </div>
 
                 {selectedTransaction.phone && (
                   <div>
-                    <label className="text-sm font-medium text-gray-300">Phone</label>
-                    <p className="text-white">{selectedTransaction.phone}</p>
+                    <label className="text-sm font-medium text-gray-600">Phone</label>
+                    <p className="text-gray-900">{selectedTransaction.phone}</p>
                   </div>
                 )}
 
                 {selectedTransaction.address && (
                   <div>
-                    <label className="text-sm font-medium text-gray-300 flex items-center gap-2 mb-2">
+                    <label className="text-sm font-medium text-gray-600 flex items-center gap-2 mb-2">
                       <MapPin className="w-4 h-4" />
                       Shipping Address
                     </label>
-                    <div className="bg-white/20 backdrop-blur-xl rounded-lg p-4 text-sm text-white">
+                    <div className="bg-white/20 backdrop-blur-xl rounded-lg p-4 text-sm text-gray-900">
                       <p>{selectedTransaction.address.line1}</p>
                       <p>
                         {selectedTransaction.address.city}, {selectedTransaction.address.state}{' '}
@@ -433,39 +433,39 @@ export default function SellerBillingDashboard() {
                 )}
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Product</label>
-                  <p className="text-white">{selectedTransaction.productTitle}</p>
+                  <label className="text-sm font-medium text-gray-600">Product</label>
+                  <p className="text-gray-900">{selectedTransaction.productTitle}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Amount</label>
-                  <p className="text-2xl font-bold text-white">
+                  <label className="text-sm font-medium text-gray-600">Amount</label>
+                  <p className="text-2xl font-bold text-gray-900">
                     {formatPrice(selectedTransaction.amount, selectedTransaction.currency)}
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Payment Method</label>
-                  <p className="text-white">{selectedTransaction.paymentMethod}</p>
+                  <label className="text-sm font-medium text-gray-600">Payment Method</label>
+                  <p className="text-gray-900">{selectedTransaction.paymentMethod}</p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Status</label>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
                   <span className={`inline-block px-3 py-1 text-sm rounded-full ${getStatusColor(selectedTransaction.status)}`}>
                     {selectedTransaction.status}
                   </span>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-300">Date</label>
-                  <p className="text-white">{selectedTransaction.createdAt.toLocaleString()}</p>
+                  <label className="text-sm font-medium text-gray-600">Date</label>
+                  <p className="text-gray-900">{selectedTransaction.createdAt.toLocaleString()}</p>
                 </div>
               </div>
 
               <div className="mt-6 flex gap-3">
                 <button
                   onClick={() => setSelectedTransaction(null)}
-                  className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-white rounded-lg font-medium transition-all"
+                  className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-900 rounded-lg font-medium transition-all"
                 >
                   Close
                 </button>
@@ -475,7 +475,7 @@ export default function SellerBillingDashboard() {
                       handleRefund(selectedTransaction.id);
                       setSelectedTransaction(null);
                     }}
-                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all"
+                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-gray-900 rounded-lg font-medium transition-all"
                   >
                     Process Refund
                   </button>

@@ -78,21 +78,21 @@ export default function AttendanceDashboard() {
   if (!currentUser) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-300">Please login to access attendance dashboard</p>
+        <p className="text-gray-600">Please login to access attendance dashboard</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 py-8">
+    <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
             <Users className="w-8 h-8 text-blue-600" />
             Activity Attendance
           </h1>
-          <p className="text-gray-300 mt-1">Manage and track attendance for your activities</p>
+          <p className="text-gray-600 mt-1">Manage and track attendance for your activities</p>
         </div>
 
         {/* Stats */}
@@ -103,10 +103,10 @@ export default function AttendanceDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-300 text-sm">Total Attendees</span>
+              <span className="text-gray-600 text-sm">Total Attendees</span>
               <Users className="w-5 h-5 text-blue-600" />
             </div>
-            <div className="text-3xl font-bold text-white">{filteredAttendance.length}</div>
+            <div className="text-3xl font-bold text-gray-900">{filteredAttendance.length}</div>
           </motion.div>
 
           <motion.div
@@ -116,10 +116,10 @@ export default function AttendanceDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-300 text-sm">Total Activities</span>
+              <span className="text-gray-600 text-sm">Total Activities</span>
               <Calendar className="w-5 h-5 text-purple-600" />
             </div>
-            <div className="text-3xl font-bold text-white">{activities.length}</div>
+            <div className="text-3xl font-bold text-gray-900">{activities.length}</div>
           </motion.div>
 
           <motion.div
@@ -129,10 +129,10 @@ export default function AttendanceDashboard() {
             className="bg-white/20 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-2xl"
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-300 text-sm">Total Revenue</span>
+              <span className="text-gray-600 text-sm">Total Revenue</span>
               <DollarSign className="w-5 h-5 text-green-600" />
             </div>
-            <div className="text-3xl font-bold text-white">
+            <div className="text-3xl font-bold text-gray-900">
               {formatPrice(totalRevenue, 'USD')}
             </div>
           </motion.div>
@@ -142,7 +142,7 @@ export default function AttendanceDashboard() {
         <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="flex-1">
-              <label className="text-sm font-medium text-gray-200 mb-2 block">Filter by Activity</label>
+              <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by Activity</label>
               <select
                 value={selectedActivity}
                 onChange={(e) => setSelectedActivity(e.target.value)}
@@ -161,7 +161,7 @@ export default function AttendanceDashboard() {
               <button
                 onClick={handleDownloadCSV}
                 disabled={filteredAttendance.length === 0}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-gray-900 rounded-lg font-medium transition-all flex items-center gap-2"
               >
                 <Download className="w-4 h-4" />
                 Export CSV
@@ -169,7 +169,7 @@ export default function AttendanceDashboard() {
               <button
                 onClick={handlePrint}
                 disabled={filteredAttendance.length === 0}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-gray-900 rounded-lg font-medium transition-all flex items-center gap-2"
               >
                 <Printer className="w-4 h-4" />
                 Print
@@ -181,18 +181,18 @@ export default function AttendanceDashboard() {
         {/* Attendance Table */}
         <div className="bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-white">Attendance Records</h2>
+            <h2 className="text-xl font-bold text-gray-900">Attendance Records</h2>
           </div>
 
           {loading ? (
             <div className="p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-300 mt-4">Loading attendance...</p>
+              <p className="text-gray-600 mt-4">Loading attendance...</p>
             </div>
           ) : filteredAttendance.length === 0 ? (
             <div className="p-12 text-center">
               <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-300">No attendance records found</p>
+              <p className="text-gray-600">No attendance records found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -223,19 +223,19 @@ export default function AttendanceDashboard() {
                   {filteredAttendance.map((record) => (
                     <tr key={record.id} className="hover:bg-white/10 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-white">{record.activity_title}</div>
+                        <div className="text-sm font-medium text-gray-900">{record.activity_title}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-white">{record.attendee_name}</div>
+                        <div className="text-sm font-medium text-gray-900">{record.attendee_name}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-gray-300">{record.attendee_email}</div>
+                        <div className="text-sm text-gray-600">{record.attendee_email}</div>
                         <div className="text-xs text-gray-500">{record.attendee_phone}</div>
                       </td>
-                      <td className="px-6 py-4 text-sm font-medium text-white">
+                      <td className="px-6 py-4 text-sm font-medium text-gray-900">
                         {formatPrice(record.amount_paid, record.currency)}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-300">
+                      <td className="px-6 py-4 text-sm text-gray-600">
                         {record.payment_date?.toDate?.()?.toLocaleDateString() || 'N/A'}
                       </td>
                       <td className="px-6 py-4">
