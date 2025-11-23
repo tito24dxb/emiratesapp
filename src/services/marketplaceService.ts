@@ -204,12 +204,21 @@ export const getPublishedProducts = async (
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(doc => ({
+    const products = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as MarketplaceProduct[];
-  } catch (error) {
-    console.error('Error getting published products:', error);
+
+    console.log(`✅ Fetched ${products.length} published products from Firestore`);
+    return products;
+  } catch (error: any) {
+    console.error('❌ Error getting published products:', error);
+
+    // Check if it's an index error
+    if (error?.message?.includes('index')) {
+      console.error('🔥 Firestore index required! Deploy with: firebase deploy --only firestore:indexes');
+    }
+
     return [];
   }
 };

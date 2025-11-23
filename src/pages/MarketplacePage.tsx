@@ -152,9 +152,9 @@ export default function MarketplacePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
+    <div className="min-h-screen">
       {/* Header */}
-      <div className="bg-white/70 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10 shadow-lg">
+      <div className="bg-white/20 backdrop-blur-xl border-b border-white/20 sticky top-0 z-10 shadow-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between mb-6">
             <div>
