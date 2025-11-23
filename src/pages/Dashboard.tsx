@@ -141,8 +141,10 @@ export default function Dashboard() {
         supportRequests,
         ...roleSpecificData
       });
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
+    } catch (error: any) {
+      if (error?.code !== 'permission-denied' && !error?.message?.includes('Missing or insufficient permissions')) {
+        console.error('Error loading dashboard data:', error);
+      }
     }
   };
 
