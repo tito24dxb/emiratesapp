@@ -378,23 +378,26 @@ export default function NotificationsPage() {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2 mb-1">
+                          <div className="flex items-start justify-between gap-3 mb-1">
                             <h3 className={`font-bold ${notification.read ? 'text-gray-700' : 'text-gray-900'}`}>
                               {notification.title}
                             </h3>
-                            {!notification.read && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleMarkAsRead(notification.id!);
-                                }}
-                                className="flex items-center gap-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold transition shadow-md hover:shadow-lg flex-shrink-0"
-                                title="Mark as read"
-                              >
-                                <Check className="w-4 h-4" />
-                                Mark Read
-                              </button>
-                            )}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleMarkAsRead(notification.id!);
+                              }}
+                              disabled={notification.read}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition shadow-md hover:shadow-lg flex-shrink-0 ${
+                                notification.read
+                                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : 'bg-green-600 hover:bg-green-700 text-white'
+                              }`}
+                              title={notification.read ? 'Already read' : 'Mark as read'}
+                            >
+                              <Check className="w-5 h-5" />
+                              {notification.read ? 'Read' : 'Mark Read'}
+                            </button>
                           </div>
                           <p className={`text-sm ${notification.read ? 'text-gray-500' : 'text-gray-700'} mb-2`}>
                             {notification.message}
