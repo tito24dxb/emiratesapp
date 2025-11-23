@@ -910,7 +910,8 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (
         resource.data.seller_id == request.auth.uid ||
         isGovernor() ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'view_count', 'updatedAt'])
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views_count']) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views_count', 'updatedAt'])
       );
 
       allow delete: if isAuthenticated() && (
