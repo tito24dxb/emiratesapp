@@ -221,6 +221,7 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
             setSelectedImageIndex(index);
             setShowImageViewer(true);
           }}
+          onDoubleTap={() => handleReaction('heart')}
         />
       ) : post.imageUrl ? (
         <div className="mb-3 md:mb-4 rounded-2xl overflow-hidden">
