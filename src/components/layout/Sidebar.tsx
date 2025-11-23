@@ -93,9 +93,11 @@ export default function Sidebar() {
         feature: 'opendays' as Feature
       },
       { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
-      { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', feature: null, badge: 'NEW' },
-      { path: '/storage', icon: HardDrive, label: 'My Files', feature: null },
-      { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null },
+      ...(currentUser.plan === 'pro' || currentUser.plan === 'vip' ? [
+        { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', feature: null, badge: 'PRO' },
+        { path: '/storage', icon: HardDrive, label: 'My Files', feature: null, badge: 'PRO' },
+        { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null, badge: 'PRO' }
+      ] : []),
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
