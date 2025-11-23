@@ -33,6 +33,14 @@ export default function MarketplaceCheckoutPage() {
 
     setLoading(true);
     try {
+      // Check if Stripe is configured
+      const stripe = await stripePromise;
+      if (!stripe) {
+        alert('Payment system is not configured. Please contact support.');
+        navigate('/marketplace');
+        return;
+      }
+
       const fetchedProduct = await getProduct(productId);
 
       if (!fetchedProduct) {
