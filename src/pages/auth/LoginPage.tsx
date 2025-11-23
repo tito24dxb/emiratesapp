@@ -315,6 +315,8 @@ export default function LoginPage() {
 
       await signInWithEmailAndPassword(auth, email, password);
 
+      setCurrentUser(pendingUserData);
+
       await updateDoc(doc(db, 'users', pendingUserId), {
         lastLogin: serverTimestamp()
       });
