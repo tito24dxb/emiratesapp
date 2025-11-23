@@ -257,7 +257,7 @@ export default function SellerBillingDashboard() {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -266,14 +266,14 @@ export default function SellerBillingDashboard() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by customer, product, or order ID..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/30 backdrop-blur-sm"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/10 backdrop-blur-sm"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/30 backdrop-blur-sm"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/10 backdrop-blur-sm"
             >
               <option value="all">All Status</option>
               <option value="completed">Completed</option>
@@ -293,7 +293,7 @@ export default function SellerBillingDashboard() {
         </div>
 
         {/* Transactions Table */}
-        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Transaction History</h2>
           </div>
@@ -311,7 +311,7 @@ export default function SellerBillingDashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-white/20 backdrop-blur-sm">
+                <thead className="bg-white/5 backdrop-blur-sm">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
@@ -336,9 +336,9 @@ export default function SellerBillingDashboard() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white/20 backdrop-blur-sm divide-y divide-gray-200/50">
+                <tbody className="bg-white/5 backdrop-blur-sm divide-y divide-gray-200/50">
                   {filteredTransactions.map((transaction) => (
-                    <tr key={transaction.id} className="hover:bg-white/30 transition-colors">
+                    <tr key={transaction.id} className="hover:bg-white/10 transition-colors">
                       <td className="px-6 py-4 text-sm text-gray-900">
                         {transaction.createdAt.toLocaleDateString()}
                       </td>
@@ -388,7 +388,7 @@ export default function SellerBillingDashboard() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white/90 backdrop-blur-md rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white/10 backdrop-blur-md rounded-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-200/50"
             >
               <h3 className="text-xl font-bold text-gray-900 mb-4">Transaction Details</h3>
 
@@ -421,7 +421,7 @@ export default function SellerBillingDashboard() {
                       <MapPin className="w-4 h-4" />
                       Shipping Address
                     </label>
-                    <div className="bg-white/40 backdrop-blur-sm rounded-lg p-4 text-sm text-gray-900">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-sm text-gray-900">
                       <p>{selectedTransaction.address.line1}</p>
                       <p>
                         {selectedTransaction.address.city}, {selectedTransaction.address.state}{' '}
