@@ -128,7 +128,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    console.log('Setting up Firebase auth listener');
+    // Auth listener setup
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       // Clean up any existing Firestore listener
@@ -138,10 +138,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (firebaseUser) {
-        console.log('User authenticated:', firebaseUser.uid);
+        // User authenticated
 
         if (sessionStorage.getItem('pending2FA') === 'true') {
-          console.log('2FA pending, skipping auto-login');
+          // 2FA verification required
           setLoading(false);
           return;
         }
@@ -152,7 +152,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           (docSnap) => {
             if (docSnap.exists()) {
               const userData = docSnap.data();
-              console.log('User data updated from Firestore:', userData);
+              // User data loaded
 
               const updatedUser: User = {
                 uid: firebaseUser.uid,
@@ -213,7 +213,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
-      console.log('Cleaning up auth listener');
+      // Cleanup auth listener
       // Clean up Firestore listener if it exists
       if (firestoreUnsubscribeRef.current) {
         firestoreUnsubscribeRef.current();

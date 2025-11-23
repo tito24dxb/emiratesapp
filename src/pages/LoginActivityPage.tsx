@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Smartphone, Monitor, Tablet, MapPin, Clock, AlertTriangle, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import InspectionProtection from '../components/InspectionProtection';
 import {
   LoginActivity,
   getUserLoginHistory,
@@ -50,8 +51,7 @@ export default function LoginActivityPage() {
       alert(`Deleted ${deleted} old login records`);
       await loadLoginActivity();
     } catch (error) {
-      console.error('Error clearing old activity:', error);
-      alert('Error clearing old activity');
+      alert('Error clearing old activity. Please try again.');
     }
   };
 
@@ -75,8 +75,9 @@ export default function LoginActivityPage() {
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
+    <InspectionProtection>
+      <div className="min-h-screen p-8">
+        <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Login Activity</h1>
@@ -238,5 +239,6 @@ export default function LoginActivityPage() {
         </div>
       </div>
     </div>
+    </InspectionProtection>
   );
 }

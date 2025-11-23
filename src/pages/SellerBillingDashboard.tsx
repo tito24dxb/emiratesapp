@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DollarSign, CreditCard, RefreshCw, Users, Filter, Download, Search, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
+import InspectionProtection from '../components/InspectionProtection';
 import { useApp } from '../context/AppContext';
 import { getSellerOrders, Order } from '../services/orderService';
 import { formatPrice } from '../services/stripeService';
@@ -191,8 +192,9 @@ export default function SellerBillingDashboard() {
   }
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <InspectionProtection>
+      <div className="min-h-screen py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
@@ -486,5 +488,6 @@ export default function SellerBillingDashboard() {
         )}
       </div>
     </div>
+    </InspectionProtection>
   );
 }

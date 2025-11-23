@@ -368,17 +368,30 @@ export default function FinancePanel() {
               </div>
             </div>
 
-            <div className="glass-light/50 rounded-xl border border-gray-200 overflow-hidden" style={{ height: '600px' }}>
-              <iframe
-                src="https://dashboard.stripe.com"
-                className="w-full h-full border-0"
-                title="Stripe Dashboard"
-                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              />
-            </div>
-
-            <div className="text-center text-xs text-gray-500 mt-2">
-              <p>If the dashboard doesn't load above, click the "Open Stripe Dashboard" button to access it in a new tab.</p>
+            <div className="glass-light rounded-xl border border-gray-200 p-12 text-center" style={{ height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div>
+                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Stripe Dashboard</h3>
+                <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                  Stripe prevents embedding their dashboard in iframes for security reasons.
+                  Click the button above to access your full Stripe dashboard in a new tab.
+                </p>
+                <a
+                  href="https://dashboard.stripe.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg text-base font-semibold transition shadow-lg"
+                >
+                  Open Stripe Dashboard
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </div>
         )}

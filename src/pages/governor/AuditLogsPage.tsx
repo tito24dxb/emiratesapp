@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Download, Filter, Search, X, Shield } from 'lucide-react';
 import { auditLogService, AuditLog } from '../../services/auditLogService';
+import InspectionProtection from '../../components/InspectionProtection';
 
 export default function AuditLogsPage() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
@@ -66,8 +67,9 @@ export default function AuditLogsPage() {
   const categories = ['role_change', 'feature_shutdown', 'moderation', 'admin_action', 'system'];
 
   return (
-    <div className="absolute inset-0 flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-6">
+    <InspectionProtection>
+      <div className="absolute inset-0 flex flex-col overflow-hidden">
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-6">
         <div className="max-w-7xl mx-auto">
           <div className="liquid-crystal-panel p-4 md:p-6 mb-4">
             <div className="flex items-center justify-between mb-4 md:mb-6 flex-wrap gap-3">
@@ -236,5 +238,6 @@ export default function AuditLogsPage() {
         </div>
       </div>
     </div>
+    </InspectionProtection>
   );
 }

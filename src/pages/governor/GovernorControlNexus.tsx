@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Shield, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import InspectionProtection from '../../components/InspectionProtection';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import MetricsCards from '../../components/governor/nexus/MetricsCards';
@@ -62,7 +63,8 @@ export default function GovernorControlNexus() {
   };
 
   return (
-    <div className="min-h-screen glass-light">
+    <InspectionProtection>
+      <div className="min-h-screen glass-light">
       {!loading && announcement && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -121,5 +123,6 @@ export default function GovernorControlNexus() {
         <SupportChatManager />
       </div>
     </div>
+    </InspectionProtection>
   );
 }
