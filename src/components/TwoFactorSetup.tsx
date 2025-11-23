@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Key, CheckCircle, XCircle, Copy, Download } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { totpService } from '../services/totpService';
+import Disable2FAModal from './Disable2FAModal';
 
 export default function TwoFactorSetup() {
   const { currentUser } = useApp();
@@ -15,6 +16,7 @@ export default function TwoFactorSetup() {
   const [showBackupCodes, setShowBackupCodes] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showDisableModal, setShowDisableModal] = useState(false);
 
   useEffect(() => {
     checkStatus();
@@ -87,24 +89,13 @@ export default function TwoFactorSetup() {
     }
   };
 
-  const handleDisable = async () => {
-    if (!currentUser) return;
-    if (!confirm('Are you sure you want to disable two-factor authentication?'))
-      return;
+  const handleDisable = () => {
+    setShowDisableModal(true);
+  };
 
-    setLoading(true);
-    setError('');
-
-    try {
-      await totpService.disable2FA(currentUser.uid);
-      setEnabled(false);
-      setSuccess('Two-factor authentication disabled');
-    } catch (error) {
-      console.error('Error disabling 2FA:', error);
-      setError('Failed to disable 2FA');
-    } finally {
-      setLoading(false);
-    }
+  const handleDisableSuccess = () => {
+    setEnabled(false);
+    setSuccess('Two-factor authentication disabled successfully');
   };
 
   const copySecret = () => {
@@ -295,6 +286,14 @@ export default function TwoFactorSetup() {
           </div>
         </div>
       )}
+
+      <Disable2FAModal
+        isOpen={showDisableModal}
+        onClose={() => setShowDisableModal(false)}
+        userEmail={currentUser.email}
+        userId={currentUser.uid}
+        onSuccess={handleDisableSuccess}
+      />
     </div>
   );
 }

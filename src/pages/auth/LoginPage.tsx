@@ -29,19 +29,14 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      console.log('Attempting login with email:', email);
-
       sessionStorage.setItem('pending2FA', 'true');
 
       const tempCredential = await signInWithEmailAndPassword(auth, email, password);
       const tempUser = tempCredential.user;
-      console.log('Checking 2FA status for user:', tempUser.uid);
 
       const has2FA = await totpService.check2FAStatus(tempUser.uid);
-      console.log('2FA check result:', has2FA);
 
       if (has2FA) {
-        console.log('2FA enabled, showing verification dropdown');
 
         const userDocRef = doc(db, 'users', tempUser.uid);
         const userDoc = await getDoc(userDocRef);
@@ -74,7 +69,6 @@ export default function LoginPage() {
 
       sessionStorage.removeItem('pending2FA');
 
-      console.log('No 2FA, proceeding with login');
       const userDocRef = doc(db, 'users', tempUser.uid);
       const userDoc = await getDoc(userDocRef);
 
@@ -111,10 +105,7 @@ export default function LoginPage() {
 
       navigate('/dashboard');
     } catch (err: any) {
-      console.error('Login error:', err);
-
       if (err.code === 'permission-denied') {
-        console.log('Permission error during 2FA setup, continuing...');
         return;
       }
 
@@ -290,7 +281,6 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log('Verifying 2FA code...');
       let isValid = false;
 
       if (useBackupCode) {
@@ -308,8 +298,6 @@ export default function LoginPage() {
           return;
         }
       }
-
-      console.log('2FA verification successful, signing back in');
 
       sessionStorage.removeItem('pending2FA');
 
@@ -332,7 +320,6 @@ export default function LoginPage() {
 
       navigate('/dashboard');
     } catch (err: any) {
-      console.error('2FA verification error:', err);
       setError('Verification failed. Please try again.');
     } finally {
       setLoading(false);

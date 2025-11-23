@@ -177,16 +177,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
               setCurrentUser(updatedUser);
               setLoading(false);
-              localStorage.setItem('currentUser', JSON.stringify(updatedUser));
 
               initializeUserPoints(firebaseUser.uid).catch(console.error);
               handleDailyLogin(firebaseUser.uid).catch(console.error);
             } else {
-              console.warn('User document not found in Firestore. User may need to complete registration.');
-              console.warn('User document missing, forcing logout');
               auth.signOut();
               setCurrentUser(null);
-              localStorage.removeItem('currentUser');
               sessionStorage.clear();
             }
           },
@@ -194,25 +190,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
             console.error('Error listening to user document:', error);
 
             if (error.code === 'permission-denied') {
-              console.warn('Permission denied - auth token may not have propagated yet. Retrying in 2s...');
               setTimeout(() => {
-                console.log('Forcing token refresh and retry');
-                firebaseUser.getIdToken(true).then(() => {
-                  console.log('Token refreshed successfully');
-                }).catch((tokenError) => {
-                  console.error('Token refresh failed:', tokenError);
-                  console.warn('Forcing logout due to persistent permission error');
+                firebaseUser.getIdToken(true).catch(() => {
                   auth.signOut();
                   setCurrentUser(null);
-                  localStorage.removeItem('currentUser');
                   sessionStorage.clear();
                 });
               }, 2000);
             } else {
-              console.warn('Firestore error, forcing logout to prevent auth loop');
               auth.signOut();
               setCurrentUser(null);
-              localStorage.removeItem('currentUser');
               sessionStorage.clear();
             }
           }
@@ -220,10 +207,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
         firestoreUnsubscribeRef.current = unsubscribeFirestore;
       } else {
-        console.log('User signed out');
         setCurrentUser(null);
         setLoading(false);
-        localStorage.removeItem('currentUser');
       }
     });
 
@@ -239,13 +224,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = async () => {
-    console.log('Logging out user');
     try {
       await auth.signOut();
       setCurrentUser(null);
-      localStorage.removeItem('currentUser');
       sessionStorage.clear();
-      console.log('Logout successful');
     } catch (error) {
       console.error('Logout error:', error);
     }

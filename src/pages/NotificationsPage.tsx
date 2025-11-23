@@ -378,9 +378,11 @@ export default function NotificationsPage() {
                                   e.stopPropagation();
                                   handleMarkAsRead(notification.id!);
                                 }}
-                                className="p-1 hover:bg-gray-200 rounded-lg transition"
+                                className="flex items-center gap-1 px-3 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded-lg text-xs font-bold transition"
+                                title="Mark as read"
                               >
-                                <Check className="w-4 h-4 text-green-600" />
+                                <Check className="w-4 h-4" />
+                                <span>Mark Read</span>
                               </button>
                             )}
                           </div>
