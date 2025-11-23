@@ -255,41 +255,41 @@ export default function PaymentForm({
 
       {/* Billing Details */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+        <h3 className="font-semibold text-white flex items-center gap-2">
           <CreditCard className="w-5 h-5" />
           Billing Information
         </h3>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-200 mb-2">
             Cardholder Name *
           </label>
           <input
             type="text"
             value={billingDetails.name}
             onChange={(e) => setBillingDetails({ ...billingDetails, name: e.target.value })}
-            className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-300"
             placeholder="John Doe"
             disabled={loading}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-200 mb-2">
             Email *
           </label>
           <input
             type="email"
             value={billingDetails.email}
             onChange={(e) => setBillingDetails({ ...billingDetails, email: e.target.value })}
-            className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-300"
             placeholder="john@example.com"
             disabled={loading}
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-200 mb-2">
             Address (Optional)
           </label>
           <input
@@ -299,7 +299,7 @@ export default function PaymentForm({
               ...billingDetails,
               address: { ...billingDetails.address, line1: e.target.value }
             })}
-            className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+            className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-300"
             placeholder="123 Main St"
             disabled={loading}
           />
@@ -307,7 +307,7 @@ export default function PaymentForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               City (Optional)
             </label>
             <input
@@ -317,14 +317,14 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, city: e.target.value }
               })}
-              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-300"
               placeholder="City"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               State (Optional)
             </label>
             <input
@@ -334,7 +334,7 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, state: e.target.value }
               })}
-              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-300"
               placeholder="State"
               disabled={loading}
             />
@@ -343,7 +343,7 @@ export default function PaymentForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Postal Code
             </label>
             <input
@@ -353,14 +353,14 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, postal_code: e.target.value }
               })}
-              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-300"
               placeholder="12345"
               disabled={loading}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-200 mb-2">
               Country
             </label>
             <select
@@ -369,7 +369,7 @@ export default function PaymentForm({
                 ...billingDetails,
                 address: { ...billingDetails.address, country: e.target.value }
               })}
-              className="w-full px-4 py-3 bg-transparent border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+              className="w-full px-4 py-3 bg-white/20 backdrop-blur-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white"
               disabled={loading}
             >
               <option value="US">United States</option>
@@ -453,10 +453,10 @@ export default function PaymentForm({
 
       {/* Card Element */}
       <div className="relative z-20">
-        <label className="block text-sm font-medium text-gray-900 mb-2">
+        <label className="block text-sm font-medium text-gray-200 mb-2">
           Card Details *
         </label>
-        <div className="relative p-4 border-2 border-gray-300 rounded-lg bg-transparent focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-all min-h-[44px] z-30" style={{ pointerEvents: 'auto' }}>
+        <div className="relative p-4 border-2 border-gray-300/50 rounded-lg bg-white/20 backdrop-blur-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500 transition-all min-h-[44px] z-30" style={{ pointerEvents: 'auto' }}>
           <CardElement
             options={CARD_ELEMENT_OPTIONS}
             onChange={(e) => {
@@ -469,7 +469,7 @@ export default function PaymentForm({
             }}
           />
         </div>
-        <p className="text-xs text-gray-900 mt-2">
+        <p className="text-xs text-gray-200 mt-2">
           <Lock className="w-3 h-3 inline mr-1" />
           Your payment information is encrypted and secure
         </p>
@@ -495,7 +495,7 @@ export default function PaymentForm({
       </button>
 
       {/* Security Info */}
-      <div className="text-center text-xs text-gray-500">
+      <div className="text-center text-xs text-gray-300">
         <p>Payments are processed securely by Stripe</p>
         <p className="mt-1">Your card information is never stored on our servers</p>
       </div>

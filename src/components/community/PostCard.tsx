@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical } from 'lucide-react';
+import { Flame, Heart, ThumbsUp, Laugh, AlertCircle, MessageCircle, Trash2, Flag, MoreVertical, ShoppingBag } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { CommunityPost, communityFeedService } from '../../services/communityFeedService';
 import EnhancedCommentsSection from './EnhancedCommentsSection';
 import ImageViewerModal from './ImageViewerModal';
@@ -13,6 +14,7 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, currentUser, onDeleted }: PostCardProps) {
+  const navigate = useNavigate();
   const [userReaction, setUserReaction] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -213,6 +215,18 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
       </div>
 
       <p className="text-gray-800 mb-3 md:mb-4 whitespace-pre-wrap text-sm md:text-base leading-relaxed">{post.content}</p>
+
+      {post.postType === 'product' && post.productLink && (
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => navigate(`/marketplace/product/${post.productLink}`)}
+          className="w-full mb-4 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold shadow-lg flex items-center justify-center gap-2 transition-all"
+        >
+          <ShoppingBag className="w-5 h-5" />
+          View on Marketplace
+        </motion.button>
+      )}
 
       {(post.imageUrls && post.imageUrls.length > 0) ? (
         <ImageCarousel

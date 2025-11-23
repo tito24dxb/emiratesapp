@@ -139,14 +139,14 @@ export default function AttendanceDashboard() {
         </div>
 
         {/* Filters and Actions */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
+        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="flex-1">
               <label className="text-sm font-medium text-gray-700 mb-2 block">Filter by Activity</label>
               <select
                 value={selectedActivity}
                 onChange={(e) => setSelectedActivity(e.target.value)}
-                className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full md:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/30 backdrop-blur-sm"
               >
                 <option value="all">All Activities</option>
                 {activities.map(activity => (
@@ -179,7 +179,7 @@ export default function AttendanceDashboard() {
         </div>
 
         {/* Attendance Table */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Attendance Records</h2>
           </div>
@@ -197,7 +197,7 @@ export default function AttendanceDashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-white/20 backdrop-blur-sm">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Activity
@@ -219,9 +219,9 @@ export default function AttendanceDashboard() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white/20 backdrop-blur-sm divide-y divide-gray-200/50">
                   {filteredAttendance.map((record) => (
-                    <tr key={record.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={record.id} className="hover:bg-white/30 transition-colors">
                       <td className="px-6 py-4">
                         <div className="text-sm font-medium text-gray-900">{record.activity_title}</div>
                       </td>

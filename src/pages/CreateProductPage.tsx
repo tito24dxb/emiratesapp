@@ -114,7 +114,7 @@ export default function CreateProductPage() {
         </div>
 
         {/* Form */}
-        <div className="bg-white/70 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 p-6 lg:p-8">
+        <div className="bg-white/40 backdrop-blur-md rounded-xl shadow-lg border border-gray-200/50 p-6 lg:p-8">
           <ProductForm
             onSubmit={handleSubmit}
             onCancel={() => navigate('/marketplace')}

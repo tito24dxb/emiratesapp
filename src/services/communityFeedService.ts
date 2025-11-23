@@ -43,6 +43,8 @@ export interface CommunityPost {
   };
   flagged: boolean;
   flaggedReason?: string;
+  productLink?: string;
+  postType?: 'text' | 'product';
 }
 
 export interface CommunityComment {
@@ -94,7 +96,8 @@ export const communityFeedService = {
     content: string,
     channel: 'announcements' | 'general' | 'study-room',
     imageFile?: File | File[],
-    userPhotoURL?: string
+    userPhotoURL?: string,
+    productLink?: string
   ): Promise<string> {
     let imageUrl = '';
     let imageUrls: string[] = [];
@@ -134,7 +137,9 @@ export const communityFeedService = {
         laugh: 0,
         wow: 0
       },
-      flagged: false
+      flagged: false,
+      productLink: productLink || '',
+      postType: productLink ? 'product' : 'text'
     };
 
     const docRef = await addDoc(collection(db, 'community_posts'), postData);

@@ -257,7 +257,7 @@ export default function SellerBillingDashboard() {
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
+        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg p-6 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -266,14 +266,14 @@ export default function SellerBillingDashboard() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search by customer, product, or order ID..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/30 backdrop-blur-sm"
               />
             </div>
 
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/30 backdrop-blur-sm"
             >
               <option value="all">All Status</option>
               <option value="completed">Completed</option>
@@ -293,7 +293,7 @@ export default function SellerBillingDashboard() {
         </div>
 
         {/* Transactions Table */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Transaction History</h2>
           </div>
@@ -311,7 +311,7 @@ export default function SellerBillingDashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-white/40 backdrop-blur-sm">
+                <thead className="bg-white/20 backdrop-blur-sm">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date

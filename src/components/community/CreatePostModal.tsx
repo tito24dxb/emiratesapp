@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { X, Image as ImageIcon, Send } from 'lucide-react';
+import { X, Image as ImageIcon, Send, Package } from 'lucide-react';
 import { communityFeedService } from '../../services/communityFeedService';
 
 interface CreatePostModalProps {
@@ -16,6 +16,8 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [postType, setPostType] = useState<'text' | 'product'>('text');
+  const [productLink, setProductLink] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,6 +53,11 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
     e.preventDefault();
     if (!content.trim() || loading) return;
 
+    if (postType === 'product' && !productLink.trim()) {
+      alert('Please enter a product link');
+      return;
+    }
+
     setLoading(true);
     try {
       await communityFeedService.createPost(
@@ -59,7 +66,9 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
         currentUser.email || '',
         content.trim(),
         selectedChannel,
-        imageFiles.length > 0 ? imageFiles : undefined
+        imageFiles.length > 0 ? imageFiles : undefined,
+        currentUser.photoURL,
+        postType === 'product' ? productLink.trim() : undefined
       );
       onPostCreated();
       onClose();
@@ -116,6 +125,42 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
           </div>
 
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Post Type *</label>
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setPostType('text')}
+                  className={`p-3 rounded-xl border-2 transition text-left ${
+                    postType === 'text'
+                      ? 'border-[#D71920] bg-red-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Send className="w-5 h-5" />
+                    <span className="font-bold text-sm text-gray-900">Regular Post</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Share your thoughts</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPostType('product')}
+                  className={`p-3 rounded-xl border-2 transition text-left ${
+                    postType === 'product'
+                      ? 'border-[#D71920] bg-red-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Package className="w-5 h-5" />
+                    <span className="font-bold text-sm text-gray-900">Product Post</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Share a marketplace product</p>
+                </button>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">Channel *</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -180,6 +225,23 @@ export default function CreatePostModal({ currentUser, defaultChannel, onClose, 
                 required
               />
             </div>
+
+            {postType === 'product' && (
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Product Link *</label>
+                <input
+                  type="text"
+                  value={productLink}
+                  onChange={(e) => setProductLink(e.target.value)}
+                  placeholder="/marketplace/product/YOUR_PRODUCT_ID"
+                  className="w-full chat-input-field"
+                  required
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Copy the product ID from the marketplace URL (e.g., if URL is /marketplace/product/abc123, enter abc123)
+                </p>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">

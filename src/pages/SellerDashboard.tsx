@@ -172,7 +172,7 @@ export default function SellerDashboard() {
         </div>
 
         {/* Products Table */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
+        <div className="bg-white/40 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200">
             <h2 className="text-xl font-bold text-gray-900">Your Products</h2>
           </div>
@@ -196,7 +196,7 @@ export default function SellerDashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-white/40 backdrop-blur-sm">
+                <thead className="bg-white/20 backdrop-blur-sm">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Product
