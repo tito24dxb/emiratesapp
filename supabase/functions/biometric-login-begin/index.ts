@@ -4,10 +4,9 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, apikey",
 };
 
-const RP_ID = typeof window !== 'undefined' ? window.location.hostname : "localhost";
 const CHALLENGE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function generateChallenge(): string {
@@ -20,8 +19,12 @@ function generateChallenge(): string {
 }
 
 Deno.serve(async (req: Request) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, { 
+      status: 204,
+      headers: corsHeaders 
+    });
   }
 
   if (req.method !== "POST") {
@@ -44,6 +47,18 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Missing userId" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Extract RP_ID from request origin
+    const origin = req.headers.get("origin") || "";
+    let rpId = "localhost";
+    if (origin) {
+      try {
+        const url = new URL(origin);
+        rpId = url.hostname;
+      } catch {
+        rpId = "localhost";
+      }
     }
 
     // Get user's credentials
@@ -76,7 +91,7 @@ Deno.serve(async (req: Request) => {
     const options = {
       challenge,
       timeout: 60000,
-      rpId: RP_ID,
+      rpId,
       allowCredentials: credentials.map((cred: any) => ({
         id: cred.credential_id,
         type: "public-key",

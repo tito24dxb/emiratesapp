@@ -4,11 +4,10 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey, apikey",
 };
 
 const RP_NAME = "Crews Academy";
-const RP_ID = typeof window !== 'undefined' ? window.location.hostname : "localhost";
 const CHALLENGE_TTL = 5 * 60 * 1000; // 5 minutes
 
 function generateChallenge(): string {
@@ -21,8 +20,12 @@ function generateChallenge(): string {
 }
 
 Deno.serve(async (req: Request) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
+    return new Response(null, { 
+      status: 204,
+      headers: corsHeaders 
+    });
   }
 
   if (req.method !== "POST") {
@@ -47,12 +50,24 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Verify Firebase token (basic check - in production you'd verify the signature)
+    // Verify Firebase token (basic check)
     if (!firebaseToken || firebaseToken.length < 10) {
       return new Response(
         JSON.stringify({ error: "Invalid Firebase token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
+    }
+
+    // Extract RP_ID from request origin
+    const origin = req.headers.get("origin") || "";
+    let rpId = "localhost";
+    if (origin) {
+      try {
+        const url = new URL(origin);
+        rpId = url.hostname;
+      } catch {
+        rpId = "localhost";
+      }
     }
 
     // Get existing credentials for this user
@@ -84,7 +99,7 @@ Deno.serve(async (req: Request) => {
     const options = {
       rp: {
         name: RP_NAME,
-        id: RP_ID,
+        id: rpId,
       },
       user: {
         id: btoa(userId).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, ''),
