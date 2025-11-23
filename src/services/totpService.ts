@@ -90,20 +90,16 @@ export const totpService = {
   async check2FAStatus(userId: string): Promise<boolean> {
     try {
       const totpRef = doc(db, 'users', userId, 'twoFactorAuth', 'settings');
-      console.log('Checking 2FA doc at path:', `users/${userId}/twoFactorAuth/settings`);
       const totpDoc = await getDoc(totpRef);
-      console.log('2FA doc exists:', totpDoc.exists());
 
       if (totpDoc.exists()) {
         const data = totpDoc.data() as TOTPSecret;
-        console.log('2FA data:', data);
-        console.log('2FA enabled field:', data.enabled);
         return data.enabled === true;
       }
 
       return false;
     } catch (error) {
-      console.error('Error checking 2FA status:', error);
+      console.error('Error checking 2FA status');
       return false;
     }
   },
