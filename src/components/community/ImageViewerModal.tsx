@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { X, ZoomIn, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ImageViewerModalProps {
@@ -9,6 +9,12 @@ interface ImageViewerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDoubleClick?: () => void;
+}
+
+interface HeartAnimation {
+  id: number;
+  x: number;
+  y: number;
 }
 
 export default function ImageViewerModal({
@@ -21,77 +27,228 @@ export default function ImageViewerModal({
 }: ImageViewerModalProps) {
   const images = imageUrls && imageUrls.length > 0 ? imageUrls : imageUrl ? [imageUrl] : [];
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [showHeart, setShowHeart] = useState(false);
-  const [isHighRes, setIsHighRes] = useState(false);
-  const [tapCount, setTapCount] = useState(0);
+  const [hearts, setHearts] = useState<HeartAnimation[]>([]);
+  const [scale, setScale] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const lastTapRef = useRef<number>(0);
+  const singleTapTimerRef = useRef<NodeJS.Timeout | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const doubleTapTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const tapCountRef = useRef<number>(0);
+  const heartIdRef = useRef<number>(0);
+
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number; dist: number } | null>(null);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
       setCurrentIndex(initialIndex);
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+      x.set(0);
+      y.set(0);
     } else {
       document.body.style.overflow = 'unset';
-      setIsHighRes(false);
+      document.body.style.touchAction = 'auto';
     }
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.style.touchAction = 'auto';
     };
-  }, [isOpen, initialIndex]);
+  }, [isOpen, initialIndex, x, y]);
 
-  const handleTouchStart = () => {
-    longPressTimerRef.current = setTimeout(() => {
-      setIsHighRes(true);
-    }, 500);
+  const getTouchDistance = (touches: React.TouchList): number => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
   };
 
-  const handleTouchEnd = () => {
+  const getTouchCenter = (touches: React.TouchList): { x: number; y: number } => {
+    if (touches.length === 1) {
+      return { x: touches[0].clientX, y: touches[0].clientY };
+    }
+    const x = (touches[0].clientX + touches[1].clientX) / 2;
+    const y = (touches[0].clientY + touches[1].clientY) / 2;
+    return { x, y };
+  };
+
+  const triggerHeartAnimation = useCallback((clientX?: number, clientY?: number) => {
+    const container = imageContainerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    const x = clientX !== undefined ? clientX - rect.left : rect.width / 2;
+    const y = clientY !== undefined ? clientY - rect.top : rect.height / 2;
+
+    const newHeart: HeartAnimation = {
+      id: heartIdRef.current++,
+      x,
+      y
+    };
+
+    setHearts(prev => [...prev, newHeart]);
+
+    setTimeout(() => {
+      setHearts(prev => prev.filter(h => h.id !== newHeart.id));
+    }, 1500);
+
+    onDoubleClick?.();
+  }, [onDoubleClick]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const dist = getTouchDistance(e.touches);
+      const center = getTouchCenter(e.touches);
+      touchStartRef.current = { x: center.x, y: center.y, dist };
+      e.preventDefault();
+    } else if (e.touches.length === 1) {
+      longPressTimerRef.current = setTimeout(() => {
+        if (scale === 1) {
+          setScale(2);
+        }
+      }, 600);
+
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        dist: 0
+      };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2 && touchStartRef.current) {
+      e.preventDefault();
+      const currentDist = getTouchDistance(e.touches);
+      const scaleDelta = currentDist / touchStartRef.current.dist;
+      const newScale = Math.min(Math.max(scale * scaleDelta, 1), 4);
+      setScale(newScale);
+      touchStartRef.current.dist = currentDist;
+    } else if (e.touches.length === 1 && scale > 1 && touchStartRef.current) {
+      const deltaX = e.touches[0].clientX - touchStartRef.current.x;
+      const deltaY = e.touches[0].clientY - touchStartRef.current.y;
+
+      setPosition(prev => ({
+        x: prev.x + deltaX,
+        y: prev.y + deltaY
+      }));
+
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        dist: 0
+      };
+    }
+
     if (longPressTimerRef.current) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
     }
   };
 
-  const handleImageClick = () => {
-    setTapCount(prev => prev + 1);
-
-    if (doubleTapTimerRef.current) {
-      clearTimeout(doubleTapTimerRef.current);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
     }
 
-    doubleTapTimerRef.current = setTimeout(() => {
-      if (tapCount + 1 === 2) {
-        triggerHeartAnimation();
-        onDoubleClick?.();
+    if (e.touches.length === 0) {
+      touchStartRef.current = null;
+    }
+
+    if (scale < 1.1) {
+      setScale(1);
+      setPosition({ x: 0, y: 0 });
+    }
+  };
+
+  const handleImageTap = (e: React.MouseEvent | React.TouchEvent) => {
+    e.stopPropagation();
+
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+
+    const now = Date.now();
+    const timeSinceLastTap = now - lastTapRef.current;
+
+    let clientX: number, clientY: number;
+
+    if ('touches' in e && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if ('changedTouches' in e && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+
+    if (timeSinceLastTap < 400 && timeSinceLastTap > 0) {
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current);
+        singleTapTimerRef.current = null;
       }
-      setTapCount(0);
-    }, 300);
+
+      triggerHeartAnimation(clientX, clientY);
+      tapCountRef.current = 0;
+    } else {
+      tapCountRef.current = 1;
+
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current);
+      }
+
+      singleTapTimerRef.current = setTimeout(() => {
+        if (tapCountRef.current === 1) {
+        }
+        tapCountRef.current = 0;
+      }, 400);
+    }
+
+    lastTapRef.current = now;
   };
 
-  const handleDoubleClick = () => {
-    triggerHeartAnimation();
-    onDoubleClick?.();
-  };
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? 0.9 : 1.1;
+    const newScale = Math.min(Math.max(scale * delta, 1), 4);
+    setScale(newScale);
 
-  const triggerHeartAnimation = () => {
-    setShowHeart(true);
-    setTimeout(() => setShowHeart(false), 1000);
+    if (newScale === 1) {
+      setPosition({ x: 0, y: 0 });
+    }
   };
 
   const goToPrevious = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-    setIsHighRes(false);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
   };
 
   const goToNext = (e: React.MouseEvent) => {
     e.stopPropagation();
     setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-    setIsHighRes(false);
+    setScale(1);
+    setPosition({ x: 0, y: 0 });
   };
 
-  if (!isOpen) return null;
+  const handleClose = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClose();
+  };
+
+  if (!isOpen || images.length === 0) return null;
 
   return (
     <AnimatePresence>
@@ -100,93 +257,165 @@ export default function ImageViewerModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-sm"
-          onClick={onClose}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black"
+          style={{ touchAction: 'none' }}
         >
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-50 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition"
+          <motion.button
+            onClick={handleClose}
+            className="fixed top-4 right-4 md:top-6 md:right-6 z-[10001] w-14 h-14 rounded-full bg-white/20 hover:bg-white/30 active:bg-white/40 flex items-center justify-center transition backdrop-blur-md border-2 border-white/30"
+            whileTap={{ scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
           >
-            <X className="w-6 h-6 text-white" />
-          </button>
+            <X className="w-7 h-7 text-white drop-shadow-lg" />
+          </motion.button>
 
-          {isHighRes && (
-            <div className="absolute top-4 left-4 z-50 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full text-white text-sm font-bold flex items-center gap-2">
+          {scale > 1.2 && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="fixed top-4 left-4 md:top-6 md:left-6 z-[10001] px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-bold flex items-center gap-2 border border-white/30"
+            >
               <ZoomIn className="w-4 h-4" />
-              High Resolution
-            </div>
+              {Math.round(scale * 100)}%
+            </motion.div>
           )}
 
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="relative max-w-7xl max-h-[90vh] w-full mx-4"
+          {images.length > 1 && (
+            <>
+              <motion.button
+                onClick={goToPrevious}
+                className="fixed left-2 md:left-6 top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 md:w-16 md:h-16 bg-white/20 hover:bg-white/30 active:bg-white/40 text-white rounded-full flex items-center justify-center transition backdrop-blur-md border-2 border-white/20"
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
+              </motion.button>
+
+              <motion.button
+                onClick={goToNext}
+                className="fixed right-2 md:right-6 top-1/2 -translate-y-1/2 z-[10000] w-12 h-12 md:w-16 md:h-16 bg-white/20 hover:bg-white/30 active:bg-white/40 text-white rounded-full flex items-center justify-center transition backdrop-blur-md border-2 border-white/20"
+                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
+              </motion.button>
+
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="fixed top-4 left-1/2 -translate-x-1/2 z-[10001] px-5 py-2 bg-white/20 backdrop-blur-md rounded-full text-white text-base font-bold border border-white/30"
+              >
+                {currentIndex + 1} / {images.length}
+              </motion.div>
+            </>
+          )}
+
+          <div
+            ref={imageContainerRef}
+            className="relative w-full h-full flex items-center justify-center overflow-hidden"
             onClick={(e) => e.stopPropagation()}
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            onMouseDown={handleTouchStart}
-            onMouseUp={handleTouchEnd}
-            onMouseLeave={handleTouchEnd}
+            onWheel={handleWheel}
           >
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={goToPrevious}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
-                >
-                  <ChevronLeft className="w-8 h-8" />
-                </button>
-
-                <button
-                  onClick={goToNext}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 z-50 w-14 h-14 bg-white/20 hover:bg-white/30 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm"
-                >
-                  <ChevronRight className="w-8 h-8" />
-                </button>
-
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white text-sm font-bold">
-                  {currentIndex + 1} / {images.length}
-                </div>
-              </>
-            )}
-
             <AnimatePresence mode="wait">
-              <motion.img
+              <motion.div
                 key={currentIndex}
-                src={images[currentIndex]}
-                alt={`Image ${currentIndex + 1}`}
-                className={`w-full h-full object-contain rounded-lg cursor-pointer select-none ${
-                  isHighRes ? 'scale-150 transition-transform duration-300' : ''
-                }`}
-                onClick={handleImageClick}
-                onDoubleClick={handleDoubleClick}
-                draggable={false}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              />
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: 'easeOut' }}
+                className="relative w-full h-full flex items-center justify-center"
+                style={{
+                  transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+                  transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+                  cursor: scale > 1 ? 'grab' : 'pointer'
+                }}
+              >
+                <img
+                  src={images[currentIndex]}
+                  alt={`Image ${currentIndex + 1}`}
+                  className="max-w-full max-h-full object-contain select-none"
+                  draggable={false}
+                  onClick={handleImageTap}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              </motion.div>
             </AnimatePresence>
 
             <AnimatePresence>
-              {showHeart && (
+              {hearts.map((heart) => (
                 <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: [0, 1.2, 1], opacity: [0, 1, 0] }}
+                  key={heart.id}
+                  initial={{ scale: 0, opacity: 0, y: 0 }}
+                  animate={{
+                    scale: [0, 1.2, 1],
+                    opacity: [0, 1, 1, 0],
+                    y: [0, -50]
+                  }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 1 }}
-                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  transition={{
+                    duration: 1.5,
+                    ease: 'easeOut',
+                    times: [0, 0.2, 0.4, 1]
+                  }}
+                  className="absolute pointer-events-none z-[10000]"
+                  style={{
+                    left: heart.x,
+                    top: heart.y,
+                    transform: 'translate(-50%, -50%)'
+                  }}
                 >
-                  <Heart className="w-32 h-32 text-red-500 fill-red-500 drop-shadow-2xl" />
+                  <div className="relative">
+                    <Heart
+                      className="w-24 h-24 md:w-32 md:h-32 text-red-500 fill-red-500"
+                      style={{
+                        filter: 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.8)) drop-shadow(0 0 40px rgba(239, 68, 68, 0.6))',
+                        strokeWidth: 1.5
+                      }}
+                    />
+                    <motion.div
+                      className="absolute inset-0"
+                      initial={{ scale: 1, opacity: 0.6 }}
+                      animate={{ scale: 1.5, opacity: 0 }}
+                      transition={{ duration: 1 }}
+                    >
+                      <Heart
+                        className="w-24 h-24 md:w-32 md:h-32 text-red-400"
+                        style={{
+                          filter: 'blur(8px)'
+                        }}
+                      />
+                    </motion.div>
+                  </div>
                 </motion.div>
-              )}
+              ))}
             </AnimatePresence>
-          </motion.div>
-
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-white text-sm opacity-70 text-center max-w-xl px-4">
-            <p>Tap once to view • Double tap to like • Hold to zoom{images.length > 1 ? ' • Arrows to navigate' : ''}</p>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="fixed bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 z-[10001] px-6 py-3 bg-black/60 backdrop-blur-md rounded-full text-white text-xs md:text-sm text-center max-w-xl border border-white/20"
+          >
+            <p className="font-medium">
+              Double tap to like • Pinch to zoom • {images.length > 1 ? 'Swipe to navigate' : 'Drag to move'}
+            </p>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
