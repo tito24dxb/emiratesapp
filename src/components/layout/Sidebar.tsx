@@ -196,7 +196,7 @@ export default function Sidebar() {
 
       {/* Desktop Expanded Sidebar */}
       <aside
-        className="hidden md:block liquid-sidebar border-r border-white/20 h-[calc(100vh-5rem)] sticky top-20 w-64 overflow-y-auto"
+        className="hidden md:block liquid-sidebar border-r border-white/20 min-h-screen h-full sticky top-0 w-64 overflow-y-auto"
         style={{ scrollbarWidth: 'thin' }}
       >
       <div className="p-3 h-full flex flex-col">

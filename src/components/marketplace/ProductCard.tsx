@@ -156,15 +156,15 @@ export default function ProductCard({
           {product.seller_photo_url ? (
             <img
               src={product.seller_photo_url}
-              alt={product.seller_name}
+              alt="Seller"
               className="w-4 h-4 rounded-full"
             />
           ) : (
-            <div className="w-4 h-4 rounded-full bg-gray-300 flex items-center justify-center text-[8px] font-bold text-gray-600">
+            <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white">
               {product.seller_name.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="text-[10px] text-gray-500 truncate">{product.seller_name}</span>
+          <span className="text-[10px] text-gray-600 truncate font-medium">By {product.seller_name}</span>
         </div>
       </div>
     </motion.div>

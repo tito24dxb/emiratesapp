@@ -226,26 +226,28 @@ export default function PaymentForm({
 
       {/* Apple Pay and Google Pay */}
       {walletPaymentAvailable && paymentRequest && (
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Wallet className="w-5 h-5 text-gray-700" />
-            <h3 className="font-semibold text-gray-900">Express Checkout</h3>
+        <div className="mb-6">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Wallet className="w-6 h-6 text-blue-600" />
+              <h3 className="font-bold text-gray-900 text-lg">Express Checkout</h3>
+            </div>
+            <div className="bg-white rounded-lg p-1">
+              <PaymentRequestButtonElement
+                options={{ paymentRequest }}
+                className="w-full"
+              />
+            </div>
+            <p className="text-sm text-gray-700 mt-3 flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-blue-600" />
+              <span className="font-medium">Pay with Apple Pay or Google Pay - Faster & Secure</span>
+            </p>
           </div>
-          <div className="p-4 border-2 border-gray-300 rounded-lg bg-transparent">
-            <PaymentRequestButtonElement
-              options={{ paymentRequest }}
-              className="w-full"
-            />
-          </div>
-          <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
-            <Smartphone className="w-3 h-3" />
-            Apple Pay or Google Pay (faster checkout)
-          </p>
 
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="text-sm text-gray-500 font-medium">OR PAY WITH CARD</span>
+            <span className="text-sm text-gray-600 font-semibold">OR PAY WITH CARD</span>
             <div className="flex-1 h-px bg-gray-300"></div>
           </div>
         </div>
