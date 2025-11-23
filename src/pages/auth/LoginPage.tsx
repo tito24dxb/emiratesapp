@@ -36,6 +36,7 @@ export default function LoginPage() {
       console.log('Checking 2FA status for user:', tempUser.uid);
 
       const has2FA = await totpService.check2FAStatus(tempUser.uid);
+      console.log('2FA check result:', has2FA);
 
       if (has2FA) {
         console.log('2FA enabled, showing verification dropdown');

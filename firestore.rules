@@ -54,6 +54,13 @@ service cloud.firestore {
         hasPermission('manageUsers')
       );
       allow delete: if false;
+
+      match /twoFactorAuth/{doc} {
+        allow read, write: if isAuthenticated() && (
+          request.auth.uid == userId ||
+          isGovernor()
+        );
+      }
     }
 
     ///////////////////////////////////////////////////////////////////////////
