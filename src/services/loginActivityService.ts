@@ -33,7 +33,18 @@ const loginActivityCollection = 'loginActivity';
 
 export async function recordLoginActivity(userId: string, success: boolean = true) {
   const deviceInfo = getDeviceInfo();
-  const ipInfo = await getIPInfo();
+
+  let ipInfo: { ip?: string; location?: any } = {};
+  try {
+    ipInfo = await Promise.race([
+      getIPInfo(),
+      new Promise<{ ip?: string; location?: any }>((resolve) =>
+        setTimeout(() => resolve({}), 2000)
+      )
+    ]);
+  } catch (error) {
+    console.warn('Could not fetch IP info, continuing without it');
+  }
 
   const activity: Omit<LoginActivity, 'id'> = {
     userId,
