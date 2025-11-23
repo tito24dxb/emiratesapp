@@ -625,5 +625,42 @@ export const communityFeedService = {
     } catch (error) {
       console.error('Error creating notification:', error);
     }
+  },
+
+  async toggleCommentReaction(
+    commentId: string,
+    userId: string,
+    reactionType: 'heart' | 'thumbsUp' | 'laugh'
+  ): Promise<void> {
+    const commentRef = doc(db, 'community_comments', commentId);
+    const commentDoc = await getDoc(commentRef);
+
+    if (!commentDoc.exists()) {
+      throw new Error('Comment not found');
+    }
+
+    const commentData = commentDoc.data();
+    const reactions = commentData.reactions || { heart: 0, thumbsUp: 0, laugh: 0 };
+    const userReactions = commentData.userReactions || {};
+
+    const hasReacted = userReactions[userId] === reactionType;
+
+    if (hasReacted) {
+      reactions[reactionType] = Math.max(0, reactions[reactionType] - 1);
+      delete userReactions[userId];
+    } else {
+      if (userReactions[userId]) {
+        const oldReaction = userReactions[userId] as 'heart' | 'thumbsUp' | 'laugh';
+        reactions[oldReaction] = Math.max(0, reactions[oldReaction] - 1);
+      }
+      reactions[reactionType] = (reactions[reactionType] || 0) + 1;
+      userReactions[userId] = reactionType;
+    }
+
+    await updateDoc(commentRef, {
+      reactions,
+      userReactions,
+      updatedAt: Timestamp.now()
+    });
   }
 };

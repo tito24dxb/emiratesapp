@@ -33,6 +33,7 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
   const [imagePreview, setImagePreview] = useState<string>('');
   const [showOptionsFor, setShowOptionsFor] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const replyFormRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const unsubscribe = communityFeedService.subscribeToComments(postId, (fetchedComments) => {
@@ -167,10 +168,15 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
 
   const handleReaction = async (commentId: string, reactionType: 'heart' | 'thumbsUp' | 'laugh') => {
     try {
-      // TODO: Implement reaction toggle in service
-      console.log('Reaction:', commentId, reactionType);
+      const userId = currentUser.uid || currentUser.id;
+      if (!userId) {
+        alert('Please log in to react');
+        return;
+      }
+      await communityFeedService.toggleCommentReaction(commentId, userId, reactionType);
     } catch (error) {
       console.error('Error adding reaction:', error);
+      alert('Failed to add reaction');
     }
   };
 
@@ -216,22 +222,8 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
     <div className="border-t-2 border-gray-200/50 pt-4 mt-4">
       <h4 className="font-bold text-gray-900 mb-4">Comments ({comments.length})</h4>
 
-      <form onSubmit={handleSubmit} className="mb-4">
-        {replyTo && (
-          <div className="mb-2 p-2 bg-blue-50 rounded-lg flex items-center justify-between">
-            <span className="text-sm text-blue-600">
-              Replying to <strong>{replyTo.name}</strong>
-            </span>
-            <button
-              type="button"
-              onClick={() => setReplyTo(null)}
-              className="text-blue-600 hover:text-blue-800"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-
+      {!replyTo && (
+        <form onSubmit={handleSubmit} className="mb-4">
         {imagePreview && (
           <div className="mb-2 relative inline-block">
             <img src={imagePreview} alt="Preview" className="max-h-32 rounded-lg" />
@@ -314,6 +306,7 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
           </div>
         )}
       </form>
+      )}
 
       <div className="space-y-3">
         <AnimatePresence>
@@ -439,6 +432,95 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
                   Reply
                 </button>
               </div>
+
+              {replyTo?.id === comment.id && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="ml-10 mt-3 border-t-2 border-gray-200 pt-3"
+                >
+                  <div className="mb-2 p-2 bg-blue-50 rounded-lg flex items-center justify-between">
+                    <span className="text-sm text-blue-600">
+                      Replying to <strong>{replyTo.name}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setReplyTo(null)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {imagePreview && (
+                    <div className="mb-2 relative inline-block">
+                      <img src={imagePreview} alt="Preview" className="max-h-32 rounded-lg" />
+                      <button
+                        type="button"
+                        onClick={removeImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2">
+                    {currentUser.photoURL || currentUser.profilePicture ? (
+                      <img
+                        src={currentUser.photoURL || currentUser.profilePicture}
+                        alt={currentUser.displayName || currentUser.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#D71920] to-[#B91518] flex items-center justify-center text-white font-bold text-xs">
+                        {(currentUser.displayName || currentUser.name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+
+                    <div className="flex-1">
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder={`Reply to ${replyTo.name}...`}
+                        className="w-full px-3 py-2 rounded-lg border-2 border-gray-200 focus:border-[#D71920] outline-none resize-none text-sm"
+                        rows={2}
+                        autoFocus
+                      />
+
+                      <div className="flex items-center gap-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition"
+                        >
+                          <Smile className="w-4 h-4 text-gray-600" />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="p-1.5 hover:bg-gray-100 rounded-lg transition"
+                        >
+                          <ImageIcon className="w-4 h-4 text-gray-600" />
+                        </button>
+
+                        <div className="flex-1" />
+
+                        <button
+                          onClick={handleSubmit}
+                          disabled={loading || (!newComment.trim() && !selectedImage)}
+                          className="px-3 py-1.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
+                        >
+                          <Send className="w-3 h-3" />
+                          Reply
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           ))}
         </AnimatePresence>
