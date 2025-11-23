@@ -166,13 +166,15 @@ export default function MarketplacePage() {
               </h1>
               <p className="text-gray-600 mt-1">Discover and sell amazing products</p>
             </div>
-            <button
-              onClick={() => navigate('/marketplace/create')}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-1.5"
-            >
-              <Plus className="w-4 h-4" />
-              Sell
-            </button>
+            {(currentUser?.role === 'mentor' || currentUser?.role === 'governor') && (
+              <button
+                onClick={() => navigate('/marketplace/create')}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-all flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                Sell
+              </button>
+            )}
           </div>
 
           {/* Search & Filters */}
@@ -265,10 +267,10 @@ export default function MarketplacePage() {
             icon={Package}
             title="No products found"
             description={searchTerm ? "Try adjusting your search or filters" : "Be the first to list a product!"}
-            action={{
+            action={currentUser?.role === 'mentor' || currentUser?.role === 'governor' ? {
               label: 'Create Product',
               onClick: () => navigate('/marketplace/create')
-            }}
+            } : undefined}
           />
         ) : (
           <motion.div

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Eye, TrendingUp, DollarSign, Edit, Trash2, BarChart3, ShoppingBag } from 'lucide-react';
+import { Package, Eye, TrendingUp, DollarSign, Edit, Trash2, BarChart3, ShoppingBag, Shield, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { getSellerProducts, deleteProduct, MarketplaceProduct, updateSellerNameOnProducts } from '../services/marketplaceService';
@@ -99,6 +99,33 @@ export default function SellerDashboard() {
         <div className="text-center">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <p className="text-gray-600">Please login to access seller dashboard</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Restrict access to mentors and governors only
+  if (currentUser.role === 'student') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50 max-w-md">
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Restricted</h2>
+          <div className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mx-auto mb-2" />
+            <p className="text-sm text-yellow-800">
+              Only <strong>Mentors</strong> and <strong>Governors</strong> can access the seller dashboard.
+            </p>
+          </div>
+          <p className="text-gray-600 mb-6">
+            You can browse and purchase products from the marketplace.
+          </p>
+          <button
+            onClick={() => navigate('/marketplace')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg"
+          >
+            Browse Marketplace
+          </button>
         </div>
       </div>
     );

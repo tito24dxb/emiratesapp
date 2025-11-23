@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, CreditCard, RefreshCw, Users, Filter, Download, Search, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { DollarSign, CreditCard, RefreshCw, Users, Filter, Download, Search, MapPin, Shield, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import InspectionProtection from '../components/InspectionProtection';
 import { useApp } from '../context/AppContext';
@@ -31,6 +32,7 @@ interface Transaction {
 
 export default function SellerBillingDashboard() {
   const { currentUser } = useApp();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]);
@@ -187,6 +189,33 @@ export default function SellerBillingDashboard() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-gray-600">Please login to access billing dashboard</p>
+      </div>
+    );
+  }
+
+  // Restrict access to mentors and governors only
+  if (currentUser.role === 'student') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-gray-200/50 max-w-md">
+          <Shield className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Restricted</h2>
+          <div className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <AlertCircle className="w-5 h-5 text-yellow-600 mx-auto mb-2" />
+            <p className="text-sm text-yellow-800">
+              Only <strong>Mentors</strong> and <strong>Governors</strong> can access billing and earnings.
+            </p>
+          </div>
+          <p className="text-gray-600 mb-6">
+            You can browse and purchase products from the marketplace.
+          </p>
+          <button
+            onClick={() => navigate('/marketplace')}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg"
+          >
+            Browse Marketplace
+          </button>
+        </div>
       </div>
     );
   }
