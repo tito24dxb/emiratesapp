@@ -48,11 +48,13 @@ export default function MarketplacePage() {
 
   const loadProducts = async () => {
     setLoading(true);
+    console.log('🔍 MarketplacePage: Loading products...');
     try {
       const fetchedProducts = await getPublishedProducts(100);
+      console.log('📦 MarketplacePage: Received products:', fetchedProducts.length);
       setProducts(fetchedProducts);
     } catch (error) {
-      console.error('Error loading products:', error);
+      console.error('❌ MarketplacePage: Error loading products:', error);
     } finally {
       setLoading(false);
     }

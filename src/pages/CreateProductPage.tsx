@@ -24,8 +24,8 @@ export default function CreateProductPage() {
         data
       );
 
-      alert('Product created successfully! You can publish it from your products page.');
-      navigate(`/marketplace/my-products`);
+      alert('Product created and published successfully!');
+      navigate(`/marketplace`);
     } catch (error: any) {
       console.error('Error creating product:', error);
       throw error;

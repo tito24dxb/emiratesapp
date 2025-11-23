@@ -79,7 +79,7 @@ export const createProduct = async (
       category: productData.category,
       product_type: productData.product_type,
       images: productData.images,
-      status: 'draft',
+      status: 'published',
       created_at: Timestamp.now(),
       updated_at: Timestamp.now(),
       views_count: 0,
