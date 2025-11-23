@@ -56,6 +56,7 @@ import MyProductsPage from './pages/MyProductsPage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerBillingDashboard from './pages/SellerBillingDashboard';
+import AttendanceDashboard from './pages/AttendanceDashboard';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -145,6 +146,7 @@ function AppContent() {
         <Route path="/marketplace/orders" element={<MyOrdersPage />} />
         <Route path="/seller/dashboard" element={<SellerDashboard />} />
         <Route path="/seller/billing" element={<SellerBillingDashboard />} />
+        <Route path="/attendance" element={<AttendanceDashboard />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>

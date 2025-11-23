@@ -27,7 +27,7 @@ export interface MarketplaceProduct {
   price: number;
   currency: string;
   category: string;
-  product_type: 'digital' | 'physical' | 'service';
+  product_type: 'digital' | 'physical' | 'service' | 'activity';
   images: string[];
   digital_file_url?: string;
   digital_file_name?: string;
@@ -42,6 +42,10 @@ export interface MarketplaceProduct {
   tags?: string[];
   custom_cta_text?: string;
   custom_cta_enabled?: boolean;
+  is_activity?: boolean;
+  activity_date?: any;
+  activity_location?: string;
+  max_participants?: number;
 }
 
 export interface ProductFormData {
@@ -50,7 +54,7 @@ export interface ProductFormData {
   price: number;
   currency: string;
   category: string;
-  product_type: 'digital' | 'physical' | 'service';
+  product_type: 'digital' | 'physical' | 'service' | 'activity';
   images: string[];
   digital_file_url?: string;
   digital_file_name?: string;
@@ -59,6 +63,10 @@ export interface ProductFormData {
   tags?: string[];
   custom_cta_text?: string;
   custom_cta_enabled?: boolean;
+  is_activity?: boolean;
+  activity_date?: any;
+  activity_location?: string;
+  max_participants?: number;
 }
 
 export const createProduct = async (

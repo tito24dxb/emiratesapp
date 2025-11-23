@@ -12,7 +12,8 @@ import {
   Timestamp,
   increment
 } from 'firebase/firestore';
-import { incrementProductSales, decrementStock } from './marketplaceService';
+import { incrementProductSales, decrementStock, getProduct } from './marketplaceService';
+import { createAttendanceRecord } from './attendanceService';
 
 export interface MarketplaceOrder {
   id: string;
@@ -384,7 +385,7 @@ export const getSellerOrders = async (sellerId: string): Promise<Order[]> => {
 export const completeOrder = async (
   orderId: string,
   productId: string,
-  productType: 'digital' | 'physical' | 'service',
+  productType: 'digital' | 'physical' | 'service' | 'activity',
   quantity: number = 1
 ): Promise<void> => {
   try {
@@ -394,6 +395,29 @@ export const completeOrder = async (
 
     if (productType === 'physical') {
       await decrementStock(productId, quantity);
+    }
+
+    // If it's an activity, create attendance record
+    if (productType === 'activity') {
+      const order = await getOrder(orderId);
+      const product = await getProduct(productId);
+
+      if (order && product) {
+        await createAttendanceRecord(
+          orderId,
+          productId,
+          product.title,
+          order.buyer_name,
+          order.buyer_email,
+          order.metadata?.buyer_phone || '',
+          order.total_amount,
+          order.currency,
+          order.seller_id,
+          order.seller_name,
+          order.payment_intent_id
+        );
+        console.log('Attendance record created for activity purchase');
+      }
     }
 
     console.log('Order completed:', orderId);

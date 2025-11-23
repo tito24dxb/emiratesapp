@@ -23,7 +23,8 @@ import {
   Rss,
   ShoppingBag,
   DollarSign,
-  Package
+  Package,
+  ClipboardList
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -95,6 +96,7 @@ export default function Sidebar() {
       { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', feature: null, badge: 'NEW' },
       { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', feature: null, badge: 'NEW' },
       { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', feature: null, badge: 'NEW' },
+      { path: '/attendance', icon: ClipboardList, label: 'Attendance', feature: null, badge: 'NEW' },
       { path: '/storage', icon: HardDrive, label: 'My Files', feature: null },
       { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
@@ -119,6 +121,7 @@ export default function Sidebar() {
     { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
+    { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -138,6 +141,7 @@ export default function Sidebar() {
     { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
+    { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },

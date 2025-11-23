@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Heart, Eye, Package, Download, Mail, Share2, Tag, MessageCircle } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Eye, Package, Download, Mail, Share2, Tag, MessageCircle, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
@@ -154,6 +154,20 @@ export default function ProductDetailPage() {
           <ArrowLeft className="w-5 h-5" />
           Back to Marketplace
         </button>
+
+        {/* Warning Banner */}
+        <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="font-semibold text-yellow-800 mb-1">Important Safety Notice</h3>
+              <p className="text-sm text-yellow-700">
+                Any sales made outside this app are not secured by our system, support, or governors.
+                For your protection, please complete all transactions through the marketplace chat and payment system only.
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Product Detail */}
         <div className="bg-white/30 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 overflow-hidden">
@@ -320,7 +334,7 @@ export default function ProductDetailPage() {
                   )}
                   <div>
                     <div className="font-medium text-gray-900">{product.seller_name}</div>
-                    <div className="text-sm text-gray-600">{product.seller_email}</div>
+                    <div className="text-sm text-gray-600">Verified Seller</div>
                   </div>
                 </div>
 
