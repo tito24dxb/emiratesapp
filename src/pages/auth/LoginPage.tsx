@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { Plane, Lock, Mail, Shield, Key } from 'lucide-react';
@@ -21,6 +21,23 @@ export default function LoginPage() {
   const [useBackupCode, setUseBackupCode] = useState(false);
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const pending2FA = sessionStorage.getItem('pending2FA');
+    const savedEmail = sessionStorage.getItem('pending2FAEmail');
+    const savedPassword = sessionStorage.getItem('pending2FAPassword');
+    const savedUserId = sessionStorage.getItem('pendingUserId');
+    const savedUserData = sessionStorage.getItem('pendingUserData');
+
+    if (pending2FA === 'true' && savedEmail && savedPassword && savedUserId && savedUserData) {
+      console.log('Restoring 2FA modal state after signout');
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setPendingUserId(savedUserId);
+      setPendingUserData(JSON.parse(savedUserData));
+      setShow2FA(true);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +84,12 @@ export default function LoginPage() {
       const has2FA = await totpService.check2FAStatus(user.uid);
 
       if (has2FA) {
-        console.log('2FA enabled, showing verification');
+        console.log('2FA enabled, showing verification modal');
+        sessionStorage.setItem('pending2FA', 'true');
+        sessionStorage.setItem('pending2FAEmail', email);
+        sessionStorage.setItem('pending2FAPassword', password);
+        sessionStorage.setItem('pendingUserData', JSON.stringify(currentUser));
+        sessionStorage.setItem('pendingUserId', user.uid);
         setPendingUserId(user.uid);
         setPendingUserData(currentUser);
         setShow2FA(true);
@@ -291,6 +313,11 @@ export default function LoginPage() {
 
       await recordLoginActivity(pendingUserId, true);
 
+      sessionStorage.removeItem('pending2FA');
+      sessionStorage.removeItem('pending2FAEmail');
+      sessionStorage.removeItem('pending2FAPassword');
+      sessionStorage.removeItem('pendingUserId');
+      sessionStorage.removeItem('pendingUserData');
       setShow2FA(false);
       setPendingUserId(null);
       setPendingUserData(null);
@@ -428,6 +455,11 @@ export default function LoginPage() {
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
           onClick={() => {
+            sessionStorage.removeItem('pending2FA');
+            sessionStorage.removeItem('pending2FAEmail');
+            sessionStorage.removeItem('pending2FAPassword');
+            sessionStorage.removeItem('pendingUserId');
+            sessionStorage.removeItem('pendingUserData');
             setShow2FA(false);
             setPendingUserId(null);
             setTwoFactorCode('');
@@ -487,6 +519,11 @@ export default function LoginPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => {
+                  sessionStorage.removeItem('pending2FA');
+                  sessionStorage.removeItem('pending2FAEmail');
+                  sessionStorage.removeItem('pending2FAPassword');
+                  sessionStorage.removeItem('pendingUserId');
+                  sessionStorage.removeItem('pendingUserData');
                   setShow2FA(false);
                   setPendingUserId(null);
                   setPendingUserData(null);
