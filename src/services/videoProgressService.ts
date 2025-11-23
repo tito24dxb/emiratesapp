@@ -146,13 +146,17 @@ export const markVideoComplete = async (
     [`${videoKey}.watchedPercentage`]: 100
   };
 
+  let completedVideos = 0;
   if (videoNumber === 1) {
+    completedVideos = 1 + (progress.video2.completed ? 1 : 0);
     updates.canAccessVideo2 = true;
-    updates.overallProgress = 50;
   } else if (videoNumber === 2) {
+    completedVideos = (progress.video1.completed ? 1 : 0) + 1;
     updates.canTakeQuiz = true;
-    updates.overallProgress = 100;
   }
+
+  const totalVideos = 2;
+  updates.overallProgress = Math.round((completedVideos / totalVideos) * 100);
 
   await updateDoc(progressRef, updates);
 
@@ -254,6 +258,36 @@ export const getAverageProgress = async (userId: string): Promise<number> => {
   return Math.round(totalProgress / progressList.length);
 };
 
+export const recalculateModuleProgress = async (
+  userId: string,
+  moduleId: string
+): Promise<number> => {
+  try {
+    const progressRef = doc(db, 'videoProgress', `${userId}_${moduleId}`);
+    const progressSnap = await getDoc(progressRef);
+
+    if (!progressSnap.exists()) {
+      return 0;
+    }
+
+    const progress = progressSnap.data() as ModuleVideoProgress;
+    let completedVideos = 0;
+    if (progress.video1.completed) completedVideos++;
+    if (progress.video2.completed) completedVideos++;
+
+    const totalVideos = 2;
+    const overallProgress = Math.round((completedVideos / totalVideos) * 100);
+
+    await updateDoc(progressRef, { overallProgress });
+    await updateModuleEnrollmentProgress(userId, moduleId, overallProgress);
+
+    return overallProgress;
+  } catch (error) {
+    console.error('Error recalculating module progress:', error);
+    return 0;
+  }
+};
+
 const updateModuleEnrollmentProgress = async (
   userId: string,
   moduleId: string,
@@ -277,7 +311,6 @@ const updateModuleEnrollmentProgress = async (
       }
 
       await updateDoc(enrollmentRef, updates);
-      console.log(`Updated enrollment progress: ${progressPercentage}%`);
     }
   } catch (error) {
     console.error('Error updating module enrollment progress:', error);

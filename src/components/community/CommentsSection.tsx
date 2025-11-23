@@ -52,7 +52,8 @@ export default function CommentsSection({ postId, currentUser }: CommentsSection
   };
 
   const canDeleteComment = (comment: CommunityComment) => {
-    return comment.userId === currentUser.uid || currentUser.role === 'governor' || currentUser.role === 'admin';
+    const userId = currentUser.uid || currentUser.id;
+    return comment.userId === userId || currentUser.role === 'governor' || currentUser.role === 'admin';
   };
 
   return (

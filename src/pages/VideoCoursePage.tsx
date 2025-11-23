@@ -9,6 +9,7 @@ import {
   updateVideoProgress,
   markVideoComplete,
   submitQuiz,
+  recalculateModuleProgress,
   ModuleVideoProgress
 } from '../services/videoProgressService';
 import CourseQuiz from '../components/CourseQuiz';
@@ -68,6 +69,9 @@ export default function VideoCoursePage() {
 
       if (!prog) {
         prog = await initializeModuleProgress(currentUser.uid, moduleId);
+      } else {
+        await recalculateModuleProgress(currentUser.uid, moduleId);
+        prog = await getModuleProgress(currentUser.uid, moduleId);
       }
 
       setProgress(prog);

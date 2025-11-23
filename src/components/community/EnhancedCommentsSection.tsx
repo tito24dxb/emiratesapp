@@ -193,7 +193,8 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
   };
 
   const canDeleteComment = (comment: EnhancedComment) => {
-    return comment.userId === currentUser.uid || currentUser.role === 'governor' || currentUser.role === 'admin';
+    const userId = currentUser.uid || currentUser.id;
+    return comment.userId === userId || currentUser.role === 'governor' || currentUser.role === 'admin';
   };
 
   const getProfilePicture = (comment: EnhancedComment) => {
@@ -371,7 +372,7 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
                         </button>
                       )}
 
-                      {comment.userId !== currentUser.uid && (
+                      {comment.userId !== (currentUser.uid || currentUser.id) && (
                         <button
                           onClick={() => {
                             handleReport(comment.id);
