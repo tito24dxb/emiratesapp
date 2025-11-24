@@ -28,6 +28,13 @@ export default function ReputationTester() {
       // Test 1: Initialize Reputation
       addResult('Initialization', 'success', 'Starting tests...');
 
+      console.log('Current user:', currentUser);
+      console.log('Reputation service:', reputationService);
+
+      if (!currentUser?.uid) {
+        throw new Error('No user ID found');
+      }
+
       await reputationService.initializeReputation(currentUser.uid, currentUser.name);
       addResult('Initialize Reputation', 'success', 'Successfully initialized reputation for current user');
 
@@ -88,7 +95,8 @@ export default function ReputationTester() {
       addResult('All Tests', 'success', '✅ All tests completed successfully!');
 
     } catch (error: any) {
-      addResult('Test Error', 'error', error.message || 'An error occurred during testing');
+      console.error('Test error:', error);
+      addResult('Test Error', 'error', error.message || error.toString() || 'An error occurred during testing');
     } finally {
       setTesting(false);
     }
@@ -96,12 +104,17 @@ export default function ReputationTester() {
 
   const testScoreCalculation = async () => {
     setTesting(true);
+    setTestResults([]);
     try {
+      if (!currentUser?.uid) {
+        throw new Error('No user ID found');
+      }
       addResult('Score Calculation', 'success', 'Calculating score...');
       const score = await reputationService.calculateUserScore(currentUser.uid);
       addResult('Score Calculation', 'success', `Your calculated score: ${score}`);
     } catch (error: any) {
-      addResult('Score Calculation', 'error', error.message);
+      console.error('Score calculation error:', error);
+      addResult('Score Calculation', 'error', error.message || error.toString());
     } finally {
       setTesting(false);
     }
@@ -111,7 +124,12 @@ export default function ReputationTester() {
     setTesting(true);
     setTestResults([]);
 
-    const scenarios = [
+    try {
+      if (!currentUser?.uid) {
+        throw new Error('No user ID found');
+      }
+
+      const scenarios = [
       { score: 95, tier: 'legendary', description: 'VIP with all perks' },
       { score: 80, tier: 'elite', description: 'Premium with highlight badge' },
       { score: 65, tier: 'veteran', description: 'Enhanced with fast posting' },
@@ -151,14 +169,18 @@ export default function ReputationTester() {
       }
     }
 
-    try {
-      await reputationService.calculateUserScore(currentUser.uid);
-      addResult('Restored', 'success', 'Original score restored');
+      try {
+        await reputationService.calculateUserScore(currentUser.uid);
+        addResult('Restored', 'success', 'Original score restored');
+      } catch (error: any) {
+        addResult('Restore', 'error', error.message);
+      }
     } catch (error: any) {
-      addResult('Restore', 'error', error.message);
+      console.error('Test scenarios error:', error);
+      addResult('Test Error', 'error', error.message || error.toString());
+    } finally {
+      setTesting(false);
     }
-
-    setTesting(false);
   };
 
   return (
