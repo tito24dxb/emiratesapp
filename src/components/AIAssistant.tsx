@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Send, Bot, X, Sparkles, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { enhancedAIService, AIMode } from '../services/enhancedAIService';
@@ -132,15 +133,22 @@ export default function AIAssistant({ isOpen, onClose, initialMode = 'coach' }: 
 
   if (!isOpen) return null;
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 20 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: 20 }}
-      transition={{ duration: 0.2 }}
-      className="fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
-      style={{ zIndex: 9999 }}
+  const modalContent = (
+    <div
+      className="fixed bottom-20 right-4 md:right-6"
+      style={{
+        zIndex: 2147483647,
+        position: 'fixed',
+        pointerEvents: 'auto'
+      }}
     >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        transition={{ duration: 0.2 }}
+        className="w-[90vw] sm:w-96 max-w-sm h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
+      >
         <div className={`${personality.color} text-white p-3 rounded-t-2xl flex items-center justify-between`}>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-lg">
@@ -294,5 +302,8 @@ export default function AIAssistant({ isOpen, onClose, initialMode = 'coach' }: 
           </div>
         </div>
       </motion.div>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
