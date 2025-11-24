@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, MessageCircle, Package } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { communityChatService, Message } from '../../services/communityChatService';
-import { createNotification } from '../../services/unifiedNotificationService';
 
 interface MarketplaceChatModalProps {
   isOpen: boolean;
@@ -78,16 +77,6 @@ export default function MarketplaceChatModal({
         newMessage,
         'text'
       );
-
-      // Send notification to seller
-      await createNotification({
-        userId: sellerId,
-        type: 'marketplace',
-        title: 'New Message About Your Product',
-        message: `${currentUser.name} sent you a message about "${productTitle}"`,
-        link: `/community?chat=${convId}`,
-        priority: 'high'
-      });
 
       setNewMessage('');
     } catch (error: any) {
