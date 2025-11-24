@@ -47,13 +47,23 @@ export default function MarketplaceCheckoutPage() {
         return;
       }
 
+      console.log('🔍 Fetching product:', productId);
       const fetchedProduct = await getProduct(productId);
 
       if (!fetchedProduct) {
+        console.error('❌ Product not found');
         alert('Product not found');
         navigate('/marketplace');
         return;
       }
+
+      console.log('✅ Product loaded:', {
+        id: fetchedProduct.id,
+        title: fetchedProduct.title,
+        price: fetchedProduct.price,
+        currency: fetchedProduct.currency,
+        type: fetchedProduct.product_type
+      });
 
       if (fetchedProduct.status !== 'published') {
         alert('This product is not available for purchase');
@@ -70,11 +80,16 @@ export default function MarketplaceCheckoutPage() {
       setProduct(fetchedProduct);
 
       // Load wallet balance
+      console.log('💰 Loading wallet balance...');
       const wallet = await walletService.getWallet(currentUser.uid);
       if (wallet) {
+        console.log('✅ Wallet balance:', wallet.balance);
         setWalletBalance(wallet.balance);
+      } else {
+        console.log('ℹ️ No wallet found, balance is 0');
       }
 
+      console.log('📦 Creating order...');
       const newOrderId = await createOrder({
         buyer_id: currentUser.uid,
         buyer_name: currentUser.name || 'Anonymous',
@@ -91,24 +106,35 @@ export default function MarketplaceCheckoutPage() {
         currency: fetchedProduct.currency
       });
 
+      console.log('✅ Order created:', newOrderId);
       setOrderId(newOrderId);
 
       // Price is already in cents from Firestore, so divide by 100 to get dollars
       const priceInDollars = fetchedProduct.price / 100;
       const totalAmount = priceInDollars * quantity;
 
+      console.log('💵 Price calculation:', {
+        priceInCents: fetchedProduct.price,
+        priceInDollars,
+        quantity,
+        totalAmount,
+        walletBalance: wallet?.balance || 0
+      });
+
       // Determine default payment method based on wallet balance
       if (wallet && wallet.balance >= totalAmount) {
+        console.log('💰 Full wallet payment selected');
         setPaymentMethod('wallet');
         setWalletAmount(totalAmount);
         setCardAmount(0);
       } else if (wallet && wallet.balance > 0) {
+        console.log('💳 Mixed payment selected (wallet + card)');
         setPaymentMethod('mixed');
         setWalletAmount(wallet.balance);
         setCardAmount(totalAmount - wallet.balance);
 
         // Create payment intent for remaining amount
-        console.log('Creating payment intent for mixed payment:', {
+        console.log('🔄 Creating payment intent for mixed payment:', {
           amount: totalAmount - wallet.balance,
           currency: fetchedProduct.currency
         });
@@ -124,13 +150,14 @@ export default function MarketplaceCheckoutPage() {
           currency: fetchedProduct.currency,
           seller_email: fetchedProduct.seller_email
         });
-        console.log('Payment intent created successfully:', paymentIntent.paymentIntentId);
+        console.log('✅ Mixed payment intent created:', paymentIntent.paymentIntentId);
         setClientSecret(paymentIntent.clientSecret);
       } else {
+        console.log('💳 Card payment selected');
         setPaymentMethod('card');
         setCardAmount(totalAmount);
 
-        console.log('Creating payment intent for card payment:', {
+        console.log('🔄 Creating payment intent for card payment:', {
           amount: totalAmount,
           currency: fetchedProduct.currency,
           productPrice: fetchedProduct.price,
@@ -148,19 +175,27 @@ export default function MarketplaceCheckoutPage() {
           currency: fetchedProduct.currency,
           seller_email: fetchedProduct.seller_email
         });
-        console.log('Payment intent created successfully:', paymentIntent.paymentIntentId);
+        console.log('✅ Card payment intent created:', paymentIntent.paymentIntentId);
         setClientSecret(paymentIntent.clientSecret);
       }
+
+      console.log('🎉 Checkout initialization complete!');
     } catch (error: any) {
-      console.error('Error loading checkout:', error);
+      console.error('❌ Error loading checkout:', error);
       const errorMessage = error.message || 'Failed to load checkout';
       console.error('Full error details:', {
         error,
+        errorMessage: error.message,
+        errorStack: error.stack,
         productId,
-        currentUserId: currentUser?.uid
+        currentUserId: currentUser?.uid,
+        hasProduct: !!product,
+        paymentMethod,
+        hasClientSecret: !!clientSecret
       });
-      alert(`Unable to initialize checkout: ${errorMessage}`);
-      navigate('/marketplace');
+      alert(`Unable to initialize checkout: ${errorMessage}\n\nPlease check console for details or contact support.`);
+      // Don't navigate away, stay on page to show error details
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -268,12 +303,29 @@ export default function MarketplaceCheckoutPage() {
   }
 
   if (!product || (paymentMethod !== 'wallet' && !clientSecret)) {
+    // Log state for debugging
+    console.log('Checkout page state check:', {
+      hasProduct: !!product,
+      paymentMethod,
+      hasClientSecret: !!clientSecret,
+      loading
+    });
+
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
+        <div className="text-center max-w-lg mx-auto p-8">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Checkout Error</h2>
-          <p className="text-gray-600 mb-4">Unable to load checkout</p>
+          <p className="text-gray-600 mb-2">Unable to load checkout</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Please check your internet connection and try again.
+          </p>
+          <div className="text-xs text-left bg-gray-100 p-3 rounded mb-4">
+            <p>Debug Info:</p>
+            <p>Product: {product ? '✓' : '✗'}</p>
+            <p>Payment Method: {paymentMethod}</p>
+            <p>Client Secret: {clientSecret ? '✓' : '✗'}</p>
+          </div>
           <button
             onClick={() => navigate('/marketplace')}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
