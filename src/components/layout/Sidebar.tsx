@@ -176,7 +176,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Horizontal Sidebar - Always show on all pages */}
-      <aside className="w-full liquid-sidebar border-b border-white/20">
+      <aside className="w-full liquid-sidebar border-b border-white/20 relative z-40">
         <div className="p-3">
           <nav className="flex gap-1 overflow-x-auto pb-2">
             {links.map((link) => {

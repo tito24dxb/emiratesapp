@@ -84,7 +84,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="liquid-navbar sticky top-0 z-[100] overflow-visible">
+      <nav className="liquid-navbar sticky top-0 z-50 overflow-visible">
         <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8 overflow-visible">
           <div className="flex items-center justify-between h-16 md:h-20 relative overflow-visible">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
@@ -153,7 +153,7 @@ export default function Navbar() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute top-full right-3 md:right-6 lg:right-8 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-[102] shadow-2xl rounded-2xl"
+              className="absolute top-full right-3 md:right-6 lg:right-8 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-[60] shadow-2xl rounded-2xl"
             >
               <Link
                 to="/profile"
