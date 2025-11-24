@@ -18,7 +18,7 @@ export default function ReputationManager() {
   const [editReason, setEditReason] = useState('');
 
   useEffect(() => {
-    if (currentUser?.role !== 'governor') {
+    if (currentUser?.role !== 'governor' && currentUser?.role !== 'mentor') {
       navigate('/dashboard');
       return;
     }

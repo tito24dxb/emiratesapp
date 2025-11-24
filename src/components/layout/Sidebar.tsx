@@ -3,6 +3,7 @@ import {
   Wallet,
   Camera,
   QrCode,
+  Ticket,
   LayoutDashboard,
   BookOpen,
   MessageCircle,
@@ -107,6 +108,7 @@ export default function Sidebar() {
       { path: '/wallet', icon: Wallet, label: 'My Wallet', feature: null, badge: 'NEW' },
       { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', feature: null, badge: 'NEW' },
       { path: '/activity-check-in', icon: QrCode, label: 'Check-In', feature: null, badge: 'NEW' },
+      { path: '/my-events', icon: Ticket, label: 'My Events', feature: null, badge: 'NEW' },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
@@ -121,6 +123,7 @@ export default function Sidebar() {
   const mentorLinks = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard', highlight: true },
+    { path: '/governor/reputation', icon: TrendingUp, label: 'Reputation Manager', badge: 'NEW' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/community-feed', icon: Rss, label: 'Community Feed' },
@@ -136,6 +139,8 @@ export default function Sidebar() {
     { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', badge: 'NEW' },
     { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW' },
     { path: '/activity-management', icon: Users, label: 'Activity Management', badge: 'NEW' },
+    { path: '/event-attendance', icon: Calendar, label: 'Event Attendance', badge: 'NEW' },
+    { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -183,6 +188,8 @@ export default function Sidebar() {
     { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', badge: 'NEW' },
     { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW' },
     { path: '/activity-management', icon: Users, label: 'Activity Management', badge: 'NEW' },
+    { path: '/event-attendance', icon: Calendar, label: 'Event Attendance', badge: 'NEW' },
+    { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
