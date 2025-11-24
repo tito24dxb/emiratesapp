@@ -103,7 +103,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="grid grid-cols-[280px_1fr] h-full overflow-hidden bg-white -m-4 md:-m-6">
+    <div className="fixed inset-0 top-16 grid grid-cols-[280px_1fr] h-[calc(100vh-4rem)] overflow-hidden bg-white">
       <ChatSidebar
         conversations={conversations}
         selectedConversationId={selectedConversation?.id || null}
