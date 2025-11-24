@@ -17,6 +17,7 @@ export default function CommunityPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [sending, setSending] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const { messages, loading, hasMore, loadMoreMessages } = useChatMessages(
     selectedConversation?.id || null
@@ -89,6 +90,25 @@ export default function CommunityPage() {
     setSelectedConversation(conversation);
   };
 
+  const handleCreateConversation = () => {
+    setShowCreateModal(true);
+  };
+
+  const handleReaction = async (messageId: string, emoji: string) => {
+    if (!currentUser || !selectedConversation) return;
+
+    try {
+      await communityChatService.addReaction(
+        selectedConversation.id,
+        messageId,
+        emoji,
+        currentUser.uid
+      );
+    } catch (error) {
+      console.error('Error adding reaction:', error);
+    }
+  };
+
   if (!currentUser) return null;
 
   const chatAccess = checkFeatureAccess(currentUser, 'chat');
@@ -103,13 +123,14 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="h-full bg-white">
+    <div className="h-full">
       {!selectedConversation ? (
         <ChatSidebar
           conversations={conversations}
           selectedConversationId={null}
           currentUserId={currentUser.uid}
           onSelectConversation={handleSelectConversation}
+          onCreateConversation={handleCreateConversation}
         />
       ) : (
         <ChatWindow
@@ -124,6 +145,7 @@ export default function CommunityPage() {
           onTyping={startTyping}
           sending={sending}
           onBack={() => setSelectedConversation(null)}
+          onReact={handleReaction}
         />
       )}
     </div>

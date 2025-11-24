@@ -10,6 +10,7 @@ interface MessageListProps {
   hasMore?: boolean;
   onLoadMore?: () => void;
   typingUsers?: Array<{ userId: string; userName: string }>;
+  onReact?: (messageId: string, emoji: string) => void;
 }
 
 export default function MessageList({
@@ -19,6 +20,7 @@ export default function MessageList({
   hasMore = false,
   onLoadMore,
   typingUsers = [],
+  onReact,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -134,6 +136,7 @@ export default function MessageList({
                   message={message}
                   currentUserId={currentUserId}
                   showAvatar={showAvatar}
+                  onReact={onReact}
                 />
               );
             })}

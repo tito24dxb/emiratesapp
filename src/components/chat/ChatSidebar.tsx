@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, MessageSquare } from 'lucide-react';
+import { Search, MessageSquare, Plus, Users } from 'lucide-react';
 import { Conversation } from '../../services/communityChatService';
 
 interface ChatSidebarProps {
@@ -7,6 +7,7 @@ interface ChatSidebarProps {
   selectedConversationId: string | null;
   currentUserId: string;
   onSelectConversation: (conversation: Conversation) => void;
+  onCreateConversation?: () => void;
 }
 
 export default function ChatSidebar({
@@ -14,6 +15,7 @@ export default function ChatSidebar({
   selectedConversationId,
   currentUserId,
   onSelectConversation,
+  onCreateConversation,
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -45,11 +47,22 @@ export default function ChatSidebar({
   };
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="p-3 border-b border-gray-200">
-        <div className="flex items-center gap-2 mb-3">
-          <MessageSquare className="w-5 h-5 text-blue-600" />
-          <h1 className="text-xl font-bold text-gray-900">Messages</h1>
+    <div className="h-full flex flex-col">
+      <div className="p-3 border-b border-white/20 backdrop-blur-sm bg-white/10">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-blue-600" />
+            <h1 className="text-xl font-bold text-gray-900">Messages</h1>
+          </div>
+          {onCreateConversation && (
+            <button
+              onClick={onCreateConversation}
+              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              title="New Conversation"
+            >
+              <Plus className="w-5 h-5 text-gray-700" />
+            </button>
+          )}
         </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -58,7 +71,7 @@ export default function ChatSidebar({
             placeholder="Search conversations"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-9 pr-3 py-1.5 bg-white/20 border border-white/30 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-600"
           />
         </div>
       </div>
@@ -81,8 +94,8 @@ export default function ChatSidebar({
                 <button
                   key={conversation.id}
                   onClick={() => onSelectConversation(conversation)}
-                  className={`w-full px-3 py-2.5 flex items-start gap-2.5 hover:bg-gray-50 transition ${
-                    isSelected ? 'bg-blue-50' : ''
+                  className={`w-full px-3 py-2.5 flex items-start gap-2.5 hover:bg-white/20 transition ${
+                    isSelected ? 'bg-white/30 backdrop-blur-sm' : ''
                   }`}
                 >
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-base flex-shrink-0">

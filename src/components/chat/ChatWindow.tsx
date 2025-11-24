@@ -15,6 +15,7 @@ interface ChatWindowProps {
   onTyping: () => void;
   sending: boolean;
   onBack?: () => void;
+  onReact?: (messageId: string, emoji: string) => void;
 }
 
 export default function ChatWindow({
@@ -29,10 +30,11 @@ export default function ChatWindow({
   onTyping,
   sending,
   onBack,
+  onReact,
 }: ChatWindowProps) {
   if (!conversation) {
     return (
-      <div className="h-full flex items-center justify-center bg-white">
+      <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <MessageCircle className="w-16 h-16 mx-auto mb-4 text-gray-300" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Select a conversation</h2>
@@ -43,8 +45,8 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-3 py-2 border-b border-gray-200 flex items-center gap-2 flex-shrink-0 bg-white">
+    <div className="h-full flex flex-col">
+      <div className="px-3 py-2 border-b border-white/20 flex items-center gap-2 flex-shrink-0 backdrop-blur-sm bg-white/10">
         {onBack && (
           <button
             onClick={onBack}
@@ -78,10 +80,11 @@ export default function ChatWindow({
           hasMore={hasMore}
           onLoadMore={onLoadMore}
           typingUsers={typingUsers}
+          onReact={onReact}
         />
       </div>
 
-      <div className="flex-shrink-0 bg-white border-t border-gray-200">
+      <div className="flex-shrink-0 backdrop-blur-sm bg-white/10 border-t border-white/20">
         <ChatInput
           onSend={onSendMessage}
           onTyping={onTyping}

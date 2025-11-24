@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Edit2, MoreVertical } from 'lucide-react';
+import { Trash2, Edit2, MoreVertical, Smile } from 'lucide-react';
 import { Message } from '../../services/communityChatService';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -7,10 +7,14 @@ interface ChatMessageBubbleProps {
   message: Message;
   currentUserId: string;
   showAvatar?: boolean;
+  onReact?: (messageId: string, emoji: string) => void;
 }
 
-export default function ChatMessageBubble({ message, currentUserId, showAvatar = true }: ChatMessageBubbleProps) {
+const REACTION_EMOJIS = ['👍', '❤️', '😂', '🔥', '😮', '👏'];
+
+export default function ChatMessageBubble({ message, currentUserId, showAvatar = true, onReact }: ChatMessageBubbleProps) {
   const [showActions, setShowActions] = useState(false);
+  const [showReactionPicker, setShowReactionPicker] = useState(false);
   const isOwnMessage = message.senderId === currentUserId;
 
   const formatTime = (timestamp: any) => {
@@ -123,11 +127,42 @@ export default function ChatMessageBubble({ message, currentUserId, showAvatar =
                   </>
                 )}
                 <button
+                  onClick={() => setShowReactionPicker(!showReactionPicker)}
+                  className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
+                  title="React"
+                >
+                  <Smile className="w-4 h-4 text-gray-600" />
+                </button>
+                <button
                   className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
                   title="More"
                 >
                   <MoreVertical className="w-4 h-4 text-gray-600" />
                 </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showReactionPicker && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className={`absolute ${isOwnMessage ? 'right-0' : 'left-0'} bottom-full mb-2 flex gap-1 bg-white p-2 rounded-lg shadow-xl`}
+              >
+                {REACTION_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => {
+                      if (onReact) onReact(message.messageId, emoji);
+                      setShowReactionPicker(false);
+                    }}
+                    className="text-xl hover:scale-125 transition-transform"
+                  >
+                    {emoji}
+                  </button>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
