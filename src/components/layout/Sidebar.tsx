@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Wallet,
+  Camera,
   LayoutDashboard,
   BookOpen,
   MessageCircle,
@@ -103,6 +104,7 @@ export default function Sidebar() {
       ] : []),
       { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', feature: null, badge: 'NEW' },
       { path: '/wallet', icon: Wallet, label: 'My Wallet', feature: null, badge: 'NEW' },
+      { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', feature: null, badge: 'NEW' },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
@@ -129,6 +131,7 @@ export default function Sidebar() {
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
+    { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -173,6 +176,7 @@ export default function Sidebar() {
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
+    { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
