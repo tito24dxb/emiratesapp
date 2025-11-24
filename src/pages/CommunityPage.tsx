@@ -139,9 +139,9 @@ export default function CommunityPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-light border border-gray-200 rounded-xl shadow-xl overflow-hidden"
+      className="glass-light border border-gray-200 rounded-xl shadow-xl overflow-hidden h-full flex flex-col"
     >
-      <div className="flex items-center gap-3 p-6 border-b border-gray-200">
+      <div className="flex items-center gap-3 p-6 border-b border-gray-200 flex-shrink-0">
         <MessageCircle className="w-6 h-6 text-gray-700" />
         <h2 className="text-xl font-bold text-gray-900">Community Chat</h2>
         {getUnreadCount() > 0 && (
@@ -151,7 +151,7 @@ export default function CommunityPage() {
         )}
       </div>
 
-      <div className="flex h-[600px]">
+      <div className="flex flex-1 min-h-0">
         <div className="w-80 border-r border-gray-200 overflow-y-auto glass-light">
           {conversations.length === 0 ? (
             <div className="p-4 text-center text-gray-600">No conversations yet</div>
