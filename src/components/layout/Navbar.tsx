@@ -86,45 +86,46 @@ export default function Navbar() {
     if (currentUser.role === 'student') {
       return [
         { path: '/dashboard', label: 'Dashboard' },
-        { path: '/my-progress', label: 'My Progress' },
-        { path: '/courses', label: 'Courses' },
-        { path: '/ai-trainer', label: 'AI Trainer' },
-        { path: '/open-day', label: 'Simulator' },
-        { path: '/chat', label: 'Chat' },
+        { path: '/courses', label: 'Learning' },
         { path: '/community-feed', label: 'Community' },
-        { path: '/leaderboard', label: 'Leaderboard' },
-        { path: '/marketplace', label: 'Marketplace' },
-        { path: '/profile', label: 'Profile' },
-        { path: '/support', label: 'Support' },
+        { path: '/recruiters', label: 'Career' },
+        { path: '/student-events', label: 'Events' },
+        { path: '/marketplace', label: 'Shop' },
+        { path: '/support', label: 'Help' },
+        { path: '/profile', label: 'Account' },
       ];
     } else if (currentUser.role === 'mentor') {
       return [
         { path: '/dashboard', label: 'Dashboard' },
-        { path: '/coach-dashboard', label: 'Coach' },
-        { path: '/students', label: 'Students' },
-        { path: '/chat', label: 'Chat' },
+        { path: '/coach-dashboard', label: 'Learning' },
         { path: '/community-feed', label: 'Community' },
-        { path: '/marketplace', label: 'Marketplace' },
-        { path: '/seller/dashboard', label: 'Seller' },
-        { path: '/profile', label: 'Profile' },
+        { path: '/students', label: 'Career' },
+        { path: '/student-events', label: 'Events' },
+        { path: '/marketplace', label: 'Shop' },
+        { path: '/support', label: 'Help' },
+        { path: '/profile', label: 'Account' },
       ];
     } else if (currentUser.role === 'governor') {
       return [
-        { path: '/governor/nexus', label: 'Control' },
         { path: '/dashboard', label: 'Dashboard' },
-        { path: '/coach-dashboard', label: 'Coach' },
-        { path: '/chat', label: 'Chat' },
+        { path: '/governor/nexus', label: 'Learning' },
         { path: '/community-feed', label: 'Community' },
-        { path: '/marketplace', label: 'Marketplace' },
-        { path: '/profile', label: 'Profile' },
+        { path: '/coach-dashboard', label: 'Career' },
+        { path: '/student-events', label: 'Events' },
+        { path: '/marketplace', label: 'Shop' },
+        { path: '/support', label: 'Help' },
+        { path: '/profile', label: 'Account' },
       ];
     }
     return [
       { path: '/dashboard', label: 'Dashboard' },
-      { path: '/chat', label: 'Chat' },
+      { path: '/courses', label: 'Learning' },
       { path: '/community-feed', label: 'Community' },
-      { path: '/marketplace', label: 'Marketplace' },
-      { path: '/profile', label: 'Profile' },
+      { path: '/recruiters', label: 'Career' },
+      { path: '/student-events', label: 'Events' },
+      { path: '/marketplace', label: 'Shop' },
+      { path: '/support', label: 'Help' },
+      { path: '/profile', label: 'Account' },
     ];
   };
 
