@@ -147,7 +147,7 @@ export default function AIAssistant({ isOpen, onClose, initialMode = 'coach' }: 
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
         transition={{ duration: 0.2 }}
-        className="w-[90vw] sm:w-96 max-w-sm h-[500px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
+        className="w-[85vw] sm:w-80 max-w-xs h-[420px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200"
       >
         <div className={`${personality.color} text-white p-3 rounded-t-2xl flex items-center justify-between`}>
           <div className="flex items-center gap-3">
