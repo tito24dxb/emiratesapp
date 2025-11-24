@@ -314,18 +314,18 @@ export default function PaymentForm({
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch justify-center gap-3">
                 <button
                   disabled
-                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-black rounded-lg opacity-40 cursor-not-allowed"
+                  className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-black rounded-xl opacity-40 cursor-not-allowed min-w-[140px]"
                 >
-                  <ApplePayIcon className="h-8 w-auto" />
+                  <ApplePayIcon className="h-10 w-auto" />
                 </button>
                 <button
                   disabled
-                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white border-2 border-gray-300 rounded-lg opacity-40 cursor-not-allowed"
+                  className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white border-2 border-gray-300 rounded-xl opacity-40 cursor-not-allowed min-w-[140px]"
                 >
-                  <GooglePayIcon className="h-8 w-auto" />
+                  <GooglePayIcon className="h-10 w-auto" />
                 </button>
               </div>
               <p className="text-xs text-gray-500 text-center italic">

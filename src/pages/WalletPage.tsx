@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react';
 import { Wallet as WalletIcon, TrendingUp, TrendingDown, DollarSign, Clock, Filter, Download, Plus, X, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { useApp } from '../context/AppContext';
 import { walletService, Wallet, Transaction } from '../services/walletService';
+import { getStripe } from '../services/stripeService';
 import PaymentForm from '../components/marketplace/PaymentForm';
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = getStripe();
 
 export default function WalletPage() {
   const { currentUser } = useApp();

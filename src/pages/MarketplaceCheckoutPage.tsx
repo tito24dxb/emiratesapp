@@ -108,6 +108,10 @@ export default function MarketplaceCheckoutPage() {
         setCardAmount(totalAmount - wallet.balance);
 
         // Create payment intent for remaining amount
+        console.log('Creating payment intent for mixed payment:', {
+          amount: totalAmount - wallet.balance,
+          currency: fetchedProduct.currency
+        });
         const paymentIntent = await createMarketplacePaymentIntent({
           firebase_buyer_uid: currentUser.uid,
           firebase_seller_uid: fetchedProduct.seller_id,
@@ -120,11 +124,18 @@ export default function MarketplaceCheckoutPage() {
           currency: fetchedProduct.currency,
           seller_email: fetchedProduct.seller_email
         });
+        console.log('Payment intent created successfully:', paymentIntent.paymentIntentId);
         setClientSecret(paymentIntent.clientSecret);
       } else {
         setPaymentMethod('card');
         setCardAmount(totalAmount);
 
+        console.log('Creating payment intent for card payment:', {
+          amount: totalAmount,
+          currency: fetchedProduct.currency,
+          productPrice: fetchedProduct.price,
+          quantity
+        });
         const paymentIntent = await createMarketplacePaymentIntent({
           firebase_buyer_uid: currentUser.uid,
           firebase_seller_uid: fetchedProduct.seller_id,
@@ -137,6 +148,7 @@ export default function MarketplaceCheckoutPage() {
           currency: fetchedProduct.currency,
           seller_email: fetchedProduct.seller_email
         });
+        console.log('Payment intent created successfully:', paymentIntent.paymentIntentId);
         setClientSecret(paymentIntent.clientSecret);
       }
     } catch (error: any) {
