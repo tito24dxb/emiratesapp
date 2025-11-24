@@ -1,4 +1,4 @@
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, ArrowLeft } from 'lucide-react';
 import { Conversation, Message } from '../../services/communityChatService';
 import ChatInput from './ChatInput';
 import MessageList from './MessageList';
@@ -14,6 +14,7 @@ interface ChatWindowProps {
   onSendMessage: (message: string, file?: File) => void;
   onTyping: () => void;
   sending: boolean;
+  onBack?: () => void;
 }
 
 export default function ChatWindow({
@@ -27,6 +28,7 @@ export default function ChatWindow({
   onSendMessage,
   onTyping,
   sending,
+  onBack,
 }: ChatWindowProps) {
   if (!conversation) {
     return (
@@ -41,16 +43,25 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="px-6 py-4 border-b border-gray-200 flex items-center gap-3 flex-shrink-0">
+    <div className="h-screen flex flex-col bg-white">
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-3 flex-shrink-0 bg-white">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label="Back to conversations"
+          >
+            <ArrowLeft className="w-5 h-5 text-gray-700" />
+          </button>
+        )}
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-lg flex-shrink-0">
           {conversation.id === 'publicRoom' ? '🌍' :
            conversation.type === 'marketplace' ? '🛒' :
            conversation.type === 'private' ? conversation.title.charAt(0).toUpperCase() :
            '💬'}
         </div>
-        <div>
-          <h2 className="font-semibold text-gray-900">{conversation.title}</h2>
+        <div className="flex-1 min-w-0">
+          <h2 className="font-semibold text-gray-900 truncate">{conversation.title}</h2>
           <p className="text-sm text-gray-500">
             {conversation.type === 'group' && 'Group Chat'}
             {conversation.type === 'private' && 'Direct Message'}
@@ -59,7 +70,7 @@ export default function ChatWindow({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         <MessageList
           messages={messages}
           currentUserId={currentUserId}
@@ -70,7 +81,7 @@ export default function ChatWindow({
         />
       </div>
 
-      <div className="flex-shrink-0 sticky bottom-0 bg-white border-t border-gray-200">
+      <div className="flex-shrink-0 bg-white border-t border-gray-200">
         <ChatInput
           onSend={onSendMessage}
           onTyping={onTyping}

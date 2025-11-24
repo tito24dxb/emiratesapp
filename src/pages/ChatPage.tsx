@@ -103,25 +103,31 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="fixed inset-0 grid grid-cols-[280px_1fr] h-screen overflow-hidden bg-white">
-      <ChatSidebar
-        conversations={conversations}
-        selectedConversationId={selectedConversation?.id || null}
-        currentUserId={currentUser.uid}
-        onSelectConversation={handleSelectConversation}
-      />
-      <ChatWindow
-        conversation={selectedConversation}
-        messages={messages}
-        currentUserId={currentUser.uid}
-        loading={loading}
-        hasMore={hasMore}
-        onLoadMore={loadMoreMessages}
-        typingUsers={typingUsers}
-        onSendMessage={handleSendMessage}
-        onTyping={startTyping}
-        sending={sending}
-      />
+    <div className="h-screen bg-white">
+      {!selectedConversation ? (
+        <div className="h-full max-w-2xl mx-auto">
+          <ChatSidebar
+            conversations={conversations}
+            selectedConversationId={null}
+            currentUserId={currentUser.uid}
+            onSelectConversation={handleSelectConversation}
+          />
+        </div>
+      ) : (
+        <ChatWindow
+          conversation={selectedConversation}
+          messages={messages}
+          currentUserId={currentUser.uid}
+          loading={loading}
+          hasMore={hasMore}
+          onLoadMore={loadMoreMessages}
+          typingUsers={typingUsers}
+          onSendMessage={handleSendMessage}
+          onTyping={startTyping}
+          sending={sending}
+          onBack={() => setSelectedConversation(null)}
+        />
+      )}
     </div>
   );
 }
