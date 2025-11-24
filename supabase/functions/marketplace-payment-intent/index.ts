@@ -133,10 +133,16 @@ Deno.serve(async (req) => {
     }
 
     const amountInCents = Math.round(amount * 100);
+    const currencyLower = currency.toLowerCase();
+
+    const supportedCurrencies = ['usd', 'eur', 'gbp', 'aed', 'aud', 'cad', 'jpy', 'inr', 'sgd'];
+    if (!supportedCurrencies.includes(currencyLower)) {
+      return corsResponse({ error: `Currency ${currency} is not supported. Supported currencies: ${supportedCurrencies.join(', ')}` }, 400);
+    }
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amountInCents,
-      currency: currency.toLowerCase(),
+      currency: currencyLower,
       customer: customerId,
       metadata: {
         marketplace_order: 'true',
@@ -153,6 +159,12 @@ Deno.serve(async (req) => {
       automatic_payment_methods: {
         enabled: true,
       },
+      payment_method_options: {
+        card: {
+          request_three_d_secure: 'automatic',
+        },
+      },
+      setup_future_usage: 'off_session',
     });
 
     console.log(`Created payment intent ${paymentIntent.id} for order ${firebase_order_id}`);
@@ -178,7 +190,10 @@ Deno.serve(async (req) => {
     return corsResponse({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      customerId
+      customerId,
+      currency: currencyLower,
+      amount: amountInCents,
+      requires3DSecure: paymentIntent.payment_method_options?.card?.request_three_d_secure === 'automatic'
     });
 
   } catch (error: any) {

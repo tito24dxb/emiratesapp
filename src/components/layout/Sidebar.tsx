@@ -29,6 +29,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
 import { checkFeatureAccess, Feature } from '../../utils/featureAccess';
+import { motion } from 'framer-motion';
 
 export default function Sidebar() {
   const { currentUser } = useApp();
@@ -228,34 +229,40 @@ export default function Sidebar() {
             const highlight = 'highlight' in link && link.highlight;
 
             return (
-              <Link
+              <motion.div
                 key={link.path}
-                to={link.path}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative transition-all ${
-                  isActive
-                    ? 'glass-primary text-gray-900'
-                    : highlight
-                    ? 'glass-primary text-gray-900 font-bold'
-                    : isLocked
-                    ? 'text-gray-400 glass-ultra-thin opacity-60'
-                    : 'text-gray-700 glass-button-secondary'
-                }`}
+                whileHover={{ scale: 1.02, x: 4 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <span className="font-medium text-sm flex-1 whitespace-nowrap">{link.label}</span>
-                {isLocked && <Lock className="w-3.5 h-3.5 flex-shrink-0" />}
-                {badge && (
-                  <span
-                    className={`px-2 py-0.5 text-xs font-bold rounded-full ${
-                      badge === 'VIP'
-                        ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
-                        : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
-                    }`}
-                  >
-                    {badge}
-                  </span>
-                )}
-              </Link>
+                <Link
+                  to={link.path}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative transition-all ${
+                    isActive
+                      ? 'glass-primary text-gray-900'
+                      : highlight
+                      ? 'glass-primary text-gray-900 font-bold'
+                      : isLocked
+                      ? 'text-gray-400 glass-ultra-thin opacity-60'
+                      : 'text-gray-700 glass-button-secondary'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium text-sm flex-1 whitespace-nowrap">{link.label}</span>
+                  {isLocked && <Lock className="w-3.5 h-3.5 flex-shrink-0" />}
+                  {badge && (
+                    <span
+                      className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                        badge === 'VIP'
+                          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
+                          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
+                      }`}
+                    >
+                      {badge}
+                    </span>
+                  )}
+                </Link>
+              </motion.div>
             );
           })}
         </nav>
