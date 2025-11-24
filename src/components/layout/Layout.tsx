@@ -20,47 +20,10 @@ export default function Layout({ children }: LayoutProps) {
   if (isCommunityPage) {
     return (
       <div className="h-screen flex flex-col">
-        <Navbar />
-
-        <div className="pt-16 md:pt-20 flex-1 flex flex-col min-h-0">
-          <AnimatePresence>
-            {banners.map((banner) => (
-              <motion.div
-                key={banner.id}
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl flex-shrink-0"
-              >
-                <div className="max-w-7xl mx-auto flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm font-bold">{banner.title}</p>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          <div className="flex flex-1 min-h-0">
-            <div className="hidden md:block flex-shrink-0">
-              <Sidebar />
-            </div>
-            <main className="flex-1 overflow-y-auto p-4 md:p-6">
-              {children}
-            </main>
-          </div>
+        <div className="flex-shrink-0">
+          <Navbar />
         </div>
-      </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen relative flex flex-col">
-      <OfflineIndicator />
-      <Navbar />
-
-      <div className="pt-16 md:pt-20 flex-1 flex flex-col">
         <AnimatePresence>
           {banners.map((banner) => (
             <motion.div
@@ -68,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl"
+              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl flex-shrink-0"
             >
               <div className="max-w-7xl mx-auto flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -80,18 +43,53 @@ export default function Layout({ children }: LayoutProps) {
           ))}
         </AnimatePresence>
 
-        <div className="flex flex-col md:flex-row relative z-10 flex-1">
-          <Sidebar />
-          <main className="flex-1 p-6 md:p-8 lg:p-10 w-full overflow-x-hidden pb-20">
-            <div className="max-w-6xl mx-auto">
-              {children}
-            </div>
+        <div className="flex flex-1 min-h-0">
+          <div className="hidden md:block flex-shrink-0">
+            <Sidebar />
+          </div>
+          <main className="flex-1 overflow-y-auto p-4 md:p-6">
+            {children}
           </main>
         </div>
+      </div>
+    );
+  }
 
-        <div className="sticky bottom-0 z-20 mt-auto">
-          <Footer />
-        </div>
+  return (
+    <div className="min-h-screen relative flex flex-col">
+      <OfflineIndicator />
+      <Navbar />
+
+      <AnimatePresence>
+        {banners.map((banner) => (
+          <motion.div
+            key={banner.id}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl"
+          >
+            <div className="max-w-7xl mx-auto flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-bold">{banner.title}</p>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+
+      <div className="flex flex-col md:flex-row relative z-10 flex-1">
+        <Sidebar />
+        <main className="flex-1 p-6 md:p-8 lg:p-10 w-full overflow-x-hidden pb-20">
+          <div className="max-w-6xl mx-auto">
+            {children}
+          </div>
+        </main>
+      </div>
+
+      <div className="sticky bottom-0 z-20 mt-auto">
+        <Footer />
       </div>
     </div>
   );
