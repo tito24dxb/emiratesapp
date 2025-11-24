@@ -22,6 +22,7 @@ import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebas
 import { db, storage, auth, functions } from '../lib/firebase';
 import { httpsCallable } from 'firebase/functions';
 import { aiModerationService } from './aiModerationService';
+import { reputationService } from './reputationService';
 
 export interface Conversation {
   id: string;
@@ -311,6 +312,11 @@ export const communityChatService = {
 
     const userDoc = await getDoc(doc(db, 'users', userId));
     const userName = userDoc.data()?.name || 'Unknown User';
+
+    const postingCheck = await reputationService.checkPostingAllowed(userId);
+    if (!postingCheck.allowed) {
+      throw new Error(postingCheck.reason || 'Messaging not allowed');
+    }
 
     if (content.trim()) {
       const moderationResult = await aiModerationService.moderateContent(

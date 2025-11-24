@@ -20,6 +20,7 @@ import {
 import { db, auth } from '../lib/firebase';
 import { notifyPostComment, notifyPostReaction, notifyCommentReply } from './comprehensiveNotificationService';
 import { aiModerationService } from './aiModerationService';
+import { reputationService } from './reputationService';
 
 export interface CommunityPost {
   id: string;
@@ -103,6 +104,11 @@ export const communityFeedService = {
     productLink?: string,
     targetAudience?: 'all' | 'free' | 'pro' | 'vip' | 'pro-vip'
   ): Promise<string> {
+    const postingCheck = await reputationService.checkPostingAllowed(userId);
+    if (!postingCheck.allowed) {
+      throw new Error(postingCheck.reason || 'Posting not allowed');
+    }
+
     const moderationResult = await aiModerationService.moderateContent(
       userId,
       userName,

@@ -1052,6 +1052,184 @@ export const updateLeaderboard = functions.pubsub.schedule('every 15 minutes').o
   }
 });
 
+export const weeklyReputationUpdate = functions.pubsub.schedule('every sunday 00:00').onRun(async (context) => {
+  console.log('Starting weekly reputation score update...');
+
+  try {
+    const usersSnapshot = await db.collection('users').get();
+    let updatedCount = 0;
+    let errorCount = 0;
+
+    for (const userDoc of usersSnapshot.docs) {
+      const userId = userDoc.data().uid;
+      const userName = userDoc.data().name || 'Unknown';
+
+      try {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+
+        const postsSnapshot = await db.collection('community_posts')
+          .where('userId', '==', userId)
+          .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(weekAgo))
+          .get();
+
+        const totalPosts = postsSnapshot.size;
+        let helpfulPosts = 0;
+
+        postsSnapshot.forEach((doc) => {
+          const post = doc.data();
+          if ((post.likes || 0) >= 5 || (post.commentsCount || 0) >= 3) {
+            helpfulPosts++;
+          }
+        });
+
+        const moderationSnapshot = await db.collection('moderation_logs')
+          .where('userId', '==', userId)
+          .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(weekAgo))
+          .get();
+
+        let violations = 0;
+        let warnings = 0;
+
+        moderationSnapshot.forEach((doc) => {
+          const log = doc.data();
+          if (log.action === 'block' || log.action === 'ban') violations++;
+          else if (log.action === 'warn') warnings++;
+        });
+
+        const messagesSnapshot = await db.collection('groupChats').doc('publicRoom')
+          .collection('messages')
+          .where('senderId', '==', userId)
+          .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(weekAgo))
+          .get();
+
+        const messageCount = messagesSnapshot.size;
+
+        const productsSnapshot = await db.collection('marketplace_products')
+          .where('sellerId', '==', userId)
+          .get();
+
+        let totalRatings = 0;
+        let ratingSum = 0;
+
+        productsSnapshot.forEach((doc) => {
+          const product = doc.data();
+          if (product.rating && product.ratingCount) {
+            ratingSum += product.rating * product.ratingCount;
+            totalRatings += product.ratingCount;
+          }
+        });
+
+        const marketplaceRating = totalRatings > 0 ? ratingSum / totalRatings : 0;
+        const consistency = totalPosts >= 3 ? Math.min(totalPosts / 7 * 10, 15) : 0;
+        const engagement = Math.min((messageCount + totalPosts) / 20 * 15, 20);
+
+        let score = 50;
+        score += helpfulPosts * 3;
+        score += consistency;
+        score += engagement;
+        score += marketplaceRating * 5;
+        score -= violations * 15;
+        score -= warnings * 5;
+        score = Math.max(0, Math.min(100, score));
+
+        const calculateTier = (s: number) => {
+          if (s >= 90) return 'legendary';
+          if (s >= 75) return 'elite';
+          if (s >= 60) return 'veteran';
+          if (s >= 40) return 'trusted';
+          return 'novice';
+        };
+
+        const calculatePerks = (s: number) => ({
+          fastPosting: s >= 60,
+          highlightBadge: s >= 75,
+          visibilityBoost: s >= 75,
+          prioritySupport: s >= 90
+        });
+
+        const calculateRestrictions = (s: number) => {
+          if (s < 20) {
+            return {
+              cooldownUntil: admin.firestore.Timestamp.fromDate(new Date(Date.now() + 24 * 60 * 60 * 1000)),
+              postingLimited: true,
+              maxPostsPerHour: 2
+            };
+          } else if (s < 40) {
+            return {
+              cooldownUntil: null,
+              postingLimited: true,
+              maxPostsPerHour: 5
+            };
+          } else {
+            return {
+              cooldownUntil: null,
+              postingLimited: false,
+              maxPostsPerHour: s >= 75 ? 50 : 20
+            };
+          }
+        };
+
+        const reputationRef = db.collection('user_reputation').doc(userId);
+        const currentRep = await reputationRef.get();
+
+        if (!currentRep.exists()) {
+          await reputationRef.set({
+            userId,
+            userName,
+            score,
+            tier: calculateTier(score),
+            lastCalculated: admin.firestore.FieldValue.serverTimestamp(),
+            metrics: {
+              helpfulPosts,
+              totalPosts,
+              violations,
+              warnings,
+              consistency,
+              engagement,
+              marketplaceRating
+            },
+            perks: calculatePerks(score),
+            restrictions: calculateRestrictions(score),
+            history: [],
+            visibilityPublic: true,
+            manualOverride: {
+              active: false,
+              by: null,
+              reason: null,
+              date: null
+            }
+          });
+        } else {
+          await reputationRef.update({
+            score,
+            tier: calculateTier(score),
+            perks: calculatePerks(score),
+            restrictions: calculateRestrictions(score),
+            'metrics.helpfulPosts': helpfulPosts,
+            'metrics.totalPosts': totalPosts,
+            'metrics.violations': violations,
+            'metrics.warnings': warnings,
+            'metrics.consistency': consistency,
+            'metrics.engagement': engagement,
+            'metrics.marketplaceRating': marketplaceRating,
+            lastCalculated: admin.firestore.FieldValue.serverTimestamp()
+          });
+        }
+
+        updatedCount++;
+      } catch (error) {
+        console.error(`Error updating reputation for user ${userId}:`, error);
+        errorCount++;
+      }
+    }
+
+    console.log(`Reputation update complete. Updated: ${updatedCount}, Errors: ${errorCount}`);
+  } catch (error) {
+    console.error('Error in weekly reputation update:', error);
+  }
+});
+
 export { createPaymentIntent } from './stripe/createPaymentIntent';
 export { stripeWebhook } from './stripe/handleWebhook';
 export { generateDownloadLink } from './stripe/generateDownloadLink';

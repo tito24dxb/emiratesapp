@@ -7,6 +7,7 @@ import { db } from '../lib/firebase';
 import CVAnalyzer from '../components/CVAnalyzer';
 import DeclareCrewButton from '../components/DeclareCrewButton';
 import SubscriptionCancellation from '../components/SubscriptionCancellation';
+import { ReputationDisplay } from '../components/ReputationDisplay';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
@@ -471,6 +472,10 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mt-6">
+        <ReputationDisplay userId={currentUser.uid} isOwnProfile={true} />
       </div>
 
       {currentUser.role === 'student' && (
