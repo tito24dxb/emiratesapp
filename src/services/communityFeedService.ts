@@ -114,6 +114,11 @@ export const communityFeedService = {
       throw new Error(moderationResult.reason);
     }
 
+    if (moderationResult.action === 'warn') {
+      console.warn('⚠️ Content warning:', moderationResult.reason);
+      alert('⚠️ Warning: ' + moderationResult.reason + '\n\nYour post will be published, but please be mindful of community guidelines.');
+    }
+
     let imageUrl = '';
     let imageUrls: string[] = [];
 
@@ -303,6 +308,11 @@ export const communityFeedService = {
 
     if (!moderationResult.allowed) {
       throw new Error(moderationResult.reason);
+    }
+
+    if (moderationResult.action === 'warn') {
+      console.warn('⚠️ Content warning:', moderationResult.reason);
+      alert('⚠️ Warning: ' + moderationResult.reason + '\n\nYour comment will be posted, but please be mindful of community guidelines.');
     }
 
     const commentData = {

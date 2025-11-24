@@ -150,8 +150,9 @@ class AIModerationService {
     }
 
     let severity: ModerationSeverity = 'LOW';
-    if (violations.length >= 3) severity = 'MEDIUM';
-    if (violations.length >= 5) severity = 'HIGH';
+    if (violations.length >= 1) severity = 'MEDIUM';
+    if (violations.length >= 3) severity = 'HIGH';
+    if (violations.length >= 5) severity = 'CRITICAL';
 
     return { violations, severity };
   }
@@ -237,18 +238,18 @@ categories must be from: spam, harassment, scam, off-topic, explicit, hate-speec
   ): ModerationAction {
     if (severity === 'CRITICAL') return 'ban';
     if (severity === 'HIGH') {
-      return userViolationCount >= 3 ? 'ban' : 'block';
+      return userViolationCount >= 2 ? 'ban' : 'block';
     }
     if (severity === 'MEDIUM') {
-      return userViolationCount >= 5 ? 'block' : 'warn';
-    }
-
-    if (hasRuleViolations) {
       return userViolationCount >= 3 ? 'block' : 'warn';
     }
 
+    if (hasRuleViolations) {
+      return 'warn';
+    }
+
     if (categories.length > 0) {
-      return userViolationCount >= 5 ? 'warn' : 'allow';
+      return userViolationCount >= 3 ? 'warn' : 'allow';
     }
 
     return 'allow';
