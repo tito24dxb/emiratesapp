@@ -530,72 +530,70 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Portal dropdowns with AnimatePresence */}
-      <AnimatePresence>
-        {openDropdown && dropdownPosition && createPortal(
-          <motion.div
-            key={openDropdown}
-            ref={dropdownRef}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 400 }}
-            className="fixed min-w-[220px] rounded-2xl overflow-hidden"
-            style={{
-              top: `${dropdownPosition.top}px`,
-              left: `${dropdownPosition.left}px`,
-              zIndex: 2147483647,
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.8)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
-            }}
-          >
-            <div className="p-2">
-              {groupedNav.find(g => g.label === openDropdown)?.items.map((item) => {
-                const ItemIcon = item.icon;
-                const isActive = location.pathname === item.path;
-                const isLocked = item.locked;
+      {/* Portal dropdowns */}
+      {openDropdown && dropdownPosition && createPortal(
+        <motion.div
+          key={openDropdown}
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: -10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -10, scale: 0.95 }}
+          transition={{ type: "spring", damping: 25, stiffness: 400 }}
+          className="fixed min-w-[220px] rounded-2xl overflow-hidden"
+          style={{
+            top: `${dropdownPosition.top}px`,
+            left: `${dropdownPosition.left}px`,
+            zIndex: 2147483647,
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
+            backdropFilter: 'blur(40px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+            border: '1px solid rgba(255, 255, 255, 0.8)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+          }}
+        >
+          <div className="p-2">
+            {groupedNav.find(g => g.label === openDropdown)?.items.map((item) => {
+              const ItemIcon = item.icon;
+              const isActive = location.pathname === item.path;
+              const isLocked = item.locked;
 
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => {
-                      setOpenDropdown(null);
-                      setDropdownPosition(null);
-                    }}
-                    className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all mb-1 ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#FF3B3F]/20 to-[#E6282C]/20 text-gray-900 font-semibold shadow-md'
-                        : isLocked
-                        ? 'text-gray-400 opacity-60 cursor-not-allowed'
-                        : 'hover:bg-white/60 text-gray-700'
-                    }`}
-                  >
-                    <ItemIcon className="w-4 h-4 flex-shrink-0" />
-                    <span className="text-sm flex-1">{item.label}</span>
-                    {isLocked && <Lock className="w-3.5 h-3.5 flex-shrink-0" />}
-                    {item.badge && (
-                      <span
-                        className={`px-2 py-0.5 text-xs font-bold rounded-full ${
-                          item.badge === 'PRO' || item.badge === 'VIP'
-                            ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
-                            : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          </motion.div>,
-          document.body
-        )}
-      </AnimatePresence>
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={() => {
+                    setOpenDropdown(null);
+                    setDropdownPosition(null);
+                  }}
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all mb-1 ${
+                    isActive
+                      ? 'bg-gradient-to-r from-[#FF3B3F]/20 to-[#E6282C]/20 text-gray-900 font-semibold shadow-md'
+                      : isLocked
+                      ? 'text-gray-400 opacity-60 cursor-not-allowed'
+                      : 'hover:bg-white/60 text-gray-700'
+                  }`}
+                >
+                  <ItemIcon className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm flex-1">{item.label}</span>
+                  {isLocked && <Lock className="w-3.5 h-3.5 flex-shrink-0" />}
+                  {item.badge && (
+                    <span
+                      className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                        item.badge === 'PRO' || item.badge === 'VIP'
+                          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
+                          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
+                      }`}
+                    >
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </motion.div>,
+        document.body
+      )}
 
       {/* Desktop Collapsible Sidebar - Hidden, replaced by horizontal bar */}
       <motion.aside

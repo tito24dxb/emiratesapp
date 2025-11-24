@@ -195,66 +195,64 @@ export default function Navbar() {
           </div>
         </div>
 
-        <AnimatePresence>
-          {showProfileMenu && profileMenuPosition && createPortal(
-            <motion.div
-              key="profile-menu"
-              ref={profileMenuRef}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed w-56 py-2 liquid-text-primary shadow-2xl rounded-2xl"
-              style={{
-                top: `${profileMenuPosition.top}px`,
-                right: `${profileMenuPosition.right}px`,
-                zIndex: 2147483647,
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
-                backdropFilter: 'blur(40px) saturate(180%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-                border: '1px solid rgba(255, 255, 255, 0.8)',
-                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+        {showProfileMenu && profileMenuPosition && createPortal(
+          <motion.div
+            key="profile-menu"
+            ref={profileMenuRef}
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed w-56 py-2 liquid-text-primary shadow-2xl rounded-2xl"
+            style={{
+              top: `${profileMenuPosition.top}px`,
+              right: `${profileMenuPosition.right}px`,
+              zIndex: 2147483647,
+              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
+              backdropFilter: 'blur(40px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.8)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+            }}
+          >
+            <Link
+              to="/profile"
+              onClick={() => {
+                setShowProfileMenu(false);
+                setProfileMenuPosition(null);
               }}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
             >
-              <Link
-                to="/profile"
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  setProfileMenuPosition(null);
-                }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
-              >
-                <User className="w-4 h-4" />
-                <span>My Profile</span>
-              </Link>
-              <Link
-                to="/settings"
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  setProfileMenuPosition(null);
-                }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
-              >
-                <Settings className="w-4 h-4" />
-                <span>Settings</span>
-              </Link>
-              <hr className="my-2 border-white/20" />
-              <button
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  setProfileMenuPosition(null);
-                  logout();
-                  navigate('/');
-                }}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-red-50/50 rounded-xl mx-2 transition-all w-full text-left text-red-600"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
-            </motion.div>,
-            document.body
-          )}
-        </AnimatePresence>
+              <User className="w-4 h-4" />
+              <span>My Profile</span>
+            </Link>
+            <Link
+              to="/settings"
+              onClick={() => {
+                setShowProfileMenu(false);
+                setProfileMenuPosition(null);
+              }}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+            >
+              <Settings className="w-4 h-4" />
+              <span>Settings</span>
+            </Link>
+            <hr className="my-2 border-white/20" />
+            <button
+              onClick={() => {
+                setShowProfileMenu(false);
+                setProfileMenuPosition(null);
+                logout();
+                navigate('/');
+              }}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-red-50/50 rounded-xl mx-2 transition-all w-full text-left text-red-600"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          </motion.div>,
+          document.body
+        )}
       </nav>
 
       <AnimatePresence>
