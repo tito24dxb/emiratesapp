@@ -331,9 +331,9 @@ export default function StudentEventsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">All Available Events</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Available Events</h2>
 
-          {allEvents.length === 0 ? (
+          {allEvents.filter(e => !isRegistered(e.id)).length === 0 ? (
             <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-12 text-center border border-white/30">
               <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-900 mb-2">No Events Available</h3>
@@ -341,7 +341,7 @@ export default function StudentEventsPage() {
             </div>
           ) : (
             <div className="grid gap-6">
-              {allEvents.map((event, index) => {
+              {allEvents.filter(e => !isRegistered(e.id)).map((event, index) => {
                 const registered = isRegistered(event.id);
                 const registration = getRegistration(event.id);
 
