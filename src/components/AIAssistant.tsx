@@ -181,7 +181,7 @@ export default function AIAssistant({ isOpen, onClose, initialMode = 'coach' }: 
               exit={{ height: 0, opacity: 0 }}
               className="border-b border-gray-200 overflow-hidden"
             >
-              <div className="p-2 grid grid-cols-1 gap-1.5">
+              <div className="p-2 grid grid-cols-1 gap-1.5 max-h-48 overflow-y-auto">
                 {modes.map((mode) => {
                   const modePersonality = enhancedAIService.getPersonality(mode.id);
                   return (
