@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, MessageCircle, Minus, Package } from 'lucide-react';
+import { X, Send, MessageCircle, Package } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { communityChatService, Message } from '../../services/communityChatService';
 import { createNotification } from '../../services/unifiedNotificationService';
@@ -31,7 +31,6 @@ export default function MarketplaceChatModal({
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,29 +110,23 @@ export default function MarketplaceChatModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {!isMinimized && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9998]"
-              style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}
-              onClick={handleClose}
-            />
-          )}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[9998] flex items-center justify-center p-4"
+          onClick={handleClose}
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{
               opacity: 1,
               scale: 1,
-              y: 0,
-              height: isMinimized ? '64px' : 'auto',
-              maxHeight: isMinimized ? '64px' : 'calc(100vh - 120px)'
+              y: 0
             }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-4 right-4 w-96 max-w-[calc(100vw-2rem)] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 z-[9999] flex flex-col overflow-hidden"
+            className="w-full max-w-2xl max-h-[90vh] bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -147,26 +140,15 @@ export default function MarketplaceChatModal({
                   <p className="text-xs text-gray-600 truncate max-w-[200px]">{sellerName}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="p-2 hover:bg-white/50 rounded-lg transition text-gray-600"
-                  title={isMinimized ? "Maximize" : "Minimize"}
-                >
-                  <Minus className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={handleClose}
-                  className="p-2 hover:bg-white/50 rounded-lg transition text-gray-600"
-                  title="Close"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+              <button
+                onClick={handleClose}
+                className="p-2 hover:bg-white/50 rounded-lg transition text-gray-600"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            {!isMinimized && (
-              <>
                 {/* Product Info */}
                 <div className="p-3 bg-gradient-to-r from-gray-50/80 to-gray-100/80 backdrop-blur-sm border-b border-gray-200/50">
                   <div className="flex items-center gap-3">
@@ -266,10 +248,8 @@ export default function MarketplaceChatModal({
                     </button>
                   </div>
                 </div>
-              </>
-            )}
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );
