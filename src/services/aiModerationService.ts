@@ -85,7 +85,7 @@ class AIModerationService {
     'free money',
     'get rich',
     'work from home',
-    'nigga',
+    'fuck',
     'fucking',
     'shit',
     'bitch',
@@ -93,6 +93,19 @@ class AIModerationService {
     'damn',
     'cunt',
     'dick',
+    'bastard',
+    'idiot',
+    'stupid',
+    'dumb',
+    'moron',
+    'loser',
+    'pathetic',
+    'worthless',
+    'useless',
+    'retard',
+    'kill yourself',
+    'kys',
+    'die',
   ];
 
   private spamPatterns = [
@@ -219,16 +232,26 @@ categories must be from: spam, harassment, scam, off-topic, explicit, hate-speec
   private determineAction(
     severity: ModerationSeverity,
     categories: ModerationCategory[],
-    userViolationCount: number
+    userViolationCount: number,
+    hasRuleViolations: boolean
   ): ModerationAction {
     if (severity === 'CRITICAL') return 'ban';
     if (severity === 'HIGH') {
-      return userViolationCount >= 3 ? 'ban' : 'escalate';
+      return userViolationCount >= 3 ? 'ban' : 'block';
     }
     if (severity === 'MEDIUM') {
-      return userViolationCount >= 5 ? 'escalate' : 'block';
+      return userViolationCount >= 5 ? 'block' : 'warn';
     }
-    return userViolationCount >= 10 ? 'warn' : 'allow';
+
+    if (hasRuleViolations) {
+      return userViolationCount >= 3 ? 'block' : 'warn';
+    }
+
+    if (categories.length > 0) {
+      return userViolationCount >= 5 ? 'warn' : 'allow';
+    }
+
+    return 'allow';
   }
 
   async moderateContent(
@@ -250,7 +273,8 @@ categories must be from: spam, harassment, scam, off-topic, explicit, hate-speec
         : 'LOW';
 
     const userViolations = await this.getUserViolationCount(userId);
-    const action = this.determineAction(maxSeverity, allCategories, userViolations);
+    const hasRuleViolations = ruleCheck.violations.length > 0;
+    const action = this.determineAction(maxSeverity, allCategories, userViolations, hasRuleViolations);
 
     const result: ModerationResult = {
       allowed: action === 'allow' || action === 'warn',
