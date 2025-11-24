@@ -37,20 +37,17 @@ export default function CommunityPage() {
   const [showAIBanner, setShowAIBanner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Handle chat parameter from URL (e.g., from marketplace)
   useEffect(() => {
     const chatId = searchParams.get('chat');
     if (chatId && conversations.length > 0) {
       const conversation = conversations.find(c => c.id === chatId);
       if (conversation) {
         setSelectedConversationId(chatId);
-        // Clear the URL parameter
         setSearchParams({});
       }
     }
   }, [searchParams, conversations]);
 
-  // Check feature access
   if (!currentUser) return null;
 
   const chatAccess = checkFeatureAccess(currentUser, 'chat');
@@ -272,8 +269,8 @@ export default function CommunityPage() {
 
   if (showGroupCreation) {
     return (
-      <div className="absolute inset-0 flex flex-col glass-light overflow-hidden">
-        <div className="glass-light border-b border-white/20 px-3 md:px-4 py-3 flex items-center justify-between flex-shrink-0">
+      <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
+        <div className="bg-white shadow-sm px-3 md:px-4 py-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <button
               onClick={() => {
@@ -282,7 +279,7 @@ export default function CommunityPage() {
                 setSelectedUsers([]);
                 setSearchQuery('');
               }}
-              className="w-9 h-9 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all"
+              className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"
             >
               <X className="w-5 h-5 text-gray-700" />
             </button>
@@ -290,23 +287,23 @@ export default function CommunityPage() {
           </div>
           <button
             onClick={handleConfirmGroupCreation}
-            className="w-9 h-9 rounded-full bg-[#D71921] text-white flex items-center justify-center hover:bg-[#B01419] transition-all"
+            className="w-9 h-9 rounded-full bg-[#0084FF] text-white flex items-center justify-center hover:bg-[#0073E6] transition-all"
           >
             <Check className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-3 md:p-4 glass-light border-b border-white/20 flex-shrink-0">
+        <div className="p-3 md:p-4 bg-white border-b border-gray-200 flex-shrink-0">
           <input
             type="text"
             placeholder="Group name"
             value={groupName}
             onChange={(e) => setGroupName(e.target.value)}
-            className="w-full px-4 py-2.5 glass-bubble rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20"
+            className="w-full px-4 py-2.5 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
           />
         </div>
 
-        <div className="px-3 md:px-4 py-2 glass-light border-b border-white/20 flex-shrink-0">
+        <div className="px-3 md:px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -314,21 +311,21 @@ export default function CommunityPage() {
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 glass-bubble rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20"
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
             />
           </div>
         </div>
 
         {selectedUsers.length > 0 && (
-          <div className="px-3 md:px-4 py-2 flex flex-wrap gap-2 glass-light border-b border-white/20 flex-shrink-0">
+          <div className="px-3 md:px-4 py-2 flex flex-wrap gap-2 bg-white border-b border-gray-200 flex-shrink-0">
             {selectedUsers.map(userId => {
               const user = availableUsers.find(u => u.uid === userId);
               return user ? (
-                <div key={userId} className="flex items-center gap-1 px-3 py-1 bg-[#D71921]/10 rounded-full">
+                <div key={userId} className="flex items-center gap-1 px-3 py-1 bg-blue-100 rounded-full">
                   <span className="text-sm text-gray-900">{user.displayName}</span>
                   <button
                     onClick={() => toggleUserSelection(userId)}
-                    className="w-4 h-4 rounded-full hover:bg-white/50 flex items-center justify-center"
+                    className="w-4 h-4 rounded-full hover:bg-blue-200 flex items-center justify-center"
                   >
                     <X className="w-3 h-3 text-gray-700" />
                   </button>
@@ -338,17 +335,17 @@ export default function CommunityPage() {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
           {filteredUsers.map((user) => (
             <button
               key={user.uid}
               onClick={() => toggleUserSelection(user.uid)}
-              className={`w-full px-3 md:px-4 py-2.5 flex items-center gap-3 transition-all hover:glass-bubble ${
-                selectedUsers.includes(user.uid) ? 'bg-[#D71921]/5' : ''
+              className={`w-full px-3 md:px-4 py-2.5 flex items-center gap-3 transition-all hover:bg-gray-50 ${
+                selectedUsers.includes(user.uid) ? 'bg-blue-50' : ''
               }`}
             >
               <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0 ${
-                selectedUsers.includes(user.uid) ? 'bg-[#D71921]' : 'bg-gray-600'
+                selectedUsers.includes(user.uid) ? 'bg-[#0084FF]' : 'bg-gray-600'
               }`}>
                 {user.displayName.charAt(0).toUpperCase()}
               </div>
@@ -357,7 +354,7 @@ export default function CommunityPage() {
                 <p className="text-xs text-gray-500 truncate">{user.email}</p>
               </div>
               {selectedUsers.includes(user.uid) && (
-                <div className="w-6 h-6 rounded-full bg-[#D71921] flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-[#0084FF] flex items-center justify-center flex-shrink-0">
                   <Check className="w-4 h-4 text-white" />
                 </div>
               )}
@@ -370,21 +367,21 @@ export default function CommunityPage() {
 
   if (showPrivateChatCreation) {
     return (
-      <div className="absolute inset-0 flex flex-col glass-light overflow-hidden">
-        <div className="glass-light border-b border-white/20 px-3 md:px-4 py-3 flex items-center gap-2 flex-shrink-0">
+      <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
+        <div className="bg-white shadow-sm px-3 md:px-4 py-3 flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => {
               setShowPrivateChatCreation(false);
               setSearchQuery('');
             }}
-            className="w-9 h-9 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all"
+            className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"
           >
             <X className="w-5 h-5 text-gray-700" />
           </button>
           <h2 className="text-lg md:text-xl font-bold text-gray-900">New Chat</h2>
         </div>
 
-        <div className="px-3 md:px-4 py-2 glass-light border-b border-white/20 flex-shrink-0">
+        <div className="px-3 md:px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -392,17 +389,17 @@ export default function CommunityPage() {
               placeholder="Search users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 glass-bubble rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20"
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
             />
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
           {filteredUsers.map((user) => (
             <button
               key={user.uid}
               onClick={() => handleConfirmPrivateChatCreation(user.uid)}
-              className="w-full px-3 md:px-4 py-2.5 flex items-center gap-3 transition-all hover:glass-bubble"
+              className="w-full px-3 md:px-4 py-2.5 flex items-center gap-3 transition-all hover:bg-gray-50"
             >
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-600 text-white flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0">
                 {user.displayName.charAt(0).toUpperCase()}
@@ -420,19 +417,19 @@ export default function CommunityPage() {
 
   if (selectedConversationId) {
     return (
-      <div className="absolute inset-0 flex flex-col glass-light overflow-hidden">
-        <div className="glass-light border-b border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 flex-shrink-0 relative overflow-visible">
+      <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
+        <div className="bg-white shadow-sm px-3 md:px-4 py-3 md:py-4 flex items-center gap-2 md:gap-3 flex-shrink-0 relative overflow-visible">
           <button
             onClick={() => setSelectedConversationId(null)}
-            className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all flex-shrink-0"
+            className="w-9 h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all flex-shrink-0"
           >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
+            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
           </button>
-          <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+          <div className={`w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center flex-shrink-0 ${
             selectedConversation?.id === 'publicRoom'
               ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-base'
               : selectedConversation?.type === 'group'
-                ? 'bg-[#D71921] text-white'
+                ? 'bg-[#0084FF] text-white'
                 : 'bg-gray-700 text-white font-bold'
           }`}>
             {selectedConversation?.id === 'publicRoom'
@@ -443,15 +440,15 @@ export default function CommunityPage() {
           </div>
           <div className="min-w-0 flex-1">
             <h2 className="font-bold text-gray-900 text-sm md:text-base truncate">{selectedConversation?.title}</h2>
-            <p className="text-xs text-gray-500 truncate">{selectedConversation?.type === 'group' ? 'Group Chat' : 'Private Chat'}</p>
+            <p className="text-xs text-gray-500 truncate">{selectedConversation?.type === 'group' ? 'Group Chat' : 'Active now'}</p>
           </div>
           {selectedConversation?.id === 'publicRoom' && (
             <div className="relative z-[103]">
               <button
                 onClick={() => setShowRules(!showRules)}
-                className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all flex-shrink-0"
+                className="w-9 h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all flex-shrink-0"
               >
-                <Info className="w-4 h-4 md:w-5 md:h-5 text-[#D71921]" />
+                <Info className="w-5 h-5 text-[#0084FF]" />
               </button>
 
               <AnimatePresence>
@@ -461,11 +458,11 @@ export default function CommunityPage() {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] glass-card shadow-2xl rounded-2xl z-[104] max-h-[70vh] overflow-hidden border-2 border-white/40"
+                    className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white shadow-2xl rounded-2xl z-[104] max-h-[70vh] overflow-hidden border border-gray-200"
                   >
-                    <div className="p-4 border-b border-white/20 bg-gradient-to-r from-[#D71920]/10 to-[#B91518]/10">
+                    <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-cyan-50">
                       <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-xl flex items-center justify-center text-xl shadow-md">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#0084FF] to-[#0073E6] rounded-xl flex items-center justify-center text-xl shadow-md">
                           🎉
                         </div>
                         <h3 className="text-lg font-bold text-gray-900">Community Rules</h3>
@@ -474,7 +471,7 @@ export default function CommunityPage() {
 
                     <div className="overflow-y-auto max-h-[calc(70vh-120px)]">
                       <div className="p-4 space-y-3">
-                        <div className="glass-card rounded-xl p-3 border-2 border-white/40">
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
                           <p className="text-xs text-gray-700 leading-relaxed">
                             Welcome! Please read these rules to ensure a safe and respectful community experience.
                           </p>
@@ -491,15 +488,15 @@ export default function CommunityPage() {
                             { num: "7", title: "Respect Moderators", desc: "Follow moderator instructions immediately." },
                             { num: "8", title: "English or Spanish Only", desc: "Keep conversations in allowed languages." },
                           ].map((rule) => (
-                            <div key={rule.num} className="glass-card rounded-xl p-3 border border-white/40 hover:bg-white/40 transition">
+                            <div key={rule.num} className="bg-white rounded-xl p-3 border border-gray-200 hover:bg-gray-50 transition">
                               <h4 className="font-bold text-gray-900 text-xs mb-1 flex items-center gap-1.5">
-                                <span className="text-[#D71920]">{rule.num}.</span> {rule.title}
+                                <span className="text-[#0084FF]">{rule.num}.</span> {rule.title}
                               </h4>
                               <p className="text-xs text-gray-700 ml-4">{rule.desc}</p>
                             </div>
                           ))}
-                          <div className="glass-card rounded-xl p-3 border-2 border-red-200 bg-red-50">
-                            <h4 className="font-bold text-[#D71920] text-xs mb-1 flex items-center gap-1.5">
+                          <div className="bg-red-50 rounded-xl p-3 border-2 border-red-200">
+                            <h4 className="font-bold text-red-600 text-xs mb-1 flex items-center gap-1.5">
                               <span>9.</span> Zero Tolerance
                             </h4>
                             <p className="text-xs text-gray-700 ml-4">
@@ -510,10 +507,10 @@ export default function CommunityPage() {
                       </div>
                     </div>
 
-                    <div className="p-4 border-t border-white/20 bg-white/50">
+                    <div className="p-4 border-t border-gray-200 bg-white">
                       <button
                         onClick={() => setShowRules(false)}
-                        className="w-full px-4 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition-all text-sm"
+                        className="w-full px-4 py-2.5 bg-gradient-to-r from-[#0084FF] to-[#0073E6] text-white rounded-xl font-bold hover:shadow-lg transition-all text-sm"
                       >
                         I Understand
                       </button>
@@ -525,12 +522,12 @@ export default function CommunityPage() {
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 min-h-0" style={{ overflowX: 'hidden' }}>
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 min-h-0 bg-gray-50" style={{ overflowX: 'hidden' }}>
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="relative">
                 <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-gray-200"></div>
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#D71921] border-t-transparent animate-spin absolute top-0 left-0"></div>
+                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#0084FF] border-t-transparent animate-spin absolute top-0 left-0"></div>
               </div>
             </div>
           ) : messages.length === 0 ? (
@@ -540,8 +537,8 @@ export default function CommunityPage() {
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-center max-w-sm px-4"
               >
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-[#D71921]/10 to-[#B01419]/10 rounded-3xl flex items-center justify-center mx-auto mb-4 md:mb-6">
-                  <MessageCircle className="w-8 h-8 md:w-12 md:h-12 text-[#D71921]" />
+                <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl flex items-center justify-center mx-auto mb-4 md:mb-6">
+                  <MessageCircle className="w-8 h-8 md:w-12 md:h-12 text-[#0084FF]" />
                 </div>
                 <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">No messages yet</h3>
                 <p className="text-sm text-gray-500">Be the first to break the ice and start the conversation!</p>
@@ -596,47 +593,38 @@ export default function CommunityPage() {
           )}
         </div>
 
-        {typingUsers.length > 0 && (
-          <div className="px-3 md:px-4 py-1.5 md:py-2 glass-light border-t border-white/20 flex-shrink-0">
+        <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-3 md:py-4 flex-shrink-0 sticky bottom-0 left-0 right-0 z-10">
+          {typingUsers.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: -5 }}
+              initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-3 py-2 mb-2"
             >
               <div className="flex gap-1">
-                <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#D71921] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#D71921] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-[#D71921] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
-              <p className="text-xs md:text-sm text-gray-600 font-medium">
+              <p className="text-sm text-gray-600 font-medium">
                 {typingUsers[0].userName} is typing...
               </p>
             </motion.div>
-          </div>
-        )}
-
-        <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex-shrink-0">
+          )}
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
-          <div className="flex items-center justify-center mt-2">
-            <div className="flex items-center gap-1.5 text-xs text-blue-600">
-              <Shield className="w-3 h-3" />
-              <span className="font-medium">AI Moderated</span>
-            </div>
-          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col glass-light overflow-hidden">
-      <div className="glass-light border-b border-white/20 p-3 md:p-4 flex-shrink-0">
+    <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
+      <div className="bg-white shadow-sm p-3 md:p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <h1 className="text-xl md:text-2xl font-bold text-gray-900">Messages</h1>
           <div className="relative">
             <button
               onClick={() => setShowCreateMenu(!showCreateMenu)}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#D71921] text-white flex items-center justify-center hover:bg-[#B01419] transition-all shadow-lg"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#0084FF] text-white flex items-center justify-center hover:bg-[#0073E6] transition-all shadow-lg"
             >
               <Plus className="w-4 h-4 md:w-5 md:h-5" />
             </button>
@@ -645,13 +633,13 @@ export default function CommunityPage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="absolute right-0 mt-2 w-48 md:w-56 glass-bubble rounded-xl shadow-xl border border-white/20 overflow-hidden z-50"
+                className="absolute right-0 mt-2 w-48 md:w-56 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50"
               >
                 <button
                   onClick={handleCreateGroupChat}
-                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-white/50 transition-all text-left"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-gray-50 transition-all text-left"
                 >
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#D71921] text-white flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#0084FF] text-white flex items-center justify-center flex-shrink-0">
                     <Users className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <div className="min-w-0">
@@ -661,7 +649,7 @@ export default function CommunityPage() {
                 </button>
                 <button
                   onClick={handleCreatePrivateChat}
-                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-white/50 transition-all text-left border-t border-white/20"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-gray-50 transition-all text-left border-t border-gray-200"
                 >
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-700 text-white flex items-center justify-center flex-shrink-0">
                     <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
@@ -680,7 +668,7 @@ export default function CommunityPage() {
           <input
             type="text"
             placeholder="Search conversations..."
-            className="w-full pl-10 pr-4 py-2 glass-bubble rounded-xl text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20"
+            className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
           />
         </div>
 
@@ -707,7 +695,7 @@ export default function CommunityPage() {
         </motion.div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 bg-gray-50">
         {groupChats.length > 0 && (
           <div>
             <div className="px-3 md:px-4 py-2">
@@ -717,12 +705,12 @@ export default function CommunityPage() {
               <button
                 key={conversation.id}
                 onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:glass-bubble"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:bg-gray-100"
               >
                 <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                   conversation.id === 'publicRoom'
                     ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-lg md:text-xl'
-                    : 'bg-[#D71921] text-white'
+                    : 'bg-[#0084FF] text-white'
                 }`}>
                   {conversation.id === 'publicRoom' ? '🌍' : <Users className="w-4 h-4 md:w-5 md:h-5" />}
                 </div>
@@ -749,7 +737,7 @@ export default function CommunityPage() {
               <button
                 key={conversation.id}
                 onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:glass-bubble border-l-4 border-green-500"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:bg-gray-100 border-l-4 border-green-500"
               >
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0 shadow-lg">
                   🛒
@@ -772,7 +760,7 @@ export default function CommunityPage() {
               <button
                 key={conversation.id}
                 onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:glass-bubble"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:bg-gray-100"
               >
                 <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 text-white flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0">
                   {conversation.title.charAt(0).toUpperCase()}
