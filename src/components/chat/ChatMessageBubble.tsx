@@ -72,7 +72,7 @@ export default function ChatMessageBubble({ message, currentUserId, showAvatar =
               <img
                 src={message.attachmentUrl}
                 alt="attachment"
-                className="max-w-full rounded-lg mb-2"
+                className="max-w-xs max-h-64 object-contain rounded-lg mb-2"
               />
             )}
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>

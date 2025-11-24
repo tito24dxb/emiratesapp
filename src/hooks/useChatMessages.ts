@@ -28,7 +28,19 @@ export function useChatMessages(conversationId: string | null) {
     unsubscribeRef.current = communityChatService.subscribeToMessages(
       conversationId,
       (newMessages) => {
-        setMessages(newMessages);
+        setMessages((prev) => {
+          const messageMap = new Map<string, Message>();
+          [...prev, ...newMessages].forEach(msg => {
+            if (msg.messageId) {
+              messageMap.set(msg.messageId, msg);
+            }
+          });
+          return Array.from(messageMap.values()).sort((a, b) => {
+            const aTime = a.createdAt?.toMillis?.() || 0;
+            const bTime = b.createdAt?.toMillis?.() || 0;
+            return aTime - bTime;
+          });
+        });
         setLoading(false);
       },
       (error) => {
@@ -61,7 +73,19 @@ export function useChatMessages(conversationId: string | null) {
         setHasMore(false);
       }
 
-      setMessages((prev) => [...olderMessages, ...prev]);
+      setMessages((prev) => {
+        const messageMap = new Map<string, Message>();
+        [...olderMessages, ...prev].forEach(msg => {
+          if (msg.messageId) {
+            messageMap.set(msg.messageId, msg);
+          }
+        });
+        return Array.from(messageMap.values()).sort((a, b) => {
+          const aTime = a.createdAt?.toMillis?.() || 0;
+          const bTime = b.createdAt?.toMillis?.() || 0;
+          return aTime - bTime;
+        });
+      });
       setLastDoc(newLastDoc);
     } catch (error) {
       console.error('Error loading more messages:', error);
