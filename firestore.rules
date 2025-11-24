@@ -1057,7 +1057,12 @@ service cloud.firestore {
       allow read, list: if isAuthenticated();
 
       // Staff and governors can create/update activities
-      allow create, update: if isAuthenticated() && isStaff();
+      // Also allow users to update registeredCount when joining
+      allow create, update: if isAuthenticated() && (
+        isStaff() ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['registeredCount']) ||
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['registeredCount', 'updatedAt']))
+      );
 
       // Only governors can delete activities
       allow delete: if isAuthenticated() && isGovernor();
@@ -1273,15 +1278,9 @@ service cloud.firestore {
     }
 
     ///////////////////////////////////////////////////////////////////////////
-    // ACTIVITIES (Simplified activity system)
+    // ACTIVITIES (Simplified activity system) - DUPLICATE REMOVED
+    // NOTE: Rules for /activities/ are defined above (line 1055)
     ///////////////////////////////////////////////////////////////////////////
-    match /activities/{activityId} {
-      // Everyone can read activities
-      allow read, list: if isAuthenticated();
-
-      // Only staff can create/update/delete activities
-      allow create, update, delete: if isAuthenticated() && isStaff();
-    }
 
     ///////////////////////////////////////////////////////////////////////////
     // ACTIVITY REGISTRATIONS (Student registrations for activities)
