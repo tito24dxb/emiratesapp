@@ -1,7 +1,6 @@
 import { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import Navbar from './Navbar';
-import Sidebar from './Sidebar';
+import TopNavbar from './TopNavbar';
 import Footer from './Footer';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle } from 'lucide-react';
@@ -20,8 +19,9 @@ export default function Layout({ children }: LayoutProps) {
   if (isCommunityPage) {
     return (
       <div className="h-screen flex flex-col">
+        <OfflineIndicator />
         <div className="flex-shrink-0">
-          <Navbar />
+          <TopNavbar />
         </div>
 
         <AnimatePresence>
@@ -31,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl flex-shrink-0"
+              className="bg-blue-600 text-white px-4 py-2 flex-shrink-0"
             >
               <div className="max-w-7xl mx-auto flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -44,9 +44,6 @@ export default function Layout({ children }: LayoutProps) {
         </AnimatePresence>
 
         <div className="flex flex-1 min-h-0">
-          <div className="hidden md:block flex-shrink-0">
-            <Sidebar />
-          </div>
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
@@ -60,9 +57,9 @@ export default function Layout({ children }: LayoutProps) {
   }
 
   return (
-    <div className="min-h-screen relative flex flex-col">
+    <div className="min-h-screen relative flex flex-col bg-gray-50">
       <OfflineIndicator />
-      <Navbar />
+      <TopNavbar />
 
       <AnimatePresence>
         {banners.map((banner) => (
@@ -71,7 +68,7 @@ export default function Layout({ children }: LayoutProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl"
+            className="bg-blue-600 text-white px-4 py-2"
           >
             <div className="max-w-7xl mx-auto flex items-center gap-2">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -83,16 +80,13 @@ export default function Layout({ children }: LayoutProps) {
         ))}
       </AnimatePresence>
 
-      <div className="flex flex-col md:flex-row relative z-10 flex-1">
-        <Sidebar />
-        <main className="flex-1 p-6 md:p-8 lg:p-10 w-full overflow-x-hidden pb-20">
-          <div className="max-w-6xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
+      <main className="flex-1 p-4 md:p-6 lg:p-8 w-full overflow-x-hidden">
+        <div className="max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
 
-      <div className="sticky bottom-0 z-20 mt-auto">
+      <div className="mt-auto">
         <Footer />
       </div>
     </div>
