@@ -45,8 +45,12 @@ export default function ChatSidebar({
   };
 
   return (
-    <div className="h-full flex flex-col bg-gray-50 border-r border-gray-200">
-      <div className="p-3 border-b border-gray-200 bg-white">
+    <div className="h-full flex flex-col bg-white">
+      <div className="p-4 border-b border-gray-200">
+        <div className="flex items-center gap-3 mb-4">
+          <MessageSquare className="w-6 h-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+        </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -54,54 +58,57 @@ export default function ChatSidebar({
             placeholder="Search conversations"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 bg-gray-100 border-0 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-300"
+            className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length === 0 ? (
-          <div className="p-4 text-center text-gray-500 text-sm">
-            {searchQuery ? 'No conversations found' : 'No conversations yet'}
+          <div className="p-8 text-center">
+            <MessageSquare className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+            <p className="text-gray-500 text-sm">
+              {searchQuery ? 'No conversations found' : 'No conversations yet'}
+            </p>
           </div>
         ) : (
-          filteredConversations.map((conversation) => {
-            const isSelected = selectedConversationId === conversation.id;
-            const lastMessageTime = conversation.lastMessage?.createdAt;
+          <div className="divide-y divide-gray-100">
+            {filteredConversations.map((conversation) => {
+              const isSelected = selectedConversationId === conversation.id;
+              const lastMessageTime = conversation.lastMessage?.createdAt;
 
-            return (
-              <button
-                key={conversation.id}
-                onClick={() => onSelectConversation(conversation)}
-                className={`w-full px-3 py-3 flex items-start gap-3 hover:bg-gray-100 transition border-l-2 ${
-                  isSelected
-                    ? 'bg-gray-100 border-blue-600'
-                    : 'border-transparent'
-                }`}
-              >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-lg flex-shrink-0">
-                  {getAvatar(conversation)}
-                </div>
-                <div className="flex-1 min-w-0 text-left">
-                  <div className="flex items-baseline justify-between gap-2 mb-0.5">
-                    <h3 className="font-medium text-gray-900 truncate text-sm">
-                      {conversation.title}
-                    </h3>
-                    {lastMessageTime && (
-                      <span className="text-xs text-gray-500 flex-shrink-0">
-                        {formatTimestamp(lastMessageTime)}
-                      </span>
+              return (
+                <button
+                  key={conversation.id}
+                  onClick={() => onSelectConversation(conversation)}
+                  className={`w-full px-4 py-4 flex items-start gap-3 hover:bg-gray-50 transition ${
+                    isSelected ? 'bg-blue-50' : ''
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-lg flex-shrink-0">
+                    {getAvatar(conversation)}
+                  </div>
+                  <div className="flex-1 min-w-0 text-left">
+                    <div className="flex items-baseline justify-between gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900 truncate">
+                        {conversation.title}
+                      </h3>
+                      {lastMessageTime && (
+                        <span className="text-xs text-gray-500 flex-shrink-0">
+                          {formatTimestamp(lastMessageTime)}
+                        </span>
+                      )}
+                    </div>
+                    {conversation.lastMessage && (
+                      <p className="text-sm text-gray-600 truncate">
+                        {conversation.lastMessage.text}
+                      </p>
                     )}
                   </div>
-                  {conversation.lastMessage && (
-                    <p className="text-xs text-gray-600 truncate">
-                      {conversation.lastMessage.text}
-                    </p>
-                  )}
-                </div>
-              </button>
-            );
-          })
+                </button>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>
