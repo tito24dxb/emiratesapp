@@ -67,6 +67,8 @@ import { ModerationWarningModal } from './components/ModerationWarningModal';
 import { useState, useEffect } from 'react';
 import ReputationManager from './pages/governor/ReputationManager';
 import ReputationTester from './pages/governor/ReputationTester';
+import InviteFriendsPage from './pages/InviteFriendsPage';
+import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -145,6 +147,8 @@ function AppContent() {
         <Route path="/community-feed" element={<CommunityFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/invite-friends" element={<InviteFriendsPage />} />
+        <Route path="/affiliate-dashboard" element={<AffiliateDashboardPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/settings/devices" element={<DevicesPage />} />
         <Route path="/support" element={<SupportPage />} />

@@ -26,7 +26,9 @@ import {
   DollarSign,
   Package,
   ClipboardList,
-  Play
+  Play,
+  UserPlus,
+  Link as LinkIcon
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -98,6 +100,7 @@ export default function Sidebar() {
         { path: '/storage', icon: HardDrive, label: 'My Files', feature: null, badge: 'PRO' },
         { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null, badge: 'PRO' }
       ] : []),
+      { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', feature: null, badge: 'NEW' },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
@@ -120,7 +123,9 @@ export default function Sidebar() {
     { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
+    { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliate Program', badge: 'NEW' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
+    { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -161,7 +166,9 @@ export default function Sidebar() {
     { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
+    { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliate Program', badge: 'NEW' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
+    { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },

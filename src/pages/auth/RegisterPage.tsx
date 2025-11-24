@@ -8,11 +8,13 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { countries } from '../../data/countries';
 import { supabase } from '../../lib/supabase';
+import { referralService } from '../../services/referralService';
 
 export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const selectedPlan = searchParams.get('plan');
   const priceId = searchParams.get('priceId');
+  const referralCode = searchParams.get('ref');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -61,6 +63,22 @@ export default function RegisterPage() {
       };
 
       setCurrentUser(newUser);
+
+      if (referralCode) {
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipResponse.json();
+          await referralService.recordConversion(
+            referralCode,
+            user.uid,
+            name,
+            email,
+            ipData.ip
+          );
+        } catch (error) {
+          console.error('Error recording referral:', error);
+        }
+      }
 
       if (selectedPlan && selectedPlan !== 'free' && priceId) {
         try {
