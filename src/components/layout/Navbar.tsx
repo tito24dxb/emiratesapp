@@ -208,11 +208,11 @@ export default function Navbar() {
               top: `${profileMenuPosition.top}px`,
               right: `${profileMenuPosition.right}px`,
               zIndex: 2147483647,
-              background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
-              backdropFilter: 'blur(40px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.8)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+              background: 'rgba(255, 255, 255, 0.65)',
+              backdropFilter: 'blur(60px) saturate(200%) brightness(1.1)',
+              WebkitBackdropFilter: 'blur(60px) saturate(200%) brightness(1.1)',
+              border: '1px solid rgba(255, 255, 255, 0.9)',
+              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -8px rgba(0, 0, 0, 0.15), inset 0 2px 4px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px 0 rgba(0, 0, 0, 0.05)',
             }}
           >
             <Link
