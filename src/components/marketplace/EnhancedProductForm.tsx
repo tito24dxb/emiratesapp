@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Save, Download, Package, Briefcase, Tag, DollarSign, Info } from 'lucide-react';
+import { Save, Download, Tag, DollarSign, Info } from 'lucide-react';
 import { ProductFormData } from '../../services/marketplaceService';
 import { processProductImage } from '../../utils/imageProcessing';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,8 +16,10 @@ const CATEGORIES = [
   'Digital Products',
   'Software & Tools',
   'Graphics & Design',
-  'Business Services',
-  'Physical Products',
+  'Templates & Themes',
+  'Audio & Music',
+  'Video & Animation',
+  'eBooks & Guides',
   'Other'
 ];
 
@@ -33,11 +35,10 @@ export default function EnhancedProductForm({
     price: initialData?.price ? initialData.price / 100 : 0,
     currency: initialData?.currency || 'USD',
     category: initialData?.category || CATEGORIES[0],
-    product_type: initialData?.product_type || 'digital',
+    product_type: 'digital',
     images: initialData?.images || [],
     digital_file_url: initialData?.digital_file_url || '',
     digital_file_name: initialData?.digital_file_name || '',
-    stock_quantity: initialData?.stock_quantity,
     tags: initialData?.tags || []
   });
 
@@ -71,8 +72,8 @@ export default function EnhancedProductForm({
       return;
     }
 
-    if (formData.product_type === 'physical' && !formData.stock_quantity) {
-      setError('Stock quantity is required for physical products');
+    if (!formData.digital_file_url && !formData.digital_file_name) {
+      setError('Digital file is required for digital products');
       return;
     }
 
@@ -150,19 +151,6 @@ export default function EnhancedProductForm({
     });
   };
 
-  const getProductTypeIcon = (type: string) => {
-    switch (type) {
-      case 'digital':
-        return <Download className="w-4 h-4 sm:w-5 sm:h-5" />;
-      case 'physical':
-        return <Package className="w-4 h-4 sm:w-5 sm:h-5" />;
-      case 'service':
-        return <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />;
-      default:
-        return <Package className="w-4 h-4 sm:w-5 sm:h-5" />;
-    }
-  };
-
   return (
     <div className="w-full max-w-4xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -209,26 +197,13 @@ export default function EnhancedProductForm({
           <p className="text-xs text-gray-500">{formData.description.length}/2000</p>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Product Type *
-          </label>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3">
-            {['digital', 'physical', 'service'].map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setFormData({ ...formData, product_type: type as any })}
-                className={`p-2 sm:p-3 border-2 rounded-lg flex flex-col items-center gap-1 sm:gap-2 transition-all ${
-                  formData.product_type === type
-                    ? 'border-blue-500 bg-blue-500/20 backdrop-blur-sm text-blue-600'
-                    : 'border-gray-200/50 bg-white/30 backdrop-blur-sm hover:border-gray-300 hover:bg-white/50 text-gray-600'
-                }`}
-              >
-                {getProductTypeIcon(type)}
-                <span className="text-xs sm:text-sm font-medium capitalize">{type}</span>
-              </button>
-            ))}
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-center gap-2">
+            <Download className="w-5 h-5 text-blue-600" />
+            <div>
+              <p className="text-sm font-semibold text-blue-900">Digital Products Only</p>
+              <p className="text-xs text-blue-700">This marketplace is for digital products (e-books, courses, templates, etc.)</p>
+            </div>
           </div>
         </div>
 
@@ -285,51 +260,37 @@ export default function EnhancedProductForm({
           </div>
         </div>
 
-        {formData.product_type === 'physical' && (
+        <div className="space-y-3 p-3 sm:p-4 bg-blue-50/50 backdrop-blur-sm rounded-lg border border-blue-200/50 shadow-sm">
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-700">
-              Stock Quantity *
+              Digital File URL *
             </label>
             <input
-              type="number"
-              min="0"
-              value={formData.stock_quantity || 0}
-              onChange={(e) => setFormData({ ...formData, stock_quantity: parseInt(e.target.value) || 0 })}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-              placeholder="Enter quantity"
+              type="url"
+              value={formData.digital_file_url || ''}
+              onChange={(e) => setFormData({ ...formData, digital_file_url: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+              placeholder="https://example.com/file.pdf"
+              required
             />
+            <p className="text-xs text-gray-500">Provide the download link for your digital product</p>
           </div>
-        )}
 
-        {formData.product_type === 'digital' && (
-          <div className="space-y-3 p-3 sm:p-4 bg-blue-500/10 backdrop-blur-sm rounded-lg border border-blue-200/50 shadow-sm">
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Digital File URL (Optional)
-              </label>
-              <input
-                type="url"
-                value={formData.digital_file_url || ''}
-                onChange={(e) => setFormData({ ...formData, digital_file_url: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-                placeholder="https://example.com/file.pdf"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
-                File Name (Optional)
-              </label>
-              <input
-                type="text"
-                value={formData.digital_file_name || ''}
-                onChange={(e) => setFormData({ ...formData, digital_file_name: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-                placeholder="product-file.pdf"
-              />
-            </div>
+          <div className="space-y-1">
+            <label className="block text-sm font-medium text-gray-700">
+              File Name *
+            </label>
+            <input
+              type="text"
+              value={formData.digital_file_name || ''}
+              onChange={(e) => setFormData({ ...formData, digital_file_name: e.target.value })}
+              className="w-full px-3 py-2 text-sm border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
+              placeholder="product-file.pdf"
+              required
+            />
+            <p className="text-xs text-gray-500">Display name for the downloadable file</p>
           </div>
-        )}
+        </div>
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">

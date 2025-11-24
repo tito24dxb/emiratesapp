@@ -8,15 +8,10 @@ import { getUserEnrollments } from '../services/courseService';
 import { getUserPoints } from '../services/rewardsService';
 import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
-import OnboardingCard from '../components/OnboardingCard';
-import AIRealtimeSuggestions from '../components/AIRealtimeSuggestions';
-import { getOnboardingStatus, completeOnboarding } from '../services/onboardingService';
 
 export default function Dashboard() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     totalUsers: 0,
@@ -46,28 +41,9 @@ export default function Dashboard() {
   }, [currentUser, navigate]);
 
   useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      if (!currentUser) return;
-
-      try {
-        const hasCompleted = await getOnboardingStatus(currentUser.uid);
-
-        setIsFirstLogin(!hasCompleted);
-        setShowOnboarding(!hasCompleted);
-      } catch (error) {
-        console.error('Error checking onboarding status:', error);
-        setShowOnboarding(false);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkOnboardingStatus();
-  }, [currentUser]);
-
-  useEffect(() => {
     if (currentUser) {
       loadDashboardData();
+      setIsLoading(false);
     }
   }, [currentUser]);
 
@@ -151,28 +127,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleCompleteOnboarding = async () => {
-    if (!currentUser) return;
-
-    try {
-      await completeOnboarding(currentUser.uid);
-      setShowOnboarding(false);
-    } catch (error) {
-      console.error('Error completing onboarding:', error);
-    }
-  };
-
-  const handleSkipOnboarding = async () => {
-    if (!currentUser) return;
-
-    try {
-      await completeOnboarding(currentUser.uid);
-      setShowOnboarding(false);
-    } catch (error) {
-      console.error('Error skipping onboarding:', error);
-    }
-  };
-
   if (!currentUser || isLoading) return null;
 
   const containerVariants = {
@@ -191,22 +145,11 @@ export default function Dashboard() {
   if (currentUser.role === 'student') {
     return (
       <>
-        {showOnboarding && (
-          <OnboardingCard
-            userName={currentUser.name.split(' ')[0]}
-            onComplete={handleCompleteOnboarding}
-            onSkip={handleSkipOnboarding}
-          />
-        )}
-
         <motion.div
           initial="hidden"
           animate="visible"
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} className="mb-6">
-            <AIRealtimeSuggestions />
-          </motion.div>
           <motion.div variants={itemVariants} className="mb-6 md:mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-[#000000] mb-2">
               Welcome back, {currentUser.name.split(' ')[0]}!
