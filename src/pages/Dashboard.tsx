@@ -10,6 +10,7 @@ import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
 import OnboardingCard from '../components/OnboardingCard';
 import WelcomeBanner from '../components/WelcomeBanner';
+import AIRealtimeSuggestions from '../components/AIRealtimeSuggestions';
 import { getOnboardingStatus, completeOnboarding, hasSeenWelcomeBanner, markWelcomeBannerSeen } from '../services/onboardingService';
 
 export default function Dashboard() {
@@ -227,6 +228,9 @@ export default function Dashboard() {
           animate="visible"
           variants={containerVariants}
         >
+          <motion.div variants={itemVariants} className="mb-6">
+            <AIRealtimeSuggestions />
+          </motion.div>
           <motion.div variants={itemVariants} className="mb-6 md:mb-8">
             <h1 className="text-3xl md:text-4xl font-bold text-[#000000] mb-2">
               Welcome back, {currentUser.name.split(' ')[0]}!

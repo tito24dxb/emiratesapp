@@ -61,6 +61,7 @@ import AttendanceDashboard from './pages/AttendanceDashboard';
 import FinanceDashboard from './pages/FinanceDashboard';
 import ModeratorDashboard from './pages/ModeratorDashboard';
 import DevicesPage from './pages/DevicesPage';
+import AIAssistantButton from './components/AIAssistantButton';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -111,6 +112,7 @@ function AppContent() {
 
   return (
     <Layout>
+      <AIAssistantButton />
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
