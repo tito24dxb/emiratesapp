@@ -283,6 +283,8 @@ export default function Sidebar() {
       const aiTrainerAccess = checkFeatureAccess(currentUser, 'ai-trainer');
       const simulatorAccess = checkFeatureAccess(currentUser, 'simulator');
       const chatAccess = checkFeatureAccess(currentUser, 'chat');
+      const recruitersAccess = checkFeatureAccess(currentUser, 'recruiters');
+      const openDaysAccess = checkFeatureAccess(currentUser, 'opendays');
 
       return [
         {
@@ -299,8 +301,8 @@ export default function Sidebar() {
           label: 'Community',
           icon: Users,
           items: [
-            { path: '/chat', icon: MessageCircle, label: 'Chat', locked: !chatAccess.allowed, feature: 'chat' },
             { path: '/community-feed', icon: Rss, label: 'Feed', feature: null },
+            { path: '/chat', icon: MessageCircle, label: 'Chat', locked: !chatAccess.allowed, feature: 'chat' },
             { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
           ]
         },
@@ -308,15 +310,15 @@ export default function Sidebar() {
           label: 'Career',
           icon: Briefcase,
           items: [
-            { path: '/recruiters', icon: Briefcase, label: 'Recruiters', feature: null },
-            { path: '/open-days', icon: Calendar, label: 'Open Days', feature: null },
+            { path: '/recruiters', icon: Briefcase, label: 'Recruiters', locked: !recruitersAccess.allowed, feature: 'recruiters' },
+            { path: '/open-days', icon: Calendar, label: 'Open Days', locked: !openDaysAccess.allowed, feature: 'opendays' },
           ]
         },
         {
           label: 'Events',
-          icon: Calendar,
+          icon: Ticket,
           items: [
-            { path: '/events', icon: Calendar, label: 'Events', feature: null },
+            { path: '/student-events', icon: Ticket, label: 'Events', feature: null },
           ]
         },
         {
@@ -330,6 +332,7 @@ export default function Sidebar() {
               { path: '/storage', icon: HardDrive, label: 'Files', badge: 'PRO', feature: null },
               { path: '/login-activity', icon: Clock, label: 'Activity', badge: 'PRO', feature: null }
             ] : []),
+            { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', feature: null },
           ]
         },
       ];
@@ -459,17 +462,6 @@ export default function Sidebar() {
   const groupedNav = getGroupedNavigation();
   const topLevelItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    ...(currentUser.plan !== 'vip' && currentUser.role === 'student'
-      ? [{ path: '/upgrade', icon: Crown, label: 'Upgrade' }]
-      : []
-    ),
-    ...(currentUser.role === 'student'
-      ? [
-          { path: '/marketplace', icon: ShoppingBag, label: 'Shop' },
-          { path: '/support', icon: HelpCircle, label: 'Help' }
-        ]
-      : []
-    ),
   ];
 
   return (
@@ -478,7 +470,7 @@ export default function Sidebar() {
       <aside className="w-full liquid-sidebar border-b border-white/20 relative z-[100]">
         <div className="p-3">
           <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent">
-            {/* Top-level items */}
+            {/* Dashboard */}
             {topLevelItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
@@ -499,7 +491,7 @@ export default function Sidebar() {
               );
             })}
 
-            {/* Grouped navigation dropdowns */}
+            {/* Grouped navigation dropdowns in order: Learning, Community, Career, Events */}
             {groupedNav.map((group) => {
               const GroupIcon = group.icon;
               const isOpen = openDropdown === group.label;
@@ -523,6 +515,34 @@ export default function Sidebar() {
                 </div>
               );
             })}
+
+            {/* Shop, Help, Account at the end */}
+            {currentUser.role === 'student' && (
+              <>
+                <Link
+                  to="/marketplace"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
+                    location.pathname === '/marketplace'
+                      ? 'glass-primary text-gray-900 shadow-lg'
+                      : 'text-gray-700 glass-button-secondary hover:glass-primary'
+                  }`}
+                >
+                  <ShoppingBag className="w-4 h-4 flex-shrink-0" />
+                  <span className="font-medium text-sm">Shop</span>
+                </Link>
+                <Link
+                  to="/support"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
+                    location.pathname === '/support'
+                      ? 'glass-primary text-gray-900 shadow-lg'
+                      : 'text-gray-700 glass-button-secondary hover:glass-primary'
+                  }`}
+                >
+                  <HelpCircle className="w-4 h-4 flex-shrink-0" />
+                  <span className="font-medium text-sm">Help</span>
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       </aside>
