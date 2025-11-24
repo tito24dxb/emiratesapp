@@ -304,16 +304,16 @@ export default function PaymentForm({
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="flex items-center justify-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors opacity-50 cursor-not-allowed">
-                  <ApplePayIcon className="w-10 h-6" />
+              <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 px-6 py-3 bg-black rounded-lg opacity-40">
+                  <ApplePayIcon className="w-12 h-8" />
                 </div>
-                <div className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-gray-400 transition-colors opacity-50 cursor-not-allowed">
-                  <GooglePayIcon className="w-10 h-6" />
+                <div className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg opacity-40">
+                  <GooglePayIcon className="w-12 h-8" />
                 </div>
               </div>
-              <p className="text-xs text-gray-600 text-center">
-                Not available on this device/browser
+              <p className="text-xs text-gray-500 text-center italic">
+                Apple Pay and Google Pay will be available during checkout on supported browsers
               </p>
             </div>
           )}
@@ -321,7 +321,7 @@ export default function PaymentForm({
           <p className="text-sm text-gray-700 mt-3 flex items-center gap-2">
             <Smartphone className="w-4 h-4 text-blue-600" />
             <span className="font-medium">
-              {walletPaymentAvailable ? 'Pay with Apple Pay or Google Pay - Faster & Secure' : 'Available on supported devices and browsers'}
+              {walletPaymentAvailable ? 'Pay with Apple Pay or Google Pay - Faster & Secure' : 'Apple Pay & Google Pay available on Safari (iOS/Mac) and Chrome (Android/Desktop)'}
             </span>
           </p>
         </div>

@@ -141,7 +141,13 @@ export default function MarketplaceCheckoutPage() {
       }
     } catch (error: any) {
       console.error('Error loading checkout:', error);
-      alert(error.message || 'Failed to load checkout');
+      const errorMessage = error.message || 'Failed to load checkout';
+      console.error('Full error details:', {
+        error,
+        productId,
+        currentUserId: currentUser?.uid
+      });
+      alert(`Unable to initialize checkout: ${errorMessage}`);
       navigate('/marketplace');
     } finally {
       setLoading(false);
