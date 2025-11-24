@@ -1,40 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Users, Search, ChevronLeft, Plus, UserPlus, X, Check, Info, Bot, Shield } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { MessageCircle, Users, Send, Clock, CheckCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import MessageBubble from '../components/community/MessageBubble';
-import MessageComposer from '../components/community/MessageComposer';
 import { communityChatService, Message, Conversation } from '../services/communityChatService';
 import { presenceService, TypingData } from '../services/presenceService';
-import { auth, db } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { auth } from '../lib/firebase';
 import { useApp } from '../context/AppContext';
 import { checkFeatureAccess } from '../utils/featureAccess';
 import FeatureLock from '../components/FeatureLock';
 
-interface User {
-  uid: string;
-  displayName: string;
-  email: string;
-}
-
 export default function CommunityPage() {
   const { currentUser } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
   const [typingUsers, setTypingUsers] = useState<TypingData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showCreateMenu, setShowCreateMenu] = useState(false);
-  const [showGroupCreation, setShowGroupCreation] = useState(false);
-  const [showPrivateChatCreation, setShowPrivateChatCreation] = useState(false);
-  const [groupName, setGroupName] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [availableUsers, setAvailableUsers] = useState<User[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showRules, setShowRules] = useState(false);
-  const [showAIBanner, setShowAIBanner] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,7 +26,7 @@ export default function CommunityPage() {
     if (chatId && conversations.length > 0) {
       const conversation = conversations.find(c => c.id === chatId);
       if (conversation) {
-        setSelectedConversationId(chatId);
+        setSelectedConversation(conversation);
         setSearchParams({});
       }
     }
@@ -60,15 +44,6 @@ export default function CommunityPage() {
       />
     );
   }
-
-  useEffect(() => {
-    const hasSeenChatAIBanner = localStorage.getItem('hasSeenChatAIBanner');
-    if (!hasSeenChatAIBanner && selectedConversationId) {
-      setShowAIBanner(true);
-      localStorage.setItem('hasSeenChatAIBanner', 'true');
-      setTimeout(() => setShowAIBanner(false), 10000);
-    }
-  }, [selectedConversationId]);
 
   useEffect(() => {
     const initCommunityChat = async () => {
@@ -97,686 +72,280 @@ export default function CommunityPage() {
   }, []);
 
   useEffect(() => {
-    if (!selectedConversationId) return;
+    if (!selectedConversation?.id) return;
 
-    setLoading(true);
-    const unsubscribe = communityChatService.subscribeToMessages(
-      selectedConversationId,
-      (msgs) => {
-        setMessages(msgs);
-        setLoading(false);
-        scrollToBottom();
-      },
-      (error) => {
-        console.error('Error subscribing to messages:', error);
-        setLoading(false);
-      }
-    );
+    const unsubscribe = communityChatService.subscribeToMessages(selectedConversation.id, (msgs) => {
+      setMessages(msgs);
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    });
 
-    presenceService.setCurrentConversation(selectedConversationId);
+    communityChatService.markAsRead(selectedConversation.id, currentUser.uid);
 
-    const unsubscribeTyping = presenceService.subscribeToTyping(
-      selectedConversationId,
-      setTypingUsers
-    );
+    return unsubscribe;
+  }, [selectedConversation?.id, currentUser.uid]);
 
-    return () => {
-      unsubscribe();
-      unsubscribeTyping();
-      presenceService.clearTyping(selectedConversationId);
-    };
-  }, [selectedConversationId]);
+  useEffect(() => {
+    if (!selectedConversation?.id) return;
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+    const unsubscribe = presenceService.subscribeToTyping(selectedConversation.id, (typing) => {
+      setTypingUsers(typing.filter(t => t.userId !== currentUser.uid));
+    });
 
-  const handleSendMessage = async (content: string, file?: File) => {
-    if (!selectedConversationId) return;
+    return unsubscribe;
+  }, [selectedConversation?.id, currentUser.uid]);
 
-    const contentType = file
-      ? file.type.startsWith('image/')
-        ? 'image'
-        : 'file'
-      : 'text';
+  const handleSendMessage = async () => {
+    if (!currentUser || !selectedConversation || !newMessage.trim()) return;
 
-    await communityChatService.sendMessage(
-      selectedConversationId,
-      content,
-      contentType,
-      file
-    );
+    setSending(true);
+    try {
+      await communityChatService.sendMessage(
+        selectedConversation.id,
+        currentUser.uid,
+        currentUser.name,
+        newMessage,
+        'text'
+      );
 
-    setTimeout(() => {
-      scrollToBottom();
-    }, 100);
+      setNewMessage('');
+      presenceService.stopTyping(selectedConversation.id);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleTyping = () => {
-    if (!selectedConversationId) return;
-    const userName = auth.currentUser?.displayName || 'User';
-    presenceService.setTyping(selectedConversationId, userName);
-  };
-
-  const handleReaction = async (messageId: string, emoji: string, recipientId: string) => {
-    if (!selectedConversationId) return;
-    await communityChatService.addReaction(
-      selectedConversationId,
-      messageId,
-      emoji,
-      recipientId
-    );
-  };
-
-  const handleLike = async (messageId: string, recipientId: string) => {
-    if (!selectedConversationId) return;
-    await communityChatService.likeMessage(selectedConversationId, messageId, recipientId);
-  };
-
-  const handleReport = async (messageId: string) => {
-    if (!selectedConversationId) return;
-
-    const reason = prompt('Please provide a reason for reporting this message:');
-    if (!reason) return;
-
-    try {
-      await communityChatService.reportMessage(selectedConversationId, messageId, reason);
-      alert('Message reported successfully');
-    } catch (error) {
-      alert('Failed to report message');
+    if (selectedConversation?.id) {
+      presenceService.updateTyping(selectedConversation.id, currentUser.uid, currentUser.name);
     }
   };
 
-  const loadUsers = async () => {
-    try {
-      const usersSnapshot = await getDocs(collection(db, 'users'));
-      const users: User[] = [];
-      usersSnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (doc.id !== auth.currentUser?.uid) {
-          users.push({
-            uid: doc.id,
-            displayName: data.displayName || data.name || 'Unknown User',
-            email: data.email || '',
-          });
-        }
-      });
-      setAvailableUsers(users);
-    } catch (error) {
-      console.error('Error loading users:', error);
-    }
+  const groupChats = conversations.filter(c => c.type === 'group');
+  const marketplaceChats = conversations.filter(c => c.type === 'marketplace');
+  const privateChats = conversations.filter(c => c.type === 'private');
+
+  const getUnreadCount = () => {
+    return conversations.filter(c => {
+      const unreadCount = c.unreadCount?.[currentUser.uid] || 0;
+      return unreadCount > 0;
+    }).length;
   };
-
-  const handleCreateGroupChat = async () => {
-    setShowCreateMenu(false);
-    setShowGroupCreation(true);
-    await loadUsers();
-  };
-
-  const handleCreatePrivateChat = async () => {
-    setShowCreateMenu(false);
-    setShowPrivateChatCreation(true);
-    await loadUsers();
-  };
-
-  const handleConfirmGroupCreation = async () => {
-    if (!groupName.trim() || selectedUsers.length === 0) {
-      alert('Please enter a group name and select at least one member');
-      return;
-    }
-
-    try {
-      await communityChatService.createConversation('group', groupName, selectedUsers);
-      setShowGroupCreation(false);
-      setGroupName('');
-      setSelectedUsers([]);
-      setSearchQuery('');
-    } catch (error) {
-      alert('Failed to create group chat');
-    }
-  };
-
-  const handleConfirmPrivateChatCreation = async (userId: string) => {
-    try {
-      const selectedUser = availableUsers.find(u => u.uid === userId);
-      if (selectedUser) {
-        await communityChatService.createConversation('private', selectedUser.displayName, [userId]);
-        setShowPrivateChatCreation(false);
-        setSearchQuery('');
-      }
-    } catch (error) {
-      alert('Failed to create private chat');
-    }
-  };
-
-  const toggleUserSelection = (userId: string) => {
-    setSelectedUsers(prev =>
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
-  const filteredUsers = availableUsers.filter(user =>
-    user.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const groupChats = conversations.filter(c => c.type === 'group' || c.id === 'publicRoom');
-  const marketplaceChats = conversations.filter(c => c.category === 'marketplace');
-  const privateChats = conversations.filter(c => c.type === 'private' && c.category !== 'marketplace');
-  const selectedConversation = conversations.find(c => c.id === selectedConversationId);
-
-  if (showGroupCreation) {
-    return (
-      <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
-        <div className="bg-white shadow-sm px-3 md:px-4 py-3 flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setShowGroupCreation(false);
-                setGroupName('');
-                setSelectedUsers([]);
-                setSearchQuery('');
-              }}
-              className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"
-            >
-              <X className="w-5 h-5 text-gray-700" />
-            </button>
-            <h2 className="text-lg md:text-xl font-bold text-gray-900">New Group</h2>
-          </div>
-          <button
-            onClick={handleConfirmGroupCreation}
-            className="w-9 h-9 rounded-full bg-[#0084FF] text-white flex items-center justify-center hover:bg-[#0073E6] transition-all"
-          >
-            <Check className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="p-3 md:p-4 bg-white border-b border-gray-200 flex-shrink-0">
-          <input
-            type="text"
-            placeholder="Group name"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
-          />
-        </div>
-
-        <div className="px-3 md:px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
-            />
-          </div>
-        </div>
-
-        {selectedUsers.length > 0 && (
-          <div className="px-3 md:px-4 py-2 flex flex-wrap gap-2 bg-white border-b border-gray-200 flex-shrink-0">
-            {selectedUsers.map(userId => {
-              const user = availableUsers.find(u => u.uid === userId);
-              return user ? (
-                <div key={userId} className="flex items-center gap-1 px-3 py-1 bg-blue-100 rounded-full">
-                  <span className="text-sm text-gray-900">{user.displayName}</span>
-                  <button
-                    onClick={() => toggleUserSelection(userId)}
-                    className="w-4 h-4 rounded-full hover:bg-blue-200 flex items-center justify-center"
-                  >
-                    <X className="w-3 h-3 text-gray-700" />
-                  </button>
-                </div>
-              ) : null;
-            })}
-          </div>
-        )}
-
-        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
-          {filteredUsers.map((user) => (
-            <button
-              key={user.uid}
-              onClick={() => toggleUserSelection(user.uid)}
-              className={`w-full px-3 md:px-4 py-2.5 flex items-center gap-3 transition-all hover:bg-gray-50 ${
-                selectedUsers.includes(user.uid) ? 'bg-blue-50' : ''
-              }`}
-            >
-              <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-white flex-shrink-0 ${
-                selectedUsers.includes(user.uid) ? 'bg-[#0084FF]' : 'bg-gray-600'
-              }`}>
-                {user.displayName.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 text-left min-w-0">
-                <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{user.displayName}</h3>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
-              </div>
-              {selectedUsers.includes(user.uid) && (
-                <div className="w-6 h-6 rounded-full bg-[#0084FF] flex items-center justify-center flex-shrink-0">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (showPrivateChatCreation) {
-    return (
-      <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
-        <div className="bg-white shadow-sm px-3 md:px-4 py-3 flex items-center gap-2 flex-shrink-0">
-          <button
-            onClick={() => {
-              setShowPrivateChatCreation(false);
-              setSearchQuery('');
-            }}
-            className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all"
-          >
-            <X className="w-5 h-5 text-gray-700" />
-          </button>
-          <h2 className="text-lg md:text-xl font-bold text-gray-900">New Chat</h2>
-        </div>
-
-        <div className="px-3 md:px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
-            />
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto min-h-0 bg-white">
-          {filteredUsers.map((user) => (
-            <button
-              key={user.uid}
-              onClick={() => handleConfirmPrivateChatCreation(user.uid)}
-              className="w-full px-3 md:px-4 py-2.5 flex items-center gap-3 transition-all hover:bg-gray-50"
-            >
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-600 text-white flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0">
-                {user.displayName.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 text-left min-w-0">
-                <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{user.displayName}</h3>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (selectedConversationId) {
-    return (
-      <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
-        <div className="bg-white shadow-sm px-3 md:px-4 py-3 md:py-4 flex items-center gap-2 md:gap-3 flex-shrink-0 relative overflow-visible">
-          <button
-            onClick={() => setSelectedConversationId(null)}
-            className="w-9 h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all flex-shrink-0"
-          >
-            <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-gray-700" />
-          </button>
-          <div className={`w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center flex-shrink-0 ${
-            selectedConversation?.id === 'publicRoom'
-              ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-base'
-              : selectedConversation?.type === 'group'
-                ? 'bg-[#0084FF] text-white'
-                : 'bg-gray-700 text-white font-bold'
-          }`}>
-            {selectedConversation?.id === 'publicRoom'
-              ? '🌍'
-              : selectedConversation?.type === 'group'
-                ? <Users className="w-4 h-4 md:w-5 md:h-5" />
-                : selectedConversation?.title.charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0 flex-1">
-            <h2 className="font-bold text-gray-900 text-sm md:text-base truncate">{selectedConversation?.title}</h2>
-            <p className="text-xs text-gray-500 truncate">{selectedConversation?.type === 'group' ? 'Group Chat' : 'Active now'}</p>
-          </div>
-          {selectedConversation?.id === 'publicRoom' && (
-            <div className="relative z-[103]">
-              <button
-                onClick={() => setShowRules(!showRules)}
-                className="w-9 h-9 md:w-10 md:h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-all flex-shrink-0"
-              >
-                <Info className="w-5 h-5 text-[#0084FF]" />
-              </button>
-
-              <AnimatePresence>
-                {showRules && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white shadow-2xl rounded-2xl z-[104] max-h-[70vh] overflow-hidden border border-gray-200"
-                  >
-                    <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-cyan-50">
-                      <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#0084FF] to-[#0073E6] rounded-xl flex items-center justify-center text-xl shadow-md">
-                          🎉
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-900">Community Rules</h3>
-                      </div>
-                    </div>
-
-                    <div className="overflow-y-auto max-h-[calc(70vh-120px)]">
-                      <div className="p-4 space-y-3">
-                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-200">
-                          <p className="text-xs text-gray-700 leading-relaxed">
-                            Welcome! Please read these rules to ensure a safe and respectful community experience.
-                          </p>
-                        </div>
-
-                        <div className="space-y-2">
-                          {[
-                            { num: "1", title: "Respect Above Everything", desc: "Treat everyone with respect — no insults, harassment, or personal attacks." },
-                            { num: "2", title: "No Spam", desc: "No excessive messaging or unsolicited promotions." },
-                            { num: "3", title: "Keep It Safe & Legal", desc: "No illegal content, piracy, or sharing private information." },
-                            { num: "4", title: "Stay On Topic", desc: "Use proper channels for discussions." },
-                            { num: "5", title: "No Explicit Content", desc: "No pornographic, violent, or harmful material." },
-                            { num: "6", title: "Be Constructive", desc: "Add value and support others positively." },
-                            { num: "7", title: "Respect Moderators", desc: "Follow moderator instructions immediately." },
-                            { num: "8", title: "English or Spanish Only", desc: "Keep conversations in allowed languages." },
-                          ].map((rule) => (
-                            <div key={rule.num} className="bg-white rounded-xl p-3 border border-gray-200 hover:bg-gray-50 transition">
-                              <h4 className="font-bold text-gray-900 text-xs mb-1 flex items-center gap-1.5">
-                                <span className="text-[#0084FF]">{rule.num}.</span> {rule.title}
-                              </h4>
-                              <p className="text-xs text-gray-700 ml-4">{rule.desc}</p>
-                            </div>
-                          ))}
-                          <div className="bg-red-50 rounded-xl p-3 border-2 border-red-200">
-                            <h4 className="font-bold text-red-600 text-xs mb-1 flex items-center gap-1.5">
-                              <span>9.</span> Zero Tolerance
-                            </h4>
-                            <p className="text-xs text-gray-700 ml-4">
-                              Severe violations result in instant removal.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-4 border-t border-gray-200 bg-white">
-                      <button
-                        onClick={() => setShowRules(false)}
-                        className="w-full px-4 py-2.5 bg-gradient-to-r from-[#0084FF] to-[#0073E6] text-white rounded-xl font-bold hover:shadow-lg transition-all text-sm"
-                      >
-                        I Understand
-                      </button>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 min-h-0 bg-gray-50" style={{ overflowX: 'hidden' }}>
-          {loading ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="relative">
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-gray-200"></div>
-                <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-[#0084FF] border-t-transparent animate-spin absolute top-0 left-0"></div>
-              </div>
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="text-center max-w-sm px-4"
-              >
-                <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-3xl flex items-center justify-center mx-auto mb-4 md:mb-6">
-                  <MessageCircle className="w-8 h-8 md:w-12 md:h-12 text-[#0084FF]" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">No messages yet</h3>
-                <p className="text-sm text-gray-500">Be the first to break the ice and start the conversation!</p>
-              </motion.div>
-            </div>
-          ) : (
-            <div className="space-y-3 md:space-y-4">
-              {showAIBanner && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="p-3 md:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl mx-1"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot className="w-5 h-5 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-bold text-blue-900 text-sm">AI Moderator Active</h4>
-                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                      </div>
-                      <p className="text-xs md:text-sm text-blue-800 leading-relaxed">
-                        👋 Welcome! All messages in this chat are monitored by AI to ensure a safe and respectful community. Please keep conversations positive and appropriate.
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setShowAIBanner(false)}
-                      className="text-blue-600 hover:text-blue-800 transition p-1 flex-shrink-0"
-                      aria-label="Dismiss"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {messages.map((message) => (
-                <MessageBubble
-                  key={message.messageId}
-                  message={message}
-                  onAddReaction={(emoji) =>
-                    handleReaction(message.messageId, emoji, message.senderId)
-                  }
-                  onLike={() => handleLike(message.messageId, message.senderId)}
-                  onReport={() => handleReport(message.messageId)}
-                />
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-        </div>
-
-        {typingUsers.length > 0 && (
-          <div className="px-3 md:px-4 py-2 bg-white border-t border-gray-200 flex-shrink-0">
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2"
-            >
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-              </div>
-              <p className="text-sm text-gray-600 font-medium">
-                {typingUsers[0].userName} is typing...
-              </p>
-            </motion.div>
-          </div>
-        )}
-
-        <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-3 md:py-4 flex-shrink-0">
-          <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="absolute inset-0 flex flex-col bg-white overflow-hidden">
-      <div className="bg-white shadow-sm p-3 md:p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Messages</h1>
-          <div className="relative">
-            <button
-              onClick={() => setShowCreateMenu(!showCreateMenu)}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#0084FF] text-white flex items-center justify-center hover:bg-[#0073E6] transition-all shadow-lg"
-            >
-              <Plus className="w-4 h-4 md:w-5 md:h-5" />
-            </button>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="glass-light border border-gray-200 rounded-xl shadow-xl overflow-hidden"
+    >
+      <div className="flex items-center gap-3 p-6 border-b border-gray-200">
+        <MessageCircle className="w-6 h-6 text-gray-700" />
+        <h2 className="text-xl font-bold text-gray-900">Community Chat</h2>
+        {getUnreadCount() > 0 && (
+          <span className="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold border border-red-300">
+            {getUnreadCount()} unread
+          </span>
+        )}
+      </div>
 
-            {showCreateMenu && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="absolute right-0 mt-2 w-48 md:w-56 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50"
-              >
-                <button
-                  onClick={handleCreateGroupChat}
-                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-gray-50 transition-all text-left"
-                >
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#0084FF] text-white flex items-center justify-center flex-shrink-0">
-                    <Users className="w-4 h-4 md:w-5 md:h-5" />
+      <div className="flex h-[600px]">
+        <div className="w-80 border-r border-gray-200 overflow-y-auto glass-light">
+          {conversations.length === 0 ? (
+            <div className="p-4 text-center text-gray-600">No conversations yet</div>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {groupChats.length > 0 && groupChats.map((conversation) => {
+                const unreadCount = conversation.unreadCount?.[currentUser.uid] || 0;
+                return (
+                  <div
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(conversation)}
+                    className={`p-4 cursor-pointer transition ${
+                      selectedConversation?.id === conversation.id
+                        ? 'bg-gray-100'
+                        : 'hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          conversation.id === 'publicRoom'
+                            ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-xl'
+                            : 'bg-[#0084FF] text-white'
+                        }`}>
+                          {conversation.id === 'publicRoom' ? '🌍' : <Users className="w-5 h-5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-gray-900 truncate">{conversation.title}</h4>
+                          <p className="text-xs text-gray-600">Group Chat</p>
+                        </div>
+                      </div>
+                      {unreadCount > 0 && (
+                        <span className="px-2 py-1 bg-red-600 text-white rounded-full text-xs font-bold">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm">New Group</p>
-                    <p className="text-xs text-gray-500 truncate">Create a group chat</p>
-                  </div>
-                </button>
-                <button
-                  onClick={handleCreatePrivateChat}
-                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-gray-50 transition-all text-left border-t border-gray-200"
-                >
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-700 text-white flex items-center justify-center flex-shrink-0">
-                    <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-gray-900 text-sm">New Chat</p>
-                    <p className="text-xs text-gray-500 truncate">Start a private conversation</p>
-                  </div>
-                </button>
-              </motion.div>
-            )}
-          </div>
-        </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search conversations..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-gray-200"
-          />
-        </div>
+                );
+              })}
 
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-3 md:mt-4 p-3 md:p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl"
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Bot className="w-5 h-5 text-white" />
+              {marketplaceChats.length > 0 && marketplaceChats.map((conversation) => {
+                const unreadCount = conversation.unreadCount?.[currentUser.uid] || 0;
+                return (
+                  <div
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(conversation)}
+                    className={`p-4 cursor-pointer transition border-l-4 border-green-500 ${
+                      selectedConversation?.id === conversation.id
+                        ? 'bg-gray-100'
+                        : 'hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                          🛒
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-gray-900 truncate">{conversation.title}</h4>
+                          <p className="text-xs text-green-600 font-medium">Marketplace</p>
+                        </div>
+                      </div>
+                      {unreadCount > 0 && (
+                        <span className="px-2 py-1 bg-red-600 text-white rounded-full text-xs font-bold">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {privateChats.length > 0 && privateChats.map((conversation) => {
+                const unreadCount = conversation.unreadCount?.[currentUser.uid] || 0;
+                return (
+                  <div
+                    key={conversation.id}
+                    onClick={() => setSelectedConversation(conversation)}
+                    className={`p-4 cursor-pointer transition ${
+                      selectedConversation?.id === conversation.id
+                        ? 'bg-gray-100'
+                        : 'hover:bg-white'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-full bg-gray-700 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                          {conversation.title.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-gray-900 truncate">{conversation.title}</h4>
+                          <p className="text-xs text-gray-600">Private Chat</p>
+                        </div>
+                      </div>
+                      {unreadCount > 0 && (
+                        <span className="px-2 py-1 bg-red-600 text-white rounded-full text-xs font-bold">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-bold text-blue-900 text-sm md:text-base">AI Moderator Active</h3>
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+          )}
+        </div>
+
+        <div className="flex-1 flex flex-col">
+          {!selectedConversation ? (
+            <div className="flex-1 flex items-center justify-center text-gray-600">
+              <div className="text-center">
+                <MessageCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                <p>Select a conversation to start chatting</p>
               </div>
-              <p className="text-xs md:text-sm text-blue-800 leading-relaxed">
-                All conversations are monitored by AI to ensure a safe and respectful community. Please keep your messages positive and appropriate.
-              </p>
             </div>
-            <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 hidden md:block" />
-          </div>
-        </motion.div>
+          ) : (
+            <>
+              <div className="p-4 border-b border-gray-200 glass-light">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      selectedConversation.id === 'publicRoom'
+                        ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white'
+                        : selectedConversation.type === 'marketplace'
+                        ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white'
+                        : selectedConversation.type === 'private'
+                        ? 'bg-gray-700 text-white'
+                        : 'bg-[#0084FF] text-white'
+                    }`}>
+                      {selectedConversation.id === 'publicRoom' ? '🌍' :
+                       selectedConversation.type === 'marketplace' ? '🛒' :
+                       selectedConversation.type === 'private' ? selectedConversation.title.charAt(0).toUpperCase() :
+                       <Users className="w-5 h-5" />}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-gray-900">{selectedConversation.title}</h3>
+                      <p className="text-sm text-gray-600">
+                        {selectedConversation.type === 'group' ? 'Group Chat' :
+                         selectedConversation.type === 'marketplace' ? 'Marketplace Chat' :
+                         'Private Chat'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 p-4 overflow-y-auto glass-light space-y-3">
+                {messages.map((message) => (
+                  <MessageBubble key={message.id} message={message} currentUserId={currentUser.uid} />
+                ))}
+                {typingUsers.length > 0 && (
+                  <div className="flex justify-start">
+                    <div className="bg-white text-gray-900 border border-gray-200 rounded-2xl px-4 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                          <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                        </div>
+                        <span className="text-xs text-gray-600">{typingUsers[0].userName} is typing...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="p-4 glass-light border-t border-gray-200">
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => {
+                      setNewMessage(e.target.value);
+                      handleTyping();
+                    }}
+                    onKeyPress={(e) => e.key === 'Enter' && !sending && handleSendMessage()}
+                    placeholder="Type your message..."
+                    className="flex-1 px-4 py-2 glass-light border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim() || sending}
+                    className="px-4 py-2 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
       </div>
-
-      <div className="flex-1 overflow-y-auto min-h-0 bg-white">
-        {groupChats.length > 0 && (
-          <div>
-            <div className="px-3 md:px-4 py-1.5">
-              <p className="text-xs font-semibold text-gray-500 uppercase">Group Chats</p>
-            </div>
-            {groupChats.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-3 md:px-4 py-2 flex items-center gap-2 md:gap-3 transition-all hover:bg-gray-100"
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                  conversation.id === 'publicRoom'
-                    ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-base'
-                    : 'bg-[#0084FF] text-white'
-                }`}>
-                  {conversation.id === 'publicRoom' ? '🌍' : <Users className="w-4 h-4" />}
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-sm truncate">{conversation.title}</h3>
-                  <p className="text-xs text-gray-500">Tap to open</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {marketplaceChats.length > 0 && (
-          <div className="mt-2">
-            <div className="px-3 md:px-4 py-1.5 bg-gradient-to-r from-green-50/80 to-emerald-50/80 border-b border-green-200/50">
-              <p className="text-xs font-semibold text-green-700 uppercase flex items-center gap-2">
-                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                </svg>
-                Market Place
-              </p>
-            </div>
-            {marketplaceChats.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-3 md:px-4 py-2 flex items-center gap-2 md:gap-3 transition-all hover:bg-gray-100 border-l-4 border-green-500"
-              >
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 text-white flex items-center justify-center font-bold text-base flex-shrink-0">
-                  🛒
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-sm truncate">{conversation.title}</h3>
-                  <p className="text-xs text-green-600 font-medium">Product Inquiry</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {privateChats.length > 0 && (
-          <div className="mt-2">
-            <div className="px-3 md:px-4 py-1.5">
-              <p className="text-xs font-semibold text-gray-500 uppercase">Private Messages</p>
-            </div>
-            {privateChats.map((conversation) => (
-              <button
-                key={conversation.id}
-                onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-3 md:px-4 py-2 flex items-center gap-2 md:gap-3 transition-all hover:bg-gray-100"
-              >
-                <div className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center font-bold text-base flex-shrink-0">
-                  {conversation.title.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <h3 className="font-semibold text-gray-900 text-sm truncate">{conversation.title}</h3>
-                  <p className="text-xs text-gray-500">Tap to open</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
+    </motion.div>
   );
 }
