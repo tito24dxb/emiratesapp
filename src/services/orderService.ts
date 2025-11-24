@@ -12,6 +12,7 @@ import {
   Timestamp,
   increment
 } from 'firebase/firestore';
+import QRCode from 'qrcode';
 import { incrementProductSales, decrementStock, getProduct } from './marketplaceService';
 import { createAttendanceRecord } from './attendanceService';
 
@@ -26,7 +27,7 @@ export interface MarketplaceOrder {
   seller_email: string;
   product_id: string;
   product_title: string;
-  product_type: 'digital' | 'physical' | 'service';
+  product_type: 'digital' | 'physical' | 'service' | 'activity';
   product_image?: string;
   quantity: number;
   price: number;
@@ -51,6 +52,9 @@ export interface MarketplaceOrder {
   max_downloads: number;
   created_at: any;
   completed_at?: any;
+  qr_code?: string;
+  attendance_status?: 'awaited' | 'checked_in';
+  checked_in_at?: any;
   metadata?: {
     buyer_ip?: string;
     transaction_id?: string;
@@ -67,7 +71,7 @@ export interface CreateOrderData {
   seller_email: string;
   product_id: string;
   product_title: string;
-  product_type: 'digital' | 'physical' | 'service';
+  product_type: 'digital' | 'physical' | 'service' | 'activity';
   product_image?: string;
   quantity: number;
   price: number;
@@ -84,6 +88,31 @@ export const createOrder = async (orderData: CreateOrderData): Promise<string> =
   try {
     const orderRef = doc(collection(db, 'marketplace_orders'));
     const orderNumber = generateOrderNumber();
+
+    // Generate QR code for events
+    let qrCode: string | undefined;
+    let attendanceStatus: 'awaited' | 'checked_in' | undefined;
+
+    if (orderData.product_type === 'activity') {
+      const qrData = JSON.stringify({
+        orderId: orderRef.id,
+        orderNumber,
+        buyerId: orderData.buyer_id,
+        buyerName: orderData.buyer_name,
+        productId: orderData.product_id,
+        productTitle: orderData.product_title,
+        timestamp: Date.now()
+      });
+
+      qrCode = await QRCode.toDataURL(qrData, {
+        errorCorrectionLevel: 'H',
+        type: 'image/png',
+        width: 300,
+        margin: 2
+      });
+
+      attendanceStatus = 'awaited';
+    }
 
     const order: Omit<MarketplaceOrder, 'id'> = {
       order_number: orderNumber,
@@ -106,6 +135,8 @@ export const createOrder = async (orderData: CreateOrderData): Promise<string> =
       download_count: 0,
       max_downloads: 5,
       created_at: Timestamp.now(),
+      ...(qrCode && { qr_code: qrCode }),
+      ...(attendanceStatus && { attendance_status: attendanceStatus }),
       metadata: {}
     };
 
@@ -443,5 +474,62 @@ export const getOrderByPaymentIntent = async (
   } catch (error) {
     console.error('Error getting order by payment intent:', error);
     return null;
+  }
+};
+
+export const checkInAttendee = async (orderId: string): Promise<void> => {
+  try {
+    const orderRef = doc(db, 'marketplace_orders', orderId);
+    await updateDoc(orderRef, {
+      attendance_status: 'checked_in',
+      checked_in_at: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error checking in attendee:', error);
+    throw error;
+  }
+};
+
+export const getEventOrders = async (sellerId: string): Promise<MarketplaceOrder[]> => {
+  try {
+    const ordersRef = collection(db, 'marketplace_orders');
+    const q = query(
+      ordersRef,
+      where('seller_id', '==', sellerId),
+      where('product_type', '==', 'activity'),
+      where('payment_status', '==', 'completed'),
+      orderBy('created_at', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as MarketplaceOrder));
+  } catch (error) {
+    console.error('Error getting event orders:', error);
+    return [];
+  }
+};
+
+export const getMyEventOrders = async (buyerId: string): Promise<MarketplaceOrder[]> => {
+  try {
+    const ordersRef = collection(db, 'marketplace_orders');
+    const q = query(
+      ordersRef,
+      where('buyer_id', '==', buyerId),
+      where('product_type', '==', 'activity'),
+      where('payment_status', '==', 'completed'),
+      orderBy('created_at', 'desc')
+    );
+
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    } as MarketplaceOrder));
+  } catch (error) {
+    console.error('Error getting my event orders:', error);
+    return [];
   }
 };

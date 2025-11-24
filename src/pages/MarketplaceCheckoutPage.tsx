@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Package } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Package, Wallet, CreditCard } from 'lucide-react';
 import { Elements } from '@stripe/react-stripe-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { getProduct, MarketplaceProduct } from '../services/marketplaceService';
-import { createOrder } from '../services/orderService';
+import { createOrder, updateOrderPaymentStatus } from '../services/orderService';
 import { getStripe, createMarketplacePaymentIntent, formatPrice } from '../services/stripeService';
+import { walletService } from '../services/walletService';
 import PaymentForm from '../components/marketplace/PaymentForm';
 
 export default function MarketplaceCheckoutPage() {
@@ -19,6 +20,11 @@ export default function MarketplaceCheckoutPage() {
   const [orderId, setOrderId] = useState<string>('');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet' | 'mixed'>('card');
+  const [walletAmount, setWalletAmount] = useState<number>(0);
+  const [cardAmount, setCardAmount] = useState<number>(0);
+  const [processingWalletPayment, setProcessingWalletPayment] = useState(false);
 
   const stripePromise = getStripe();
 
@@ -63,6 +69,12 @@ export default function MarketplaceCheckoutPage() {
 
       setProduct(fetchedProduct);
 
+      // Load wallet balance
+      const wallet = await walletService.getWallet(currentUser.uid);
+      if (wallet) {
+        setWalletBalance(wallet.balance);
+      }
+
       const newOrderId = await createOrder({
         buyer_id: currentUser.uid,
         buyer_name: currentUser.name || 'Anonymous',
@@ -83,21 +95,50 @@ export default function MarketplaceCheckoutPage() {
 
       // Price is already in cents from Firestore, so divide by 100 to get dollars
       const priceInDollars = fetchedProduct.price / 100;
+      const totalAmount = priceInDollars * quantity;
 
-      const paymentIntent = await createMarketplacePaymentIntent({
-        firebase_buyer_uid: currentUser.uid,
-        firebase_seller_uid: fetchedProduct.seller_id,
-        firebase_order_id: newOrderId,
-        product_id: fetchedProduct.id,
-        product_title: fetchedProduct.title,
-        product_type: fetchedProduct.product_type,
-        quantity: quantity,
-        amount: priceInDollars * quantity,
-        currency: fetchedProduct.currency,
-        seller_email: fetchedProduct.seller_email
-      });
+      // Determine default payment method based on wallet balance
+      if (wallet && wallet.balance >= totalAmount) {
+        setPaymentMethod('wallet');
+        setWalletAmount(totalAmount);
+        setCardAmount(0);
+      } else if (wallet && wallet.balance > 0) {
+        setPaymentMethod('mixed');
+        setWalletAmount(wallet.balance);
+        setCardAmount(totalAmount - wallet.balance);
 
-      setClientSecret(paymentIntent.clientSecret);
+        // Create payment intent for remaining amount
+        const paymentIntent = await createMarketplacePaymentIntent({
+          firebase_buyer_uid: currentUser.uid,
+          firebase_seller_uid: fetchedProduct.seller_id,
+          firebase_order_id: newOrderId,
+          product_id: fetchedProduct.id,
+          product_title: fetchedProduct.title,
+          product_type: fetchedProduct.product_type,
+          quantity: quantity,
+          amount: totalAmount - wallet.balance,
+          currency: fetchedProduct.currency,
+          seller_email: fetchedProduct.seller_email
+        });
+        setClientSecret(paymentIntent.clientSecret);
+      } else {
+        setPaymentMethod('card');
+        setCardAmount(totalAmount);
+
+        const paymentIntent = await createMarketplacePaymentIntent({
+          firebase_buyer_uid: currentUser.uid,
+          firebase_seller_uid: fetchedProduct.seller_id,
+          firebase_order_id: newOrderId,
+          product_id: fetchedProduct.id,
+          product_title: fetchedProduct.title,
+          product_type: fetchedProduct.product_type,
+          quantity: quantity,
+          amount: totalAmount,
+          currency: fetchedProduct.currency,
+          seller_email: fetchedProduct.seller_email
+        });
+        setClientSecret(paymentIntent.clientSecret);
+      }
     } catch (error: any) {
       console.error('Error loading checkout:', error);
       alert(error.message || 'Failed to load checkout');
@@ -107,13 +148,71 @@ export default function MarketplaceCheckoutPage() {
     }
   };
 
+  const handleWalletPayment = async () => {
+    if (!currentUser || !product || !orderId) return;
+
+    setProcessingWalletPayment(true);
+    try {
+      const totalAmount = (product.price / 100) * quantity;
+
+      // Deduct from wallet
+      await walletService.deductFunds(
+        currentUser.uid,
+        totalAmount,
+        'purchase',
+        `Purchase: ${product.title}`,
+        { orderId, productId: product.id }
+      );
+
+      // Update order status
+      await updateOrderPaymentStatus(orderId, 'completed');
+
+      setPaymentSuccess(true);
+      setTimeout(() => {
+        navigate(`/marketplace/orders`);
+      }, 3000);
+    } catch (error: any) {
+      console.error('Wallet payment error:', error);
+      alert(`Payment failed: ${error.message || 'Unknown error'}`);
+    } finally {
+      setProcessingWalletPayment(false);
+    }
+  };
+
+  const handleMixedPaymentSuccess = async (paymentIntentId: string) => {
+    if (!currentUser || !product || !orderId) return;
+
+    try {
+      // Deduct wallet portion
+      await walletService.deductFunds(
+        currentUser.uid,
+        walletAmount,
+        'purchase',
+        `Partial payment for: ${product.title}`,
+        { orderId, productId: product.id, paymentIntentId }
+      );
+
+      setPaymentSuccess(true);
+      setTimeout(() => {
+        navigate(`/marketplace/orders`);
+      }, 3000);
+    } catch (error: any) {
+      console.error('Mixed payment error:', error);
+      alert(`Payment completed but wallet update failed: ${error.message}`);
+    }
+  };
+
   const handlePaymentSuccess = (paymentIntentId: string) => {
     console.log('Payment succeeded:', paymentIntentId);
-    setPaymentSuccess(true);
 
-    setTimeout(() => {
-      navigate(`/marketplace/orders`);
-    }, 3000);
+    if (paymentMethod === 'mixed') {
+      handleMixedPaymentSuccess(paymentIntentId);
+    } else {
+      setPaymentSuccess(true);
+      setTimeout(() => {
+        navigate(`/marketplace/orders`);
+      }, 3000);
+    }
   };
 
   const handlePaymentError = (error: string) => {
@@ -150,7 +249,7 @@ export default function MarketplaceCheckoutPage() {
     );
   }
 
-  if (!product || !clientSecret) {
+  if (!product || (paymentMethod !== 'wallet' && !clientSecret)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -251,6 +350,22 @@ export default function MarketplaceCheckoutPage() {
                 </div>
               )}
 
+              {/* Wallet Balance */}
+              {walletBalance > 0 && (
+                <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Wallet className="w-5 h-5 text-green-600" />
+                    <span className="font-semibold text-green-900">Wallet Balance</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-700">${walletBalance.toFixed(2)}</p>
+                  {walletBalance < (totalAmount / 100) && (
+                    <p className="text-xs text-green-600 mt-1">
+                      Remaining: ${Math.max(0, (totalAmount / 100) - walletBalance).toFixed(2)} to pay
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Price Breakdown */}
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-gray-600">
@@ -295,15 +410,144 @@ export default function MarketplaceCheckoutPage() {
             <div className="bg-white/20 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 p-6 lg:p-8 relative z-10">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Details</h2>
 
-              <Elements stripe={stripePromise}>
-                <PaymentForm
-                  amount={totalAmount}
-                  currency={product.currency}
-                  clientSecret={clientSecret}
-                  onSuccess={handlePaymentSuccess}
-                  onError={handlePaymentError}
-                />
-              </Elements>
+              {/* Payment Method Selection */}
+              {walletBalance > 0 && (
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Payment Method
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* Wallet Payment Option */}
+                    {walletBalance >= (totalAmount / 100) && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('wallet')}
+                        className={`p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
+                          paymentMethod === 'wallet'
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <Wallet className={`w-6 h-6 ${paymentMethod === 'wallet' ? 'text-green-600' : 'text-gray-600'}`} />
+                        <div className="text-left">
+                          <div className="font-semibold text-gray-900">Pay with Wallet</div>
+                          <div className="text-xs text-gray-600">Balance: ${walletBalance.toFixed(2)}</div>
+                        </div>
+                      </button>
+                    )}
+
+                    {/* Card Payment Option */}
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('card')}
+                      className={`p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
+                        paymentMethod === 'card'
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <CreditCard className={`w-6 h-6 ${paymentMethod === 'card' ? 'text-blue-600' : 'text-gray-600'}`} />
+                      <div className="text-left">
+                        <div className="font-semibold text-gray-900">Pay with Card</div>
+                        <div className="text-xs text-gray-600">Credit/Debit Card</div>
+                      </div>
+                    </button>
+
+                    {/* Mixed Payment Option */}
+                    {walletBalance < (totalAmount / 100) && walletBalance > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('mixed')}
+                        className={`p-4 border-2 rounded-lg flex items-center gap-3 transition-all md:col-span-2 ${
+                          paymentMethod === 'mixed'
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <div className="flex gap-2">
+                          <Wallet className={`w-6 h-6 ${paymentMethod === 'mixed' ? 'text-purple-600' : 'text-gray-600'}`} />
+                          <CreditCard className={`w-6 h-6 ${paymentMethod === 'mixed' ? 'text-purple-600' : 'text-gray-600'}`} />
+                        </div>
+                        <div className="text-left flex-1">
+                          <div className="font-semibold text-gray-900">Wallet + Card</div>
+                          <div className="text-xs text-gray-600">
+                            ${walletBalance.toFixed(2)} from wallet + ${((totalAmount / 100) - walletBalance).toFixed(2)} from card
+                          </div>
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Payment Form or Wallet Confirmation */}
+              {paymentMethod === 'wallet' ? (
+                <div className="space-y-4">
+                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <h3 className="font-semibold text-green-900 mb-2">Payment Summary</h3>
+                    <div className="space-y-1 text-sm text-green-800">
+                      <div className="flex justify-between">
+                        <span>Amount to pay:</span>
+                        <span className="font-semibold">${(totalAmount / 100).toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Wallet balance:</span>
+                        <span className="font-semibold">${walletBalance.toFixed(2)}</span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t border-green-300">
+                        <span>Remaining balance:</span>
+                        <span className="font-semibold">${(walletBalance - (totalAmount / 100)).toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleWalletPayment}
+                    disabled={processingWalletPayment}
+                    className="w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {processingWalletPayment ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <Wallet className="w-5 h-5" />
+                        Complete Purchase with Wallet
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {paymentMethod === 'mixed' && (
+                    <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                      <h3 className="font-semibold text-purple-900 mb-2">Split Payment</h3>
+                      <div className="space-y-1 text-sm text-purple-800">
+                        <div className="flex justify-between">
+                          <span>From wallet:</span>
+                          <span className="font-semibold">${walletBalance.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>From card:</span>
+                          <span className="font-semibold">${((totalAmount / 100) - walletBalance).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Elements stripe={stripePromise}>
+                    <PaymentForm
+                      amount={paymentMethod === 'mixed' ? Math.round((totalAmount - (walletBalance * 100))) : totalAmount}
+                      currency={product.currency}
+                      clientSecret={clientSecret}
+                      onSuccess={handlePaymentSuccess}
+                      onError={handlePaymentError}
+                    />
+                  </Elements>
+                </>
+              )}
             </div>
           </div>
         </div>
