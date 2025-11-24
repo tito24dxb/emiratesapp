@@ -21,6 +21,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage, auth, functions } from '../lib/firebase';
 import { httpsCallable } from 'firebase/functions';
+import { aiModerationService } from './aiModerationService';
 
 export interface Conversation {
   id: string;
@@ -308,6 +309,30 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userName = userDoc.data()?.name || 'Unknown User';
+
+    if (content.trim()) {
+      const moderationResult = await aiModerationService.moderateContent(
+        userId,
+        userName,
+        content,
+        'chat'
+      );
+
+      if (!moderationResult.allowed) {
+        throw new Error(moderationResult.reason);
+      }
+
+      if (moderationResult.action === 'warn') {
+        console.warn('⚠️ Content warning:', moderationResult.reason);
+        window.dispatchEvent(new CustomEvent('showModerationWarning', {
+          detail: { message: moderationResult.reason }
+        }));
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+
     const messageRef = doc(collection(db, 'groupChats', conversationId, 'messages'));
     let attachmentUrl: string | null = null;
     let attachmentRef: string | null = null;
@@ -337,9 +362,6 @@ export const communityChatService = {
         console.warn('Failed to award attachment points:', error);
       }
     }
-
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    const userName = userDoc.data()?.name || 'Unknown User';
 
     const messageData: Message = {
       messageId: messageRef.id,

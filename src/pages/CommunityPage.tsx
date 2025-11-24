@@ -12,6 +12,8 @@ import CreateConversationDropdown from '../components/chat/CreateConversationDro
 import { useChatMessages } from '../hooks/useChatMessages';
 import { useTypingIndicator } from '../hooks/useTypingIndicator';
 import { collection, query, where, getDocs } from 'firebase/firestore';
+import { Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function CommunityPage() {
   const { currentUser } = useApp();
@@ -225,7 +227,22 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="h-full">
+    <div className="h-full flex flex-col">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100"
+      >
+        <div className="flex items-center gap-3 px-4 py-2">
+          <div className="flex items-center gap-2 flex-1">
+            <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />
+            <p className="text-xs text-blue-800">
+              <span className="font-semibold">AI Moderator Active:</span> All messages are monitored for safety.
+            </p>
+          </div>
+        </div>
+      </motion.div>
+
       {!selectedConversation ? (
         <ChatSidebar
           conversations={conversations}
