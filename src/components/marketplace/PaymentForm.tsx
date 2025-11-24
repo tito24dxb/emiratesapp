@@ -82,10 +82,20 @@ export default function PaymentForm({
 
     // Check if Apple Pay or Google Pay is available
     pr.canMakePayment().then((result) => {
+      console.log('Payment Request canMakePayment result:', result);
+      console.log('User Agent:', navigator.userAgent);
+      console.log('Is PWA:', window.matchMedia('(display-mode: standalone)').matches);
+      console.log('Is Safari:', /^((?!chrome|android).)*safari/i.test(navigator.userAgent));
+
       if (result) {
         setPaymentRequest(pr);
         setWalletPaymentAvailable(true);
+        console.log('✅ Digital wallet payments available');
+      } else {
+        console.log('❌ Digital wallet payments not available');
       }
+    }).catch((error) => {
+      console.error('Error checking payment availability:', error);
     });
 
     // Handle the payment method from Apple Pay or Google Pay
@@ -303,17 +313,26 @@ export default function PaymentForm({
               />
             </div>
           ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center gap-2 px-6 py-3 bg-black rounded-lg opacity-40">
-                  <ApplePayIcon className="w-12 h-8" />
-                </div>
-                <div className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-gray-300 rounded-lg opacity-40">
-                  <GooglePayIcon className="w-12 h-8" />
-                </div>
+            <div className="space-y-3">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <button
+                  disabled
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-black rounded-lg opacity-40 cursor-not-allowed"
+                >
+                  <ApplePayIcon className="h-8 w-auto" />
+                </button>
+                <button
+                  disabled
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-white border-2 border-gray-300 rounded-lg opacity-40 cursor-not-allowed"
+                >
+                  <GooglePayIcon className="h-8 w-auto" />
+                </button>
               </div>
               <p className="text-xs text-gray-500 text-center italic">
-                Apple Pay and Google Pay will be available during checkout on supported browsers
+                Digital wallet payments currently unavailable in this browser
+              </p>
+              <p className="text-xs text-blue-600 text-center font-medium">
+                ✓ Use Safari for Apple Pay or Chrome for Google Pay
               </p>
             </div>
           )}
