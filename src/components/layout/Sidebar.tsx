@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Wallet,
   Camera,
@@ -59,7 +60,9 @@ export default function Sidebar() {
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number } | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -70,6 +73,23 @@ export default function Sidebar() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  const handleDropdownToggle = (groupLabel: string) => {
+    if (openDropdown === groupLabel) {
+      setOpenDropdown(null);
+      setDropdownPosition(null);
+    } else {
+      const button = buttonRefs.current[groupLabel];
+      if (button) {
+        const rect = button.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + 8,
+          left: rect.left
+        });
+      }
+      setOpenDropdown(groupLabel);
+    }
+  };
 
   if (!currentUser) return null;
 
@@ -429,7 +449,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Horizontal Sidebar - Grouped Navigation */}
-      <aside className="w-full liquid-sidebar border-b border-white/20 relative z-[100]" ref={dropdownRef}>
+      <aside className="w-full liquid-sidebar border-b border-white/20 relative z-[100]">
         <div className="p-3">
           <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent">
             {/* Top-level items */}
@@ -460,9 +480,10 @@ export default function Sidebar() {
               const hasActiveItem = group.items.some(item => location.pathname === item.path);
 
               return (
-                <div key={group.label} className="relative">
+                <div key={group.label}>
                   <button
-                    onClick={() => setOpenDropdown(isOpen ? null : group.label)}
+                    ref={(el) => buttonRefs.current[group.label] = el}
+                    onClick={() => handleDropdownToggle(group.label)}
                     className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap ${
                       hasActiveItem || isOpen
                         ? 'glass-primary text-gray-900 shadow-lg'
@@ -474,20 +495,23 @@ export default function Sidebar() {
                     <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                   </button>
 
-                  <AnimatePresence>
-                    {isOpen && (
+                  {isOpen && dropdownPosition && createPortal(
+                    <AnimatePresence>
                       <motion.div
+                        ref={dropdownRef}
                         initial={{ opacity: 0, y: -10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         transition={{ type: "spring", damping: 25, stiffness: 400, duration: 0.3 }}
-                        className="absolute top-full left-0 mt-2 min-w-[200px] rounded-2xl shadow-2xl overflow-hidden z-[9999]"
+                        className="fixed min-w-[200px] rounded-2xl shadow-2xl overflow-hidden"
                         style={{
-                          background: 'rgba(255, 255, 255, 0.85)',
+                          top: `${dropdownPosition.top}px`,
+                          left: `${dropdownPosition.left}px`,
+                          zIndex: 2147483647,
+                          background: 'rgba(255, 255, 255, 0.95)',
                           backdropFilter: 'blur(20px)',
                           WebkitBackdropFilter: 'blur(20px)',
                           border: '1px solid rgba(255, 255, 255, 0.3)',
-                          position: 'absolute',
                         }}
                       >
                         <div className="p-2">
@@ -500,7 +524,10 @@ export default function Sidebar() {
                               <Link
                                 key={item.path}
                                 to={item.path}
-                                onClick={() => setOpenDropdown(null)}
+                                onClick={() => {
+                                  setOpenDropdown(null);
+                                  setDropdownPosition(null);
+                                }}
                                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all mb-1 ${
                                   isActive
                                     ? 'bg-gradient-to-r from-[#FF3B3F]/20 to-[#E6282C]/20 text-gray-900 font-semibold shadow-md'
@@ -528,8 +555,9 @@ export default function Sidebar() {
                           })}
                         </div>
                       </motion.div>
-                    )}
-                  </AnimatePresence>
+                    </AnimatePresence>,
+                    document.body
+                  )}
                 </div>
               );
             })}
