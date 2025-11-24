@@ -185,7 +185,7 @@ Complete referral and affiliate marketing system with fraud prevention, commissi
 1. **User Gets Referral Link**
    - Go to "Invite Friends" page
    - System generates unique referral code
-   - Copy link: `https://yoursite.com/register?ref=ABC12XYZ-USER`
+   - Copy link: `https://thecrewacademy.co/register?ref=ABC12XYZ-USER`
 
 2. **Share Link**
    - Copy to clipboard

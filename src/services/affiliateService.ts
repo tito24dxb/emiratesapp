@@ -186,7 +186,7 @@ export const affiliateService = {
     }
 
     const linkRef = doc(collection(db, 'affiliate_links'));
-    const affiliateUrl = `${window.location.origin}/marketplace/${productId}?ref=${affiliate.affiliateCode}`;
+    const affiliateUrl = `https://thecrewacademy.co/marketplace/${productId}?ref=${affiliate.affiliateCode}`;
 
     const linkData: AffiliateLink = {
       id: linkRef.id,

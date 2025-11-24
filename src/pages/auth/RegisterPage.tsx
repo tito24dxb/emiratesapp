@@ -218,6 +218,17 @@ export default function RegisterPage() {
             Start your cabin crew journey
           </p>
 
+          {referralCode && (
+            <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-3 mb-4">
+              <p className="text-center text-sm font-semibold text-gray-900">
+                🎉 Referral Code Applied!
+              </p>
+              <p className="text-center text-xs text-gray-600 mt-1">
+                You and your friend will both earn rewards
+              </p>
+            </div>
+          )}
+
           {selectedPlan && selectedPlan !== 'free' && (
             <div className="bg-gradient-to-r from-[#D71920]/10 to-[#CBA135]/10 border border-[#D71920]/20 rounded-xl p-3 mb-4">
               <p className="text-center text-sm font-semibold text-gray-900">

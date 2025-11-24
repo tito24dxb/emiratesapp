@@ -53,7 +53,7 @@ export default function InviteFriendsPage() {
 
   const getReferralLink = () => {
     if (!referral) return '';
-    return `${window.location.origin}/register?ref=${referral.referralCode}`;
+    return `https://thecrewacademy.co/register?ref=${referral.referralCode}`;
   };
 
   const copyToClipboard = () => {
@@ -88,7 +88,7 @@ export default function InviteFriendsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#EADBC8] via-[#F5E6D3] to-white p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -109,7 +109,7 @@ export default function InviteFriendsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/80 backdrop-blur-md rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/60 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-lg"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
@@ -124,7 +124,7 @@ export default function InviteFriendsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/80 backdrop-blur-md rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/60 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-lg"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
@@ -139,7 +139,7 @@ export default function InviteFriendsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/80 backdrop-blur-md rounded-xl p-6 border border-gray-200/50 shadow-lg"
+            className="bg-white/60 backdrop-blur-xl rounded-xl p-6 border border-white/30 shadow-lg"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
@@ -155,7 +155,7 @@ export default function InviteFriendsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-xl p-8 mb-8 text-white shadow-xl"
+          className="bg-gradient-to-r from-[#D71920]/90 to-[#B91518]/90 backdrop-blur-xl rounded-xl p-8 mb-8 text-white shadow-xl border border-white/20"
         >
           <h2 className="text-2xl font-bold mb-4">Your Referral Link</h2>
           <p className="mb-6 opacity-90">Share this link with friends to earn 50 points for each successful referral!</p>
@@ -216,7 +216,7 @@ export default function InviteFriendsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-lg overflow-hidden mb-8"
+          className="bg-white/60 backdrop-blur-xl rounded-xl border border-white/30 shadow-lg overflow-hidden mb-8"
         >
           <div className="p-6 border-b border-gray-200">
             <h3 className="text-xl font-bold text-gray-900">How It Works</h3>
@@ -259,7 +259,7 @@ export default function InviteFriendsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-lg overflow-hidden"
+            className="bg-white/60 backdrop-blur-xl rounded-xl border border-white/30 shadow-lg overflow-hidden"
           >
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-xl font-bold text-gray-900">Recent Referrals</h3>

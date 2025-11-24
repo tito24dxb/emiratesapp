@@ -184,7 +184,7 @@ export default function ReputationTester() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-orange-50 to-gray-100 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 flex items-center gap-3 mb-2">
@@ -225,7 +225,7 @@ export default function ReputationTester() {
           </button>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-lg p-6">
+        <div className="bg-white/60 backdrop-blur-xl rounded-xl border border-white/30 shadow-lg p-6">
           <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
             <AlertCircle className="w-5 h-5" />
             Test Results
