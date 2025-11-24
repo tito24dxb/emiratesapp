@@ -352,8 +352,22 @@ export default function ProductDetailPage() {
                   className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  Contact Seller
+                  {showChatModal ? 'Hide Chat' : 'Contact Seller'}
                 </button>
+
+                {/* Inline Chat Dropdown */}
+                {showChatModal && product && (
+                  <MarketplaceChatModal
+                    isOpen={showChatModal}
+                    onClose={handleChatModalClose}
+                    productId={product.id}
+                    productTitle={product.title}
+                    productImage={product.images?.[0]}
+                    sellerId={product.seller_id}
+                    sellerName={product.seller_name}
+                    onConversationCreated={handleConversationCreated}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -399,20 +413,6 @@ export default function ProductDetailPage() {
           </div>
         )}
       </AnimatePresence>
-
-      {/* Marketplace Chat Modal */}
-      {product && (
-        <MarketplaceChatModal
-          isOpen={showChatModal}
-          onClose={handleChatModalClose}
-          productId={product.id}
-          productTitle={product.title}
-          productImage={product.images?.[0]}
-          sellerId={product.seller_id}
-          sellerName={product.seller_name}
-          onConversationCreated={handleConversationCreated}
-        />
-      )}
     </div>
   );
 }
