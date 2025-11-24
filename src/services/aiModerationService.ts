@@ -153,49 +153,65 @@ class AIModerationService {
     analysis: string;
   }> {
     try {
-      const prompt = `You are a content moderation AI. Analyze the following ${contentType} content and provide a JSON response.
+      const prompt = `You are a content moderation AI. Analyze the following ${contentType} content and respond with ONLY a valid JSON object, no markdown formatting.
 
 Content: "${content}"
 
-Evaluate for:
-1. Spam/promotional content
-2. Harassment/bullying
-3. Scams/fraud
-4. Off-topic content
-5. Explicit/inappropriate content
-6. Hate speech
-7. Violence
-8. Self-harm
-9. Fraudulent schemes
+Evaluate for: spam, harassment, scams, fraud, off-topic, explicit content, hate speech, violence, self-harm.
 
-Respond in JSON format:
+Respond with ONLY valid JSON (no code blocks, no markdown):
 {
-  "categories": ["spam", "harassment", etc],
-  "severity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL",
-  "confidence": 0.0-1.0,
+  "categories": ["spam", "harassment"],
+  "severity": "LOW",
+  "confidence": 0.8,
   "analysis": "brief explanation"
-}`;
+}
+
+severity must be: LOW, MEDIUM, HIGH, or CRITICAL
+confidence must be: 0.0 to 1.0
+categories must be from: spam, harassment, scam, off-topic, explicit, hate-speech, violence, self-harm, fraud`;
 
       const response = await openaiClient.sendMessage(
         [{ role: 'user', content: prompt }],
         'system-moderation'
       );
 
-      const result = JSON.parse(response.reply || '{}');
+      let cleanedReply = response.reply || '{}';
+
+      cleanedReply = cleanedReply
+        .replace(/```json\s*/g, '')
+        .replace(/```\s*/g, '')
+        .replace(/^[\s\n]+|[\s\n]+$/g, '')
+        .trim();
+
+      if (!cleanedReply.startsWith('{')) {
+        const jsonMatch = cleanedReply.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          cleanedReply = jsonMatch[0];
+        }
+      }
+
+      const result = JSON.parse(cleanedReply);
+
+      const validSeverities: ModerationSeverity[] = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
+      const severity = validSeverities.includes(result.severity) ? result.severity : 'LOW';
 
       return {
-        categories: result.categories || [],
-        severity: result.severity || 'LOW',
-        confidence: result.confidence || 0.5,
-        analysis: result.analysis || 'No analysis available',
+        categories: Array.isArray(result.categories) ? result.categories : [],
+        severity,
+        confidence: typeof result.confidence === 'number' ? result.confidence : 0.5,
+        analysis: typeof result.analysis === 'string' ? result.analysis : 'No analysis available',
       };
     } catch (error) {
       console.error('AI moderation analysis failed:', error);
+      if (error instanceof Error) {
+        console.error('Error details:', error.message);
+      }
       return {
         categories: [],
         severity: 'LOW',
         confidence: 0,
-        analysis: 'AI analysis unavailable',
+        analysis: 'AI analysis unavailable - using rule-based filtering only',
       };
     }
   }
