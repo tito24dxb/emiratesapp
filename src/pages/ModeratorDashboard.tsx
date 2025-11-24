@@ -6,22 +6,27 @@ import { useNavigate } from 'react-router-dom';
 import { collection, query, getDocs, where, orderBy, limit, updateDoc, doc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-interface ContentItem {
+interface ModerationLog {
   id: string;
-  type: 'post' | 'comment' | 'message' | 'product';
+  userId: string;
+  userName: string;
+  contentType: 'post' | 'comment' | 'chat' | 'marketplace' | 'profile';
   content: string;
-  authorId: string;
-  authorName: string;
-  createdAt: Timestamp;
-  status: 'pending' | 'approved' | 'rejected';
-  reports: number;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  categories: string[];
+  action: 'allow' | 'warn' | 'block' | 'ban' | 'escalate';
+  reason: string;
+  confidence: number;
+  timestamp: Timestamp;
+  ruleViolations?: string[];
+  status: 'pending' | 'reviewed' | 'appealed' | 'resolved';
 }
 
 interface ModStats {
-  pendingReviews: number;
-  approvedToday: number;
-  rejectedToday: number;
-  totalReports: number;
+  totalViolations: number;
+  warnings: number;
+  blocked: number;
+  criticalToday: number;
 }
 
 export default function ModeratorDashboard() {
@@ -29,13 +34,13 @@ export default function ModeratorDashboard() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ModStats>({
-    pendingReviews: 0,
-    approvedToday: 0,
-    rejectedToday: 0,
-    totalReports: 0
+    totalViolations: 0,
+    warnings: 0,
+    blocked: 0,
+    criticalToday: 0
   });
-  const [contentItems, setContentItems] = useState<ContentItem[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'reported'>('pending');
+  const [logs, setLogs] = useState<ModerationLog[]>([]);
+  const [filter, setFilter] = useState<'all' | 'warnings' | 'blocked' | 'critical'>('all');
 
   useEffect(() => {
     if (currentUser?.role === 'moderator' || currentUser?.role === 'governor') {
@@ -50,66 +55,74 @@ export default function ModeratorDashboard() {
       today.setHours(0, 0, 0, 0);
       const todayTimestamp = Timestamp.fromDate(today);
 
-      // Get community posts that need moderation
-      let postsQuery;
-      if (filter === 'reported') {
-        postsQuery = query(
-          collection(db, 'community_posts'),
-          where('reportCount', '>', 0),
-          orderBy('reportCount', 'desc'),
-          limit(50)
+      let logsQuery;
+      if (filter === 'warnings') {
+        logsQuery = query(
+          collection(db, 'moderation_logs'),
+          where('action', '==', 'warn'),
+          orderBy('timestamp', 'desc'),
+          limit(100)
         );
-      } else if (filter === 'pending') {
-        postsQuery = query(
-          collection(db, 'community_posts'),
-          where('moderationStatus', '==', 'pending'),
-          orderBy('createdAt', 'desc'),
-          limit(50)
+      } else if (filter === 'blocked') {
+        logsQuery = query(
+          collection(db, 'moderation_logs'),
+          where('action', '==', 'block'),
+          orderBy('timestamp', 'desc'),
+          limit(100)
+        );
+      } else if (filter === 'critical') {
+        logsQuery = query(
+          collection(db, 'moderation_logs'),
+          where('severity', '==', 'CRITICAL'),
+          orderBy('timestamp', 'desc'),
+          limit(100)
         );
       } else {
-        postsQuery = query(
-          collection(db, 'community_posts'),
-          orderBy('createdAt', 'desc'),
-          limit(50)
+        logsQuery = query(
+          collection(db, 'moderation_logs'),
+          orderBy('timestamp', 'desc'),
+          limit(100)
         );
       }
 
-      const postsSnapshot = await getDocs(postsQuery);
-      const items: ContentItem[] = [];
-      let pendingCount = 0;
-      let approvedCount = 0;
-      let rejectedCount = 0;
-      let totalReportsCount = 0;
+      const logsSnapshot = await getDocs(logsQuery);
+      const moderationLogs: ModerationLog[] = [];
+      let warningCount = 0;
+      let blockedCount = 0;
+      let criticalTodayCount = 0;
 
-      postsSnapshot.forEach((doc) => {
-        const post = doc.data();
-        const status = post.moderationStatus || 'pending';
+      logsSnapshot.forEach((doc) => {
+        const log = doc.data();
 
-        items.push({
+        moderationLogs.push({
           id: doc.id,
-          type: 'post',
-          content: post.content || '',
-          authorId: post.userId,
-          authorName: post.userName || 'Unknown User',
-          createdAt: post.createdAt,
-          status,
-          reports: post.reportCount || 0
+          userId: log.userId,
+          userName: log.userName,
+          contentType: log.contentType,
+          content: log.content,
+          severity: log.severity,
+          categories: log.categories || [],
+          action: log.action,
+          reason: log.reason,
+          confidence: log.confidence,
+          timestamp: log.timestamp,
+          ruleViolations: log.ruleViolations,
+          status: log.status || 'pending'
         });
 
-        if (status === 'pending') pendingCount++;
-        if (status === 'approved' && post.approvedAt?.toDate() >= today) approvedCount++;
-        if (status === 'rejected' && post.rejectedAt?.toDate() >= today) rejectedCount++;
-        totalReportsCount += (post.reportCount || 0);
+        if (log.action === 'warn') warningCount++;
+        if (log.action === 'block') blockedCount++;
+        if (log.severity === 'CRITICAL' && log.timestamp?.toDate() >= today) criticalTodayCount++;
       });
 
       setStats({
-        pendingReviews: pendingCount,
-        approvedToday: approvedCount,
-        rejectedToday: rejectedCount,
-        totalReports: totalReportsCount
+        totalViolations: logsSnapshot.size,
+        warnings: warningCount,
+        blocked: blockedCount,
+        criticalToday: criticalTodayCount
       });
 
-      setContentItems(items);
+      setLogs(moderationLogs);
     } catch (error) {
       console.error('Error loading moderator data:', error);
     } finally {
@@ -189,24 +202,34 @@ export default function ModeratorDashboard() {
                 All
               </button>
               <button
-                onClick={() => setFilter('pending')}
+                onClick={() => setFilter('warnings')}
                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  filter === 'pending'
+                  filter === 'warnings'
                     ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
                     : 'bg-white/80 text-gray-700 hover:bg-white'
                 }`}
               >
-                Pending
+                Warnings
               </button>
               <button
-                onClick={() => setFilter('reported')}
+                onClick={() => setFilter('blocked')}
                 className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  filter === 'reported'
+                  filter === 'blocked'
                     ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
                     : 'bg-white/80 text-gray-700 hover:bg-white'
                 }`}
               >
-                Reported
+                Blocked
+              </button>
+              <button
+                onClick={() => setFilter('critical')}
+                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                  filter === 'critical'
+                    ? 'bg-gradient-to-r from-orange-600 to-red-600 text-white shadow-lg'
+                    : 'bg-white/80 text-gray-700 hover:bg-white'
+                }`}
+              >
+                Critical
               </button>
             </div>
           </div>
@@ -225,8 +248,8 @@ export default function ModeratorDashboard() {
               </div>
               <AlertTriangle className="w-5 h-5 text-yellow-500" />
             </div>
-            <p className="text-gray-600 text-sm mb-1">Pending Reviews</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.pendingReviews}</p>
+            <p className="text-gray-600 text-sm mb-1">Total Violations</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.totalViolations}</p>
           </motion.div>
 
           <motion.div
@@ -241,8 +264,8 @@ export default function ModeratorDashboard() {
               </div>
               <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
-            <p className="text-gray-600 text-sm mb-1">Approved Today</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.approvedToday}</p>
+            <p className="text-gray-600 text-sm mb-1">Warnings Issued</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.warnings}</p>
           </motion.div>
 
           <motion.div
@@ -257,8 +280,8 @@ export default function ModeratorDashboard() {
               </div>
               <XCircle className="w-5 h-5 text-red-500" />
             </div>
-            <p className="text-gray-600 text-sm mb-1">Rejected Today</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.rejectedToday}</p>
+            <p className="text-gray-600 text-sm mb-1">Content Blocked</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.blocked}</p>
           </motion.div>
 
           <motion.div
@@ -273,79 +296,89 @@ export default function ModeratorDashboard() {
               </div>
               <Flag className="w-5 h-5 text-purple-500" />
             </div>
-            <p className="text-gray-600 text-sm mb-1">Total Reports</p>
-            <p className="text-2xl font-bold text-gray-900">{stats.totalReports}</p>
+            <p className="text-gray-600 text-sm mb-1">Critical Today</p>
+            <p className="text-2xl font-bold text-gray-900">{stats.criticalToday}</p>
           </motion.div>
         </div>
 
-        {/* Content Review Queue */}
+        {/* Moderation Logs */}
         <div className="bg-white/80 backdrop-blur-md rounded-xl border border-gray-200/50 shadow-lg overflow-hidden">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900">Content Review Queue</h2>
+            <h2 className="text-xl font-bold text-gray-900">AI Moderation Logs</h2>
           </div>
           <div className="divide-y divide-gray-200">
-            {contentItems.length === 0 ? (
+            {logs.length === 0 ? (
               <div className="p-8 text-center text-gray-500">
                 <CheckCircle className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p>No content to review. Great job!</p>
+                <p>No moderation violations found!</p>
               </div>
             ) : (
-              contentItems.map((item) => (
-                <div key={item.id} className="p-6 hover:bg-gray-50/50">
+              logs.map((log) => (
+                <div key={log.id} className="p-6 hover:bg-gray-50/50">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          item.type === 'post'
+                          log.contentType === 'post'
                             ? 'bg-blue-100 text-blue-800'
-                            : item.type === 'comment'
+                            : log.contentType === 'comment'
                             ? 'bg-purple-100 text-purple-800'
+                            : log.contentType === 'chat'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-orange-100 text-orange-800'
+                        }`}>
+                          {log.contentType}
+                        </span>
+                        <span className="text-sm font-semibold text-gray-900">{log.userName}</span>
+                        <span className="text-xs text-gray-500">
+                          {log.timestamp.toDate().toLocaleString()}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          log.severity === 'CRITICAL'
+                            ? 'bg-red-100 text-red-800'
+                            : log.severity === 'HIGH'
+                            ? 'bg-orange-100 text-orange-800'
+                            : log.severity === 'MEDIUM'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {log.severity}
+                        </span>
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          log.action === 'ban'
+                            ? 'bg-red-100 text-red-800'
+                            : log.action === 'block'
+                            ? 'bg-orange-100 text-orange-800'
+                            : log.action === 'warn'
+                            ? 'bg-yellow-100 text-yellow-800'
                             : 'bg-green-100 text-green-800'
                         }`}>
-                          {item.type}
+                          {log.action}
                         </span>
-                        <span className="text-sm font-semibold text-gray-900">{item.authorName}</span>
-                        <span className="text-xs text-gray-500">
-                          {item.createdAt.toDate().toLocaleString()}
-                        </span>
-                        {item.reports > 0 && (
-                          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full flex items-center gap-1">
-                            <Flag className="w-3 h-3" />
-                            {item.reports} {item.reports === 1 ? 'report' : 'reports'}
-                          </span>
+                      </div>
+                      <p className="text-gray-700 mb-2 line-clamp-2">{log.content}</p>
+                      <div className="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-2">
+                        <p className="text-xs text-amber-900 font-medium">{log.reason}</p>
+                      </div>
+                      {log.ruleViolations && log.ruleViolations.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {log.ruleViolations.map((violation, idx) => (
+                            <span key={idx} className="px-2 py-1 bg-red-50 text-red-700 text-xs rounded">
+                              {violation}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span>Confidence: {Math.round(log.confidence * 100)}%</span>
+                        {log.categories.length > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>Categories: {log.categories.join(', ')}</span>
+                          </>
                         )}
                       </div>
-                      <p className="text-gray-700 mb-3 line-clamp-3">{item.content}</p>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          item.status === 'approved'
-                            ? 'bg-green-100 text-green-800'
-                            : item.status === 'rejected'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {item.status}
-                        </span>
-                      </div>
                     </div>
-                    {item.status === 'pending' && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleModeration(item.id, 'approve')}
-                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleModeration(item.id, 'reject')}
-                          className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2"
-                        >
-                          <XCircle className="w-4 h-4" />
-                          Reject
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))

@@ -1,4 +1,4 @@
-import { MessageCircle, ArrowLeft } from 'lucide-react';
+import { MessageCircle, ArrowLeft, Shield } from 'lucide-react';
 import { Conversation, Message } from '../../services/communityChatService';
 import ChatInput from './ChatInput';
 import MessageList from './MessageList';
@@ -72,6 +72,15 @@ export default function ChatWindow({
             {conversation.type === 'group' && 'Group Chat'}
             {conversation.type === 'private' && 'Direct Message'}
             {conversation.type === 'marketplace' && 'Marketplace'}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-blue-100 px-3 py-2 flex-shrink-0">
+        <div className="flex items-center gap-2">
+          <Shield className="w-4 h-4 text-blue-600 flex-shrink-0" />
+          <p className="text-xs text-blue-800">
+            <span className="font-semibold">AI Moderator Active:</span> All messages are monitored for safety.
           </p>
         </div>
       </div>
