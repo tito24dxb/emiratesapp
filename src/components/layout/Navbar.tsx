@@ -34,15 +34,53 @@ export default function Navbar() {
 
   if (!currentUser) return null;
 
-  const navLinks = [
-    { path: '/dashboard', label: 'Dashboard' },
-    { path: '/courses', label: 'Courses' },
-    { path: '/chat', label: 'Chat' },
-    { path: '/my-progress', label: 'My Progress' },
-    { path: '/leaderboard', label: 'Leaderboard' },
-    { path: '/profile', label: 'Profile' },
-    { path: '/support', label: 'Support' },
-  ];
+  const getNavLinks = () => {
+    if (currentUser.role === 'student') {
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/my-progress', label: 'My Progress' },
+        { path: '/courses', label: 'Courses' },
+        { path: '/ai-trainer', label: 'AI Trainer' },
+        { path: '/open-day', label: 'Simulator' },
+        { path: '/chat', label: 'Chat' },
+        { path: '/community-feed', label: 'Community' },
+        { path: '/leaderboard', label: 'Leaderboard' },
+        { path: '/marketplace', label: 'Marketplace' },
+        { path: '/profile', label: 'Profile' },
+        { path: '/support', label: 'Support' },
+      ];
+    } else if (currentUser.role === 'mentor') {
+      return [
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/coach-dashboard', label: 'Coach' },
+        { path: '/students', label: 'Students' },
+        { path: '/chat', label: 'Chat' },
+        { path: '/community-feed', label: 'Community' },
+        { path: '/marketplace', label: 'Marketplace' },
+        { path: '/seller/dashboard', label: 'Seller' },
+        { path: '/profile', label: 'Profile' },
+      ];
+    } else if (currentUser.role === 'governor') {
+      return [
+        { path: '/governor/nexus', label: 'Control' },
+        { path: '/dashboard', label: 'Dashboard' },
+        { path: '/coach-dashboard', label: 'Coach' },
+        { path: '/chat', label: 'Chat' },
+        { path: '/community-feed', label: 'Community' },
+        { path: '/marketplace', label: 'Marketplace' },
+        { path: '/profile', label: 'Profile' },
+      ];
+    }
+    return [
+      { path: '/dashboard', label: 'Dashboard' },
+      { path: '/chat', label: 'Chat' },
+      { path: '/community-feed', label: 'Community' },
+      { path: '/marketplace', label: 'Marketplace' },
+      { path: '/profile', label: 'Profile' },
+    ];
+  };
+
+  const navLinks = getNavLinks();
 
   return (
     <>
@@ -61,6 +99,24 @@ export default function Navbar() {
                 <SystemAnnouncementBanner />
               </div>
             </div>
+
+            {isCommunityPage && (
+              <div className="hidden md:flex items-center gap-1 mr-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                      location.pathname === link.path
+                        ? 'bg-white/80 text-gray-900 shadow-sm'
+                        : 'text-gray-700 hover:bg-white/50'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               {isCommunityPage && (

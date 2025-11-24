@@ -103,7 +103,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="h-full bg-white rounded-lg overflow-hidden">
+    <div className="h-full bg-white">
       {!selectedConversation ? (
         <ChatSidebar
           conversations={conversations}
