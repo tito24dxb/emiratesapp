@@ -350,21 +350,30 @@ export default function MarketplaceCheckoutPage() {
                 </div>
               )}
 
-              {/* Wallet Balance */}
-              {walletBalance > 0 && (
-                <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Wallet className="w-5 h-5 text-green-600" />
-                    <span className="font-semibold text-green-900">Wallet Balance</span>
-                  </div>
-                  <p className="text-2xl font-bold text-green-700">${walletBalance.toFixed(2)}</p>
-                  {walletBalance < (totalAmount / 100) && (
-                    <p className="text-xs text-green-600 mt-1">
-                      Remaining: ${Math.max(0, (totalAmount / 100) - walletBalance).toFixed(2)} to pay
-                    </p>
-                  )}
+              {/* Wallet Balance - Always Show */}
+              <div className={`mb-4 p-4 rounded-lg border ${
+                walletBalance > 0
+                  ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
+                  : 'bg-gray-50 border-gray-200'
+              }`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Wallet className={`w-5 h-5 ${walletBalance > 0 ? 'text-green-600' : 'text-gray-400'}`} />
+                  <span className={`font-semibold ${walletBalance > 0 ? 'text-green-900' : 'text-gray-600'}`}>Wallet Balance</span>
                 </div>
-              )}
+                <p className={`text-2xl font-bold ${walletBalance > 0 ? 'text-green-700' : 'text-gray-500'}`}>
+                  ${walletBalance.toFixed(2)}
+                </p>
+                {walletBalance === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    <a href="/wallet" className="text-blue-600 hover:underline">Top up your wallet</a> to use it for payments
+                  </p>
+                )}
+                {walletBalance > 0 && walletBalance < (totalAmount / 100) && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Remaining: ${Math.max(0, (totalAmount / 100) - walletBalance).toFixed(2)} to pay
+                  </p>
+                )}
+              </div>
 
               {/* Price Breakdown */}
               <div className="space-y-2 mb-4">

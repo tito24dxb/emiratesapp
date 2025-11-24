@@ -78,7 +78,16 @@ Deno.serve(async (req) => {
     }: MarketplacePaymentRequest = await req.json();
 
     if (!firebase_buyer_uid || !firebase_order_id || !product_id || !amount) {
-      return corsResponse({ error: 'Missing required parameters' }, 400);
+      return corsResponse({
+        error: 'Missing required parameters',
+        details: {
+          firebase_buyer_uid: !!firebase_buyer_uid,
+          firebase_order_id: !!firebase_order_id,
+          product_id: !!product_id,
+          amount: !!amount,
+          firebase_seller_uid: !!firebase_seller_uid
+        }
+      }, 400);
     }
 
     console.log(`Processing marketplace payment for order: ${firebase_order_id}`);

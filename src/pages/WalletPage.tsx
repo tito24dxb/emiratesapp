@@ -90,23 +90,38 @@ export default function WalletPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
-          amount: Math.round(topUpAmount * 100),
+          firebase_buyer_uid: currentUser.uid,
+          firebase_seller_uid: currentUser.uid,
+          firebase_order_id: `wallet-topup-${Date.now()}`,
+          product_id: 'wallet-topup',
+          product_title: 'Wallet Top-Up',
+          product_type: 'service',
+          quantity: 1,
+          amount: topUpAmount,
           currency: 'usd',
-          productId: 'wallet-topup',
-          buyerId: currentUser.uid
+          seller_email: currentUser.email || 'system@emiratesacademy.com'
         })
       });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error response:', errorData);
+        throw new Error(errorData.error || 'Failed to create payment intent');
+      }
 
       const data = await response.json();
       if (data.clientSecret) {
         setClientSecret(data.clientSecret);
+      } else {
+        throw new Error('No client secret received');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating payment intent:', error);
-      alert('Failed to initiate top-up. Please try again.');
+      alert(`Failed to initiate top-up: ${error.message || 'Unknown error'}`);
     } finally {
       setProcessingTopUp(false);
     }
