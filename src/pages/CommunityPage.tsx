@@ -593,12 +593,12 @@ export default function CommunityPage() {
           )}
         </div>
 
-        <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-3 md:py-4 flex-shrink-0 sticky bottom-0 left-0 right-0 z-10">
-          {typingUsers.length > 0 && (
+        {typingUsers.length > 0 && (
+          <div className="px-3 md:px-4 py-2 bg-white border-t border-gray-200 flex-shrink-0">
             <motion.div
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 px-3 py-2 mb-2"
+              className="flex items-center gap-2"
             >
               <div className="flex gap-1">
                 <span className="w-2 h-2 bg-[#0084FF] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
@@ -609,7 +609,10 @@ export default function CommunityPage() {
                 {typingUsers[0].userName} is typing...
               </p>
             </motion.div>
-          )}
+          </div>
+        )}
+
+        <div className="bg-white border-t border-gray-200 px-3 md:px-4 py-3 md:py-4 flex-shrink-0">
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
         </div>
       </div>
