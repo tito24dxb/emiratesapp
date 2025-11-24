@@ -137,17 +137,17 @@ export default function PostCard({ post, currentUser, onDeleted }: PostCardProps
       const userId = currentUser.uid || currentUser.id;
       const userName = currentUser.displayName || currentUser.name || currentUser.userName || 'Anonymous';
 
-      await communityFeedService.addComment(post.id, {
+      await communityFeedService.addComment(
+        post.id,
         userId,
         userName,
-        userEmail: currentUser.email || '',
-        userPhotoURL: currentUser.photoURL || currentUser.profilePicture || '',
-        content: commentText,
-        imageUrl: '',
-        reactions: { heart: 0, thumbsUp: 0, laugh: 0 },
-        userReactions: {},
-        repliesCount: 0
-      });
+        currentUser.email || '',
+        commentText,
+        {
+          userPhotoURL: currentUser.photoURL || currentUser.profilePicture || '',
+          imageUrl: ''
+        }
+      );
 
       setCommentText('');
       setShowComments(true);
