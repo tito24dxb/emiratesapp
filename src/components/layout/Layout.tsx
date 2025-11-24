@@ -20,33 +20,37 @@ export default function Layout({ children }: LayoutProps) {
   if (isCommunityPage) {
     return (
       <div className="h-screen flex flex-col">
-        <div className="flex-shrink-0">
-          <Navbar />
-        </div>
+        {/* Mobile - Show navbar and sidebar */}
+        <div className="lg:hidden">
+          <div className="flex-shrink-0">
+            <Navbar />
+          </div>
 
-        <AnimatePresence>
-          {banners.map((banner) => (
-            <motion.div
-              key={banner.id}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl flex-shrink-0"
-            >
-              <div className="max-w-7xl mx-auto flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-bold">{banner.title}</p>
+          <AnimatePresence>
+            {banners.map((banner) => (
+              <motion.div
+                key={banner.id}
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl flex-shrink-0"
+              >
+                <div className="max-w-7xl mx-auto flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-bold">{banner.title}</p>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
-        <div className="flex-shrink-0">
-          <Sidebar />
+          <div className="flex-shrink-0">
+            <Sidebar />
+          </div>
         </div>
 
+        {/* Desktop - Full screen, no navbar/sidebar (handled in CommunityPage) */}
         <main className="flex-1 overflow-hidden">
           {children}
         </main>
