@@ -182,9 +182,7 @@ export default function Sidebar() {
       ] : []),
       { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', feature: null, badge: 'NEW' },
       { path: '/wallet', icon: Wallet, label: 'My Wallet', feature: null, badge: 'NEW' },
-      { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', feature: null, badge: 'NEW' },
-      { path: '/activity-check-in', icon: QrCode, label: 'Check-In', feature: null, badge: 'NEW' },
-      { path: '/my-events', icon: Ticket, label: 'My Events', feature: null, badge: 'NEW' },
+      { path: '/events', icon: Calendar, label: 'Events', feature: null },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
@@ -212,11 +210,7 @@ export default function Sidebar() {
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
-    { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', badge: 'NEW' },
-    { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW' },
-    { path: '/activity-management', icon: Users, label: 'Activity Management', badge: 'NEW' },
-    { path: '/event-attendance', icon: Calendar, label: 'Event Attendance', badge: 'NEW' },
-    { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW' },
+    { path: '/activities-manage', icon: Calendar, label: 'Manage Activities', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -261,11 +255,7 @@ export default function Sidebar() {
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
-    { path: '/activity-galleries', icon: Camera, label: 'Activity Galleries', badge: 'NEW' },
-    { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW' },
-    { path: '/activity-management', icon: Users, label: 'Activity Management', badge: 'NEW' },
-    { path: '/event-attendance', icon: Calendar, label: 'Event Attendance', badge: 'NEW' },
-    { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW' },
+    { path: '/activities-manage', icon: Calendar, label: 'Manage Activities', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
@@ -317,11 +307,9 @@ export default function Sidebar() {
         },
         {
           label: 'Events',
-          icon: Camera,
+          icon: Calendar,
           items: [
-            { path: '/activity-galleries', icon: Camera, label: 'Galleries', badge: 'NEW', feature: null },
-            { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW', feature: null },
-            { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW', feature: null },
+            { path: '/events', icon: Calendar, label: 'Events', feature: null },
           ]
         },
         {
@@ -372,13 +360,9 @@ export default function Sidebar() {
         },
         {
           label: 'Events',
-          icon: Camera,
+          icon: Calendar,
           items: [
-            { path: '/activity-galleries', icon: Camera, label: 'Galleries', badge: 'NEW' },
-            { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW' },
-            { path: '/activity-management', icon: Users, label: 'Management', badge: 'NEW' },
-            { path: '/event-attendance', icon: Calendar, label: 'Attendance', badge: 'NEW' },
-            { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW' },
+            { path: '/activities-manage', icon: Calendar, label: 'Manage Activities', badge: 'NEW' },
           ]
         },
         {
@@ -446,11 +430,7 @@ export default function Sidebar() {
           label: 'Events',
           icon: Camera,
           items: [
-            { path: '/activity-galleries', icon: Camera, label: 'Galleries', badge: 'NEW' },
-            { path: '/activity-check-in', icon: QrCode, label: 'Check-In', badge: 'NEW' },
-            { path: '/activity-management', icon: Users, label: 'Management', badge: 'NEW' },
-            { path: '/event-attendance', icon: Calendar, label: 'Attendance', badge: 'NEW' },
-            { path: '/my-events', icon: Ticket, label: 'My Events', badge: 'NEW' },
+            { path: '/activities-manage', icon: Calendar, label: 'Manage Activities', badge: 'NEW' },
           ]
         },
         {

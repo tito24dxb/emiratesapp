@@ -1271,5 +1271,40 @@ service cloud.firestore {
       // Only governors can create/update/delete updates
       allow create, update, delete: if isAuthenticated() && isGovernor();
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ACTIVITIES (Simplified activity system)
+    ///////////////////////////////////////////////////////////////////////////
+    match /activities/{activityId} {
+      // Everyone can read activities
+      allow read, list: if isAuthenticated();
+
+      // Only staff can create/update/delete activities
+      allow create, update, delete: if isAuthenticated() && isStaff();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ACTIVITY REGISTRATIONS (Student registrations for activities)
+    ///////////////////////////////////////////////////////////////////////////
+    match /activity_registrations/{registrationId} {
+      // Users can read their own registrations
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || isStaff()
+      );
+
+      // Users can list their own registrations, staff can list all
+      allow list: if isAuthenticated();
+
+      // Users can register themselves, staff can register anyone
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid || isStaff()
+      );
+
+      // Only staff can update registrations (for check-ins)
+      allow update: if isAuthenticated() && isStaff();
+
+      // No one can delete registrations
+      allow delete: if false;
+    }
   }
 }
