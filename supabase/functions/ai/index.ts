@@ -125,6 +125,8 @@ Deno.serve(async (req: Request) => {
     return new Response(
       JSON.stringify({
         output_text: outputText,
+        message: outputText,
+        response: outputText,
         tokens_used: tokensUsed,
       }),
       {

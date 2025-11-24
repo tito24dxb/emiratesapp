@@ -152,11 +152,19 @@ class EnhancedAIService {
       });
 
       if (!response.ok) {
-        throw new Error('AI service unavailable');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('AI service error:', errorData);
+        throw new Error(errorData.error || 'AI service unavailable');
       }
 
       const data = await response.json();
-      const aiMessage = data.message || data.response || 'I apologize, but I could not generate a response.';
+
+      if (data.error) {
+        console.error('AI API Error:', data.error);
+        throw new Error(data.error);
+      }
+
+      const aiMessage = data.output_text || data.message || data.response || 'I apologize, but I could not generate a response.';
 
       history.push({
         role: 'assistant',

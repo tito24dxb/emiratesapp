@@ -129,12 +129,37 @@ Realtime suggestions appear at the top of the student dashboard:
 </Dashboard>
 ```
 
-## Backend Edge Function
+## Backend Edge Function Setup
 
-The AI uses Supabase Edge Function at `/functions/v1/ai` which should:
-- Accept POST requests with `messages`, `mode`, and `userId`
-- Call OpenAI API with context-enriched prompts
-- Return structured response with message, suggestions, and action items
+### Prerequisites
+The AI Assistant requires an OpenAI API key to function. You need to:
+
+1. **Get an OpenAI API Key**:
+   - Go to https://platform.openai.com/api-keys
+   - Create a new API key
+   - Copy the key (starts with `sk-`)
+
+2. **Set the API Key in Supabase**:
+   ```bash
+   # Using Supabase CLI
+   supabase secrets set OPENAI_API_KEY=sk-your-api-key-here
+
+   # Or via Supabase Dashboard:
+   # Project Settings > Edge Functions > Secrets > Add Secret
+   # Name: OPENAI_API_KEY
+   # Value: sk-your-api-key-here
+   ```
+
+3. **Deploy the Edge Function** (if not already deployed):
+   The AI edge function is located at `supabase/functions/ai/index.ts`
+
+### Edge Function Details
+
+The AI uses Supabase Edge Function at `/functions/v1/ai` which:
+- Accepts POST requests with `messages`, `mode`, and `userId`
+- Calls OpenAI API (gpt-4o-mini) with context-enriched prompts
+- Logs all AI interactions to `ai_logs` table
+- Returns structured response with message, suggestions, and action items
 
 **Expected Request:**
 ```json
@@ -151,8 +176,10 @@ The AI uses Supabase Edge Function at `/functions/v1/ai` which should:
 **Expected Response:**
 ```json
 {
+  "output_text": "To prepare for cabin crew interviews...",
   "message": "To prepare for cabin crew interviews...",
-  "response": "To prepare for cabin crew interviews..."
+  "response": "To prepare for cabin crew interviews...",
+  "tokens_used": 150
 }
 ```
 
@@ -236,10 +263,19 @@ private async fetchUserContext(userId: string): Promise<UserContext> {
 
 ## Troubleshooting
 
-**AI not responding:**
-- Check Supabase Edge Function is deployed
-- Verify VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-- Check browser console for CORS errors
+**AI not responding / "I apologize, but I could not generate a response":**
+1. **Check OpenAI API Key**:
+   - Verify the key is set in Supabase: Project Settings > Edge Functions > Secrets
+   - The key should start with `sk-`
+   - Make sure you have credits in your OpenAI account
+2. **Check Supabase Edge Function is deployed**: The `ai` function must be deployed
+3. **Verify environment variables**: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in `.env`
+4. **Check browser console**: Look for network errors or CORS issues
+5. **Check Supabase logs**: Functions > ai > Logs to see error details
+
+**OpenAI API Key errors:**
+- Error message will say: "OpenAI API key not configured"
+- Solution: Set the OPENAI_API_KEY secret in Supabase (see Backend Edge Function Setup above)
 
 **Context not loading:**
 - Verify Firestore permissions
@@ -250,3 +286,8 @@ private async fetchUserContext(userId: string): Promise<UserContext> {
 - User may not meet criteria for suggestions
 - Check Dashboard component integration
 - Verify aiContextService.getRealtimeSuggestions() returns data
+
+**Edge Function timeout:**
+- OpenAI API can be slow sometimes
+- Check your OpenAI account status and rate limits
+- Consider upgrading OpenAI plan for faster responses
