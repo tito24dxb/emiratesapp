@@ -302,30 +302,13 @@ export default function MarketplaceCheckoutPage() {
     );
   }
 
-  if (!product || (paymentMethod !== 'wallet' && !clientSecret)) {
-    // Log state for debugging
-    console.log('Checkout page state check:', {
-      hasProduct: !!product,
-      paymentMethod,
-      hasClientSecret: !!clientSecret,
-      loading
-    });
-
+  if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center max-w-lg mx-auto p-8">
           <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Checkout Error</h2>
-          <p className="text-gray-600 mb-2">Unable to load checkout</p>
-          <p className="text-sm text-gray-500 mb-4">
-            Please check your internet connection and try again.
-          </p>
-          <div className="text-xs text-left bg-gray-100 p-3 rounded mb-4">
-            <p>Debug Info:</p>
-            <p>Product: {product ? '✓' : '✗'}</p>
-            <p>Payment Method: {paymentMethod}</p>
-            <p>Client Secret: {clientSecret ? '✓' : '✗'}</p>
-          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Not Found</h2>
+          <p className="text-gray-600 mb-4">Unable to load product details</p>
           <button
             onClick={() => navigate('/marketplace')}
             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -616,15 +599,22 @@ export default function MarketplaceCheckoutPage() {
                     </div>
                   )}
 
-                  <Elements stripe={stripePromise}>
-                    <PaymentForm
-                      amount={paymentMethod === 'mixed' ? Math.round((totalAmount - (walletBalance * 100))) : totalAmount}
-                      currency={product.currency}
-                      clientSecret={clientSecret}
-                      onSuccess={handlePaymentSuccess}
-                      onError={handlePaymentError}
-                    />
-                  </Elements>
+                  {clientSecret ? (
+                    <Elements stripe={stripePromise}>
+                      <PaymentForm
+                        amount={paymentMethod === 'mixed' ? Math.round((totalAmount - (walletBalance * 100))) : totalAmount}
+                        currency={product.currency}
+                        clientSecret={clientSecret}
+                        onSuccess={handlePaymentSuccess}
+                        onError={handlePaymentError}
+                      />
+                    </Elements>
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-gray-600">Initializing payment...</p>
+                    </div>
+                  )}
                 </>
               )}
             </div>
