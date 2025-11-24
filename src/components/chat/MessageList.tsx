@@ -99,7 +99,7 @@ export default function MessageList({
   const messageGroups = groupMessagesByDate(messages);
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto px-4 py-6 space-y-4">
+    <div ref={scrollRef} className="h-full overflow-y-auto px-3 py-3 space-y-3">
       {hasMore && (
         <div ref={topElementRef} className="flex justify-center py-4">
           {loading && <Loader2 className="w-6 h-6 animate-spin text-gray-400" />}
@@ -109,20 +109,20 @@ export default function MessageList({
       {Object.keys(messageGroups).length === 0 && !loading && (
         <div className="flex items-center justify-center h-full">
           <div className="text-center text-gray-500">
-            <p className="text-lg font-medium mb-2">No messages yet</p>
-            <p className="text-sm">Start the conversation!</p>
+            <p className="text-base font-medium mb-1">No messages yet</p>
+            <p className="text-xs">Start the conversation!</p>
           </div>
         </div>
       )}
 
       {Object.entries(messageGroups).map(([date, msgs]) => (
         <div key={date}>
-          <div className="flex justify-center my-6">
-            <div className="px-4 py-1 bg-gray-200 text-gray-600 text-xs font-medium rounded-full">
+          <div className="flex justify-center my-3">
+            <div className="px-3 py-0.5 bg-gray-200 text-gray-600 text-xs font-medium rounded-full">
               {date}
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {msgs.map((message, index) => {
               const showAvatar =
                 index === 0 ||

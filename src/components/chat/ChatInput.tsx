@@ -68,9 +68,9 @@ export default function ChatInput({
   };
 
   return (
-    <div className="p-4">
+    <div className="p-2">
       {selectedFile && (
-        <div className="mb-2 px-3 py-2 bg-blue-50 rounded-lg flex items-center justify-between text-sm">
+        <div className="mb-2 px-2 py-1.5 bg-blue-50 rounded-lg flex items-center justify-between text-xs">
           <span className="text-blue-900 truncate">{selectedFile.name}</span>
           <button
             onClick={() => setSelectedFile(null)}
@@ -81,8 +81,8 @@ export default function ChatInput({
         </div>
       )}
 
-      <div className="flex items-end gap-2">
-        <div className="flex-1 relative bg-gray-100 rounded-3xl focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 transition">
+      <div className="flex items-end gap-1.5">
+        <div className="flex-1 relative bg-gray-100 rounded-2xl focus-within:bg-white focus-within:ring-1 focus-within:ring-gray-300 transition">
           <textarea
             ref={textareaRef}
             value={message}
@@ -94,11 +94,11 @@ export default function ChatInput({
             placeholder={placeholder}
             disabled={disabled}
             rows={1}
-            className="w-full px-4 py-3 bg-transparent resize-none focus:outline-none text-gray-900 placeholder-gray-500 max-h-[200px]"
-            style={{ minHeight: '48px' }}
+            className="w-full px-3 py-2 bg-transparent resize-none focus:outline-none text-sm text-gray-900 placeholder-gray-500 max-h-[120px]"
+            style={{ minHeight: '36px' }}
           />
 
-          <div className="absolute right-2 bottom-2 flex items-center gap-1">
+          <div className="absolute right-1.5 bottom-1.5 flex items-center gap-0.5">
             <input
               ref={fileInputRef}
               type="file"
@@ -109,19 +109,19 @@ export default function ChatInput({
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
-              className="p-2 hover:bg-gray-200 rounded-full transition disabled:opacity-50"
+              className="p-1.5 hover:bg-gray-200 rounded-full transition disabled:opacity-50"
               title="Attach file"
             >
-              <Paperclip className="w-5 h-5 text-gray-600" />
+              <Paperclip className="w-4 h-4 text-gray-600" />
             </button>
             <div className="relative">
               <button
                 onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                 disabled={disabled}
-                className="p-2 hover:bg-gray-200 rounded-full transition disabled:opacity-50"
+                className="p-1.5 hover:bg-gray-200 rounded-full transition disabled:opacity-50"
                 title="Add emoji"
               >
-                <Smile className="w-5 h-5 text-gray-600" />
+                <Smile className="w-4 h-4 text-gray-600" />
               </button>
               <AnimatePresence>
                 {showEmojiPicker && (
@@ -142,9 +142,9 @@ export default function ChatInput({
         <button
           onClick={handleSend}
           disabled={(!message.trim() && !selectedFile) || disabled}
-          className="w-12 h-12 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full transition flex items-center justify-center flex-shrink-0"
+          className="w-9 h-9 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-full transition flex items-center justify-center flex-shrink-0"
         >
-          <Send className="w-5 h-5" />
+          <Send className="w-4 h-4" />
         </button>
       </div>
     </div>
