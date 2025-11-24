@@ -132,7 +132,7 @@ export default function MarketplaceChatModal({
           </div>
 
           {/* Messages */}
-          <div className="p-4 overflow-y-auto bg-white space-y-3 h-64">
+          <div className="p-4 overflow-y-auto bg-white space-y-3 min-h-[400px] max-h-[500px]">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
