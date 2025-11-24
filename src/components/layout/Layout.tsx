@@ -19,9 +19,9 @@ export default function Layout({ children }: LayoutProps) {
 
   if (isCommunityPage) {
     return (
-      <div className="h-screen flex flex-col">
+      <>
         {/* Mobile - Show navbar and sidebar */}
-        <div className="lg:hidden">
+        <div className="h-screen flex flex-col lg:hidden">
           <div className="flex-shrink-0">
             <Navbar />
           </div>
@@ -48,13 +48,17 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex-shrink-0">
             <Sidebar />
           </div>
+
+          <main className="flex-1 overflow-hidden">
+            {children}
+          </main>
         </div>
 
-        {/* Desktop - Full screen, no navbar/sidebar (handled in CommunityPage) */}
-        <main className="flex-1 overflow-hidden">
+        {/* Desktop - Full screen, no wrapper (handled completely in CommunityPage) */}
+        <div className="hidden lg:block">
           {children}
-        </main>
-      </div>
+        </div>
+      </>
     );
   }
 
