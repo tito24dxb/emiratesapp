@@ -200,7 +200,8 @@ export default function StudentEventsPage() {
         currentUser.uid,
         activity.price,
         'activity',
-        `Joined activity: ${activity.name}`
+        `Joined activity: ${activity.name}`,
+        activity.id
       );
 
       const result = await joinPaidActivity(

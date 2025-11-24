@@ -264,7 +264,7 @@ export const walletService = {
         balanceAfter: wallet.balance + amount,
         category,
         description,
-        metadata,
+        ...(metadata && { metadata }),
         status: fraudCheck.score > FRAUD_THRESHOLD ? 'pending' : 'completed',
         ipAddress: ip,
         deviceFingerprint,
@@ -350,7 +350,7 @@ export const walletService = {
         balanceAfter: wallet.balance - amount,
         category,
         description,
-        metadata,
+        ...(metadata && { metadata }),
         status: fraudCheck.score > FRAUD_THRESHOLD ? 'pending' : 'completed',
         ipAddress: ip,
         deviceFingerprint,
@@ -571,7 +571,8 @@ export const walletService = {
     userId: string,
     amount: number,
     category: string,
-    description: string
+    description: string,
+    referenceId?: string
   ): Promise<void> {
     const wallet = await this.getWallet(userId);
     if (!wallet) {
@@ -581,12 +582,20 @@ export const walletService = {
     const userName = wallet.userName;
 
     let validCategory: Transaction['category'];
+    let metadata: Transaction['metadata'] | undefined;
+
     switch (category) {
       case 'activity':
         validCategory = 'booking';
+        if (referenceId) {
+          metadata = { bookingId: referenceId };
+        }
         break;
       case 'purchase':
         validCategory = 'purchase';
+        if (referenceId) {
+          metadata = { productId: referenceId };
+        }
         break;
       default:
         validCategory = 'purchase';
@@ -597,7 +606,8 @@ export const walletService = {
       userName,
       amount,
       validCategory,
-      description
+      description,
+      metadata
     );
 
     if (!result.success) {
