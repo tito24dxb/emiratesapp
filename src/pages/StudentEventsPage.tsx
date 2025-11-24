@@ -218,8 +218,9 @@ export default function StudentEventsPage() {
       } else {
         alert(result.message);
       }
-    } catch (error) {
-      alert('Failed to process payment');
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      alert(`Failed to process payment: ${error.message || 'Unknown error'}`);
     } finally {
       setProcessing(null);
     }

@@ -565,5 +565,43 @@ export const walletService = {
       transactionCount: transactions.length,
       recentTransactions: transactions
     };
+  },
+
+  async deductFromWallet(
+    userId: string,
+    amount: number,
+    category: string,
+    description: string
+  ): Promise<void> {
+    const wallet = await this.getWallet(userId);
+    if (!wallet) {
+      throw new Error('Wallet not found');
+    }
+
+    const userName = wallet.userName;
+
+    let validCategory: Transaction['category'];
+    switch (category) {
+      case 'activity':
+        validCategory = 'booking';
+        break;
+      case 'purchase':
+        validCategory = 'purchase';
+        break;
+      default:
+        validCategory = 'purchase';
+    }
+
+    const result = await this.deductCredit(
+      userId,
+      userName,
+      amount,
+      validCategory,
+      description
+    );
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to deduct from wallet');
+    }
   }
 };
