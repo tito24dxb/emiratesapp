@@ -3,13 +3,15 @@ import { useApp } from '../context/AppContext';
 import { useSearchParams } from 'react-router-dom';
 import { communityChatService, Conversation } from '../services/communityChatService';
 import { presenceService } from '../services/presenceService';
-import { auth } from '../lib/firebase';
+import { auth, db } from '../lib/firebase';
 import { checkFeatureAccess } from '../utils/featureAccess';
 import FeatureLock from '../components/FeatureLock';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import ChatWindow from '../components/chat/ChatWindow';
+import CreateConversationModal from '../components/chat/CreateConversationModal';
 import { useChatMessages } from '../hooks/useChatMessages';
 import { useTypingIndicator } from '../hooks/useTypingIndicator';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
 export default function CommunityPage() {
   const { currentUser } = useApp();
@@ -109,6 +111,106 @@ export default function CommunityPage() {
     }
   };
 
+  const handleEditMessage = async (messageId: string, newContent: string) => {
+    if (!currentUser || !selectedConversation) return;
+
+    try {
+      await communityChatService.editMessage(
+        selectedConversation.id,
+        messageId,
+        newContent
+      );
+    } catch (error) {
+      console.error('Error editing message:', error);
+      alert('Failed to edit message');
+    }
+  };
+
+  const handleReportMessage = async (messageId: string) => {
+    if (!currentUser || !selectedConversation) return;
+
+    const reason = prompt('Please provide a reason for reporting this message:');
+    if (!reason || !reason.trim()) return;
+
+    try {
+      await communityChatService.reportMessage(
+        selectedConversation.id,
+        messageId,
+        reason.trim()
+      );
+      alert('Message reported successfully. Our team will review it.');
+    } catch (error) {
+      console.error('Error reporting message:', error);
+      alert('Failed to report message');
+    }
+  };
+
+  const handleCreateGroup = async (title: string, memberIds: string[]) => {
+    if (!currentUser) return;
+
+    try {
+      const conversationId = await communityChatService.createConversation(
+        'group',
+        title,
+        memberIds
+      );
+      const newConv = conversations.find((c) => c.id === conversationId);
+      if (newConv) {
+        setSelectedConversation(newConv);
+      }
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error('Error creating group:', error);
+      alert('Failed to create group');
+    }
+  };
+
+  const handleCreatePrivate = async (memberId: string) => {
+    if (!currentUser) return;
+
+    try {
+      const conversationId = await communityChatService.createConversation(
+        'private',
+        'Direct Message',
+        [memberId]
+      );
+      const newConv = conversations.find((c) => c.id === conversationId);
+      if (newConv) {
+        setSelectedConversation(newConv);
+      }
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error('Error creating private chat:', error);
+      alert('Failed to create private chat');
+    }
+  };
+
+  const [availableUsers, setAvailableUsers] = useState<Array<{ id: string; name: string; photoURL?: string }>>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!currentUser) return;
+
+      try {
+        const usersQuery = query(
+          collection(db, 'users'),
+          where('uid', '!=', currentUser.uid)
+        );
+        const snapshot = await getDocs(usersQuery);
+        const users = snapshot.docs.map((doc) => ({
+          id: doc.data().uid,
+          name: doc.data().name || 'Unknown',
+          photoURL: doc.data().photoURL,
+        }));
+        setAvailableUsers(users);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+
+    fetchUsers();
+  }, [currentUser]);
+
   if (!currentUser) return null;
 
   const chatAccess = checkFeatureAccess(currentUser, 'chat');
@@ -146,6 +248,16 @@ export default function CommunityPage() {
           sending={sending}
           onBack={() => setSelectedConversation(null)}
           onReact={handleReaction}
+          onEdit={handleEditMessage}
+          onReport={handleReportMessage}
+        />
+      )}
+      {showCreateModal && (
+        <CreateConversationModal
+          onClose={() => setShowCreateModal(false)}
+          onCreateGroup={handleCreateGroup}
+          onCreatePrivate={handleCreatePrivate}
+          availableUsers={availableUsers}
         />
       )}
     </div>

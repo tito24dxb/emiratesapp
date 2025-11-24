@@ -527,6 +527,32 @@ export const communityChatService = {
     }
   },
 
+  async editMessage(
+    conversationId: string,
+    messageId: string,
+    newContent: string
+  ): Promise<void> {
+    const userId = auth.currentUser?.uid;
+    if (!userId) throw new Error('Not authenticated');
+
+    const messageRef = doc(db, 'groupChats', conversationId, 'messages', messageId);
+    const messageDoc = await getDoc(messageRef);
+
+    if (!messageDoc.exists()) {
+      throw new Error('Message not found');
+    }
+
+    const messageData = messageDoc.data();
+    if (messageData.senderId !== userId) {
+      throw new Error('Not authorized to edit this message');
+    }
+
+    await updateDoc(messageRef, {
+      content: newContent,
+      editedAt: Timestamp.now(),
+    });
+  },
+
   async reportMessage(
     conversationId: string,
     messageId: string,

@@ -16,6 +16,8 @@ interface ChatWindowProps {
   sending: boolean;
   onBack?: () => void;
   onReact?: (messageId: string, emoji: string) => void;
+  onEdit?: (messageId: string, newContent: string) => void;
+  onReport?: (messageId: string) => void;
 }
 
 export default function ChatWindow({
@@ -31,6 +33,8 @@ export default function ChatWindow({
   sending,
   onBack,
   onReact,
+  onEdit,
+  onReport,
 }: ChatWindowProps) {
   if (!conversation) {
     return (
@@ -81,6 +85,8 @@ export default function ChatWindow({
           onLoadMore={onLoadMore}
           typingUsers={typingUsers}
           onReact={onReact}
+          onEdit={onEdit}
+          onReport={onReport}
         />
       </div>
 

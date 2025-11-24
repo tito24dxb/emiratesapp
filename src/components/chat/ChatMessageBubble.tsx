@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Trash2, Edit2, MoreVertical, Smile } from 'lucide-react';
+import { Edit2, Smile, Flag, Check, X } from 'lucide-react';
 import { Message } from '../../services/communityChatService';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -8,13 +8,17 @@ interface ChatMessageBubbleProps {
   currentUserId: string;
   showAvatar?: boolean;
   onReact?: (messageId: string, emoji: string) => void;
+  onEdit?: (messageId: string, newContent: string) => void;
+  onReport?: (messageId: string) => void;
 }
 
 const REACTION_EMOJIS = ['👍', '❤️', '😂', '🔥', '😮', '👏'];
 
-export default function ChatMessageBubble({ message, currentUserId, showAvatar = true, onReact }: ChatMessageBubbleProps) {
+export default function ChatMessageBubble({ message, currentUserId, showAvatar = true, onReact, onEdit, onReport }: ChatMessageBubbleProps) {
   const [showActions, setShowActions] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(message.content);
   const isOwnMessage = message.senderId === currentUserId;
 
   const formatTime = (timestamp: any) => {
@@ -79,7 +83,42 @@ export default function ChatMessageBubble({ message, currentUserId, showAvatar =
                 className="max-w-xs max-h-64 object-contain rounded-lg mb-2"
               />
             )}
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            {isEditing ? (
+              <div className="space-y-2">
+                <textarea
+                  value={editContent}
+                  onChange={(e) => setEditContent(e.target.value)}
+                  className="w-full px-2 py-1 bg-white/90 text-gray-900 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  rows={3}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      if (editContent.trim() && editContent !== message.content) {
+                        onEdit?.(message.messageId, editContent.trim());
+                      }
+                      setIsEditing(false);
+                    }}
+                    className="p-1 bg-green-600 hover:bg-green-700 text-white rounded transition"
+                    title="Save"
+                  >
+                    <Check className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditContent(message.content);
+                      setIsEditing(false);
+                    }}
+                    className="p-1 bg-gray-600 hover:bg-gray-700 text-white rounded transition"
+                    title="Cancel"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            )}
             <div className="flex items-center gap-2 mt-1">
               <span
                 className={`text-xs ${
@@ -110,35 +149,41 @@ export default function ChatMessageBubble({ message, currentUserId, showAvatar =
                   isOwnMessage ? 'right-full mr-2' : 'left-full ml-2'
                 } flex items-center gap-1`}
               >
-                {isOwnMessage && (
+                {isOwnMessage ? (
                   <>
                     <button
+                      onClick={() => setIsEditing(true)}
                       className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
                       title="Edit"
                     >
                       <Edit2 className="w-4 h-4 text-gray-600" />
                     </button>
                     <button
+                      onClick={() => setShowReactionPicker(!showReactionPicker)}
                       className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
-                      title="Delete"
+                      title="React"
                     >
-                      <Trash2 className="w-4 h-4 text-red-600" />
+                      <Smile className="w-4 h-4 text-gray-600" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setShowReactionPicker(!showReactionPicker)}
+                      className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
+                      title="React"
+                    >
+                      <Smile className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => onReport?.(message.messageId)}
+                      className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
+                      title="Report"
+                    >
+                      <Flag className="w-4 h-4 text-red-600" />
                     </button>
                   </>
                 )}
-                <button
-                  onClick={() => setShowReactionPicker(!showReactionPicker)}
-                  className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
-                  title="React"
-                >
-                  <Smile className="w-4 h-4 text-gray-600" />
-                </button>
-                <button
-                  className="p-1.5 bg-white hover:bg-gray-100 rounded-lg shadow-md transition"
-                  title="More"
-                >
-                  <MoreVertical className="w-4 h-4 text-gray-600" />
-                </button>
               </motion.div>
             )}
           </AnimatePresence>

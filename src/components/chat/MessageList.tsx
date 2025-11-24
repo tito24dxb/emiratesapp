@@ -11,6 +11,8 @@ interface MessageListProps {
   onLoadMore?: () => void;
   typingUsers?: Array<{ userId: string; userName: string }>;
   onReact?: (messageId: string, emoji: string) => void;
+  onEdit?: (messageId: string, newContent: string) => void;
+  onReport?: (messageId: string) => void;
 }
 
 export default function MessageList({
@@ -21,6 +23,8 @@ export default function MessageList({
   onLoadMore,
   typingUsers = [],
   onReact,
+  onEdit,
+  onReport,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -137,6 +141,8 @@ export default function MessageList({
                   currentUserId={currentUserId}
                   showAvatar={showAvatar}
                   onReact={onReact}
+                  onEdit={onEdit}
+                  onReport={onReport}
                 />
               );
             })}
