@@ -387,25 +387,24 @@ export default function WalletPage() {
           </ul>
         </motion.div>
 
-        {/* Top-Up Modal */}
+        {/* Top-Up Inline Section */}
         <AnimatePresence>
           {showTopUpModal && (
-            <>
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="mt-6 overflow-hidden"
+            >
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-                onClick={() => !clientSecret && setShowTopUpModal(false)}
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                initial={{ y: -20 }}
+                animate={{ y: 0 }}
+                exit={{ y: -20 }}
+                className="overflow-hidden"
               >
-                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-white/50">
-                  <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-6 rounded-t-2xl flex items-center justify-between">
+                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50">
+                  <div className="bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-6 rounded-t-2xl flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                         <WalletIcon className="w-6 h-6" />
@@ -496,7 +495,7 @@ export default function WalletPage() {
                   </div>
                 </div>
               </motion.div>
-            </>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

@@ -1083,6 +1083,39 @@ service cloud.firestore {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // USER STREAKS (Alternative collection name)
+    ///////////////////////////////////////////////////////////////////////////
+    match /user_streaks/{userId} {
+      // Users can read their own streaks, staff can read all
+      allow read: if isAuthenticated() && (
+        userId == request.auth.uid ||
+        isStaff()
+      );
+
+      allow list: if isAuthenticated();
+
+      // Users can create/update their own streaks
+      allow create, update: if isAuthenticated() &&
+        userId == request.auth.uid;
+
+      allow delete: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // ACTIVITY GALLERIES
+    ///////////////////////////////////////////////////////////////////////////
+    match /activity_galleries/{galleryId} {
+      // Anyone authenticated can view galleries
+      allow read, list: if isAuthenticated();
+
+      // Staff can create/update galleries
+      allow create, update: if isAuthenticated() && isStaff();
+
+      // Only governors can delete galleries
+      allow delete: if isAuthenticated() && isGovernor();
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // WALLETS
     ///////////////////////////////////////////////////////////////////////////
     match /wallets/{walletId} {
