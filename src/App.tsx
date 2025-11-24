@@ -66,6 +66,7 @@ import AIAssistantButton from './components/AIAssistantButton';
 import { ModerationWarningModal } from './components/ModerationWarningModal';
 import { useState, useEffect } from 'react';
 import ReputationManager from './pages/governor/ReputationManager';
+import ReputationTester from './pages/governor/ReputationTester';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -210,6 +211,7 @@ function AppContent() {
             <Route path="/governor/audit-logs" element={<AuditLogsPage />} />
             <Route path="/governor/moderation-insights" element={<ModerationInsightsPage />} />
             <Route path="/governor/reputation" element={<ReputationManager />} />
+            <Route path="/governor/reputation-tester" element={<ReputationTester />} />
           </>
         )}
 

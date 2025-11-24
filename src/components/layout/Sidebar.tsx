@@ -25,7 +25,8 @@ import {
   ShoppingBag,
   DollarSign,
   Package,
-  ClipboardList
+  ClipboardList,
+  Play
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -148,6 +149,7 @@ export default function Sidebar() {
     { path: '/governor/audit-logs', icon: Shield, label: 'Audit Logs', badge: 'NEW' },
     { path: '/moderator-dashboard', icon: Shield, label: 'Moderator Dashboard', badge: 'NEW' },
     { path: '/governor/reputation', icon: TrendingUp, label: 'Reputation Manager', badge: 'NEW' },
+    { path: '/governor/reputation-tester', icon: Play, label: 'Test Reputation', badge: 'TEST' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: 'ALL' },
