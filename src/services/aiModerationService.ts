@@ -347,7 +347,13 @@ categories must be from: spam, harassment, scam, off-topic, explicit, hate-speec
   }
 
   private async logViolation(log: ModerationLog): Promise<void> {
-    await addDoc(collection(db, 'moderation_logs'), log);
+    const logData: any = { ...log };
+
+    if (logData.contentId === undefined) {
+      delete logData.contentId;
+    }
+
+    await addDoc(collection(db, 'moderation_logs'), logData);
 
     const userRef = doc(db, 'users', log.userId);
     await updateDoc(userRef, {
