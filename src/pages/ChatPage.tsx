@@ -11,7 +11,7 @@ import ChatWindow from '../components/chat/ChatWindow';
 import { useChatMessages } from '../hooks/useChatMessages';
 import { useTypingIndicator } from '../hooks/useTypingIndicator';
 
-export default function CommunityPage() {
+export default function ChatPage() {
   const { currentUser } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -103,7 +103,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="fixed inset-0 top-16 grid grid-cols-[280px_1fr] h-[calc(100vh-4rem)] overflow-hidden bg-white">
+    <div className="fixed inset-0 grid grid-cols-[280px_1fr] h-screen overflow-hidden bg-white">
       <ChatSidebar
         conversations={conversations}
         selectedConversationId={selectedConversation?.id || null}
