@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { notifyPostComment, notifyPostReaction, notifyCommentReply } from './comprehensiveNotificationService';
+import { aiModerationService } from './aiModerationService';
 
 export interface CommunityPost {
   id: string;
@@ -102,6 +103,17 @@ export const communityFeedService = {
     productLink?: string,
     targetAudience?: 'all' | 'free' | 'pro' | 'vip' | 'pro-vip'
   ): Promise<string> {
+    const moderationResult = await aiModerationService.moderateContent(
+      userId,
+      userName,
+      content,
+      'post'
+    );
+
+    if (!moderationResult.allowed) {
+      throw new Error(moderationResult.reason);
+    }
+
     let imageUrl = '';
     let imageUrls: string[] = [];
 
@@ -280,6 +292,17 @@ export const communityFeedService = {
     // Validate required fields
     if (!userId || !userName || !content.trim()) {
       throw new Error('Missing required fields for comment creation');
+    }
+
+    const moderationResult = await aiModerationService.moderateContent(
+      userId,
+      userName,
+      content,
+      'comment'
+    );
+
+    if (!moderationResult.allowed) {
+      throw new Error(moderationResult.reason);
     }
 
     const commentData = {

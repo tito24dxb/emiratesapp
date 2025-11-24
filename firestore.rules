@@ -1031,5 +1031,22 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // AI MODERATION LOGS
+    ///////////////////////////////////////////////////////////////////////////
+    match /moderation_logs/{logId} {
+      // Governors and moderators can read all logs
+      allow read, list: if isAuthenticated() && isModerator();
+
+      // System creates logs (server-side or client-side service)
+      allow create: if isAuthenticated();
+
+      // Only governors can update logs (for appeals review)
+      allow update: if isAuthenticated() && isGovernor();
+
+      // No one can delete logs
+      allow delete: if false;
+    }
   }
 }

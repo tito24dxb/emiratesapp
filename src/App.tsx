@@ -46,6 +46,7 @@ import StorageManagerPage from './pages/StorageManagerPage';
 import LoginActivityPage from './pages/LoginActivityPage';
 import CommunityFeedPage from './pages/CommunityFeedPage';
 import AuditLogsPage from './pages/governor/AuditLogsPage';
+import ModerationInsightsPage from './pages/governor/ModerationInsightsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import ContactUsPage from './pages/ContactUsPage';
@@ -187,6 +188,7 @@ function AppContent() {
             <Route path="/governor/analytics" element={<AnalyticsDashboard />} />
             <Route path="/governor/feature-flags" element={<FeatureFlagsManager />} />
             <Route path="/governor/audit-logs" element={<AuditLogsPage />} />
+            <Route path="/governor/moderation-insights" element={<ModerationInsightsPage />} />
           </>
         )}
 
