@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Camera, X, Plus, Users, CheckCircle, Clock, DollarSign, Image as ImageIcon, QrCode, ChevronDown, ChevronUp } from 'lucide-react';
+import { Camera, X, Plus, Users, CheckCircle, Clock, DollarSign, Image as ImageIcon, QrCode, ChevronDown, ChevronUp, TrendingUp, Calendar, Ticket } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
@@ -32,6 +32,29 @@ export default function StaffActivityManagementPage() {
   const [scanResult, setScanResult] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const isStaff = currentUser?.role && ['governor', 'mentor', 'coach'].includes(currentUser.role);
+
+  const calculateAnalytics = () => {
+    const totalRevenue = activities.reduce((sum, activity) => {
+      return sum + (activity.price * activity.registeredCount);
+    }, 0);
+
+    const totalParticipants = activities.reduce((sum, activity) => {
+      return sum + activity.registeredCount;
+    }, 0);
+
+    const paidEvents = activities.filter(a => a.price > 0).length;
+    const freeEvents = activities.filter(a => a.price === 0).length;
+
+    return {
+      totalRevenue,
+      totalParticipants,
+      totalEvents: activities.length,
+      paidEvents,
+      freeEvents
+    };
+  };
+
+  const analytics = calculateAnalytics();
 
   useEffect(() => {
     if (isStaff) {
@@ -195,6 +218,76 @@ export default function StaffActivityManagementPage() {
               {showCreateForm ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
               {showCreateForm ? 'Cancel' : 'Create Activity'}
             </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <DollarSign className="w-8 h-8 opacity-80" />
+                <TrendingUp className="w-5 h-5 opacity-60" />
+              </div>
+              <p className="text-green-100 text-sm font-medium mb-1">Total Revenue</p>
+              <p className="text-3xl font-bold">${analytics.totalRevenue.toFixed(2)}</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <Users className="w-8 h-8 opacity-80" />
+                <TrendingUp className="w-5 h-5 opacity-60" />
+              </div>
+              <p className="text-blue-100 text-sm font-medium mb-1">Total Participants</p>
+              <p className="text-3xl font-bold">{analytics.totalParticipants}</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <Ticket className="w-8 h-8 opacity-80" />
+                <Calendar className="w-5 h-5 opacity-60" />
+              </div>
+              <p className="text-purple-100 text-sm font-medium mb-1">Total Events</p>
+              <p className="text-3xl font-bold">{analytics.totalEvents}</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <DollarSign className="w-8 h-8 opacity-80" />
+              </div>
+              <p className="text-orange-100 text-sm font-medium mb-1">Paid Events</p>
+              <p className="text-3xl font-bold">{analytics.paidEvents}</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <CheckCircle className="w-8 h-8 opacity-80" />
+              </div>
+              <p className="text-teal-100 text-sm font-medium mb-1">Free Events</p>
+              <p className="text-3xl font-bold">{analytics.freeEvents}</p>
+            </motion.div>
           </div>
 
           <AnimatePresence>
