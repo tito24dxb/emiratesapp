@@ -13,6 +13,7 @@ import {
   limit as firestoreLimit
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { walletService } from './walletService';
 
 export interface Referral {
   id: string;
@@ -278,6 +279,21 @@ export const referralService = {
       pointsEarned: increment(REFERRAL_POINTS),
       totalEarnings: increment(REFERRAL_BONUS)
     });
+
+    await walletService.addCredit(
+      referral.referrerId,
+      referral.referrerName,
+      REFERRAL_BONUS,
+      'referral',
+      `Referral bonus for ${newUserName}`,
+      {
+        referralId: conversionRef.id,
+        newUserId,
+        newUserName,
+        newUserEmail
+      },
+      ipAddress
+    );
 
     const clickQuery = query(
       collection(db, 'referral_clicks'),

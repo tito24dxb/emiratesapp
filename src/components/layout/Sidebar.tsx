@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Wallet,
   LayoutDashboard,
   BookOpen,
   MessageCircle,
@@ -101,6 +102,7 @@ export default function Sidebar() {
         { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null, badge: 'PRO' }
       ] : []),
       { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', feature: null, badge: 'NEW' },
+      { path: '/wallet', icon: Wallet, label: 'My Wallet', feature: null, badge: 'NEW' },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
@@ -126,6 +128,7 @@ export default function Sidebar() {
     { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliate Program', badge: 'NEW' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
+    { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
     { path: '/profile', icon: UserCircle, label: 'Profile' },
   ];
 
@@ -169,6 +172,7 @@ export default function Sidebar() {
     { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliate Program', badge: 'NEW' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
     { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
+    { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
     { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
