@@ -70,6 +70,7 @@ import ReputationTester from './pages/governor/ReputationTester';
 import InviteFriendsPage from './pages/InviteFriendsPage';
 import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
 import WalletPage from './pages/WalletPage';
+import ActivityGalleryPage from './pages/ActivityGalleryPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -151,6 +152,7 @@ function AppContent() {
         <Route path="/invite-friends" element={<InviteFriendsPage />} />
         <Route path="/affiliate-dashboard" element={<AffiliateDashboardPage />} />
         <Route path="/wallet" element={<WalletPage />} />
+        <Route path="/activity-gallery/:galleryId" element={<ActivityGalleryPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/settings/devices" element={<DevicesPage />} />
         <Route path="/support" element={<SupportPage />} />
