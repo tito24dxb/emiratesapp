@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { Plane, Lock, Mail, Shield, Key, Fingerprint } from 'lucide-react';
+import { Plane, Lock, Mail, Shield, Key } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { recordLoginActivity } from '../../services/loginActivityService';
 import { totpService } from '../../services/totpService';
-import { useBiometric } from '../../hooks/useBiometric';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,142 +19,9 @@ export default function LoginPage() {
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [pendingUserData, setPendingUserData] = useState<any>(null);
   const [useBackupCode, setUseBackupCode] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
-  const { isBiometricAvailable, loginWithBiometric } = useBiometric();
 
-  useEffect(() => {
-    checkBiometricAvailability();
-  }, []);
-
-  const checkBiometricAvailability = async () => {
-    const available = await isBiometricAvailable();
-    setBiometricAvailable(available);
-    const lastEmail = localStorage.getItem('last_biometric_email');
-    if (lastEmail && available) {
-      setEmail(lastEmail);
-    }
-  };
-
-  const handleBiometricLogin = async () => {
-    if (!email) {
-      setError('Please enter your email address');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      localStorage.setItem('last_biometric_email', email);
-
-      // Get user ID from email first
-      const { data: users } = await import('../../lib/firebase').then(m =>
-        import('firebase/firestore').then(firestore =>
-          firestore.getDocs(
-            firestore.query(
-              firestore.collection(m.db, 'users'),
-              firestore.where('email', '==', email),
-              firestore.limit(1)
-            )
-          )
-        )
-      );
-
-      if (!users || users.empty) {
-        throw new Error('No account found with this email. Please register first.');
-      }
-
-      const userId = users.docs[0].id;
-      const userData = users.docs[0].data();
-
-      // Verify biometric
-      await loginWithBiometric(userId);
-
-      // Verify the biometric verification succeeded
-      const verifiedUserId = localStorage.getItem('biometric_verified_user');
-
-      if (verifiedUserId !== userId) {
-        throw new Error('Biometric verification failed');
-      }
-
-      // Load full user data
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      const fullUserData = userDoc.data();
-
-      if (!fullUserData) {
-        throw new Error('User data not found');
-      }
-
-      // Check if user has 2FA enabled
-      const has2FA = await totpService.check2FAStatus(userId);
-
-      if (has2FA) {
-        // Store pending data for 2FA verification
-        setPendingUserId(userId);
-        setPendingUserData({
-          uid: userId,
-          email: fullUserData.email,
-          name: fullUserData.name || 'User',
-          role: (fullUserData.role || 'student') as 'student' | 'mentor' | 'governor',
-          plan: (fullUserData.plan || 'free') as 'free' | 'pro' | 'vip',
-          country: fullUserData.country || '',
-          bio: fullUserData.bio || '',
-          expectations: fullUserData.expectations || '',
-          photoURL: fullUserData.photo_base64 || '',
-          hasCompletedOnboarding: fullUserData.hasCompletedOnboarding || false,
-          hasSeenWelcomeBanner: fullUserData.hasSeenWelcomeBanner || false,
-          onboardingCompletedAt: fullUserData.onboardingCompletedAt,
-          welcomeBannerSeenAt: fullUserData.welcomeBannerSeenAt,
-          createdAt: fullUserData.createdAt || new Date().toISOString(),
-          updatedAt: fullUserData.updatedAt || new Date().toISOString(),
-        });
-        setShow2FA(true);
-        setLoading(false);
-        return;
-      }
-
-      // Set the current user
-      setCurrentUser({
-        uid: userId,
-        email: fullUserData.email,
-        displayName: fullUserData.name,
-        photoURL: fullUserData.photo_base64 || null,
-        name: fullUserData.name || 'User',
-        role: (fullUserData.role || 'student') as 'student' | 'mentor' | 'governor',
-        plan: (fullUserData.plan || 'free') as 'free' | 'pro' | 'vip',
-        country: fullUserData.country || '',
-        bio: fullUserData.bio || '',
-        expectations: fullUserData.expectations || '',
-        hasCompletedOnboarding: fullUserData.hasCompletedOnboarding || false,
-        hasSeenWelcomeBanner: fullUserData.hasSeenWelcomeBanner || false,
-        onboardingCompletedAt: fullUserData.onboardingCompletedAt,
-        welcomeBannerSeenAt: fullUserData.welcomeBannerSeenAt,
-        createdAt: fullUserData.createdAt || new Date().toISOString(),
-        updatedAt: fullUserData.updatedAt || new Date().toISOString(),
-      });
-
-      // Record login activity
-      await recordLoginActivity(userId, 'biometric', true);
-
-      // Update last login
-      await updateDoc(doc(db, 'users', userId), {
-        lastLogin: serverTimestamp(),
-      });
-
-      // Clear biometric verification flag
-      localStorage.removeItem('biometric_verified_user');
-
-      navigate('/dashboard');
-    } catch (err: any) {
-      console.error('Biometric login error:', err);
-      setError(err.message || 'Biometric login failed. Try using your password instead.');
-      localStorage.removeItem('biometric_verified_user');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -641,18 +507,6 @@ export default function LoginPage() {
               </svg>
               Sign in with Google
             </button>
-
-            {biometricAvailable && (
-              <button
-                type="button"
-                onClick={handleBiometricLogin}
-                disabled={loading || !email}
-                className="mt-3 w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                <Fingerprint className="w-5 h-5" />
-                {loading ? 'Authenticating...' : 'Sign in with Face ID / Touch ID'}
-              </button>
-            )}
           </div>
 
           <div className="mt-6 text-center">

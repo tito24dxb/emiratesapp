@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, Lock, Bell, Globe, Palette, Shield, Trash2, Mail, Camera, Save, Smartphone, Monitor, MapPin, Clock, Fingerprint } from 'lucide-react';
+import { User, Lock, Bell, Globe, Palette, Shield, Trash2, Mail, Camera, Save, Smartphone, Monitor, MapPin, Clock } from 'lucide-react';
 import { doc, updateDoc, collection, query, where, getDocs, orderBy, limit as limitQuery, deleteDoc } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
 import { updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { countries } from '../data/countries';
 import { useNavigate } from 'react-router-dom';
 import TwoFactorSetup from '../components/TwoFactorSetup';
-import { useBiometric } from '../hooks/useBiometric';
-import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Check } from 'lucide-react';
 
 type SettingsTab = 'profile' | 'account' | 'notifications' | 'preferences' | 'privacy';
 
@@ -40,13 +39,6 @@ export default function SettingsPage() {
   const [loginSessions, setLoginSessions] = useState<any[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
 
-  const [showBiometricSetup, setShowBiometricSetup] = useState(false);
-  const [biometricAvailable, setBiometricAvailable] = useState(false);
-  const [biometricStep, setBiometricStep] = useState<'setup' | 'backup'>('setup');
-  const [deviceName, setDeviceName] = useState('');
-  const [backupCodes, setBackupCodes] = useState<string[]>([]);
-  const [copiedCodes, setCopiedCodes] = useState(false);
-  const { isBiometricAvailable, registerBiometric, loading: biometricLoading } = useBiometric();
 
   useEffect(() => {
     if (currentUser) {
@@ -58,69 +50,9 @@ export default function SettingsPage() {
       if (activeTab === 'privacy') {
         loadLoginSessions();
       }
-      if (activeTab === 'account') {
-        checkBiometricAvailability();
-      }
     }
   }, [currentUser, activeTab]);
 
-  const checkBiometricAvailability = async () => {
-    const available = await isBiometricAvailable();
-    setBiometricAvailable(available);
-    if (available) {
-      detectDeviceName();
-    }
-  };
-
-  const detectDeviceName = () => {
-    const userAgent = navigator.userAgent;
-    let device = 'This Device';
-
-    if (/iPhone|iPad|iPod/.test(userAgent)) {
-      device = 'iPhone';
-    } else if (/Android/.test(userAgent)) {
-      device = 'Android Device';
-    } else if (/Macintosh/.test(userAgent)) {
-      device = 'MacBook';
-    } else if (/Windows/.test(userAgent)) {
-      device = 'Windows PC';
-    } else if (/Linux/.test(userAgent)) {
-      device = 'Linux Device';
-    }
-
-    const browser = /Chrome/.test(userAgent) ? 'Chrome' :
-                    /Safari/.test(userAgent) ? 'Safari' :
-                    /Firefox/.test(userAgent) ? 'Firefox' :
-                    /Edge/.test(userAgent) ? 'Edge' : 'Browser';
-
-    setDeviceName(`${browser} on ${device}`);
-  };
-
-  const handleBiometricSetup = async () => {
-    if (!deviceName.trim()) return;
-
-    try {
-      const codes = await registerBiometric(deviceName);
-      setBackupCodes(codes);
-      setBiometricStep('backup');
-    } catch (err: any) {
-      setMessage(err.message || 'Failed to enable biometric login');
-    }
-  };
-
-  const handleCopyBackupCodes = () => {
-    const codesText = backupCodes.join('\n');
-    navigator.clipboard.writeText(codesText);
-    setCopiedCodes(true);
-    setTimeout(() => setCopiedCodes(false), 2000);
-  };
-
-  const handleCompleteBiometric = () => {
-    setShowBiometricSetup(false);
-    setBiometricStep('setup');
-    setMessage('Biometric login enabled successfully! Make sure you saved your backup codes.');
-    setTimeout(() => setMessage(''), 5000);
-  };
 
   const loadLoginSessions = async () => {
     if (!currentUser) return;
@@ -513,136 +445,6 @@ export default function SettingsPage() {
                   <TwoFactorSetup />
                 </div>
 
-                <div className="mt-8 pt-8 border-t border-gray-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                        <Fingerprint className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Biometric Login</h3>
-                        <p className="text-sm text-gray-600">Face ID, Touch ID, or Windows Hello</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setShowBiometricSetup(!showBiometricSetup)}
-                      disabled={!biometricAvailable}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition disabled:opacity-50"
-                    >
-                      {showBiometricSetup ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </button>
-                  </div>
-
-                  {!biometricAvailable && (
-                    <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-                      <p className="text-sm text-red-800">
-                        <strong>Note:</strong> Your device or browser doesn't support biometric authentication.
-                      </p>
-                    </div>
-                  )}
-
-                  {showBiometricSetup && biometricAvailable && (
-                    <div className="mt-4 space-y-4 animate-in slide-in-from-top duration-200">
-                      {biometricStep === 'setup' && (
-                        <>
-                          <div className="p-4 bg-gray-50 rounded-xl space-y-4">
-                            <div>
-                              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Device Name
-                              </label>
-                              <input
-                                type="text"
-                                value={deviceName}
-                                onChange={(e) => setDeviceName(e.target.value)}
-                                placeholder="e.g., Chrome on MacBook Pro"
-                                className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-red-500 focus:outline-none transition"
-                                disabled={biometricLoading}
-                              />
-                              <p className="text-xs text-gray-500 mt-1">
-                                This helps you identify this device in your trusted devices list
-                              </p>
-                            </div>
-
-                            <button
-                              onClick={handleBiometricSetup}
-                              disabled={biometricLoading || !deviceName.trim()}
-                              className="w-full py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-bold hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            >
-                              <Fingerprint className="w-4 h-4" />
-                              {biometricLoading ? 'Setting up...' : 'Enable Biometric Login'}
-                            </button>
-                          </div>
-
-                          <button
-                            onClick={() => navigate('/settings/devices')}
-                            className="w-full py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                          >
-                            <Smartphone className="w-4 h-4" />
-                            Manage Trusted Devices
-                          </button>
-                        </>
-                      )}
-
-                      {biometricStep === 'backup' && (
-                        <div className="p-4 bg-gray-50 rounded-xl space-y-4">
-                          <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                            <p className="text-sm font-semibold text-green-900 mb-1 flex items-center gap-2">
-                              <Check className="w-4 h-4" />
-                              Biometric Login Enabled!
-                            </p>
-                            <p className="text-sm text-green-800">
-                              Save these backup codes in a safe place.
-                            </p>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2">
-                            {backupCodes.map((code, index) => (
-                              <div
-                                key={index}
-                                className="px-3 py-2 bg-white rounded-lg border border-gray-200 font-mono text-sm text-center"
-                              >
-                                {code}
-                              </div>
-                            ))}
-                          </div>
-
-                          <button
-                            onClick={handleCopyBackupCodes}
-                            className="w-full py-2 bg-white border-2 border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition flex items-center justify-center gap-2"
-                          >
-                            {copiedCodes ? (
-                              <>
-                                <Check className="w-4 h-4 text-green-600" />
-                                <span className="text-green-600">Copied!</span>
-                              </>
-                            ) : (
-                              <>
-                                <Copy className="w-4 h-4" />
-                                <span>Copy All Codes</span>
-                              </>
-                            )}
-                          </button>
-
-                          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                            <p className="text-xs text-amber-900 font-semibold mb-1">
-                              Important: Save These Codes
-                            </p>
-                            <p className="text-xs text-amber-800">
-                              You won't be able to see these codes again. Save them in a password manager or print them out.
-                            </p>
-                          </div>
-
-                          <button
-                            onClick={handleCompleteBiometric}
-                            className="w-full py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition"
-                          >
-                            I've Saved My Backup Codes
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
               </form>
             )}
 

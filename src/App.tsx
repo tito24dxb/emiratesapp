@@ -61,7 +61,6 @@ import SellerBillingDashboard from './pages/SellerBillingDashboard';
 import AttendanceDashboard from './pages/AttendanceDashboard';
 import FinanceDashboard from './pages/FinanceDashboard';
 import ModeratorDashboard from './pages/ModeratorDashboard';
-import DevicesPage from './pages/DevicesPage';
 import AIAssistantButton from './components/AIAssistantButton';
 import { ModerationWarningModal } from './components/ModerationWarningModal';
 import { useState, useEffect } from 'react';
@@ -157,7 +156,6 @@ function AppContent() {
         <Route path="/events" element={<StudentEventsPage />} />
         <Route path="/student-events" element={<StudentEventsPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
-        <Route path="/settings/devices" element={<DevicesPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
