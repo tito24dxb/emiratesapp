@@ -259,15 +259,15 @@ class AIContextService {
 
       const completedQuery = query(
         collection(db, 'user_module_progress'),
-        where('userId', '==', userId),
-        where('completed', '==', true)
+        where('userId', '==', userId)
       );
       const completedSnap = await getDocs(completedQuery);
+      const completedCount = completedSnap.docs.filter(doc => doc.data().completed === true).length;
 
       return {
         created: createdSnap.size,
         enrolled: enrolledSnap.size,
-        completed: completedSnap.size,
+        completed: completedCount,
       };
     } catch (error) {
       console.error('Error fetching module data:', error);

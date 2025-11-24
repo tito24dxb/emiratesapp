@@ -9,15 +9,13 @@ import { getUserPoints } from '../services/rewardsService';
 import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
 import OnboardingCard from '../components/OnboardingCard';
-import WelcomeBanner from '../components/WelcomeBanner';
 import AIRealtimeSuggestions from '../components/AIRealtimeSuggestions';
-import { getOnboardingStatus, completeOnboarding, hasSeenWelcomeBanner, markWelcomeBannerSeen } from '../services/onboardingService';
+import { getOnboardingStatus, completeOnboarding } from '../services/onboardingService';
 
 export default function Dashboard() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
@@ -53,15 +51,12 @@ export default function Dashboard() {
 
       try {
         const hasCompleted = await getOnboardingStatus(currentUser.uid);
-        const hasSeenBanner = await hasSeenWelcomeBanner(currentUser.uid);
 
         setIsFirstLogin(!hasCompleted);
         setShowOnboarding(!hasCompleted);
-        setShowWelcomeBanner(!hasSeenBanner && hasCompleted);
       } catch (error) {
         console.error('Error checking onboarding status:', error);
         setShowOnboarding(false);
-        setShowWelcomeBanner(false);
       } finally {
         setIsLoading(false);
       }
@@ -178,17 +173,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleWelcomeBannerDismiss = async () => {
-    if (!currentUser) return;
-
-    try {
-      await markWelcomeBannerSeen(currentUser.uid);
-      setShowWelcomeBanner(false);
-    } catch (error) {
-      console.error('Error marking welcome banner as seen:', error);
-    }
-  };
-
   if (!currentUser || isLoading) return null;
 
   const containerVariants = {
@@ -212,14 +196,6 @@ export default function Dashboard() {
             userName={currentUser.name.split(' ')[0]}
             onComplete={handleCompleteOnboarding}
             onSkip={handleSkipOnboarding}
-          />
-        )}
-
-        {showWelcomeBanner && !showOnboarding && (
-          <WelcomeBanner
-            userName={currentUser.name.split(' ')[0]}
-            isFirstLogin={isFirstLogin}
-            onDismiss={handleWelcomeBannerDismiss}
           />
         )}
 
