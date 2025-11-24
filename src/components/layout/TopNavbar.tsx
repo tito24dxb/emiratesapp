@@ -153,7 +153,7 @@ export default function TopNavbar() {
                 />
               </Link>
 
-              <div className="hidden lg:flex items-center space-x-1">
+              <div className="hidden md:flex items-center space-x-1">
                 {navigationItems.map((item) => (
                   <div
                     key={item.label}
@@ -304,7 +304,7 @@ export default function TopNavbar() {
 
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
+                className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
               >
                 {showMobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -319,7 +319,7 @@ export default function TopNavbar() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="lg:hidden border-t border-gray-200 overflow-hidden"
+              className="md:hidden border-t border-gray-200 overflow-hidden"
             >
               <div className="px-4 py-4 space-y-2">
                 {navigationItems.map((item) => (
