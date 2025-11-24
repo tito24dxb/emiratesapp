@@ -72,6 +72,8 @@ import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
 import WalletPage from './pages/WalletPage';
 import ActivityGalleryPage from './pages/ActivityGalleryPage';
 import ActivityGalleriesListPage from './pages/ActivityGalleriesListPage';
+import ActivityCheckInPage from './pages/ActivityCheckInPage';
+import ActivityManagementPage from './pages/ActivityManagementPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -155,6 +157,8 @@ function AppContent() {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/activity-gallery/:galleryId" element={<ActivityGalleryPage />} />
         <Route path="/activity-galleries" element={<ActivityGalleriesListPage />} />
+        <Route path="/activity-check-in" element={<ActivityCheckInPage />} />
+        <Route path="/activity-management" element={<ActivityManagementPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/settings/devices" element={<DevicesPage />} />
         <Route path="/support" element={<SupportPage />} />
