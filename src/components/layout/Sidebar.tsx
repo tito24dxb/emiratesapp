@@ -367,6 +367,7 @@ export default function Sidebar() {
           items: [
             { path: '/chat', icon: MessageCircle, label: 'Chat' },
             { path: '/community-feed', icon: Rss, label: 'Feed' },
+            { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
           ]
         },
         {
@@ -421,6 +422,15 @@ export default function Sidebar() {
             { path: '/marketplace', icon: ShoppingBag, label: 'Marketplace', badge: 'NEW' },
             { path: '/seller/dashboard', icon: Package, label: 'Seller', badge: 'NEW' },
             { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliates', badge: 'NEW' },
+          ]
+        },
+        {
+          label: 'Community',
+          icon: Users,
+          items: [
+            { path: '/chat', icon: MessageCircle, label: 'Chat' },
+            { path: '/community-feed', icon: Rss, label: 'Feed' },
+            { path: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
           ]
         },
         {
