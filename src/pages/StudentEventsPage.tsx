@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, DollarSign, ChevronDown, ChevronUp, QrCode as QrCodeIcon, Wallet as WalletIcon, CheckCircle } from 'lucide-react';
+import { Calendar, DollarSign, ChevronDown, ChevronUp, QrCode as QrCodeIcon, Wallet as WalletIcon, CheckCircle, CreditCard } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
@@ -10,7 +10,11 @@ import {
   Activity,
   ActivityRegistration
 } from '../services/simpleActivityService';
-import { walletService } from '../services/walletService';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import PaymentForm from '../components/marketplace/PaymentForm';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export default function StudentEventsPage() {
   const { currentUser } = useApp();
@@ -19,6 +23,9 @@ export default function StudentEventsPage() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'stripe' | null>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState<string | null>(null);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState(0);
 
   useEffect(() => {
@@ -92,11 +99,93 @@ export default function StudentEventsPage() {
     }
   };
 
-  const handleJoinPaid = async (activity: Activity) => {
+  const handleSelectPaymentMethod = (activityId: string, method: 'wallet' | 'stripe') => {
+    setPaymentMethod(method);
+    if (method === 'stripe') {
+      setShowPaymentForm(activityId);
+      initiateStripePayment(activityId);
+    }
+  };
+
+  const initiateStripePayment = async (activityId: string) => {
+    if (!currentUser) return;
+
+    const activity = allEvents.find(a => a.id === activityId);
+    if (!activity) return;
+
+    setProcessing(activityId);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/marketplace-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          firebase_buyer_uid: currentUser.uid,
+          firebase_seller_uid: activity.creatorId,
+          firebase_order_id: `activity-${activityId}-${Date.now()}`,
+          product_id: activityId,
+          product_title: activity.name,
+          product_type: 'service',
+          quantity: 1,
+          amount: activity.price,
+          currency: 'usd',
+          seller_email: activity.creatorEmail
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create payment intent');
+      }
+
+      const data = await response.json();
+      setClientSecret(data.clientSecret);
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      alert('Failed to initialize payment');
+      setShowPaymentForm(null);
+    } finally {
+      setProcessing(null);
+    }
+  };
+
+  const handleStripePaymentSuccess = async (activityId: string) => {
+    if (!currentUser) return;
+
+    const activity = allEvents.find(a => a.id === activityId);
+    if (!activity) return;
+
+    const result = await joinPaidActivity(
+      activityId,
+      currentUser.uid,
+      currentUser.name,
+      currentUser.email,
+      true
+    );
+
+    if (result.success) {
+      await loadData();
+      setShowPaymentForm(null);
+      setClientSecret(null);
+      setPaymentMethod(null);
+      alert('Successfully joined activity!');
+    }
+  };
+
+  const handleStripePaymentError = (error: string) => {
+    alert(`Payment failed: ${error}`);
+    setShowPaymentForm(null);
+    setClientSecret(null);
+    setPaymentMethod(null);
+  };
+
+  const handleJoinPaidWallet = async (activity: Activity) => {
     if (!currentUser || processing) return;
 
     if (walletBalance < activity.price) {
-      alert('Insufficient wallet balance. Please top up your wallet first.');
+      alert('Insufficient wallet balance. Please choose card payment or top up your wallet.');
       return;
     }
 
@@ -355,7 +444,7 @@ export default function StudentEventsPage() {
                               )}
 
                               {!registered && (
-                                <div className="mt-6">
+                                <div className="mt-6 space-y-4">
                                   {event.price === 0 ? (
                                     <button
                                       onClick={() => handleJoinFree(event)}
@@ -371,24 +460,64 @@ export default function StudentEventsPage() {
                                         'Join Free Event'
                                       )}
                                     </button>
+                                  ) : showPaymentForm !== event.id ? (
+                                    <div className="space-y-3">
+                                      <p className="text-sm font-semibold text-gray-700">Choose Payment Method:</p>
+                                      <button
+                                        onClick={() => handleJoinPaidWallet(event)}
+                                        disabled={processing === event.id || walletBalance < event.price}
+                                        className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                      >
+                                        {processing === event.id ? (
+                                          <>
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Processing...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <WalletIcon className="w-5 h-5" />
+                                            Pay with Wallet (${walletBalance.toFixed(2)})
+                                          </>
+                                        )}
+                                      </button>
+                                      <button
+                                        onClick={() => handleSelectPaymentMethod(event.id, 'stripe')}
+                                        disabled={processing === event.id}
+                                        className="w-full px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                                      >
+                                        <CreditCard className="w-5 h-5" />
+                                        Pay with Card
+                                      </button>
+                                    </div>
                                   ) : (
-                                    <button
-                                      onClick={() => handleJoinPaid(event)}
-                                      disabled={processing === event.id || walletBalance < event.price}
-                                      className="w-full px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-semibold hover:opacity-90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                                    >
-                                      {processing === event.id ? (
-                                        <>
-                                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                          Processing...
-                                        </>
+                                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200">
+                                      <h5 className="text-lg font-bold text-gray-900 mb-4">Complete Payment</h5>
+                                      {clientSecret ? (
+                                        <Elements stripe={stripePromise}>
+                                          <PaymentForm
+                                            amount={Math.round(event.price * 100)}
+                                            currency="usd"
+                                            onSuccess={() => handleStripePaymentSuccess(event.id)}
+                                            onError={handleStripePaymentError}
+                                            clientSecret={clientSecret}
+                                          />
+                                        </Elements>
                                       ) : (
-                                        <>
-                                          <DollarSign className="w-5 h-5" />
-                                          Pay ${event.price} & Join
-                                        </>
+                                        <div className="flex items-center justify-center py-8">
+                                          <div className="w-8 h-8 border-4 border-[#D71920] border-t-transparent rounded-full animate-spin" />
+                                        </div>
                                       )}
-                                    </button>
+                                      <button
+                                        onClick={() => {
+                                          setShowPaymentForm(null);
+                                          setClientSecret(null);
+                                          setPaymentMethod(null);
+                                        }}
+                                        className="mt-4 w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all"
+                                      >
+                                        Cancel
+                                      </button>
+                                    </div>
                                   )}
                                 </div>
                               )}

@@ -336,15 +336,21 @@ export const getActivityAttendees = async (activityId: string): Promise<Activity
     const registrationsRef = collection(db, 'activity_registrations');
     const q = query(
       registrationsRef,
-      where('activityId', '==', activityId),
-      orderBy('registeredAt', 'desc')
+      where('activityId', '==', activityId)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    const results = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as ActivityRegistration[];
+
+    // Sort in memory
+    return results.sort((a, b) => {
+      const dateA = a.registeredAt?.toMillis() || 0;
+      const dateB = b.registeredAt?.toMillis() || 0;
+      return dateB - dateA;
+    });
   } catch (error) {
     console.error('Error getting attendees:', error);
     return [];
@@ -356,15 +362,21 @@ export const getMyActivities = async (userId: string): Promise<ActivityRegistrat
     const registrationsRef = collection(db, 'activity_registrations');
     const q = query(
       registrationsRef,
-      where('userId', '==', userId),
-      orderBy('registeredAt', 'desc')
+      where('userId', '==', userId)
     );
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
+    const results = snapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as ActivityRegistration[];
+
+    // Sort in memory
+    return results.sort((a, b) => {
+      const dateA = a.registeredAt?.toMillis() || 0;
+      const dateB = b.registeredAt?.toMillis() || 0;
+      return dateB - dateA;
+    });
   } catch (error) {
     console.error('Error getting my activities:', error);
     return [];
