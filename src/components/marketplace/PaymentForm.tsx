@@ -224,34 +224,52 @@ export default function PaymentForm({
         </motion.div>
       )}
 
-      {/* Apple Pay and Google Pay */}
-      {walletPaymentAvailable && paymentRequest && (
-        <div className="mb-6">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Wallet className="w-6 h-6 text-blue-600" />
-              <h3 className="font-bold text-gray-900 text-lg">Express Checkout</h3>
-            </div>
+      {/* Apple Pay and Google Pay - Always Show */}
+      <div className="mb-6">
+        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
+          <div className="flex items-center gap-2 mb-4">
+            <Wallet className="w-6 h-6 text-blue-600" />
+            <h3 className="font-bold text-gray-900 text-lg">Express Checkout</h3>
+          </div>
+
+          {walletPaymentAvailable && paymentRequest ? (
             <div className="bg-white rounded-lg p-1">
               <PaymentRequestButtonElement
                 options={{ paymentRequest }}
                 className="w-full"
               />
             </div>
-            <p className="text-sm text-gray-700 mt-3 flex items-center gap-2">
-              <Smartphone className="w-4 h-4 text-blue-600" />
-              <span className="font-medium">Pay with Apple Pay or Google Pay - Faster & Secure</span>
-            </p>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-4 p-4 bg-white rounded-lg border border-gray-200">
+                <div className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-md">
+                  <span className="text-lg">Apple Pay</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-md">
+                  <span className="text-lg font-medium">G Pay</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 text-center">
+                Not available on this device/browser
+              </p>
+            </div>
+          )}
 
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-gray-300"></div>
-            <span className="text-sm text-gray-600 font-semibold">OR PAY WITH CARD</span>
-            <div className="flex-1 h-px bg-gray-300"></div>
-          </div>
+          <p className="text-sm text-gray-700 mt-3 flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-blue-600" />
+            <span className="font-medium">
+              {walletPaymentAvailable ? 'Pay with Apple Pay or Google Pay - Faster & Secure' : 'Available on supported devices and browsers'}
+            </span>
+          </p>
         </div>
-      )}
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 my-6">
+          <div className="flex-1 h-px bg-gray-300"></div>
+          <span className="text-sm text-gray-600 font-semibold">OR PAY WITH CARD</span>
+          <div className="flex-1 h-px bg-gray-300"></div>
+        </div>
+      </div>
 
       {/* Billing Details */}
       <div className="space-y-4">
