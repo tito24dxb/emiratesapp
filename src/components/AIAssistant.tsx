@@ -138,7 +138,8 @@ export default function AIAssistant({ isOpen, onClose, initialMode = 'coach' }: 
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: 20 }}
       transition={{ duration: 0.2 }}
-      className="fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-[99999] border border-gray-200"
+      className="fixed bottom-20 right-4 md:right-6 w-[calc(100vw-2rem)] md:w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-ai-chat border border-gray-200"
+      style={{ zIndex: 999999 }}
     >
         <div className={`${personality.color} text-white p-3 rounded-t-2xl flex items-center justify-between`}>
           <div className="flex items-center gap-3">

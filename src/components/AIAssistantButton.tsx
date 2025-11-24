@@ -18,7 +18,8 @@ export default function AIAssistantButton({ initialMode = 'coach', className = '
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className={`fixed bottom-6 right-6 z-[99998] w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow ${className}`}
+        className={`fixed bottom-6 right-6 z-ai-button w-14 h-14 bg-gradient-to-br from-blue-600 to-purple-600 text-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-shadow ${className}`}
+        style={{ zIndex: 999998 }}
       >
         <div className="relative">
           <Bot className="w-6 h-6" />

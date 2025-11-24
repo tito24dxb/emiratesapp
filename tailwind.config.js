@@ -24,6 +24,11 @@ export default {
       height: {
         'safe': 'env(safe-area-inset-bottom)',
       },
+      zIndex: {
+        'ai-button': '999998',
+        'ai-chat': '999999',
+        'modal': '1000000',
+      },
     },
   },
   plugins: [],
