@@ -1,5 +1,6 @@
 import { Bell, ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -12,6 +13,9 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [profileMenuPosition, setProfileMenuPosition] = useState<{ top: number; right: number } | null>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isCommunityPage = location.pathname === '/chat';
@@ -31,6 +35,50 @@ export default function Navbar() {
 
     return unsubscribe;
   }, [currentUser]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (profileMenuRef.current && !profileMenuRef.current.contains(target) &&
+          profileButtonRef.current && !profileButtonRef.current.contains(target)) {
+        setShowProfileMenu(false);
+        setProfileMenuPosition(null);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    function updateProfileMenuPosition() {
+      if (showProfileMenu && profileButtonRef.current) {
+        const rect = profileButtonRef.current.getBoundingClientRect();
+        setProfileMenuPosition({
+          top: rect.bottom + 8,
+          right: window.innerWidth - rect.right
+        });
+      }
+    }
+
+    if (showProfileMenu) {
+      updateProfileMenuPosition();
+      window.addEventListener('scroll', updateProfileMenuPosition, true);
+      window.addEventListener('resize', updateProfileMenuPosition);
+      return () => {
+        window.removeEventListener('scroll', updateProfileMenuPosition, true);
+        window.removeEventListener('resize', updateProfileMenuPosition);
+      };
+    }
+  }, [showProfileMenu]);
+
+  const handleProfileMenuToggle = () => {
+    if (showProfileMenu) {
+      setShowProfileMenu(false);
+      setProfileMenuPosition(null);
+    } else {
+      setShowProfileMenu(true);
+    }
+  };
 
   if (!currentUser) return null;
 
@@ -127,7 +175,8 @@ export default function Navbar() {
 
               <div className="relative z-[101]">
                 <button
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  ref={profileButtonRef}
+                  onClick={handleProfileMenuToggle}
                   className="flex items-center gap-1 md:gap-3 liquid-button-secondary rounded-3xl px-2 md:px-3 py-1.5 md:py-2 transition-all"
                 >
                   <img
@@ -147,17 +196,32 @@ export default function Navbar() {
         </div>
 
         <AnimatePresence>
-          {showProfileMenu && (
+          {showProfileMenu && profileMenuPosition && createPortal(
             <motion.div
+              key="profile-menu"
+              ref={profileMenuRef}
               initial={{ opacity: 0, y: -10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="absolute top-full right-3 md:right-6 lg:right-8 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-[60] shadow-2xl rounded-2xl"
+              className="fixed w-56 py-2 liquid-text-primary shadow-2xl rounded-2xl"
+              style={{
+                top: `${profileMenuPosition.top}px`,
+                right: `${profileMenuPosition.right}px`,
+                zIndex: 2147483647,
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%)',
+                backdropFilter: 'blur(40px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.8)',
+                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9)',
+              }}
             >
               <Link
                 to="/profile"
-                onClick={() => setShowProfileMenu(false)}
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  setProfileMenuPosition(null);
+                }}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
               >
                 <User className="w-4 h-4" />
@@ -165,7 +229,10 @@ export default function Navbar() {
               </Link>
               <Link
                 to="/settings"
-                onClick={() => setShowProfileMenu(false)}
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  setProfileMenuPosition(null);
+                }}
                 className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
               >
                 <Settings className="w-4 h-4" />
@@ -175,6 +242,7 @@ export default function Navbar() {
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
+                  setProfileMenuPosition(null);
                   logout();
                   navigate('/');
                 }}
@@ -183,7 +251,8 @@ export default function Navbar() {
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
               </button>
-            </motion.div>
+            </motion.div>,
+            document.body
           )}
         </AnimatePresence>
       </nav>
