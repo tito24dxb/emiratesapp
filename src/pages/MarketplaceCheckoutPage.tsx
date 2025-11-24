@@ -34,6 +34,72 @@ export default function MarketplaceCheckoutPage() {
     }
   }, [productId, currentUser]);
 
+  const handlePaymentMethodChange = async (method: 'card' | 'wallet' | 'mixed') => {
+    if (!product || !orderId || !currentUser) return;
+
+    setPaymentMethod(method);
+
+    const totalAmount = (product.price / 100) * quantity;
+
+    if (method === 'wallet') {
+      setWalletAmount(totalAmount);
+      setCardAmount(0);
+      setClientSecret('');
+    } else if (method === 'card') {
+      setWalletAmount(0);
+      setCardAmount(totalAmount);
+
+      if (!clientSecret) {
+        try {
+          console.log('🔄 Creating payment intent for card payment after method change');
+          const paymentIntent = await createMarketplacePaymentIntent({
+            firebase_buyer_uid: currentUser.uid,
+            firebase_seller_uid: product.seller_id,
+            firebase_order_id: orderId,
+            product_id: product.id,
+            product_title: product.title,
+            product_type: product.product_type,
+            quantity: quantity,
+            amount: totalAmount,
+            currency: product.currency,
+            seller_email: product.seller_email
+          });
+          console.log('✅ Payment intent created:', paymentIntent.paymentIntentId);
+          setClientSecret(paymentIntent.clientSecret);
+        } catch (error) {
+          console.error('❌ Failed to create payment intent:', error);
+          alert('Failed to initialize payment. Please try again.');
+        }
+      }
+    } else if (method === 'mixed') {
+      setWalletAmount(walletBalance);
+      setCardAmount(totalAmount - walletBalance);
+
+      if (!clientSecret) {
+        try {
+          console.log('🔄 Creating payment intent for mixed payment after method change');
+          const paymentIntent = await createMarketplacePaymentIntent({
+            firebase_buyer_uid: currentUser.uid,
+            firebase_seller_uid: product.seller_id,
+            firebase_order_id: orderId,
+            product_id: product.id,
+            product_title: product.title,
+            product_type: product.product_type,
+            quantity: quantity,
+            amount: totalAmount - walletBalance,
+            currency: product.currency,
+            seller_email: product.seller_email
+          });
+          console.log('✅ Payment intent created:', paymentIntent.paymentIntentId);
+          setClientSecret(paymentIntent.clientSecret);
+        } catch (error) {
+          console.error('❌ Failed to create payment intent:', error);
+          alert('Failed to initialize payment. Please try again.');
+        }
+      }
+    }
+  };
+
   const loadProductAndCreateOrder = async () => {
     if (!productId || !currentUser) return;
 
@@ -483,7 +549,7 @@ export default function MarketplaceCheckoutPage() {
                     {walletBalance >= (totalAmount / 100) && (
                       <button
                         type="button"
-                        onClick={() => setPaymentMethod('wallet')}
+                        onClick={() => handlePaymentMethodChange('wallet')}
                         className={`p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
                           paymentMethod === 'wallet'
                             ? 'border-green-500 bg-green-50'
@@ -501,7 +567,7 @@ export default function MarketplaceCheckoutPage() {
                     {/* Card Payment Option */}
                     <button
                       type="button"
-                      onClick={() => setPaymentMethod('card')}
+                      onClick={() => handlePaymentMethodChange('card')}
                       className={`p-4 border-2 rounded-lg flex items-center gap-3 transition-all ${
                         paymentMethod === 'card'
                           ? 'border-blue-500 bg-blue-50'
@@ -519,7 +585,7 @@ export default function MarketplaceCheckoutPage() {
                     {walletBalance < (totalAmount / 100) && walletBalance > 0 && (
                       <button
                         type="button"
-                        onClick={() => setPaymentMethod('mixed')}
+                        onClick={() => handlePaymentMethodChange('mixed')}
                         className={`p-4 border-2 rounded-lg flex items-center gap-3 transition-all md:col-span-2 ${
                           paymentMethod === 'mixed'
                             ? 'border-purple-500 bg-purple-50'
