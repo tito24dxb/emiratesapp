@@ -131,8 +131,8 @@ export default function Sidebar() {
 
     const baseLinks = [
       { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', feature: null },
-      { path: '/my-progress', icon: TrendingUp, label: 'My Progress', feature: null },
       { path: '/courses', icon: BookOpen, label: 'Courses', feature: null },
+      { path: '/my-progress', icon: TrendingUp, label: 'My Progress', feature: null },
       {
         path: '/ai-trainer',
         icon: Brain,
@@ -148,22 +148,23 @@ export default function Sidebar() {
         feature: 'simulator' as Feature
       },
       {
+        path: '/community-feed',
+        icon: Rss,
+        label: 'Community',
+        feature: null
+      },
+      {
         path: '/chat',
         icon: MessageCircle,
         label: 'Chat',
         locked: !chatAccess.allowed,
         feature: 'chat' as Feature
       },
-      {
-        path: '/community-feed',
-        icon: Rss,
-        label: 'Community Feed',
-        feature: null
-      },
+      { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
       {
         path: '/recruiters',
         icon: Briefcase,
-        label: 'Recruiters',
+        label: 'Career',
         locked: !recruitersAccess.allowed,
         feature: 'recruiters' as Feature
       },
@@ -175,16 +176,15 @@ export default function Sidebar() {
         feature: 'opendays' as Feature
       },
       { path: '/student-events', icon: Ticket, label: 'Events', feature: null },
-      { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
       { path: '/marketplace', icon: ShoppingBag, label: 'Shop', feature: null },
+      { path: '/wallet', icon: Wallet, label: 'My Wallet', feature: null, badge: 'NEW' },
+      { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', feature: null, badge: 'NEW' },
       ...(currentUser.plan === 'pro' || currentUser.plan === 'vip' ? [
         { path: '/storage', icon: HardDrive, label: 'My Files', feature: null, badge: 'PRO' },
         { path: '/login-activity', icon: Clock, label: 'Login Activity', feature: null, badge: 'PRO' }
       ] : []),
-      { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', feature: null, badge: 'NEW' },
-      { path: '/wallet', icon: Wallet, label: 'My Wallet', feature: null, badge: 'NEW' },
-      { path: '/profile', icon: UserCircle, label: 'Account', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Help', feature: null },
+      { path: '/profile', icon: UserCircle, label: 'Account', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
       ...(currentUser.role !== 'student' ? [{ path: '/support-manager', icon: MessageCircle, label: 'Support Manager', feature: null }] : [])
     ];
@@ -199,7 +199,7 @@ export default function Sidebar() {
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard', highlight: true },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
-    { path: '/community-feed', icon: Rss, label: 'Community Feed' },
+    { path: '/community-feed', icon: Rss, label: 'Community' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/recruiters', icon: Briefcase, label: 'Career' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
@@ -209,8 +209,8 @@ export default function Sidebar() {
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
     { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliate Program', badge: 'NEW' },
-    { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
+    { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/governor/reputation', icon: TrendingUp, label: 'Reputation Manager', badge: 'NEW' },
     { path: '/support', icon: HelpCircle, label: 'Help' },
     { path: '/profile', icon: UserCircle, label: 'Account' },
@@ -244,16 +244,16 @@ export default function Sidebar() {
     { path: '/governor/analytics', icon: BarChart3, label: 'Analytics', badge: 'NEW' },
     { path: '/governor/feature-flags', icon: Flag, label: 'Feature Flags', badge: 'NEW' },
     { path: '/governor/audit-logs', icon: Shield, label: 'Audit Logs', badge: 'NEW' },
+    { path: '/moderator-dashboard', icon: Shield, label: 'Moderator Dashboard', badge: 'NEW' },
     { path: '/governor/reputation', icon: TrendingUp, label: 'Reputation Manager', badge: 'NEW' },
     { path: '/governor/reputation-tester', icon: Play, label: 'Test Reputation', badge: 'TEST' },
-    { path: '/coach-dashboard', icon: GraduationCap, label: 'Learning' },
-    { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: 'ALL' },
-    { path: '/open-day', icon: Plane, label: 'Open Day Sim', badge: 'ALL' },
+    { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/students', icon: Users, label: 'Students' },
     { path: '/attendance', icon: ClipboardList, label: 'Attendance', badge: 'NEW' },
+    { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: 'ALL' },
+    { path: '/open-day', icon: Plane, label: 'Open Day Sim', badge: 'ALL' },
     { path: '/community-feed', icon: Rss, label: 'Community', badge: 'NEW' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
-    { path: '/moderator-dashboard', icon: Shield, label: 'Moderator Dashboard', badge: 'NEW' },
     { path: '/recruiters', icon: Briefcase, label: 'Career' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },
     { path: '/student-events', icon: Ticket, label: 'Events' },
@@ -262,12 +262,12 @@ export default function Sidebar() {
     { path: '/seller/dashboard', icon: Package, label: 'Seller Dashboard', badge: 'NEW' },
     { path: '/seller/billing', icon: DollarSign, label: 'My Earnings', badge: 'NEW' },
     { path: '/affiliate-dashboard', icon: LinkIcon, label: 'Affiliate Program', badge: 'NEW' },
-    { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/wallet', icon: Wallet, label: 'My Wallet', badge: 'NEW' },
-    { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
+    { path: '/invite-friends', icon: UserPlus, label: 'Invite Friends', badge: 'NEW' },
     { path: '/storage', icon: HardDrive, label: 'Storage Manager' },
     { path: '/login-activity', icon: Clock, label: 'Login Activity' },
     { path: '/support', icon: HelpCircle, label: 'Help' },
+    { path: '/support-manager', icon: MessageCircle, label: 'Support Manager' },
     { path: '/profile', icon: UserCircle, label: 'Account' },
   ];
 
