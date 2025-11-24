@@ -15,7 +15,7 @@ import { useChatMessages } from '../hooks/useChatMessages';
 import { useTypingIndicator } from '../hooks/useTypingIndicator';
 import { MessageCircle } from 'lucide-react';
 
-export default function CommunityPage() {
+export default function CommunityPageNew() {
   const { currentUser } = useApp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [conversations, setConversations] = useState<Conversation[]>([]);
