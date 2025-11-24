@@ -7,6 +7,7 @@ import {
   getAllActivities,
   getActivityAttendees,
   scanQRAndCheckIn,
+  getAllRegistrations,
   Activity,
   ActivityRegistration
 } from '../services/simpleActivityService';
@@ -19,6 +20,7 @@ export default function StaffActivityManagementPage() {
   const [scanningActivity, setScanningActivity] = useState<string | null>(null);
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [attendees, setAttendees] = useState<Record<string, ActivityRegistration[]>>({});
+  const [allRegistrations, setAllRegistrations] = useState<ActivityRegistration[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -34,13 +36,25 @@ export default function StaffActivityManagementPage() {
   const isStaff = currentUser?.role && ['governor', 'mentor', 'coach'].includes(currentUser.role);
 
   const calculateAnalytics = () => {
-    const totalRevenue = activities.reduce((sum, activity) => {
-      return sum + (activity.price * activity.registeredCount);
+    // Calculate actual registration counts per activity
+    const activityRegistrationCounts = new Map<string, number>();
+    allRegistrations.forEach(reg => {
+      const count = activityRegistrationCounts.get(reg.activityId) || 0;
+      activityRegistrationCounts.set(reg.activityId, count + 1);
+    });
+
+    // Calculate revenue only from paid registrations
+    const totalRevenue = allRegistrations.reduce((sum, reg) => {
+      if (reg.paymentStatus === 'paid') {
+        const activity = activities.find(a => a.id === reg.activityId);
+        if (activity) {
+          return sum + activity.price;
+        }
+      }
+      return sum;
     }, 0);
 
-    const totalParticipants = activities.reduce((sum, activity) => {
-      return sum + activity.registeredCount;
-    }, 0);
+    const totalParticipants = allRegistrations.length;
 
     const paidEvents = activities.filter(a => a.price > 0).length;
     const freeEvents = activities.filter(a => a.price === 0).length;
@@ -50,7 +64,8 @@ export default function StaffActivityManagementPage() {
       totalParticipants,
       totalEvents: activities.length,
       paidEvents,
-      freeEvents
+      freeEvents,
+      activityRegistrationCounts
     };
   };
 
@@ -73,8 +88,12 @@ export default function StaffActivityManagementPage() {
   const loadActivities = async () => {
     setLoading(true);
     try {
-      const data = await getAllActivities();
-      setActivities(data);
+      const [activitiesData, registrationsData] = await Promise.all([
+        getAllActivities(),
+        getAllRegistrations()
+      ]);
+      setActivities(activitiesData);
+      setAllRegistrations(registrationsData);
     } catch (error) {
       console.error('Error loading activities:', error);
     } finally {
@@ -438,11 +457,11 @@ export default function StaffActivityManagementPage() {
                     <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4" />
-                        {activity.registeredCount} registered
+                        {analytics.activityRegistrationCounts.get(activity.id) || 0} registered
                       </div>
                       <div className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4" />
-                        {activity.checkedInCount} checked in
+                        {activity.checkedInCount || 0} checked in
                       </div>
                     </div>
 

@@ -405,3 +405,18 @@ export const updateActivity = async (
     throw error;
   }
 };
+
+export const getAllRegistrations = async (): Promise<ActivityRegistration[]> => {
+  try {
+    const registrationsRef = collection(db, 'activity_registrations');
+    const snapshot = await getDocs(registrationsRef);
+
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ActivityRegistration[];
+  } catch (error) {
+    console.error('Error getting all registrations:', error);
+    return [];
+  }
+};
