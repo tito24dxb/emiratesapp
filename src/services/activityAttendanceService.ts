@@ -226,6 +226,59 @@ export const activityAttendanceService = {
     });
   },
 
+  async joinActivity(
+    activityId: string,
+    userId: string,
+    userName: string,
+    userEmail: string
+  ): Promise<{ success: boolean; message: string; attendance?: Attendance }> {
+    const activity = await this.getActivity(activityId);
+
+    if (!activity) {
+      return { success: false, message: 'Activity not found' };
+    }
+
+    if (activity.maxAttendees && activity.totalCheckIns >= activity.maxAttendees) {
+      return { success: false, message: 'Activity is full' };
+    }
+
+    const existingAttendanceQuery = query(
+      collection(db, 'activity_attendance'),
+      where('activityId', '==', activityId),
+      where('userId', '==', userId)
+    );
+    const existingAttendance = await getDocs(existingAttendanceQuery);
+
+    if (!existingAttendance.empty) {
+      return { success: false, message: 'Already joined this activity' };
+    }
+
+    const now = Timestamp.now();
+    const attendanceRef = doc(collection(db, 'activity_attendance'));
+    const attendance: Attendance = {
+      id: attendanceRef.id,
+      activityId,
+      activityName: activity.name,
+      userId,
+      userName,
+      userEmail,
+      checkInTime: now,
+      checkInMethod: 'manual',
+      certificateGenerated: false,
+      verified: false,
+      createdAt: now
+    };
+
+    await setDoc(attendanceRef, attendance);
+
+    await updateDoc(doc(db, 'activities', activityId), {
+      totalCheckIns: increment(1),
+      updatedAt: Timestamp.now()
+    });
+
+    return { success: true, message: 'Successfully joined activity!', attendance };
+  },
+
   async checkIn(
     activityId: string,
     userId: string,

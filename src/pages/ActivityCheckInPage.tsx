@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { QrCode, Calendar, MapPin, Users, Award, Flame, Trophy, Download } from 'lucide-react';
+import { QrCode, Calendar, MapPin, Users, Award, Flame, Trophy, Download, UserPlus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
   activityAttendanceService,
   Activity,
   UserStreak,
-  ParticipationBadge
+  ParticipationBadge,
+  Attendance
 } from '../services/activityAttendanceService';
 
 export default function ActivityCheckInPage() {
   const { currentUser } = useApp();
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [userAttendance, setUserAttendance] = useState<Attendance[]>([]);
   const [userStreak, setUserStreak] = useState<UserStreak | null>(null);
   const [userBadges, setUserBadges] = useState<ParticipationBadge[]>([]);
   const [qrInput, setQrInput] = useState('');
@@ -30,6 +32,9 @@ export default function ActivityCheckInPage() {
       const upcomingActivities = await activityAttendanceService.getUpcomingActivities();
       setActivities(upcomingActivities);
 
+      const attendance = await activityAttendanceService.getUserAttendance(currentUser.uid);
+      setUserAttendance(attendance);
+
       const streak = await activityAttendanceService.getUserStreak(currentUser.uid);
       setUserStreak(streak);
 
@@ -42,6 +47,37 @@ export default function ActivityCheckInPage() {
       console.error('Error loading data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const isJoined = (activityId: string) => {
+    return userAttendance.some(att => att.activityId === activityId);
+  };
+
+  const handleJoinActivity = async (activityId: string) => {
+    if (!currentUser) return;
+
+    setCheckingIn(true);
+    setMessage(null);
+
+    try {
+      const result = await activityAttendanceService.joinActivity(
+        activityId,
+        currentUser.uid,
+        currentUser.name,
+        currentUser.email
+      );
+
+      if (result.success) {
+        setMessage({ type: 'success', text: result.message });
+        await loadData();
+      } else {
+        setMessage({ type: 'error', text: result.message });
+      }
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message });
+    } finally {
+      setCheckingIn(false);
     }
   };
 
@@ -316,13 +352,30 @@ export default function ActivityCheckInPage() {
                       )}
                     </div>
                     <div className="flex flex-col gap-2">
-                      {activity.checkInEnabled && (
+                      {isJoined(activity.id) ? (
+                        <>
+                          <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-center font-semibold text-sm flex items-center gap-2 whitespace-nowrap">
+                            <UserPlus className="w-4 h-4" />
+                            Joined
+                          </span>
+                          {activity.checkInEnabled && (
+                            <button
+                              onClick={() => handleManualCheckIn(activity.id)}
+                              disabled={checkingIn}
+                              className="px-4 py-2 bg-[#D71920] text-white rounded-lg hover:bg-[#B91518] transition font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            >
+                              Check In
+                            </button>
+                          )}
+                        </>
+                      ) : (
                         <button
-                          onClick={() => handleManualCheckIn(activity.id)}
+                          onClick={() => handleJoinActivity(activity.id)}
                           disabled={checkingIn}
-                          className="px-4 py-2 bg-[#D71920] text-white rounded-lg hover:bg-[#B91518] transition font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-semibold text-sm disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-2"
                         >
-                          Check In
+                          <UserPlus className="w-4 h-4" />
+                          Join Activity
                         </button>
                       )}
                     </div>
@@ -343,23 +396,27 @@ export default function ActivityCheckInPage() {
           <ul className="space-y-2 text-sm text-gray-700">
             <li className="flex items-start gap-2">
               <span className="w-2 h-2 bg-[#D71920] rounded-full mt-1.5 flex-shrink-0"></span>
-              <span>Scan the QR code displayed at the activity venue</span>
+              <span><strong>Join</strong> any free activity by clicking "Join Activity"</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="w-2 h-2 bg-[#D71920] rounded-full mt-1.5 flex-shrink-0"></span>
-              <span>Or check in manually when check-in is enabled</span>
+              <span><strong>Attend</strong> the activity at the scheduled time</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="w-2 h-2 bg-[#D71920] rounded-full mt-1.5 flex-shrink-0"></span>
-              <span>Build streaks by attending activities on consecutive days</span>
+              <span><strong>Check In</strong> at the venue by scanning QR code or manually</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="w-2 h-2 bg-[#D71920] rounded-full mt-1.5 flex-shrink-0"></span>
-              <span>Earn badges for reaching attendance milestones</span>
+              <span><strong>Build streaks</strong> by attending activities on consecutive days</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="w-2 h-2 bg-[#D71920] rounded-full mt-1.5 flex-shrink-0"></span>
-              <span>Download digital certificates for each activity attended</span>
+              <span><strong>Earn badges</strong> for reaching attendance milestones</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="w-2 h-2 bg-[#D71920] rounded-full mt-1.5 flex-shrink-0"></span>
+              <span><strong>Download</strong> digital certificates for each activity</span>
             </li>
           </ul>
         </motion.div>

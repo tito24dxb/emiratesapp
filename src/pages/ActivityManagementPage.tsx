@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { QrCode, Users, Calendar, Download, Play, Square, Eye, Plus } from 'lucide-react';
+import { QrCode, Users, Calendar, Download, Play, Square, Eye, Plus, Share2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
