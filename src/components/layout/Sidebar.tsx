@@ -146,6 +146,7 @@ export default function Sidebar() {
     { path: '/governor/analytics', icon: BarChart3, label: 'Analytics', badge: 'NEW' },
     { path: '/governor/feature-flags', icon: Flag, label: 'Feature Flags', badge: 'NEW' },
     { path: '/governor/audit-logs', icon: Shield, label: 'Audit Logs', badge: 'NEW' },
+    { path: '/moderator-dashboard', icon: Shield, label: 'Moderator Dashboard', badge: 'NEW' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/ai-trainer', icon: Brain, label: 'AI Trainer', badge: 'ALL' },

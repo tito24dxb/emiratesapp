@@ -116,7 +116,10 @@ export const communityFeedService = {
 
     if (moderationResult.action === 'warn') {
       console.warn('⚠️ Content warning:', moderationResult.reason);
-      alert('⚠️ Warning: ' + moderationResult.reason + '\n\nYour post will be published, but please be mindful of community guidelines.');
+      window.dispatchEvent(new CustomEvent('showModerationWarning', {
+        detail: { message: moderationResult.reason }
+      }));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     let imageUrl = '';
@@ -312,7 +315,10 @@ export const communityFeedService = {
 
     if (moderationResult.action === 'warn') {
       console.warn('⚠️ Content warning:', moderationResult.reason);
-      alert('⚠️ Warning: ' + moderationResult.reason + '\n\nYour comment will be posted, but please be mindful of community guidelines.');
+      window.dispatchEvent(new CustomEvent('showModerationWarning', {
+        detail: { message: moderationResult.reason }
+      }));
+      await new Promise(resolve => setTimeout(resolve, 100));
     }
 
     const commentData = {

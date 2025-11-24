@@ -63,6 +63,8 @@ import FinanceDashboard from './pages/FinanceDashboard';
 import ModeratorDashboard from './pages/ModeratorDashboard';
 import DevicesPage from './pages/DevicesPage';
 import AIAssistantButton from './components/AIAssistantButton';
+import { ModerationWarningModal } from './components/ModerationWarningModal';
+import { useState, useEffect } from 'react';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -80,6 +82,18 @@ function MaintenanceScreen({ message }: { message: string }) {
 
 function AppContent() {
   const { currentUser, loading, maintenanceMode, maintenanceMessage } = useApp();
+  const [warningModal, setWarningModal] = useState({ isOpen: false, message: '' });
+
+  useEffect(() => {
+    const handleWarning = (event: CustomEvent) => {
+      setWarningModal({ isOpen: true, message: event.detail.message });
+    };
+
+    window.addEventListener('showModerationWarning', handleWarning as EventListener);
+    return () => {
+      window.removeEventListener('showModerationWarning', handleWarning as EventListener);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -114,6 +128,11 @@ function AppContent() {
   return (
     <Layout>
       <AIAssistantButton />
+      <ModerationWarningModal
+        isOpen={warningModal.isOpen}
+        message={warningModal.message}
+        onClose={() => setWarningModal({ isOpen: false, message: '' })}
+      />
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
