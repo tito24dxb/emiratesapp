@@ -84,7 +84,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="liquid-navbar sticky top-0 z-50 overflow-visible">
+      <nav className="liquid-navbar sticky top-0 z-[100] overflow-visible">
         <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8 overflow-visible">
           <div className="flex items-center justify-between h-16 md:h-20 relative overflow-visible">
             <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">

@@ -429,7 +429,7 @@ export default function Sidebar() {
   return (
     <>
       {/* Horizontal Sidebar - Grouped Navigation */}
-      <aside className="w-full liquid-sidebar border-b border-white/20 relative z-40" ref={dropdownRef}>
+      <aside className="w-full liquid-sidebar border-b border-white/20 relative z-[100]" ref={dropdownRef}>
         <div className="p-3">
           <nav className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent">
             {/* Top-level items */}
@@ -481,12 +481,13 @@ export default function Sidebar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.95 }}
                         transition={{ type: "spring", damping: 25, stiffness: 400, duration: 0.3 }}
-                        className="absolute top-full left-0 mt-2 min-w-[200px] rounded-2xl shadow-2xl overflow-hidden z-50"
+                        className="absolute top-full left-0 mt-2 min-w-[200px] rounded-2xl shadow-2xl overflow-hidden z-[9999]"
                         style={{
                           background: 'rgba(255, 255, 255, 0.85)',
                           backdropFilter: 'blur(20px)',
                           WebkitBackdropFilter: 'blur(20px)',
                           border: '1px solid rgba(255, 255, 255, 0.3)',
+                          position: 'absolute',
                         }}
                       >
                         <div className="p-2">
