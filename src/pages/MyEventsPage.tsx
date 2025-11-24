@@ -4,10 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { getMyEventOrders, MarketplaceOrder } from '../services/orderService';
 import { getProduct } from '../services/marketplaceService';
+import { activityAttendanceService } from '../services/activityAttendanceService';
+import { getActivity } from '../services/activityManagementService';
 
 interface EventWithProduct extends MarketplaceOrder {
   eventDate?: Date;
   eventLocation?: string;
+  source?: 'marketplace' | 'activity';
+  activityName?: string;
+  qrCode?: string;
 }
 
 export default function MyEventsPage() {
@@ -27,21 +32,55 @@ export default function MyEventsPage() {
 
     setLoading(true);
     try {
+      // Load marketplace event orders
       const orders = await getMyEventOrders(currentUser.uid);
-
-      // Fetch product details for each order to get event details
-      const eventsWithDetails = await Promise.all(
+      const marketplaceEvents = await Promise.all(
         orders.map(async (order) => {
           const product = await getProduct(order.product_id);
           return {
             ...order,
             eventDate: product?.activity_date ? new Date(product.activity_date) : undefined,
-            eventLocation: product?.activity_location
+            eventLocation: product?.activity_location,
+            source: 'marketplace' as const
           };
         })
       );
 
-      setEvents(eventsWithDetails);
+      // Load activity registrations
+      const attendance = await activityAttendanceService.getUserAttendance(currentUser.uid);
+      const activityEvents = await Promise.all(
+        attendance.map(async (att) => {
+          const activity = await getActivity(att.activityId);
+          return {
+            id: att.id,
+            order_number: att.id,
+            product_title: activity?.title || 'Unknown Activity',
+            product_image: activity?.imageUrl,
+            amount: activity?.price || 0,
+            status: 'completed' as const,
+            attendance_status: att.checkInTime ? 'checked_in' as const : 'registered' as const,
+            qr_code: att.qrCode,
+            eventDate: activity?.date,
+            eventLocation: activity?.location,
+            source: 'activity' as const,
+            activityName: activity?.title,
+            qrCode: att.qrCode,
+            created_at: att.joinedAt,
+            buyer_id: currentUser.uid,
+            seller_id: activity?.creatorId || '',
+            product_id: att.activityId,
+          } as EventWithProduct;
+        })
+      );
+
+      // Combine and sort by date
+      const allEvents = [...marketplaceEvents, ...activityEvents].sort((a, b) => {
+        const dateA = a.eventDate || new Date(0);
+        const dateB = b.eventDate || new Date(0);
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      setEvents(allEvents);
     } catch (error) {
       console.error('Error loading events:', error);
     } finally {

@@ -1260,5 +1260,16 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // UPDATES (System updates and announcements)
+    ///////////////////////////////////////////////////////////////////////////
+    match /updates/{updateId} {
+      // All authenticated users can read updates
+      allow read, list: if isAuthenticated();
+
+      // Only governors can create/update/delete updates
+      allow create, update, delete: if isAuthenticated() && isGovernor();
+    }
   }
 }

@@ -103,32 +103,36 @@ class AIContextService {
 
   private async getProgressData(userId: string) {
     try {
+      const enrollmentsQuery = query(
+        collection(db, 'course_enrollments'),
+        where('userId', '==', userId)
+      );
+      const enrollmentsSnap = await getDocs(enrollmentsQuery);
+
       const progressQuery = query(
-        collection(db, 'progress'),
+        collection(db, 'user_module_progress'),
         where('userId', '==', userId)
       );
       const progressSnap = await getDocs(progressQuery);
 
       let completedModules = 0;
-      let totalPoints = 0;
-      const enrolledCourses = new Set<string>();
-
       progressSnap.forEach((doc) => {
         const data = doc.data();
-        if (data.courseId) enrolledCourses.add(data.courseId);
         if (data.completed) completedModules++;
-        if (data.points) totalPoints += data.points;
       });
 
+      const pointsDoc = await getDoc(doc(db, 'user_points', userId));
+      const totalPoints = pointsDoc.exists() ? pointsDoc.data().total_points || 0 : 0;
+
       const badgesQuery = query(
-        collection(db, 'badges'),
+        collection(db, 'user_badges'),
         where('userId', '==', userId)
       );
       const badgesSnap = await getDocs(badgesQuery);
-      const badges = badgesSnap.docs.map((doc) => doc.data().type);
+      const badges = badgesSnap.docs.map((doc) => doc.data().badge_type || doc.data().type);
 
       return {
-        enrolledCourses: enrolledCourses.size,
+        enrolledCourses: enrollmentsSnap.size,
         completedModules,
         totalPoints,
         badges,
@@ -242,19 +246,19 @@ class AIContextService {
   private async getModuleData(userId: string) {
     try {
       const createdQuery = query(
-        collection(db, 'modules'),
+        collection(db, 'main_modules'),
         where('createdBy', '==', userId)
       );
       const createdSnap = await getDocs(createdQuery);
 
       const enrolledQuery = query(
-        collection(db, 'enrollments'),
+        collection(db, 'course_enrollments'),
         where('userId', '==', userId)
       );
       const enrolledSnap = await getDocs(enrolledQuery);
 
       const completedQuery = query(
-        collection(db, 'progress'),
+        collection(db, 'user_module_progress'),
         where('userId', '==', userId),
         where('completed', '==', true)
       );
