@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Wallet as WalletIcon, TrendingUp, TrendingDown, DollarSign, Clock, Filter, Download } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Wallet as WalletIcon, TrendingUp, TrendingDown, DollarSign, Clock, Filter, Download, Plus, X, CreditCard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
 import { useApp } from '../context/AppContext';
 import { walletService, Wallet, Transaction } from '../services/walletService';
+import PaymentForm from '../components/marketplace/PaymentForm';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 export default function WalletPage() {
   const { currentUser } = useApp();
@@ -11,6 +16,10 @@ export default function WalletPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'credit' | 'debit'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState<number>(50);
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const [processingTopUp, setProcessingTopUp] = useState(false);
 
   useEffect(() => {
     loadWalletData();
@@ -72,6 +81,65 @@ export default function WalletPage() {
     }
   };
 
+  const handleInitiateTopUp = async () => {
+    if (!currentUser || topUpAmount <= 0) return;
+
+    setProcessingTopUp(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/marketplace-payment-intent`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          amount: Math.round(topUpAmount * 100),
+          currency: 'usd',
+          productId: 'wallet-topup',
+          buyerId: currentUser.uid
+        })
+      });
+
+      const data = await response.json();
+      if (data.clientSecret) {
+        setClientSecret(data.clientSecret);
+      }
+    } catch (error) {
+      console.error('Error creating payment intent:', error);
+      alert('Failed to initiate top-up. Please try again.');
+    } finally {
+      setProcessingTopUp(false);
+    }
+  };
+
+  const handleTopUpSuccess = async (paymentIntentId: string) => {
+    if (!currentUser) return;
+
+    try {
+      await walletService.addFunds(
+        currentUser.uid,
+        topUpAmount,
+        'admin_credit',
+        `Wallet top-up via Stripe (${paymentIntentId})`,
+        { paymentIntentId }
+      );
+
+      setShowTopUpModal(false);
+      setClientSecret('');
+      setTopUpAmount(50);
+      await loadWalletData();
+      alert('Wallet topped up successfully!');
+    } catch (error) {
+      console.error('Error updating wallet:', error);
+      alert('Payment successful but failed to update wallet. Please contact support.');
+    }
+  };
+
+  const handleTopUpError = (error: string) => {
+    console.error('Payment error:', error);
+    alert(`Payment failed: ${error}`);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -105,7 +173,16 @@ export default function WalletPage() {
             className="lg:col-span-2"
           >
             <div className="bg-gradient-to-r from-[#D71920]/90 to-[#B91518]/90 backdrop-blur-xl rounded-2xl p-8 text-white shadow-xl border border-white/20">
-              <p className="text-sm opacity-80 mb-2">Available Balance</p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm opacity-80">Available Balance</p>
+                <button
+                  onClick={() => setShowTopUpModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-lg transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="text-sm font-medium">Add Funds</span>
+                </button>
+              </div>
               <div className="flex items-baseline gap-2 mb-6">
                 <span className="text-5xl font-bold">${wallet?.balance.toFixed(2) || '0.00'}</span>
                 <span className="text-xl opacity-80">{wallet?.currency || 'USD'}</span>
@@ -294,6 +371,119 @@ export default function WalletPage() {
             </li>
           </ul>
         </motion.div>
+
+        {/* Top-Up Modal */}
+        <AnimatePresence>
+          {showTopUpModal && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                onClick={() => !clientSecret && setShowTopUpModal(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              >
+                <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-white/50">
+                  <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-6 rounded-t-2xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                        <WalletIcon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold">Add Funds to Wallet</h3>
+                        <p className="text-sm opacity-80">Top up your wallet balance</p>
+                      </div>
+                    </div>
+                    {!clientSecret && (
+                      <button
+                        onClick={() => setShowTopUpModal(false)}
+                        className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="p-6">
+                    {!clientSecret ? (
+                      <>
+                        <div className="mb-6">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Top-Up Amount (USD)
+                          </label>
+                          <div className="relative">
+                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                              type="number"
+                              min="10"
+                              step="10"
+                              value={topUpAmount}
+                              onChange={(e) => setTopUpAmount(parseFloat(e.target.value) || 0)}
+                              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#D71920] focus:border-transparent"
+                              placeholder="Enter amount"
+                            />
+                          </div>
+                          <p className="text-xs text-gray-600 mt-2">Minimum top-up amount is $10</p>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-3 mb-6">
+                          {[50, 100, 200].map((amount) => (
+                            <button
+                              key={amount}
+                              type="button"
+                              onClick={() => setTopUpAmount(amount)}
+                              className={`p-3 border-2 rounded-lg font-medium transition-all ${
+                                topUpAmount === amount
+                                  ? 'border-[#D71920] bg-[#D71920]/10 text-[#D71920]'
+                                  : 'border-gray-300 hover:border-gray-400'
+                              }`}
+                            >
+                              ${amount}
+                            </button>
+                          ))}
+                        </div>
+
+                        <button
+                          onClick={handleInitiateTopUp}
+                          disabled={processingTopUp || topUpAmount < 10}
+                          className="w-full py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {processingTopUp ? (
+                            <>
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <CreditCard className="w-5 h-5" />
+                              Continue to Payment
+                            </>
+                          )}
+                        </button>
+                      </>
+                    ) : (
+                      <Elements stripe={stripePromise}>
+                        <PaymentForm
+                          amount={Math.round(topUpAmount * 100)}
+                          currency="usd"
+                          onSuccess={handleTopUpSuccess}
+                          onError={handleTopUpError}
+                          clientSecret={clientSecret}
+                        />
+                      </Elements>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
