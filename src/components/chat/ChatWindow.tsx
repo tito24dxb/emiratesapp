@@ -43,7 +43,7 @@ export default function ChatWindow({
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-full flex flex-col bg-white">
       <div className="px-4 py-3 border-b border-gray-200 flex items-center gap-3 flex-shrink-0 bg-white">
         {onBack && (
           <button
