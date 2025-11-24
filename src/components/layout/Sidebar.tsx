@@ -173,10 +173,12 @@ export default function Sidebar() {
     currentUser.role === 'moderator' ? moderatorLinks :
     studentLinks;
 
+  const isCommunityPage = location.pathname === '/chat';
+
   return (
     <>
-      {/* Mobile Sidebar */}
-      <aside className="w-full md:hidden liquid-sidebar border-b border-white/20">
+      {/* Horizontal Sidebar - Show on mobile always, and on desktop only for chat page */}
+      <aside className={`w-full ${isCommunityPage ? 'block' : 'md:hidden'} liquid-sidebar border-b border-white/20`}>
         <div className="p-3">
           <nav className="flex gap-1 overflow-x-auto pb-2">
             {links.map((link) => {
@@ -206,9 +208,9 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Desktop Collapsible Sidebar */}
+      {/* Desktop Collapsible Sidebar - Hide on chat page */}
       <motion.aside
-        className="hidden md:block liquid-sidebar border-r border-white/20 min-h-screen h-full sticky top-0 overflow-y-auto overflow-x-visible z-40"
+        className={`${isCommunityPage ? 'hidden' : 'hidden md:block'} liquid-sidebar border-r border-white/20 min-h-screen h-full sticky top-0 overflow-y-auto overflow-x-visible z-40`}
         style={{ scrollbarWidth: 'thin' }}
         initial={{ width: '5rem' }}
         animate={{ width: isExpanded ? '16rem' : '5rem' }}

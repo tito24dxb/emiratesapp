@@ -100,24 +100,6 @@ export default function Navbar() {
               </div>
             </div>
 
-            {isCommunityPage && (
-              <div className="hidden md:flex items-center gap-1 mr-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                      location.pathname === link.path
-                        ? 'bg-white/80 text-gray-900 shadow-sm'
-                        : 'text-gray-700 hover:bg-white/50'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-
             <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
               {isCommunityPage && (
                 <button

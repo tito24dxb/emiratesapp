@@ -43,6 +43,10 @@ export default function Layout({ children }: LayoutProps) {
           ))}
         </AnimatePresence>
 
+        <div className="flex-shrink-0">
+          <Sidebar />
+        </div>
+
         <main className="flex-1 overflow-hidden">
           {children}
         </main>
