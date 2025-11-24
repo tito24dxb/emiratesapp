@@ -8,7 +8,7 @@ import { checkFeatureAccess } from '../utils/featureAccess';
 import FeatureLock from '../components/FeatureLock';
 import ChatSidebar from '../components/chat/ChatSidebar';
 import ChatWindow from '../components/chat/ChatWindow';
-import CreateConversationModal from '../components/chat/CreateConversationModal';
+import CreateConversationDropdown from '../components/chat/CreateConversationDropdown';
 import { useChatMessages } from '../hooks/useChatMessages';
 import { useTypingIndicator } from '../hooks/useTypingIndicator';
 import { collection, query, where, getDocs } from 'firebase/firestore';
@@ -233,6 +233,15 @@ export default function CommunityPage() {
           currentUserId={currentUser.uid}
           onSelectConversation={handleSelectConversation}
           onCreateConversation={handleCreateConversation}
+          showCreateForm={showCreateModal}
+          createFormContent={
+            <CreateConversationDropdown
+              onClose={() => setShowCreateModal(false)}
+              onCreateGroup={handleCreateGroup}
+              onCreatePrivate={handleCreatePrivate}
+              availableUsers={availableUsers}
+            />
+          }
         />
       ) : (
         <ChatWindow
@@ -250,14 +259,6 @@ export default function CommunityPage() {
           onReact={handleReaction}
           onEdit={handleEditMessage}
           onReport={handleReportMessage}
-        />
-      )}
-      {showCreateModal && (
-        <CreateConversationModal
-          onClose={() => setShowCreateModal(false)}
-          onCreateGroup={handleCreateGroup}
-          onCreatePrivate={handleCreatePrivate}
-          availableUsers={availableUsers}
         />
       )}
     </div>

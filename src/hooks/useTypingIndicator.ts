@@ -28,16 +28,16 @@ export function useTypingIndicator(conversationId: string | null, userId: string
   const startTyping = useCallback(() => {
     if (!conversationId) return;
 
-    presenceService.updateTyping(conversationId, userId, userName);
+    presenceService.setTyping(conversationId, userName);
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      presenceService.stopTyping(conversationId);
+      presenceService.clearTyping(conversationId);
     }, TYPING_TIMEOUT);
-  }, [conversationId, userId, userName]);
+  }, [conversationId, userName]);
 
   const stopTyping = useCallback(() => {
     if (!conversationId) return;
@@ -46,7 +46,7 @@ export function useTypingIndicator(conversationId: string | null, userId: string
       clearTimeout(typingTimeoutRef.current);
     }
 
-    presenceService.stopTyping(conversationId);
+    presenceService.clearTyping(conversationId);
   }, [conversationId]);
 
   return {

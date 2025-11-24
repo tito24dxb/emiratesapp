@@ -369,12 +369,12 @@ export const communityChatService = {
       },
     });
 
-    try {
-      const awardMessage = httpsCallable(functions, 'awardMessageSent');
-      await awardMessage({ conversationId });
-    } catch (error) {
-      console.warn('Failed to award message points:', error);
-    }
+    // try {
+    //   const awardMessage = httpsCallable(functions, 'awardMessageSent');
+    //   await awardMessage({ conversationId });
+    // } catch (error) {
+    //   console.warn('Failed to award message points:', error);
+    // }
 
     return messageRef.id;
   },

@@ -8,6 +8,8 @@ interface ChatSidebarProps {
   currentUserId: string;
   onSelectConversation: (conversation: Conversation) => void;
   onCreateConversation?: () => void;
+  showCreateForm?: boolean;
+  createFormContent?: React.ReactNode;
 }
 
 export default function ChatSidebar({
@@ -16,6 +18,8 @@ export default function ChatSidebar({
   currentUserId,
   onSelectConversation,
   onCreateConversation,
+  showCreateForm,
+  createFormContent,
 }: ChatSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -75,6 +79,8 @@ export default function ChatSidebar({
           />
         </div>
       </div>
+
+      {showCreateForm && createFormContent}
 
       <div className="flex-1 overflow-y-auto">
         {filteredConversations.length === 0 ? (
