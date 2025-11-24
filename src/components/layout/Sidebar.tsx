@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   LayoutDashboard,
   BookOpen,
@@ -29,11 +30,12 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
 import { checkFeatureAccess, Feature } from '../../utils/featureAccess';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar() {
   const { currentUser } = useApp();
   const location = useLocation();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   if (!currentUser) return null;
 
@@ -204,70 +206,106 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* Desktop Expanded Sidebar */}
-      <aside
-        className="hidden md:block liquid-sidebar border-r border-white/20 min-h-screen h-full sticky top-0 w-64 overflow-y-auto"
+      {/* Desktop Collapsible Sidebar */}
+      <motion.aside
+        className="hidden md:block liquid-sidebar border-r border-white/20 min-h-screen h-full sticky top-0 overflow-y-auto overflow-x-visible z-40"
         style={{ scrollbarWidth: 'thin' }}
+        initial={{ width: '5rem' }}
+        animate={{ width: isExpanded ? '16rem' : '5rem' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        onMouseEnter={() => setIsExpanded(true)}
+        onMouseLeave={() => setIsExpanded(false)}
       >
-      <div className="p-3 h-full flex flex-col">
-        {currentUser.role === 'governor' && (
-          <div className="mb-3 p-3 glass-primary text-gray-900 rounded-2xl shadow-xl">
-            <div className="flex items-center gap-2 mb-1">
-              <Shield className="w-4 h-4 flex-shrink-0" />
-              <span className="text-sm font-bold whitespace-nowrap">Governor Access</span>
-            </div>
-            <p className="text-xs text-gray-600">Full system control</p>
-          </div>
-        )}
+        <div className="p-3 h-full flex flex-col">
+          {currentUser.role === 'governor' && (
+            <motion.div
+              className="mb-3 p-3 glass-primary text-gray-900 rounded-2xl shadow-xl overflow-hidden"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: isExpanded ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Shield className="w-4 h-4 flex-shrink-0" />
+                {isExpanded && (
+                  <span className="text-sm font-bold whitespace-nowrap">Governor Access</span>
+                )}
+              </div>
+              {isExpanded && (
+                <p className="text-xs text-gray-600">Full system control</p>
+              )}
+            </motion.div>
+          )}
 
-        <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent py-1">
-          {links.map((link) => {
-            const Icon = link.icon;
-            const isActive = location.pathname === link.path;
-            const isLocked = 'locked' in link && link.locked;
-            const badge = 'badge' in link ? link.badge : undefined;
-            const highlight = 'highlight' in link && link.highlight;
+          <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-visible scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent py-1">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = location.pathname === link.path;
+              const isLocked = 'locked' in link && link.locked;
+              const badge = 'badge' in link ? link.badge : undefined;
+              const highlight = 'highlight' in link && link.highlight;
 
-            return (
-              <motion.div
-                key={link.path}
-                whileHover={{ scale: 1.02, x: 4 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-              >
-                <Link
-                  to={link.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative transition-all ${
-                    isActive
-                      ? 'glass-primary text-gray-900'
-                      : highlight
-                      ? 'glass-primary text-gray-900 font-bold'
-                      : isLocked
-                      ? 'text-gray-400 glass-ultra-thin opacity-60'
-                      : 'text-gray-700 glass-button-secondary'
-                  }`}
-                >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                  <span className="font-medium text-sm flex-1 whitespace-nowrap">{link.label}</span>
-                  {isLocked && <Lock className="w-3.5 h-3.5 flex-shrink-0" />}
-                  {badge && (
-                    <span
-                      className={`px-2 py-0.5 text-xs font-bold rounded-full ${
-                        badge === 'VIP'
-                          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
-                          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
-                      }`}
+              return (
+                <div key={link.path} className="relative">
+                  <Link
+                    to={link.path}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative transition-all ${
+                      isActive
+                        ? 'glass-primary text-gray-900'
+                        : highlight
+                        ? 'glass-primary text-gray-900 font-bold'
+                        : isLocked
+                        ? 'text-gray-400 glass-ultra-thin opacity-60'
+                        : 'text-gray-700 glass-button-secondary hover:glass-primary hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 flex-shrink-0" />
+
+                    <AnimatePresence>
+                      {isExpanded && (
+                        <motion.div
+                          className="flex items-center gap-2 flex-1 overflow-hidden"
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: 'auto' }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <span className="font-medium text-sm whitespace-nowrap">{link.label}</span>
+                          {isLocked && <Lock className="w-3.5 h-3.5 flex-shrink-0" />}
+                          {badge && (
+                            <span
+                              className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                                badge === 'VIP'
+                                  ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
+                                  : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
+                              }`}
+                            >
+                              {badge}
+                            </span>
+                          )}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </Link>
+
+                  {/* Tooltip on hover when collapsed */}
+                  {!isExpanded && (
+                    <motion.div
+                      className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-xl whitespace-nowrap pointer-events-none opacity-0 group-hover:opacity-100 z-50"
+                      initial={{ opacity: 0, x: -10 }}
+                      whileHover={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2 }}
+                      style={{ display: 'none' }}
                     >
-                      {badge}
-                    </span>
+                      {link.label}
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+                    </motion.div>
                   )}
-                </Link>
-              </motion.div>
-            );
-          })}
-        </nav>
-      </div>
-    </aside>
+                </div>
+              );
+            })}
+          </nav>
+        </div>
+      </motion.aside>
     </>
   );
 }

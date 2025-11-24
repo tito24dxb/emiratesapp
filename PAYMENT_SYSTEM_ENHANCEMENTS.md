@@ -41,14 +41,15 @@
 ## Sidebar Navigation Enhancement
 
 ### Features Implemented
-- Restored smooth motion animations on desktop sidebar only
-- Added `framer-motion` hover effects:
-  - Scale animation (1.02) on hover
-  - Slide animation (4px right) on hover
-  - Scale down (0.98) on tap/click
-  - Spring physics for natural feel
-- Mobile sidebar remains unchanged for optimal mobile UX
-- Smooth transitions with configurable stiffness and damping
+- **Collapsible Sidebar Design** - Maximizes content space on desktop
+- **Icon-Only Mode** - Shows only icons when collapsed (5rem / 80px width)
+- **Hover-to-Expand** - Expands to full width (16rem / 256px) on hover
+- **Smooth Spring Animations** - Natural expansion/collapse with spring physics
+- **Label Animations** - Labels fade in/out with opacity and width transitions
+- **Smart Content Management** - Labels, badges, and highlights properly handled in both states
+- **Governor Badge Support** - Special badges work in collapsed and expanded states
+- **Mobile Unchanged** - Mobile sidebar remains horizontal scrolling for optimal touch UX
+- **Space Optimization** - Gives more room to main content when sidebar is collapsed
 
 ## Technical Details
 
