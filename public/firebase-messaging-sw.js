@@ -2,12 +2,13 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: 'your-api-key',
-  authDomain: 'your-auth-domain',
-  projectId: 'your-project-id',
-  storageBucket: 'your-storage-bucket',
-  messagingSenderId: 'your-messaging-sender-id',
-  appId: 'your-app-id',
+  apiKey: 'AIzaSyBzpqAb-wysxMypgpuRHmFJik-szxtghlM',
+  authDomain: 'emirates-app-d80c5.firebaseapp.com',
+  projectId: 'emirates-app-d80c5',
+  storageBucket: 'emirates-app-d80c5.firebasestorage.app',
+  messagingSenderId: '969149026907',
+  appId: '1:969149026907:web:04aa02e33c8e987178257e',
+  measurementId: 'G-49060R5J9M'
 });
 
 const messaging = firebase.messaging();
