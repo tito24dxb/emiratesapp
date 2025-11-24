@@ -155,6 +155,7 @@ function AppContent() {
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/activities-manage" element={<StaffActivityManagementPage />} />
         <Route path="/events" element={<StudentEventsPage />} />
+        <Route path="/student-events" element={<StudentEventsPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/settings/devices" element={<DevicesPage />} />
         <Route path="/support" element={<SupportPage />} />
