@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApp } from '../context/AppContext';
-import { Lock, Mail, Shield, Key } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { Plane, Lock, Mail, Shield, Key } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../lib/firebase';
-import { recordLoginActivity } from '../services/loginActivityService';
-import { totpService } from '../services/totpService';
+import { auth, db } from '../../lib/firebase';
+import { recordLoginActivity } from '../../services/loginActivityService';
+import { totpService } from '../../services/totpService';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [useBackupCode, setUseBackupCode] = useState(false);
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,9 +37,11 @@ export default function LoginPage() {
       const has2FA = await totpService.check2FAStatus(tempUser.uid);
 
       if (has2FA) {
+
         const userDocRef = doc(db, 'users', tempUser.uid);
         const userDoc = await getDoc(userDocRef);
         const userData = userDoc.data();
+
 
         setPendingUserId(tempUser.uid);
         setPendingUserData({
@@ -221,6 +224,55 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // TODO: Re-enable 2FA with browser-compatible TOTP library
+  // const handleVerify2FA = async () => {
+  //   if (!twoFactorCode || twoFactorCode.length !== 6 || !pendingUserId) {
+  //     setError('Please enter a 6-digit code');
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setError('');
+
+  //   try {
+  //     const valid = await twoFactorService.verifyToken(pendingUserId, twoFactorCode);
+
+  //     if (valid) {
+  //       const userDoc = await getDoc(doc(db, 'users', pendingUserId));
+  //       const userData = userDoc.data()!;
+
+  //       const currentUser = {
+  //         uid: pendingUserId,
+  //         email: userData.email,
+  //         name: userData.name || 'User',
+  //         role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
+  //         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
+  //         country: userData.country || '',
+  //         bio: userData.bio || '',
+  //         expectations: userData.expectations || '',
+  //         photoURL: userData.photo_base64 || '',
+  //         hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+  //         hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+  //         onboardingCompletedAt: userData.onboardingCompletedAt,
+  //         welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+  //         createdAt: userData.createdAt || new Date().toISOString(),
+  //         updatedAt: userData.updatedAt || new Date().toISOString(),
+  //       };
+
+  //       setCurrentUser(currentUser);
+  //       await recordLoginActivity(pendingUserId, true);
+  //       navigate('/dashboard');
+  //     } else {
+  //       setError('Invalid verification code. Please try again.');
+  //     }
+  //   } catch (err: any) {
+  //     console.error('2FA verification error:', err);
+  //     setError('Verification failed. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handle2FAVerification = async () => {
     if (!pendingUserId || !twoFactorCode || !pendingUserData) return;

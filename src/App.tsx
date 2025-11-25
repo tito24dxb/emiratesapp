@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useApp, AppProvider } from './context/AppContext';
 import Layout from './components/layout/Layout';
 import LandingPage from './pages/LandingPage';
-import WaitlistGatePage from './pages/WaitlistGatePage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import Dashboard from './pages/Dashboard';
@@ -121,8 +120,7 @@ function AppContent() {
   if (!currentUser) {
     return (
       <Routes>
-        <Route path="/" element={<WaitlistGatePage />} />
-        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
