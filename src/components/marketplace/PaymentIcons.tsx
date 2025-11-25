@@ -1,7 +1,7 @@
 export function ApplePayIcon({ className = "h-8" }: { className?: string }) {
   return (
     <img
-      src="/1.png"
+      src="/096937064f1c19e885c46069db0c497c.jpg"
       alt="Apple Pay"
       className={className}
       style={{ objectFit: 'contain' }}
@@ -12,7 +12,7 @@ export function ApplePayIcon({ className = "h-8" }: { className?: string }) {
 export function GooglePayIcon({ className = "h-8" }: { className?: string }) {
   return (
     <img
-      src="/2.png"
+      src="/white-google-pay-logotype-on-light-blue-background-logo-mobile-payment-system-electronic-wallet-contactless-nfc-for-android-operating-system-gpay-editorial-free-vector.jpg"
       alt="Google Pay"
       className={className}
       style={{ objectFit: 'contain' }}
