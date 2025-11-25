@@ -1,4 +1,4 @@
-import { Bell, ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
+import { Bell, ChevronDown, User, Settings, LogOut, Menu, X, Users } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -160,6 +160,15 @@ export default function Navbar() {
                   ) : (
                     <Menu className="w-4 h-4 text-gray-900" />
                   )}
+                </button>
+              )}
+              {currentUser.role === 'governor' && (
+                <button
+                  onClick={() => navigate('/governor/waitlist')}
+                  className="relative p-1.5 md:p-2 liquid-button-secondary rounded-full transition-all"
+                  title="Waitlist"
+                >
+                  <Users className="w-4 h-4 md:w-5 md:h-5 text-gray-900" />
                 </button>
               )}
             <button

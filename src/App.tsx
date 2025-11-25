@@ -71,6 +71,9 @@ import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
 import WalletPage from './pages/WalletPage';
 import StaffActivityManagementPage from './pages/StaffActivityManagementPage';
 import StudentEventsPage from './pages/StudentEventsPage';
+import WaitlistPage from './pages/WaitlistPage';
+import StaffCodePage from './pages/StaffCodePage';
+import WaitlistDashboard from './pages/governor/WaitlistDashboard';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -121,6 +124,8 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/waitlist" element={<WaitlistPage />} />
+        <Route path="/staff-code" element={<StaffCodePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -221,6 +226,7 @@ function AppContent() {
             <Route path="/governor/moderation-insights" element={<ModerationInsightsPage />} />
             <Route path="/governor/reputation" element={<ReputationManager />} />
             <Route path="/governor/reputation-tester" element={<ReputationTester />} />
+            <Route path="/governor/waitlist" element={<WaitlistDashboard />} />
           </>
         )}
 

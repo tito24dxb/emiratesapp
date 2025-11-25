@@ -150,16 +150,16 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-row items-center gap-2 sm:gap-3">
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/staff-code')}
                 className="px-4 sm:px-6 py-2.5 text-gray-700 font-semibold hover:text-[#D71920] transition rounded-lg hover:bg-white/50 text-sm sm:text-base"
               >
                 Login
               </button>
               <button
-                onClick={() => navigate('/register')}
+                onClick={() => navigate('/waitlist')}
                 className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition text-sm sm:text-base whitespace-nowrap"
               >
-                Sign Up Free
+                Join Waitlist
               </button>
             </div>
           </div>
@@ -201,17 +201,17 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 px-4">
               <button
-                onClick={() => navigate('/register')}
+                onClick={() => navigate('/waitlist')}
                 className="group px-10 py-4 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition flex items-center gap-2"
               >
-                Start Free Today
+                Join Waitlist
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/staff-code')}
                 className="px-10 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold text-lg hover:border-[#D71920] hover:text-[#D71920] hover:shadow-lg transition"
               >
-                Sign In
+                Staff Login
               </button>
             </div>
 
