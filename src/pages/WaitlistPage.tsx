@@ -169,14 +169,6 @@ export default function WaitlistPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
-              Already have access?{' '}
-              <a
-                href="/login"
-                className="text-[#D71920] font-bold hover:underline"
-              >
-                Sign In
               </a>
             </p>
           </div>
