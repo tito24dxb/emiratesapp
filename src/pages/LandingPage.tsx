@@ -54,13 +54,13 @@ export default function LandingPage() {
     },
     {
       name: 'Maria Santos',
-      role: 'Qatar Airways Crew',
+      role: 'Emirates crew',
       image: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=200',
       quote: 'I went from zero confidence to landing my dream job. The mentorship program is invaluable.'
     },
     {
       name: 'Aisha Khan',
-      role: 'Etihad Airways Crew',
+      role: 'Emirates crew',
       image: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=200',
       quote: 'The simulation module gave me the confidence I needed. I knew exactly what to expect on the day!'
     }
@@ -104,7 +104,7 @@ export default function LandingPage() {
     },
     {
       name: 'Pro',
-      price: '£39',
+      price: '$29',
       period: 'per month',
       priceId: 'price_1SUxeo02SYry0M3gdhJU01Xr',
       features: [
@@ -122,7 +122,7 @@ export default function LandingPage() {
     },
     {
       name: 'VIP',
-      price: '£79',
+      price: '$55',
       period: 'per month',
       priceId: 'price_1SUxfV02SYry0M3gjVKsRY8l',
       features: [
@@ -184,7 +184,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D71920]/10 to-[#CBA135]/10 border border-[#D71920]/20 rounded-full mb-8"
             >
               <Sparkles className="w-4 h-4 text-[#D71920]" />
-              <span className="text-sm font-semibold text-gray-700">Trusted by 10,000+ aspiring cabin crew worldwide</span>
+              <span className="text-sm font-semibold text-gray-700">Trusted by aspiring cabin crew worldwide</span>
             </motion.div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight px-4">
