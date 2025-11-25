@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Key, Loader } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { waitlistService } from '../services/waitlistService';
 
 export default function StaffCodePage() {
   const [code, setCode] = useState('');
@@ -15,31 +15,15 @@ export default function StaffCodePage() {
     setError('');
     setLoading(true);
 
-    try {
-      const { data, error: queryError } = await supabase
-        .from('staff_access_codes')
-        .select('*')
-        .eq('code', code)
-        .eq('is_active', true)
-        .maybeSingle();
+    const isValid = await waitlistService.verifyStaffCode(code);
 
-      if (queryError || !data) {
-        setError('Invalid or inactive staff code.');
-        setLoading(false);
-        return;
-      }
-
-      await supabase
-        .from('staff_access_codes')
-        .update({ used_count: data.used_count + 1 })
-        .eq('id', data.id);
-
+    if (isValid) {
       navigate('/login');
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError('Invalid or inactive staff code.');
     }
+
+    setLoading(false);
   };
 
   return (

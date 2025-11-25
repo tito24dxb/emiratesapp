@@ -76,7 +76,7 @@ export default function RegisterPage() {
             ipData.ip
           );
         } catch (error) {
-          console.error('Error recording referral:', error);
+          // Silent error handling for referral tracking
         }
       }
 
@@ -105,13 +105,12 @@ export default function RegisterPage() {
             return;
           }
         } catch (checkoutError) {
-          console.error('Checkout error:', checkoutError);
+          // Silent error handling for checkout
         }
       }
 
       navigate('/dashboard');
     } catch (err: any) {
-      console.error('Registration error details:', err);
       let errorMessage = 'Registration failed. Please try again.';
 
       if (err.code === 'auth/email-already-in-use') {
@@ -188,7 +187,6 @@ export default function RegisterPage() {
         navigate('/dashboard');
       }
     } catch (error: any) {
-      console.error('Google sign up error:', error);
       setError(error.message || 'Failed to sign up with Google');
     } finally {
       setLoading(false);

@@ -201,8 +201,6 @@ export default function LoginPage() {
       await recordLoginActivity(user.uid, true);
       navigate('/dashboard');
     } catch (err: any) {
-      console.error('Google sign-in error:', err);
-
       let errorMessage = 'Failed to sign in with Google';
 
       if (err.code === 'auth/configuration-not-found' || err.code === 'auth/invalid-api-key') {

@@ -1,17 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Users, Mail, Calendar, CheckCircle, Clock, Search, Filter } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-
-interface WaitlistEntry {
-  id: string;
-  name: string;
-  email: string;
-  created_at: string;
-  approved: boolean;
-  approved_at: string | null;
-  approved_by: string | null;
-}
+import { waitlistService, WaitlistEntry } from '../../services/waitlistService';
 
 export default function WaitlistDashboard() {
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
@@ -26,44 +16,22 @@ export default function WaitlistDashboard() {
 
   const fetchWaitlist = async () => {
     setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('waitlist')
-        .select('*')
-        .order('created_at', { ascending: false });
+    const data = await waitlistService.getAllEntries();
 
-      if (error) throw error;
+    setEntries(data);
 
-      setEntries(data || []);
+    const total = data.length;
+    const pending = data.filter(e => !e.approved).length;
+    const approved = data.filter(e => e.approved).length;
 
-      const total = data?.length || 0;
-      const pending = data?.filter(e => !e.approved).length || 0;
-      const approved = data?.filter(e => e.approved).length || 0;
-
-      setStats({ total, pending, approved });
-    } catch (error) {
-      console.error('Error fetching waitlist:', error);
-    } finally {
-      setLoading(false);
-    }
+    setStats({ total, pending, approved });
+    setLoading(false);
   };
 
   const handleApprove = async (entry: WaitlistEntry) => {
-    try {
-      const { error } = await supabase
-        .from('waitlist')
-        .update({
-          approved: true,
-          approved_at: new Date().toISOString(),
-          approved_by: 'Governor'
-        })
-        .eq('id', entry.id);
-
-      if (error) throw error;
-
+    const success = await waitlistService.approveEntry(entry.id, 'Governor');
+    if (success) {
       fetchWaitlist();
-    } catch (error) {
-      console.error('Error approving entry:', error);
     }
   };
 

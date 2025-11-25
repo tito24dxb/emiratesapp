@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, User, CheckCircle, Loader } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { waitlistService } from '../services/waitlistService';
 
 export default function WaitlistPage() {
-  const navigate = useNavigate(); // Initialize useNavigate
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,29 +15,17 @@ export default function WaitlistPage() {
     setError('');
     setLoading(true);
 
-    try {
-      const { error: insertError } = await supabase
-        .from('waitlist')
-        .insert([{ name, email }]);
+    const result = await waitlistService.addToWaitlist(name, email);
 
-      if (insertError) {
-        if (insertError.code === '23505') {
-          setError('This email is already on the waitlist.');
-        } else {
-          setError('Failed to join waitlist. Please try again.');
-        }
-        setLoading(false);
-        return;
-      }
-
+    if (result.success) {
       setSuccess(true);
       setName('');
       setEmail('');
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(result.error || 'An unexpected error occurred. Please try again.');
     }
+
+    setLoading(false);
   };
 
   if (success) {
