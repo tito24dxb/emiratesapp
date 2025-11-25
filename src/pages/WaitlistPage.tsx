@@ -168,10 +168,6 @@ export default function WaitlistPage() {
               )}
             </button>
           </form>
-
-              </a>
-            </p>
-          </div>
         </div>
       </motion.div>
     </div>
