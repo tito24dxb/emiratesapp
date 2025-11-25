@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, User, CheckCircle, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 export default function WaitlistPage() {
+  const navigate = useNavigate(); // Initialize useNavigate
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
@@ -168,6 +170,14 @@ export default function WaitlistPage() {
               )}
             </button>
           </form>
+
+          {/* Back to Landing Page Button */}
+          <button
+            onClick={() => navigate('/')}
+            className="mt-4 w-full liquid-button-secondary text-gray-700 py-3.5 font-bold hover:bg-gray-100 transition"
+          >
+            Back to Landing Page
+          </button>
         </div>
       </motion.div>
     </div>
