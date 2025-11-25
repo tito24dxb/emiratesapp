@@ -153,7 +153,7 @@ export default function LandingPage() {
                 onClick={() => navigate('/staff-code')}
                 className="px-4 sm:px-6 py-2.5 text-gray-700 font-semibold hover:text-[#D71920] transition rounded-lg hover:bg-white/50 text-sm sm:text-base"
               >
-                Login
+                Staff Login
               </button>
               <button
                 onClick={() => navigate('/waitlist')}
