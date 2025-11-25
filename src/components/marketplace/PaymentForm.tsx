@@ -1,10 +1,8 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { CardElement, PaymentRequestButtonElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Lock, CreditCard, Smartphone, Wallet, AlertCircle, CheckCircle, Globe } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Lock, CreditCard, Smartphone, Wallet } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { PaymentRequest, PaymentMethod } from '@stripe/stripe-js';
-import { getCurrencySymbol, formatCurrencyAmount } from '../../utils/currencyDetection';
-import { ApplePayIcon, GooglePayIcon } from './PaymentIcons';
 
 interface PaymentFormProps {
   amount: number;
@@ -48,9 +46,6 @@ export default function PaymentForm({
   const [cardComplete, setCardComplete] = useState(false);
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null);
   const [walletPaymentAvailable, setWalletPaymentAvailable] = useState(false);
-  const [processing3DSecure, setProcessing3DSecure] = useState(false);
-  const [detectedCurrency, setDetectedCurrency] = useState<string>(currency);
-  const [cardBrand, setCardBrand] = useState<string>('');
   const [billingDetails, setBillingDetails] = useState({
     name: '',
     email: '',
@@ -82,20 +77,10 @@ export default function PaymentForm({
 
     // Check if Apple Pay or Google Pay is available
     pr.canMakePayment().then((result) => {
-      console.log('Payment Request canMakePayment result:', result);
-      console.log('User Agent:', navigator.userAgent);
-      console.log('Is PWA:', window.matchMedia('(display-mode: standalone)').matches);
-      console.log('Is Safari:', /^((?!chrome|android).)*safari/i.test(navigator.userAgent));
-
       if (result) {
         setPaymentRequest(pr);
         setWalletPaymentAvailable(true);
-        console.log('✅ Digital wallet payments available');
-      } else {
-        console.log('❌ Digital wallet payments not available');
       }
-    }).catch((error) => {
-      console.error('Error checking payment availability:', error);
     });
 
     // Handle the payment method from Apple Pay or Google Pay
@@ -195,28 +180,10 @@ export default function PaymentForm({
         throw new Error(confirmError.message);
       }
 
-      if (paymentIntent) {
-        if (paymentIntent.status === 'requires_action') {
-          setProcessing3DSecure(true);
-          const { error: authError, paymentIntent: authIntent } = await stripe.confirmCardPayment(clientSecret);
-          setProcessing3DSecure(false);
-
-          if (authError) {
-            throw new Error(authError.message);
-          }
-
-          if (authIntent && authIntent.status === 'succeeded') {
-            onSuccess(authIntent.id);
-          } else {
-            throw new Error('3D Secure authentication failed');
-          }
-        } else if (paymentIntent.status === 'succeeded') {
-          onSuccess(paymentIntent.id);
-        } else {
-          throw new Error('Payment was not successful');
-        }
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        onSuccess(paymentIntent.id);
       } else {
-        throw new Error('Payment intent not found');
+        throw new Error('Payment was not successful');
       }
     } catch (err: any) {
       console.error('Payment error:', err);
@@ -229,129 +196,62 @@ export default function PaymentForm({
   };
 
   const formatAmount = () => {
-    return formatCurrencyAmount(amount / 100, detectedCurrency);
+    const formatted = (amount / 100).toFixed(2);
+    const symbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : 'د.إ';
+    return `${symbol}${formatted}`;
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Amount Display */}
       <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl text-white">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-sm opacity-90">Total Amount</div>
-          <div className="flex items-center gap-2 text-xs opacity-75">
-            <Globe className="w-3 h-3" />
-            <span>{currency.toUpperCase()}</span>
-          </div>
-        </div>
-        <div className="text-4xl font-bold mb-2">{formatAmount()}</div>
-        <div className="text-sm opacity-75 flex items-center gap-2">
-          <Lock className="w-4 h-4" />
-          <span>Secure payment with 3D Secure protection</span>
+        <div className="text-sm opacity-90 mb-1">Total Amount</div>
+        <div className="text-4xl font-bold">{formatAmount()}</div>
+        <div className="text-sm opacity-75 mt-2">
+          <Lock className="w-4 h-4 inline mr-1" />
+          Secure payment powered by Stripe
         </div>
       </div>
-
-      {/* 3D Secure Processing Modal */}
-      <AnimatePresence>
-        {processing3DSecure && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl"
-            >
-              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Lock className="w-10 h-10 text-blue-600 animate-pulse" />
-              </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Verifying Payment</h3>
-              <p className="text-gray-600 mb-6">
-                Please complete the verification with your card issuer. This may open in a new window or popup.
-              </p>
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-              <p className="text-xs text-gray-500 mt-4">Secured by 3D Secure</p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Error Message */}
       {error && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
+          className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
         >
-          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-red-600 text-sm font-medium">{error}</p>
-          </div>
+          {error}
         </motion.div>
       )}
 
-      {/* Apple Pay and Google Pay - Always Show */}
-      <div className="mb-6">
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
-          <div className="flex items-center gap-2 mb-4">
-            <Wallet className="w-6 h-6 text-blue-600" />
-            <h3 className="font-bold text-gray-900 text-lg">Express Checkout</h3>
-          </div>
-
-          {walletPaymentAvailable && paymentRequest ? (
+      {/* Apple Pay and Google Pay */}
+      {walletPaymentAvailable && paymentRequest && (
+        <div className="mb-6">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border-2 border-blue-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Wallet className="w-6 h-6 text-blue-600" />
+              <h3 className="font-bold text-gray-900 text-lg">Express Checkout</h3>
+            </div>
             <div className="bg-white rounded-lg p-1">
               <PaymentRequestButtonElement
                 options={{ paymentRequest }}
                 className="w-full"
               />
             </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex flex-col sm:flex-row items-stretch justify-center gap-3">
-                <button
-                  disabled
-                  className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-black rounded-xl opacity-40 cursor-not-allowed min-w-[140px]"
-                >
-                  <ApplePayIcon className="h-10 w-auto" />
-                </button>
-                <button
-                  disabled
-                  className="w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white border-2 border-gray-300 rounded-xl opacity-40 cursor-not-allowed min-w-[140px]"
-                >
-                  <GooglePayIcon className="h-10 w-auto" />
-                </button>
-              </div>
-              <p className="text-xs text-gray-500 text-center italic">
-                Digital wallet payments currently unavailable in this browser
-              </p>
-              <p className="text-xs text-blue-600 text-center font-medium">
-                ✓ Use Safari for Apple Pay or Chrome for Google Pay
-              </p>
-            </div>
-          )}
+            <p className="text-sm text-gray-700 mt-3 flex items-center gap-2">
+              <Smartphone className="w-4 h-4 text-blue-600" />
+              <span className="font-medium">Pay with Apple Pay or Google Pay - Faster & Secure</span>
+            </p>
+          </div>
 
-          <p className="text-sm text-gray-700 mt-3 flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-blue-600" />
-            <span className="font-medium">
-              {walletPaymentAvailable ? 'Pay with Apple Pay or Google Pay - Faster & Secure' : 'Apple Pay & Google Pay available on Safari (iOS/Mac) and Chrome (Android/Desktop)'}
-            </span>
-          </p>
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-gray-300"></div>
+            <span className="text-sm text-gray-600 font-semibold">OR PAY WITH CARD</span>
+            <div className="flex-1 h-px bg-gray-300"></div>
+          </div>
         </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-4 my-6">
-          <div className="flex-1 h-px bg-gray-300"></div>
-          <span className="text-sm text-gray-600 font-semibold">OR PAY WITH CARD</span>
-          <div className="flex-1 h-px bg-gray-300"></div>
-        </div>
-      </div>
+      )}
 
       {/* Billing Details */}
       <div className="space-y-4">
@@ -566,25 +466,13 @@ export default function PaymentForm({
               } else {
                 setError('');
               }
-
-              if (e.brand) {
-                setCardBrand(e.brand);
-              }
             }}
           />
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <p className="text-xs text-gray-700 flex items-center gap-1">
-            <Lock className="w-3 h-3" />
-            Encrypted & Secure
-          </p>
-          {cardBrand && (
-            <div className="flex items-center gap-1 text-xs text-gray-600">
-              <CheckCircle className="w-3 h-3 text-green-600" />
-              <span className="capitalize">{cardBrand}</span>
-            </div>
-          )}
-        </div>
+        <p className="text-xs text-gray-700 mt-2">
+          <Lock className="w-3 h-3 inline mr-1" />
+          Your payment information is encrypted and secure
+        </p>
       </div>
 
       {/* Submit Button */}
@@ -607,22 +495,9 @@ export default function PaymentForm({
       </button>
 
       {/* Security Info */}
-      <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-        <div className="flex items-center gap-2 text-xs text-gray-600">
-          <CheckCircle className="w-4 h-4 text-green-600" />
-          <span>PCI-DSS Compliant Payment Processing</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-600">
-          <CheckCircle className="w-4 h-4 text-green-600" />
-          <span>3D Secure Authentication Available</span>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-gray-600">
-          <CheckCircle className="w-4 h-4 text-green-600" />
-          <span>Multi-Currency Support</span>
-        </div>
-        <p className="text-xs text-gray-500 mt-2 text-center border-t border-gray-200 pt-2">
-          Powered by Stripe • Your card information is never stored on our servers
-        </p>
+      <div className="text-center text-xs text-gray-300">
+        <p>Payments are processed securely by Stripe</p>
+        <p className="mt-1">Your card information is never stored on our servers</p>
       </div>
     </form>
   );

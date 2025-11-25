@@ -89,25 +89,6 @@ export const createConversation = async (
     };
 
     await setDoc(conversationRef, conversation);
-
-    // Also save to conversations collection for retrieval from community chat
-    const communityConvRef = doc(collection(db, 'conversations'));
-    await setDoc(communityConvRef, {
-      conversationType: 'marketplace',
-      productId,
-      productTitle,
-      productImage,
-      members: [buyerId, sellerId],
-      memberNames: {
-        [buyerId]: buyerName,
-        [sellerId]: sellerName,
-      },
-      lastMessage: '',
-      lastMessageAt: Timestamp.now(),
-      createdAt: Timestamp.now(),
-      marketplaceConversationId: conversationRef.id,
-    });
-
     console.log('Conversation created:', conversationRef.id);
     return conversationRef.id;
   } catch (error) {

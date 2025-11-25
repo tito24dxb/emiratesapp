@@ -13,7 +13,6 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { aiModerationService } from './aiModerationService';
 
 export interface GroupMessage {
   id: string;
@@ -60,17 +59,6 @@ export const sendGroupMessage = async (
   senderRole: 'student' | 'mentor' | 'governor',
   text: string
 ): Promise<void> => {
-  const moderationResult = await aiModerationService.moderateContent(
-    senderId,
-    senderName,
-    text,
-    'chat'
-  );
-
-  if (!moderationResult.allowed) {
-    throw new Error(moderationResult.reason);
-  }
-
   const messagesRef = collection(db, 'groupChats', 'publicRoom', 'messages');
   await addDoc(messagesRef, {
     senderId,
@@ -152,22 +140,8 @@ export const sendPrivateMessage = async (
   conversationId: string,
   senderId: string,
   senderRole: 'student' | 'mentor' | 'governor',
-  text: string,
-  senderName?: string
+  text: string
 ): Promise<void> => {
-  if (senderName) {
-    const moderationResult = await aiModerationService.moderateContent(
-      senderId,
-      senderName,
-      text,
-      'chat'
-    );
-
-    if (!moderationResult.allowed) {
-      throw new Error(moderationResult.reason);
-    }
-  }
-
   const messagesRef = collection(
     db,
     'conversations',

@@ -9,7 +9,7 @@ export const loginBegin = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
-    res.status(200).send('');
+    res.status(204).send('');
     return;
   }
 

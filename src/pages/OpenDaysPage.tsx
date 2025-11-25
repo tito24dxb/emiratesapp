@@ -9,25 +9,9 @@ import {
   deleteOpenDay,
   OpenDay,
 } from '../services/openDaysService';
-import { checkFeatureAccess } from '../utils/featureAccess';
-import FeatureLock from '../components/FeatureLock';
 
 export default function OpenDaysPage() {
   const { currentUser } = useApp();
-
-  // Check feature access
-  if (!currentUser) return null;
-
-  const openDaysAccess = checkFeatureAccess(currentUser, 'opendays');
-  if (!openDaysAccess.allowed) {
-    return (
-      <FeatureLock
-        requiredPlan={openDaysAccess.requiresPlan || 'pro'}
-        featureName="Open Days"
-        description={openDaysAccess.message}
-      />
-    );
-  }
   const [openDays, setOpenDays] = useState<OpenDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { Plane, Lock, Mail, Shield, Key } from 'lucide-react';
+import { Plane, Lock, Mail, Shield, Key, Fingerprint } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { recordLoginActivity } from '../../services/loginActivityService';
 import { totpService } from '../../services/totpService';
+import { useBiometric } from '../../hooks/useBiometric';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -19,9 +20,43 @@ export default function LoginPage() {
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [pendingUserData, setPendingUserData] = useState<any>(null);
   const [useBackupCode, setUseBackupCode] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
+  const { isBiometricAvailable, loginWithBiometric } = useBiometric();
 
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
+
+  const checkBiometricAvailability = async () => {
+    const available = await isBiometricAvailable();
+    setBiometricAvailable(available);
+    const lastEmail = localStorage.getItem('last_biometric_email');
+    if (lastEmail && available) {
+      setEmail(lastEmail);
+    }
+  };
+
+  const handleBiometricLogin = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      localStorage.setItem('last_biometric_email', email);
+      await loginWithBiometric(email);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Biometric login failed. Try using your password instead.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -201,6 +236,8 @@ export default function LoginPage() {
       await recordLoginActivity(user.uid, true);
       navigate('/dashboard');
     } catch (err: any) {
+      console.error('Google sign-in error:', err);
+
       let errorMessage = 'Failed to sign in with Google';
 
       if (err.code === 'auth/configuration-not-found' || err.code === 'auth/invalid-api-key') {
@@ -505,6 +542,18 @@ export default function LoginPage() {
               </svg>
               Sign in with Google
             </button>
+
+            {biometricAvailable && (
+              <button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={loading || !email}
+                className="mt-3 w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                <Fingerprint className="w-5 h-5" />
+                {loading ? 'Authenticating...' : 'Sign in with Face ID / Touch ID'}
+              </button>
+            )}
           </div>
 
           <div className="mt-6 text-center">

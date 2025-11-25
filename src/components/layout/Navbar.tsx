@@ -1,6 +1,5 @@
-import { Bell, ChevronDown, User, Settings, LogOut, Menu, X, Users } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { Bell, ChevronDown, User, Settings, LogOut, Menu, X, ShoppingBag, Package, DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,9 +12,6 @@ export default function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [profileMenuPosition, setProfileMenuPosition] = useState<{ top: number; right: number } | null>(null);
-  const profileButtonRef = useRef<HTMLButtonElement>(null);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isCommunityPage = location.pathname === '/chat';
@@ -36,100 +32,17 @@ export default function Navbar() {
     return unsubscribe;
   }, [currentUser]);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as Node;
-      if (profileMenuRef.current && !profileMenuRef.current.contains(target) &&
-          profileButtonRef.current && !profileButtonRef.current.contains(target)) {
-        setShowProfileMenu(false);
-        setProfileMenuPosition(null);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    function updateProfileMenuPosition() {
-      if (showProfileMenu && profileButtonRef.current) {
-        const rect = profileButtonRef.current.getBoundingClientRect();
-        setProfileMenuPosition({
-          top: rect.bottom + 8,
-          right: window.innerWidth - rect.right
-        });
-      }
-    }
-
-    if (showProfileMenu) {
-      updateProfileMenuPosition();
-      window.addEventListener('scroll', updateProfileMenuPosition, true);
-      window.addEventListener('resize', updateProfileMenuPosition);
-      return () => {
-        window.removeEventListener('scroll', updateProfileMenuPosition, true);
-        window.removeEventListener('resize', updateProfileMenuPosition);
-      };
-    }
-  }, [showProfileMenu]);
-
-  const handleProfileMenuToggle = () => {
-    if (showProfileMenu) {
-      setShowProfileMenu(false);
-      setProfileMenuPosition(null);
-    } else {
-      setShowProfileMenu(true);
-    }
-  };
-
   if (!currentUser) return null;
 
-  const getNavLinks = () => {
-    if (currentUser.role === 'student') {
-      return [
-        { path: '/dashboard', label: 'Dashboard' },
-        { path: '/courses', label: 'Learning' },
-        { path: '/community-feed', label: 'Community' },
-        { path: '/recruiters', label: 'Career' },
-        { path: '/student-events', label: 'Events' },
-        { path: '/marketplace', label: 'Shop' },
-        { path: '/support', label: 'Help' },
-        { path: '/profile', label: 'Account' },
-      ];
-    } else if (currentUser.role === 'mentor') {
-      return [
-        { path: '/dashboard', label: 'Dashboard' },
-        { path: '/coach-dashboard', label: 'Learning' },
-        { path: '/community-feed', label: 'Community' },
-        { path: '/students', label: 'Career' },
-        { path: '/student-events', label: 'Events' },
-        { path: '/marketplace', label: 'Shop' },
-        { path: '/support', label: 'Help' },
-        { path: '/profile', label: 'Account' },
-      ];
-    } else if (currentUser.role === 'governor') {
-      return [
-        { path: '/dashboard', label: 'Dashboard' },
-        { path: '/governor/nexus', label: 'Learning' },
-        { path: '/community-feed', label: 'Community' },
-        { path: '/coach-dashboard', label: 'Career' },
-        { path: '/student-events', label: 'Events' },
-        { path: '/marketplace', label: 'Shop' },
-        { path: '/support', label: 'Help' },
-        { path: '/profile', label: 'Account' },
-      ];
-    }
-    return [
-      { path: '/dashboard', label: 'Dashboard' },
-      { path: '/courses', label: 'Learning' },
-      { path: '/community-feed', label: 'Community' },
-      { path: '/recruiters', label: 'Career' },
-      { path: '/student-events', label: 'Events' },
-      { path: '/marketplace', label: 'Shop' },
-      { path: '/support', label: 'Help' },
-      { path: '/profile', label: 'Account' },
-    ];
-  };
-
-  const navLinks = getNavLinks();
+  const navLinks = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/courses', label: 'Courses' },
+    { path: '/chat', label: 'Chat' },
+    { path: '/my-progress', label: 'My Progress' },
+    { path: '/leaderboard', label: 'Leaderboard' },
+    { path: '/profile', label: 'Profile' },
+    { path: '/support', label: 'Support' },
+  ];
 
   return (
     <>
@@ -162,15 +75,6 @@ export default function Navbar() {
                   )}
                 </button>
               )}
-              {currentUser.role === 'governor' && (
-                <button
-                  onClick={() => navigate('/governor/waitlist')}
-                  className="relative p-1.5 md:p-2 liquid-button-secondary rounded-full transition-all"
-                  title="Waitlist"
-                >
-                  <Users className="w-4 h-4 md:w-5 md:h-5 text-gray-900" />
-                </button>
-              )}
             <button
               onClick={() => navigate('/notifications')}
               className="relative p-1.5 md:p-2 liquid-button-secondary rounded-full transition-all"
@@ -185,8 +89,7 @@ export default function Navbar() {
 
               <div className="relative z-[101]">
                 <button
-                  ref={profileButtonRef}
-                  onClick={handleProfileMenuToggle}
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-1 md:gap-3 liquid-button-secondary rounded-3xl px-2 md:px-3 py-1.5 md:py-2 transition-all"
                 >
                   <img
@@ -205,64 +108,71 @@ export default function Navbar() {
           </div>
         </div>
 
-        {showProfileMenu && profileMenuPosition && createPortal(
-          <motion.div
-            key="profile-menu"
-            ref={profileMenuRef}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed w-56 py-2 liquid-text-primary shadow-2xl rounded-2xl"
-            style={{
-              top: `${profileMenuPosition.top}px`,
-              right: `${profileMenuPosition.right}px`,
-              zIndex: 2147483647,
-              background: 'rgba(255, 255, 255, 0.65)',
-              backdropFilter: 'blur(60px) saturate(200%) brightness(1.1)',
-              WebkitBackdropFilter: 'blur(60px) saturate(200%) brightness(1.1)',
-              border: '1px solid rgba(255, 255, 255, 0.9)',
-              boxShadow: '0 25px 70px -12px rgba(0, 0, 0, 0.25), 0 10px 30px -8px rgba(0, 0, 0, 0.15), inset 0 2px 4px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 4px 0 rgba(0, 0, 0, 0.05)',
-            }}
-          >
-            <Link
-              to="/profile"
-              onClick={() => {
-                setShowProfileMenu(false);
-                setProfileMenuPosition(null);
-              }}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+        <AnimatePresence>
+          {showProfileMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="absolute top-full right-3 md:right-6 lg:right-8 mt-2 w-56 liquid-crystal-strong py-2 liquid-text-primary z-[102] shadow-2xl rounded-2xl"
             >
-              <User className="w-4 h-4" />
-              <span>My Profile</span>
-            </Link>
-            <Link
-              to="/settings"
-              onClick={() => {
-                setShowProfileMenu(false);
-                setProfileMenuPosition(null);
-              }}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
-            >
-              <Settings className="w-4 h-4" />
-              <span>Settings</span>
-            </Link>
-            <hr className="my-2 border-white/20" />
-            <button
-              onClick={() => {
-                setShowProfileMenu(false);
-                setProfileMenuPosition(null);
-                logout();
-                navigate('/');
-              }}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-red-50/50 rounded-xl mx-2 transition-all w-full text-left text-red-600"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
-          </motion.div>,
-          document.body
-        )}
+              <Link
+                to="/profile"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <User className="w-4 h-4" />
+                <span>My Profile</span>
+              </Link>
+              <Link
+                to="/settings"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </Link>
+              <hr className="my-2 border-white/20" />
+              <Link
+                to="/marketplace"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>Marketplace</span>
+              </Link>
+              <Link
+                to="/seller/dashboard"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <Package className="w-4 h-4" />
+                <span>Seller Dashboard</span>
+              </Link>
+              <Link
+                to="/seller/billing"
+                onClick={() => setShowProfileMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span>My Earnings</span>
+              </Link>
+              <hr className="my-2 border-white/20" />
+              <button
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  logout();
+                  navigate('/');
+                }}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-red-50/50 rounded-xl mx-2 transition-all w-full text-left text-red-600"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </nav>
 
       <AnimatePresence>

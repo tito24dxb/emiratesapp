@@ -6,8 +6,6 @@ import { doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import CVAnalyzer from '../components/CVAnalyzer';
 import DeclareCrewButton from '../components/DeclareCrewButton';
-import SubscriptionCancellation from '../components/SubscriptionCancellation';
-import { ReputationDisplay } from '../components/ReputationDisplay';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
@@ -474,10 +472,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="mt-6">
-        <ReputationDisplay userId={currentUser.uid} isOwnProfile={true} />
-      </div>
-
       {currentUser.role === 'student' && (
         <div className="mt-6">
           <div className="glass-card rounded-2xl shadow-lg p-6">
@@ -501,22 +495,6 @@ export default function ProfilePage() {
           <div className="glass-card rounded-2xl shadow-lg p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">CV Analysis & ATS Converter</h3>
             <CVAnalyzer cvUrl={currentUser.cvUrl} userId={currentUser.uid} />
-          </div>
-        </div>
-      )}
-
-      {/* Subscription Management */}
-      {currentUser.role === 'student' && (
-        <div className="mt-6">
-          <div className="glass-card rounded-2xl shadow-lg p-6">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">Subscription Management</h3>
-            <SubscriptionCancellation
-              userId={currentUser.uid}
-              currentPlan={currentUser.plan}
-              onCancel={() => {
-                window.location.reload();
-              }}
-            />
           </div>
         </div>
       )}

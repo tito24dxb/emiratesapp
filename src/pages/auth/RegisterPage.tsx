@@ -8,13 +8,11 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { countries } from '../../data/countries';
 import { supabase } from '../../lib/supabase';
-import { referralService } from '../../services/referralService';
 
 export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const selectedPlan = searchParams.get('plan');
   const priceId = searchParams.get('priceId');
-  const referralCode = searchParams.get('ref');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -64,22 +62,6 @@ export default function RegisterPage() {
 
       setCurrentUser(newUser);
 
-      if (referralCode) {
-        try {
-          const ipResponse = await fetch('https://api.ipify.org?format=json');
-          const ipData = await ipResponse.json();
-          await referralService.recordConversion(
-            referralCode,
-            user.uid,
-            name,
-            email,
-            ipData.ip
-          );
-        } catch (error) {
-          // Silent error handling for referral tracking
-        }
-      }
-
       if (selectedPlan && selectedPlan !== 'free' && priceId) {
         try {
           const { data: { session } } = await supabase.auth.getSession();
@@ -105,12 +87,13 @@ export default function RegisterPage() {
             return;
           }
         } catch (checkoutError) {
-          // Silent error handling for checkout
+          console.error('Checkout error:', checkoutError);
         }
       }
 
       navigate('/dashboard');
     } catch (err: any) {
+      console.error('Registration error details:', err);
       let errorMessage = 'Registration failed. Please try again.';
 
       if (err.code === 'auth/email-already-in-use') {
@@ -187,6 +170,7 @@ export default function RegisterPage() {
         navigate('/dashboard');
       }
     } catch (error: any) {
+      console.error('Google sign up error:', error);
       setError(error.message || 'Failed to sign up with Google');
     } finally {
       setLoading(false);
@@ -215,17 +199,6 @@ export default function RegisterPage() {
           <p className="text-center text-sm md:text-base text-gray-600 mb-4">
             Start your cabin crew journey
           </p>
-
-          {referralCode && (
-            <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 rounded-xl p-3 mb-4">
-              <p className="text-center text-sm font-semibold text-gray-900">
-                🎉 Referral Code Applied!
-              </p>
-              <p className="text-center text-xs text-gray-600 mt-1">
-                You and your friend will both earn rewards
-              </p>
-            </div>
-          )}
 
           {selectedPlan && selectedPlan !== 'free' && (
             <div className="bg-gradient-to-r from-[#D71920]/10 to-[#CBA135]/10 border border-[#D71920]/20 rounded-xl p-3 mb-4">

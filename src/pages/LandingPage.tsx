@@ -54,13 +54,13 @@ export default function LandingPage() {
     },
     {
       name: 'Maria Santos',
-      role: 'Emirates crew',
+      role: 'Qatar Airways Crew',
       image: 'https://images.pexels.com/photos/1181686/pexels-photo-1181686.jpeg?auto=compress&cs=tinysrgb&w=200',
       quote: 'I went from zero confidence to landing my dream job. The mentorship program is invaluable.'
     },
     {
       name: 'Aisha Khan',
-      role: 'Emirates crew',
+      role: 'Etihad Airways Crew',
       image: 'https://images.pexels.com/photos/1181519/pexels-photo-1181519.jpeg?auto=compress&cs=tinysrgb&w=200',
       quote: 'The simulation module gave me the confidence I needed. I knew exactly what to expect on the day!'
     }
@@ -104,7 +104,7 @@ export default function LandingPage() {
     },
     {
       name: 'Pro',
-      price: '$29',
+      price: '£39',
       period: 'per month',
       priceId: 'price_1SUxeo02SYry0M3gdhJU01Xr',
       features: [
@@ -122,7 +122,7 @@ export default function LandingPage() {
     },
     {
       name: 'VIP',
-      price: '$55',
+      price: '£79',
       period: 'per month',
       priceId: 'price_1SUxfV02SYry0M3gjVKsRY8l',
       features: [
@@ -150,16 +150,16 @@ export default function LandingPage() {
             </div>
             <div className="flex flex-row items-center gap-2 sm:gap-3">
               <button
-                onClick={() => navigate('/staff-code')}
+                onClick={() => navigate('/login')}
                 className="px-4 sm:px-6 py-2.5 text-gray-700 font-semibold hover:text-[#D71920] transition rounded-lg hover:bg-white/50 text-sm sm:text-base"
               >
-                Staff Login
+                Login
               </button>
               <button
-                onClick={() => navigate('/waitlist')}
+                onClick={() => navigate('/register')}
                 className="px-4 sm:px-6 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition text-sm sm:text-base whitespace-nowrap"
               >
-                Join Waitlist
+                Sign Up Free
               </button>
             </div>
           </div>
@@ -184,7 +184,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#D71920]/10 to-[#CBA135]/10 border border-[#D71920]/20 rounded-full mb-8"
             >
               <Sparkles className="w-4 h-4 text-[#D71920]" />
-              <span className="text-sm font-semibold text-gray-700">Trusted by aspiring cabin crew worldwide</span>
+              <span className="text-sm font-semibold text-gray-700">Trusted by 10,000+ aspiring cabin crew worldwide</span>
             </motion.div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight px-4">
@@ -201,17 +201,17 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 px-4">
               <button
-                onClick={() => navigate('/waitlist')}
+                onClick={() => navigate('/register')}
                 className="group px-10 py-4 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold text-lg hover:shadow-2xl transform hover:-translate-y-1 transition flex items-center gap-2"
               >
-                Join Waitlist
+                Start Free Today
                 <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
-                onClick={() => navigate('/staff-code')}
+                onClick={() => navigate('/login')}
                 className="px-10 py-4 bg-white border-2 border-gray-200 text-gray-700 rounded-xl font-bold text-lg hover:border-[#D71920] hover:text-[#D71920] hover:shadow-lg transition"
               >
-                Staff Login
+                Sign In
               </button>
             </div>
 

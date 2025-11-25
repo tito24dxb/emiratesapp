@@ -8,10 +8,16 @@ import { getUserEnrollments } from '../services/courseService';
 import { getUserPoints } from '../services/rewardsService';
 import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
+import OnboardingCard from '../components/OnboardingCard';
+import WelcomeBanner from '../components/WelcomeBanner';
+import { getOnboardingStatus, completeOnboarding, hasSeenWelcomeBanner, markWelcomeBannerSeen } from '../services/onboardingService';
 
 export default function Dashboard() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState({
     totalUsers: 0,
@@ -31,19 +37,34 @@ export default function Dashboard() {
       navigate('/login', { replace: true });
       return;
     }
-
-    // Redirect to role-specific dashboards
-    if (currentUser.role === 'finance') {
-      navigate('/finance-dashboard', { replace: true });
-    } else if (currentUser.role === 'moderator') {
-      navigate('/moderator-dashboard', { replace: true });
-    }
   }, [currentUser, navigate]);
+
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      if (!currentUser) return;
+
+      try {
+        const hasCompleted = await getOnboardingStatus(currentUser.uid);
+        const hasSeenBanner = await hasSeenWelcomeBanner(currentUser.uid);
+
+        setIsFirstLogin(!hasCompleted);
+        setShowOnboarding(!hasCompleted);
+        setShowWelcomeBanner(!hasSeenBanner && hasCompleted);
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        setShowOnboarding(false);
+        setShowWelcomeBanner(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, [currentUser]);
 
   useEffect(() => {
     if (currentUser) {
       loadDashboardData();
-      setIsLoading(false);
     }
   }, [currentUser]);
 
@@ -127,6 +148,39 @@ export default function Dashboard() {
     }
   };
 
+  const handleCompleteOnboarding = async () => {
+    if (!currentUser) return;
+
+    try {
+      await completeOnboarding(currentUser.uid);
+      setShowOnboarding(false);
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+    }
+  };
+
+  const handleSkipOnboarding = async () => {
+    if (!currentUser) return;
+
+    try {
+      await completeOnboarding(currentUser.uid);
+      setShowOnboarding(false);
+    } catch (error) {
+      console.error('Error skipping onboarding:', error);
+    }
+  };
+
+  const handleWelcomeBannerDismiss = async () => {
+    if (!currentUser) return;
+
+    try {
+      await markWelcomeBannerSeen(currentUser.uid);
+      setShowWelcomeBanner(false);
+    } catch (error) {
+      console.error('Error marking welcome banner as seen:', error);
+    }
+  };
+
   if (!currentUser || isLoading) return null;
 
   const containerVariants = {
@@ -145,6 +199,22 @@ export default function Dashboard() {
   if (currentUser.role === 'student') {
     return (
       <>
+        {showOnboarding && (
+          <OnboardingCard
+            userName={currentUser.name.split(' ')[0]}
+            onComplete={handleCompleteOnboarding}
+            onSkip={handleSkipOnboarding}
+          />
+        )}
+
+        {showWelcomeBanner && !showOnboarding && (
+          <WelcomeBanner
+            userName={currentUser.name.split(' ')[0]}
+            isFirstLogin={isFirstLogin}
+            onDismiss={handleWelcomeBannerDismiss}
+          />
+        )}
+
         <motion.div
           initial="hidden"
           animate="visible"

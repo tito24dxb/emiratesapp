@@ -21,8 +21,6 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage, auth, functions } from '../lib/firebase';
 import { httpsCallable } from 'firebase/functions';
-import { aiModerationService } from './aiModerationService';
-import { reputationService } from './reputationService';
 
 export interface Conversation {
   id: string;
@@ -39,7 +37,6 @@ export interface Conversation {
   pinned?: boolean;
   mutedBy?: Record<string, boolean>;
   isArchivedBy?: Record<string, boolean>;
-  category?: 'general' | 'marketplace';
 }
 
 export interface Message {
@@ -117,8 +114,7 @@ export const communityChatService = {
   async createConversation(
     type: 'group' | 'private',
     title: string,
-    memberIds: string[],
-    category?: 'general' | 'marketplace'
+    memberIds: string[]
   ): Promise<string> {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
@@ -153,7 +149,6 @@ export const communityChatService = {
       pinned: false,
       mutedBy: {},
       isArchivedBy: {},
-      category: category || 'general',
     };
 
     await setDoc(conversationRef, conversationData);
@@ -310,35 +305,6 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    const userName = userDoc.data()?.name || 'Unknown User';
-
-    const postingCheck = await reputationService.checkPostingAllowed(userId);
-    if (!postingCheck.allowed) {
-      throw new Error(postingCheck.reason || 'Messaging not allowed');
-    }
-
-    if (content.trim()) {
-      const moderationResult = await aiModerationService.moderateContent(
-        userId,
-        userName,
-        content,
-        'chat'
-      );
-
-      if (!moderationResult.allowed) {
-        throw new Error(moderationResult.reason);
-      }
-
-      if (moderationResult.action === 'warn') {
-        console.warn('⚠️ Content warning:', moderationResult.reason);
-        window.dispatchEvent(new CustomEvent('showModerationWarning', {
-          detail: { message: moderationResult.reason }
-        }));
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-
     const messageRef = doc(collection(db, 'groupChats', conversationId, 'messages'));
     let attachmentUrl: string | null = null;
     let attachmentRef: string | null = null;
@@ -369,6 +335,9 @@ export const communityChatService = {
       }
     }
 
+    const userDoc = await getDoc(doc(db, 'users', userId));
+    const userName = userDoc.data()?.name || 'Unknown User';
+
     const messageData: Message = {
       messageId: messageRef.id,
       senderId: userId,
@@ -397,12 +366,12 @@ export const communityChatService = {
       },
     });
 
-    // try {
-    //   const awardMessage = httpsCallable(functions, 'awardMessageSent');
-    //   await awardMessage({ conversationId });
-    // } catch (error) {
-    //   console.warn('Failed to award message points:', error);
-    // }
+    try {
+      const awardMessage = httpsCallable(functions, 'awardMessageSent');
+      await awardMessage({ conversationId });
+    } catch (error) {
+      console.warn('Failed to award message points:', error);
+    }
 
     return messageRef.id;
   },
@@ -553,32 +522,6 @@ export const communityChatService = {
         console.warn('Failed to award like points:', error);
       }
     }
-  },
-
-  async editMessage(
-    conversationId: string,
-    messageId: string,
-    newContent: string
-  ): Promise<void> {
-    const userId = auth.currentUser?.uid;
-    if (!userId) throw new Error('Not authenticated');
-
-    const messageRef = doc(db, 'groupChats', conversationId, 'messages', messageId);
-    const messageDoc = await getDoc(messageRef);
-
-    if (!messageDoc.exists()) {
-      throw new Error('Message not found');
-    }
-
-    const messageData = messageDoc.data();
-    if (messageData.senderId !== userId) {
-      throw new Error('Not authorized to edit this message');
-    }
-
-    await updateDoc(messageRef, {
-      content: newContent,
-      editedAt: Timestamp.now(),
-    });
   },
 
   async reportMessage(

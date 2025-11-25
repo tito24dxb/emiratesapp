@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Trash2, Heart, ThumbsUp, Smile, Image as ImageIcon, Reply, MoreVertical, Flag, Loader2 } from 'lucide-react';
+import { Send, Trash2, Heart, ThumbsUp, Smile, Image as ImageIcon, Reply, MoreVertical, Flag } from 'lucide-react';
 import { CommunityComment, communityFeedService } from '../../services/communityFeedService';
 import EmojiPicker from 'emoji-picker-react';
-import { useNavigate } from 'react-router-dom';
 
 interface EnhancedComment extends CommunityComment {
   userPhotoURL?: string;
@@ -25,11 +24,9 @@ interface EnhancedCommentsSectionProps {
 }
 
 export default function EnhancedCommentsSection({ postId, currentUser }: EnhancedCommentsSectionProps) {
-  const navigate = useNavigate();
   const [comments, setComments] = useState<EnhancedComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
-  const [upgradeLoading, setUpgradeLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -226,31 +223,7 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
     <div className="border-t-2 border-gray-200/50 pt-4 mt-4">
       <h4 className="font-bold text-gray-900 mb-4">Comments ({comments.length})</h4>
 
-      {currentUser.plan === 'free' ? (
-        <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl text-center">
-          <p className="text-sm font-semibold text-purple-900 mb-2">💬 Join the Conversation</p>
-          <p className="text-xs text-purple-700 mb-3">
-            Upgrade to Pro or VIP to comment on posts and engage with the community!
-          </p>
-          <button
-            onClick={() => {
-              setUpgradeLoading(true);
-              navigate('/upgrade');
-            }}
-            disabled={upgradeLoading}
-            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg text-sm font-semibold hover:from-purple-700 hover:to-pink-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 mx-auto"
-          >
-            {upgradeLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              'Upgrade Now'
-            )}
-          </button>
-        </div>
-      ) : !replyTo ? (
+      {!replyTo && (
         <form onSubmit={handleSubmit} className="mb-4">
         {imagePreview && (
           <div className="mb-2 relative inline-block">
@@ -334,7 +307,7 @@ export default function EnhancedCommentsSection({ postId, currentUser }: Enhance
           </div>
         )}
       </form>
-      ) : null}
+      )}
 
       <div className="space-y-3">
         <AnimatePresence>

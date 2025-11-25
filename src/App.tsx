@@ -20,7 +20,6 @@ import ChatModerationConsole from './pages/governor/ChatModerationConsole';
 import FeatureShutdownControl from './pages/governor/FeatureShutdownControl';
 import PlaceholderPage from './pages/PlaceholderPage';
 import NotificationsPage from './pages/NotificationsPage';
-import WhatsNewPage from './pages/WhatsNewPage';
 import AITrainerPage from './pages/AITrainerPage';
 import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
 import RecruiterListPage from './pages/RecruiterListPage';
@@ -46,7 +45,6 @@ import StorageManagerPage from './pages/StorageManagerPage';
 import LoginActivityPage from './pages/LoginActivityPage';
 import CommunityFeedPage from './pages/CommunityFeedPage';
 import AuditLogsPage from './pages/governor/AuditLogsPage';
-import ModerationInsightsPage from './pages/governor/ModerationInsightsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import ContactUsPage from './pages/ContactUsPage';
@@ -59,21 +57,6 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import SellerDashboard from './pages/SellerDashboard';
 import SellerBillingDashboard from './pages/SellerBillingDashboard';
 import AttendanceDashboard from './pages/AttendanceDashboard';
-import FinanceDashboard from './pages/FinanceDashboard';
-import ModeratorDashboard from './pages/ModeratorDashboard';
-import AIAssistantButton from './components/AIAssistantButton';
-import { ModerationWarningModal } from './components/ModerationWarningModal';
-import { useState, useEffect } from 'react';
-import ReputationManager from './pages/governor/ReputationManager';
-import ReputationTester from './pages/governor/ReputationTester';
-import InviteFriendsPage from './pages/InviteFriendsPage';
-import AffiliateDashboardPage from './pages/AffiliateDashboardPage';
-import WalletPage from './pages/WalletPage';
-import StaffActivityManagementPage from './pages/StaffActivityManagementPage';
-import StudentEventsPage from './pages/StudentEventsPage';
-import WaitlistPage from './pages/WaitlistPage';
-import StaffCodePage from './pages/StaffCodePage';
-import WaitlistDashboard from './pages/governor/WaitlistDashboard';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -91,18 +74,6 @@ function MaintenanceScreen({ message }: { message: string }) {
 
 function AppContent() {
   const { currentUser, loading, maintenanceMode, maintenanceMessage } = useApp();
-  const [warningModal, setWarningModal] = useState({ isOpen: false, message: '' });
-
-  useEffect(() => {
-    const handleWarning = (event: CustomEvent) => {
-      setWarningModal({ isOpen: true, message: event.detail.message });
-    };
-
-    window.addEventListener('showModerationWarning', handleWarning as EventListener);
-    return () => {
-      window.removeEventListener('showModerationWarning', handleWarning as EventListener);
-    };
-  }, []);
 
   if (loading) {
     return (
@@ -124,8 +95,6 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/waitlist" element={<WaitlistPage />} />
-        <Route path="/staff-code" element={<StaffCodePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/privacy" element={<PrivacyPolicyPage />} />
@@ -138,12 +107,6 @@ function AppContent() {
 
   return (
     <Layout>
-      <AIAssistantButton />
-      <ModerationWarningModal
-        isOpen={warningModal.isOpen}
-        message={warningModal.message}
-        onClose={() => setWarningModal({ isOpen: false, message: '' })}
-      />
       <Routes>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
@@ -154,17 +117,10 @@ function AppContent() {
         <Route path="/community-feed" element={<CommunityFeedPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/invite-friends" element={<InviteFriendsPage />} />
-        <Route path="/affiliate-dashboard" element={<AffiliateDashboardPage />} />
-        <Route path="/wallet" element={<WalletPage />} />
-        <Route path="/activities-manage" element={<StaffActivityManagementPage />} />
-        <Route path="/events" element={<StudentEventsPage />} />
-        <Route path="/student-events" element={<StudentEventsPage />} />
         <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/support-chat" element={<SupportChatPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/whats-new" element={<WhatsNewPage />} />
         <Route path="/documentation" element={<DocumentationPage />} />
         <Route path="/ai-trainer" element={<AITrainerPage />} />
         <Route path="/open-day" element={<OpenDaySimulatorPage />} />
@@ -192,16 +148,6 @@ function AppContent() {
         <Route path="/seller/billing" element={<SellerBillingDashboard />} />
         <Route path="/attendance" element={<AttendanceDashboard />} />
 
-        {/* Finance Dashboard */}
-        {(currentUser.role === 'finance' || currentUser.role === 'governor') && (
-          <Route path="/finance-dashboard" element={<FinanceDashboard />} />
-        )}
-
-        {/* Moderator Dashboard */}
-        {(currentUser.role === 'moderator' || currentUser.role === 'governor') && (
-          <Route path="/moderator-dashboard" element={<ModeratorDashboard />} />
-        )}
-
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>
             <Route path="/coach-dashboard" element={<NewCoachDashboard />} />
@@ -223,10 +169,6 @@ function AppContent() {
             <Route path="/governor/analytics" element={<AnalyticsDashboard />} />
             <Route path="/governor/feature-flags" element={<FeatureFlagsManager />} />
             <Route path="/governor/audit-logs" element={<AuditLogsPage />} />
-            <Route path="/governor/moderation-insights" element={<ModerationInsightsPage />} />
-            <Route path="/governor/reputation" element={<ReputationManager />} />
-            <Route path="/governor/reputation-tester" element={<ReputationTester />} />
-            <Route path="/governor/waitlist" element={<WaitlistDashboard />} />
           </>
         )}
 

@@ -129,15 +129,13 @@ export async function markNotificationAsRead(notificationId: string) {
 export async function markAllNotificationsAsRead(userId: string) {
   try {
     const notificationsRef = collection(db, 'notifications');
-    const q = query(notificationsRef, where('userId', '==', userId));
+    const q = query(notificationsRef, where('userId', '==', userId), where('read', '==', false));
 
     const snapshot = await getDocs(q);
     const batch = writeBatch(db);
 
     snapshot.docs.forEach((docSnap) => {
-      if (!docSnap.data().read) {
-        batch.update(docSnap.ref, { read: true });
-      }
+      batch.update(docSnap.ref, { read: true });
     });
 
     await batch.commit();

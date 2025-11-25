@@ -43,7 +43,6 @@ export interface MarketplaceProduct {
   custom_cta_text?: string;
   custom_cta_enabled?: boolean;
   is_activity?: boolean;
-  linked_activity_id?: string;
   activity_date?: any;
   activity_location?: string;
   max_participants?: number;
@@ -293,13 +292,9 @@ export const getSellerProducts = async (sellerId: string): Promise<MarketplacePr
 export const incrementProductViews = async (productId: string): Promise<void> => {
   try {
     const productRef = doc(db, 'marketplace_products', productId);
-    const productSnap = await getDoc(productRef);
-    if (productSnap.exists()) {
-      const currentViews = productSnap.data().views_count || 0;
-      await updateDoc(productRef, {
-        views_count: currentViews + 1
-      });
-    }
+    await updateDoc(productRef, {
+      views_count: increment(1)
+    });
   } catch (error) {
     console.error('Error incrementing views:', error);
   }
@@ -458,116 +453,6 @@ export const updateSellerNameOnProducts = async (
     return updatedCount;
   } catch (error) {
     console.error('Error updating seller name on products:', error);
-    throw error;
-  }
-};
-
-export const linkProductToActivity = async (productId: string, activityId: string): Promise<void> => {
-  try {
-    const productRef = doc(db, 'marketplace_products', productId);
-    await updateDoc(productRef, {
-      is_activity: true,
-      product_type: 'activity',
-      linked_activity_id: activityId,
-      updated_at: Timestamp.now()
-    });
-  } catch (error) {
-    console.error('Error linking product to activity:', error);
-    throw error;
-  }
-};
-
-export const unlinkProductFromActivity = async (productId: string): Promise<void> => {
-  try {
-    const productRef = doc(db, 'marketplace_products', productId);
-    await updateDoc(productRef, {
-      is_activity: false,
-      linked_activity_id: null,
-      updated_at: Timestamp.now()
-    });
-  } catch (error) {
-    console.error('Error unlinking product from activity:', error);
-    throw error;
-  }
-};
-
-export const getActivityProducts = async (activityId?: string): Promise<MarketplaceProduct[]> => {
-  try {
-    const productsRef = collection(db, 'marketplace_products');
-    let q;
-
-    if (activityId) {
-      q = query(
-        productsRef,
-        where('is_activity', '==', true),
-        where('linked_activity_id', '==', activityId),
-        where('status', '==', 'published')
-      );
-    } else {
-      q = query(
-        productsRef,
-        where('is_activity', '==', true),
-        where('status', '==', 'published'),
-        orderBy('created_at', 'desc')
-      );
-    }
-
-    const snapshot = await getDocs(q);
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    })) as MarketplaceProduct[];
-  } catch (error) {
-    console.error('Error fetching activity products:', error);
-    return [];
-  }
-};
-
-export const createActivityProduct = async (
-  activityId: string,
-  activityName: string,
-  activityDescription: string,
-  price: number,
-  activityDate: Date,
-  activityLocation: string,
-  maxParticipants: number,
-  sellerId: string,
-  sellerName: string,
-  sellerEmail: string,
-  imageUrl?: string
-): Promise<string> => {
-  try {
-    const productRef = doc(collection(db, 'marketplace_products'));
-
-    const productData: Omit<MarketplaceProduct, 'id'> = {
-      seller_id: sellerId,
-      seller_name: sellerName,
-      seller_email: sellerEmail,
-      title: activityName,
-      description: activityDescription,
-      price,
-      currency: 'USD',
-      category: 'events',
-      product_type: 'activity',
-      images: imageUrl ? [imageUrl] : [],
-      status: 'published',
-      views_count: 0,
-      likes_count: 0,
-      sales_count: 0,
-      created_at: Timestamp.now(),
-      updated_at: Timestamp.now(),
-      is_activity: true,
-      linked_activity_id: activityId,
-      activity_date: Timestamp.fromDate(activityDate),
-      activity_location: activityLocation,
-      max_participants: maxParticipants,
-      tags: ['activity', 'event']
-    };
-
-    await setDoc(productRef, productData);
-    return productRef.id;
-  } catch (error) {
-    console.error('Error creating activity product:', error);
     throw error;
   }
 };

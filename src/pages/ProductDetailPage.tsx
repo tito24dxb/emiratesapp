@@ -11,7 +11,7 @@ import {
   MarketplaceProduct
 } from '../services/marketplaceService';
 import { formatPrice } from '../services/stripeService';
-import MarketplaceChatModal from '../components/marketplace/MarketplaceChatModal';
+import MarketplaceChat from '../components/marketplace/MarketplaceChat';
 
 export default function ProductDetailPage() {
   const { productId } = useParams<{ productId: string }>();
@@ -21,8 +21,8 @@ export default function ProductDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [isFav, setIsFav] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [showShareMenu, setShowShareMenu] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false);
 
   useEffect(() => {
     if (productId && currentUser) {
@@ -80,15 +80,7 @@ export default function ProductDetailPage() {
       alert('You cannot message yourself');
       return;
     }
-    setShowChatModal(true);
-  };
-
-  const handleChatModalClose = () => {
-    setShowChatModal(false);
-  };
-
-  const handleConversationCreated = (conversationId: string) => {
-    console.log('Conversation created:', conversationId);
+    setShowChat(true);
   };
 
   const handleShare = () => {
@@ -352,28 +344,27 @@ export default function ProductDetailPage() {
                   className="w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  {showChatModal ? 'Hide Chat' : 'Contact Seller'}
+                  Contact Seller
                 </button>
-
-                {/* Inline Chat Dropdown */}
-                {showChatModal && product && (
-                  <MarketplaceChatModal
-                    isOpen={showChatModal}
-                    onClose={handleChatModalClose}
-                    productId={product.id}
-                    productTitle={product.title}
-                    productImage={product.images?.[0]}
-                    sellerId={product.seller_id}
-                    sellerName={product.seller_name}
-                    onConversationCreated={handleConversationCreated}
-                  />
-                )}
               </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Marketplace Chat */}
+      <AnimatePresence>
+        {showChat && product && currentUser && (
+          <MarketplaceChat
+            productId={product.id}
+            productTitle={product.title}
+            productImage={product.images?.[0]}
+            sellerId={product.seller_id}
+            sellerName={product.seller_name}
+            onClose={() => setShowChat(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Share Menu */}
       <AnimatePresence>

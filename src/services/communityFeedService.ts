@@ -18,9 +18,6 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { db, auth } from '../lib/firebase';
-import { notifyPostComment, notifyPostReaction, notifyCommentReply } from './comprehensiveNotificationService';
-import { aiModerationService } from './aiModerationService';
-import { reputationService } from './reputationService';
 
 export interface CommunityPost {
   id: string;
@@ -48,7 +45,6 @@ export interface CommunityPost {
   flaggedReason?: string;
   productLink?: string;
   postType?: 'text' | 'product';
-  targetAudience?: 'all' | 'free' | 'pro' | 'vip' | 'pro-vip';
 }
 
 export interface CommunityComment {
@@ -101,33 +97,8 @@ export const communityFeedService = {
     channel: 'announcements' | 'general' | 'study-room',
     imageFile?: File | File[],
     userPhotoURL?: string,
-    productLink?: string,
-    targetAudience?: 'all' | 'free' | 'pro' | 'vip' | 'pro-vip'
+    productLink?: string
   ): Promise<string> {
-    const postingCheck = await reputationService.checkPostingAllowed(userId);
-    if (!postingCheck.allowed) {
-      throw new Error(postingCheck.reason || 'Posting not allowed');
-    }
-
-    const moderationResult = await aiModerationService.moderateContent(
-      userId,
-      userName,
-      content,
-      'post'
-    );
-
-    if (!moderationResult.allowed) {
-      throw new Error(moderationResult.reason);
-    }
-
-    if (moderationResult.action === 'warn') {
-      console.warn('⚠️ Content warning:', moderationResult.reason);
-      window.dispatchEvent(new CustomEvent('showModerationWarning', {
-        detail: { message: moderationResult.reason }
-      }));
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
     let imageUrl = '';
     let imageUrls: string[] = [];
 
@@ -168,8 +139,7 @@ export const communityFeedService = {
       },
       flagged: false,
       productLink: productLink || '',
-      postType: productLink ? 'product' : 'text',
-      targetAudience: targetAudience || 'all'
+      postType: productLink ? 'product' : 'text'
     };
 
     const docRef = await addDoc(collection(db, 'community_posts'), postData);
@@ -308,25 +278,6 @@ export const communityFeedService = {
       throw new Error('Missing required fields for comment creation');
     }
 
-    const moderationResult = await aiModerationService.moderateContent(
-      userId,
-      userName,
-      content,
-      'comment'
-    );
-
-    if (!moderationResult.allowed) {
-      throw new Error(moderationResult.reason);
-    }
-
-    if (moderationResult.action === 'warn') {
-      console.warn('⚠️ Content warning:', moderationResult.reason);
-      window.dispatchEvent(new CustomEvent('showModerationWarning', {
-        detail: { message: moderationResult.reason }
-      }));
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-
     const commentData = {
       postId,
       userId,
@@ -355,36 +306,7 @@ export const communityFeedService = {
     const postDoc = await getDoc(doc(db, 'community_posts', postId));
     if (postDoc.exists()) {
       const postData = postDoc.data();
-
-      // Don't notify if commenting on own post
-      if (postData.userId !== userId) {
-        // Send comprehensive notification to post author
-        await notifyPostComment(
-          postData.userId,
-          userName,
-          postData.content?.substring(0, 50) || 'your post',
-          content,
-          postId
-        );
-      }
-
-      // If this is a reply, notify the original commenter
-      if (options?.replyTo && options.replyToName) {
-        const originalCommentDoc = await getDoc(doc(db, 'community_comments', options.replyTo));
-        if (originalCommentDoc.exists()) {
-          const originalCommentData = originalCommentDoc.data();
-          if (originalCommentData.userId !== userId) {
-            await notifyCommentReply(
-              originalCommentData.userId,
-              userName,
-              content,
-              postId
-            );
-          }
-        }
-      }
-
-      // Old notification system (keep for backward compatibility)
+      // Create notification for comment
       await this.createNotification(
         'comment',
         userId,
@@ -506,19 +428,6 @@ export const communityFeedService = {
 
     // Create notification for new reaction (not for removal or switching from same user)
     if (shouldCreateNotification && postData) {
-      // Don't notify if reacting to own post
-      if (postData.userId !== userId) {
-        // Send comprehensive notification
-        await notifyPostReaction(
-          postData.userId,
-          userName,
-          reactionType,
-          postData.content?.substring(0, 50) || 'your post',
-          postId
-        );
-      }
-
-      // Old notification system (keep for backward compatibility)
       await this.createNotification(
         'reaction',
         userId,

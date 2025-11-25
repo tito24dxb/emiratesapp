@@ -9,25 +9,9 @@ import {
   deleteRecruiter,
   Recruiter,
 } from '../services/recruitersService';
-import { checkFeatureAccess } from '../utils/featureAccess';
-import FeatureLock from '../components/FeatureLock';
 
 export default function RecruitersPage() {
   const { currentUser } = useApp();
-
-  // Check feature access
-  if (!currentUser) return null;
-
-  const recruitersAccess = checkFeatureAccess(currentUser, 'recruiters');
-  if (!recruitersAccess.allowed) {
-    return (
-      <FeatureLock
-        requiredPlan={recruitersAccess.requiresPlan || 'pro'}
-        featureName="Recruiters"
-        description={recruitersAccess.message}
-      />
-    );
-  }
   const [recruiters, setRecruiters] = useState<Recruiter[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

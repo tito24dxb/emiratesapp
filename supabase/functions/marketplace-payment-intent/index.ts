@@ -78,16 +78,7 @@ Deno.serve(async (req) => {
     }: MarketplacePaymentRequest = await req.json();
 
     if (!firebase_buyer_uid || !firebase_order_id || !product_id || !amount) {
-      return corsResponse({
-        error: 'Missing required parameters',
-        details: {
-          firebase_buyer_uid: !!firebase_buyer_uid,
-          firebase_order_id: !!firebase_order_id,
-          product_id: !!product_id,
-          amount: !!amount,
-          firebase_seller_uid: !!firebase_seller_uid
-        }
-      }, 400);
+      return corsResponse({ error: 'Missing required parameters' }, 400);
     }
 
     console.log(`Processing marketplace payment for order: ${firebase_order_id}`);
@@ -143,38 +134,9 @@ Deno.serve(async (req) => {
 
     const amountInCents = Math.round(amount * 100);
 
-    // Always use USD for Stripe to avoid "card doesn't support this currency" errors
-    // Store original currency in metadata for record keeping
-    const originalCurrency = currency.toLowerCase();
-    const stripeCurrency = 'usd';
-
-    // If original currency is not USD, we'll process in USD
-    // Frontend should handle currency display/conversion if needed
-    let stripeAmount = amountInCents;
-
-    // Simple currency conversion to USD (these are approximate rates)
-    // In production, you'd fetch real-time rates from an API
-    const conversionRates: { [key: string]: number } = {
-      'usd': 1.0,
-      'aed': 0.27,  // 1 AED = 0.27 USD
-      'eur': 1.10,  // 1 EUR = 1.10 USD
-      'gbp': 1.27,  // 1 GBP = 1.27 USD
-      'aud': 0.65,  // 1 AUD = 0.65 USD
-      'cad': 0.72,  // 1 CAD = 0.72 USD
-      'jpy': 0.0067, // 1 JPY = 0.0067 USD
-      'inr': 0.012, // 1 INR = 0.012 USD
-      'sgd': 0.74,  // 1 SGD = 0.74 USD
-    };
-
-    if (originalCurrency !== 'usd' && conversionRates[originalCurrency]) {
-      // Convert to USD
-      stripeAmount = Math.round((amount * conversionRates[originalCurrency]) * 100);
-      console.log(`Converting ${amount} ${originalCurrency.toUpperCase()} to ${stripeAmount / 100} USD`);
-    }
-
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: stripeAmount,
-      currency: stripeCurrency,
+      amount: amountInCents,
+      currency: currency.toLowerCase(),
       customer: customerId,
       metadata: {
         marketplace_order: 'true',
@@ -185,20 +147,12 @@ Deno.serve(async (req) => {
         product_title,
         product_type,
         quantity: quantity.toString(),
-        seller_email,
-        original_currency: originalCurrency,
-        original_amount: amount.toString()
+        seller_email
       },
       description: `Marketplace: ${product_title} (${quantity}x)`,
       automatic_payment_methods: {
         enabled: true,
       },
-      payment_method_options: {
-        card: {
-          request_three_d_secure: 'automatic',
-        },
-      },
-      setup_future_usage: 'off_session',
     });
 
     console.log(`Created payment intent ${paymentIntent.id} for order ${firebase_order_id}`);
@@ -211,8 +165,8 @@ Deno.serve(async (req) => {
         firebase_buyer_uid,
         firebase_seller_uid,
         product_id,
-        amount: stripeAmount,
-        currency: stripeCurrency,
+        amount: amountInCents,
+        currency: currency.toLowerCase(),
         status: 'pending',
         stripe_customer_id: customerId
       });
@@ -224,12 +178,7 @@ Deno.serve(async (req) => {
     return corsResponse({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-      customerId,
-      currency: stripeCurrency,
-      amount: stripeAmount,
-      originalCurrency: originalCurrency,
-      originalAmount: amount,
-      requires3DSecure: paymentIntent.payment_method_options?.card?.request_three_d_secure === 'automatic'
+      customerId
     });
 
   } catch (error: any) {

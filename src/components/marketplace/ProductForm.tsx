@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { Save, Upload, DollarSign, Package, Download, Briefcase, Tag, Calendar, MapPin, Users } from 'lucide-react';
+import { Save, Upload, DollarSign, Package, Download, Briefcase, Tag } from 'lucide-react';
 import { ProductFormData } from '../../services/marketplaceService';
 import ImageUploadMultiple from './ImageUploadMultiple';
 
@@ -17,7 +17,6 @@ const CATEGORIES = [
   'Graphics & Design',
   'Business Services',
   'Physical Products',
-  'Activities & Events',
   'Other'
 ];
 
@@ -38,11 +37,7 @@ export default function ProductForm({
     digital_file_url: initialData?.digital_file_url || '',
     digital_file_name: initialData?.digital_file_name || '',
     stock_quantity: initialData?.stock_quantity,
-    tags: initialData?.tags || [],
-    is_activity: initialData?.is_activity || false,
-    activity_date: initialData?.activity_date || '',
-    activity_location: initialData?.activity_location || '',
-    max_participants: initialData?.max_participants
+    tags: initialData?.tags || []
   });
 
   const [loading, setLoading] = useState(false);
@@ -76,21 +71,6 @@ export default function ProductForm({
     if (formData.product_type === 'physical' && !formData.stock_quantity) {
       setError('Stock quantity is required for physical products');
       return;
-    }
-
-    if (formData.product_type === 'activity') {
-      if (!formData.activity_date) {
-        setError('Event date and time are required for activities');
-        return;
-      }
-      if (!formData.activity_location?.trim()) {
-        setError('Event location is required for activities');
-        return;
-      }
-      if (!formData.max_participants || formData.max_participants <= 0) {
-        setError('Maximum participants must be greater than 0');
-        return;
-      }
     }
 
     setLoading(true);
@@ -129,8 +109,6 @@ export default function ProductForm({
         return <Package className="w-4 h-4" />;
       case 'service':
         return <Briefcase className="w-4 h-4" />;
-      case 'activity':
-        return <Calendar className="w-4 h-4" />;
       default:
         return <Package className="w-4 h-4" />;
     }
@@ -182,12 +160,12 @@ export default function ProductForm({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Product Type *
         </label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {['digital', 'physical', 'service', 'activity'].map((type) => (
+        <div className="grid grid-cols-3 gap-3">
+          {['digital', 'physical', 'service'].map((type) => (
             <button
               key={type}
               type="button"
-              onClick={() => setFormData({ ...formData, product_type: type as any, is_activity: type === 'activity' })}
+              onClick={() => setFormData({ ...formData, product_type: type as any })}
               className={`p-4 border-2 rounded-lg flex flex-col items-center gap-2 transition-all ${
                 formData.product_type === type
                   ? 'border-blue-500 bg-blue-500/20 backdrop-blur-sm text-blue-600'
@@ -195,7 +173,7 @@ export default function ProductForm({
               }`}
             >
               {getProductTypeIcon(type)}
-              <span className="text-sm font-medium capitalize">{type === 'activity' ? 'Event' : type}</span>
+              <span className="text-sm font-medium capitalize">{type}</span>
             </button>
           ))}
         </div>
@@ -270,65 +248,6 @@ export default function ProductForm({
             className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
             placeholder="Enter available quantity"
           />
-        </div>
-      )}
-
-      {/* Event/Activity Fields */}
-      {formData.product_type === 'activity' && (
-        <div className="space-y-4 p-4 bg-gradient-to-r from-purple-50/80 to-blue-50/80 backdrop-blur-sm rounded-lg border border-purple-200/50 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-purple-600" />
-            Event Details
-          </h3>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Event Date & Time *
-            </label>
-            <input
-              type="datetime-local"
-              value={formData.activity_date || ''}
-              onChange={(e) => setFormData({ ...formData, activity_date: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-              min={new Date().toISOString().slice(0, 16)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Event Location *
-            </label>
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={formData.activity_location || ''}
-                onChange={(e) => setFormData({ ...formData, activity_location: e.target.value })}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-                placeholder="Enter event location or venue"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Maximum Participants *
-            </label>
-            <div className="relative">
-              <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="number"
-                min="1"
-                value={formData.max_participants || ''}
-                onChange={(e) => setFormData({ ...formData, max_participants: parseInt(e.target.value) || 0 })}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300/50 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white/50 backdrop-blur-sm"
-                placeholder="Enter maximum capacity"
-              />
-            </div>
-            <p className="text-xs text-gray-600 mt-1">
-              Set the maximum number of people who can attend this event
-            </p>
-          </div>
         </div>
       )}
 
