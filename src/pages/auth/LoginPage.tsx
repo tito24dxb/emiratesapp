@@ -1,246 +1,380 @@
-import { useState } from 'react';
-import { Plane, Lock, Mail, Shield, Key, Fingerprint, UserPlus } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useApp } from '../../context/AppContext';
+import { Plane, Lock, Mail, Shield, Key, Fingerprint } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../../lib/firebase';
+import { recordLoginActivity } from '../../services/loginActivityService';
+import { totpService } from '../../services/totpService';
+import { useBiometric } from '../../hooks/useBiometric';
 
 export default function LoginPage() {
-  const [showWaitlist, setShowWaitlist] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [accessCode, setAccessCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [show2FA, setShow2FA] = useState(false);
   const [twoFactorCode, setTwoFactorCode] = useState('');
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingUserData, setPendingUserData] = useState<any>(null);
   const [useBackupCode, setUseBackupCode] = useState(false);
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
+  const { setCurrentUser } = useApp();
+  const navigate = useNavigate();
+  const { isBiometricAvailable, loginWithBiometric } = useBiometric();
 
-  const [waitlistName, setWaitlistName] = useState('');
-  const [waitlistEmail, setWaitlistEmail] = useState('');
-  const [waitlistPhone, setWaitlistPhone] = useState('');
-  const [waitlistSuccess, setWaitlistSuccess] = useState(false);
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
 
-  const VALID_ACCESS_CODE = 'Gigi171224@';
-
-  const handleAccessCodeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (accessCode === VALID_ACCESS_CODE) {
-      setShowWaitlist(false);
-      setError('');
-    } else {
-      setError('Invalid access code. Please try again.');
+  const checkBiometricAvailability = async () => {
+    const available = await isBiometricAvailable();
+    setBiometricAvailable(available);
+    const lastEmail = localStorage.getItem('last_biometric_email');
+    if (lastEmail && available) {
+      setEmail(lastEmail);
     }
   };
 
-  const handleWaitlistSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleBiometricLogin = async () => {
+    if (!email) {
+      setError('Please enter your email address');
+      return;
+    }
 
-    setTimeout(() => {
-      console.log('Waitlist submission:', { waitlistName, waitlistEmail, waitlistPhone });
-      setWaitlistSuccess(true);
+    setLoading(true);
+    setError('');
+
+    try {
+      localStorage.setItem('last_biometric_email', email);
+      await loginWithBiometric(email);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Biometric login failed. Try using your password instead.');
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      if (email === 'demo@example.com' && password === 'demo123') {
+    try {
+      sessionStorage.setItem('pending2FA', 'true');
+
+      const tempCredential = await signInWithEmailAndPassword(auth, email, password);
+      const tempUser = tempCredential.user;
+
+      const has2FA = await totpService.check2FAStatus(tempUser.uid);
+
+      if (has2FA) {
+
+        const userDocRef = doc(db, 'users', tempUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        const userData = userDoc.data();
+
+
+        setPendingUserId(tempUser.uid);
+        setPendingUserData({
+          uid: tempUser.uid,
+          email: userData?.email || tempUser.email,
+          name: userData?.name || 'User',
+          role: (userData?.role || 'student') as 'student' | 'mentor' | 'governor',
+          plan: (userData?.plan || 'free') as 'free' | 'pro' | 'vip',
+          country: userData?.country || '',
+          bio: userData?.bio || '',
+          expectations: userData?.expectations || '',
+          photoURL: userData?.photo_base64 || '',
+          hasCompletedOnboarding: userData?.hasCompletedOnboarding || false,
+          hasSeenWelcomeBanner: userData?.hasSeenWelcomeBanner || false,
+          onboardingCompletedAt: userData?.onboardingCompletedAt,
+          welcomeBannerSeenAt: userData?.welcomeBannerSeenAt,
+          createdAt: userData?.createdAt || new Date().toISOString(),
+          updatedAt: userData?.updatedAt || new Date().toISOString(),
+        });
+
         setShow2FA(true);
         setLoading(false);
-      } else {
-        setError('Invalid email or password');
-        setLoading(false);
+        return;
       }
-    }, 1000);
+
+      sessionStorage.removeItem('pending2FA');
+
+      const userDocRef = doc(db, 'users', tempUser.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        throw new Error('User profile not found. Please contact support.');
+      }
+
+      const userData = userDoc.data();
+      const currentUser = {
+        uid: tempUser.uid,
+        email: userData.email || tempUser.email,
+        name: userData.name || 'User',
+        role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
+        plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
+        country: userData.country || '',
+        bio: userData.bio || '',
+        expectations: userData.expectations || '',
+        photoURL: userData.photo_base64 || '',
+        hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+        hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+        onboardingCompletedAt: userData.onboardingCompletedAt,
+        welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+        createdAt: userData.createdAt || new Date().toISOString(),
+        updatedAt: userData.updatedAt || new Date().toISOString(),
+      };
+
+      setCurrentUser(currentUser);
+
+      await updateDoc(doc(db, 'users', tempUser.uid), {
+        lastLogin: serverTimestamp()
+      });
+
+      await recordLoginActivity(tempUser.uid, true);
+
+      navigate('/dashboard');
+    } catch (err: any) {
+      if (err.code === 'permission-denied') {
+        return;
+      }
+
+      let errorMessage = 'Invalid email or password';
+
+      if (err.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email.';
+      } else if (err.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please try again later.';
+      } else if (err.code === 'auth/invalid-credential') {
+        errorMessage = 'Invalid email or password.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      console.log('Google Sign-In clicked');
-      setLoading(false);
-    }, 1000);
-  };
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-  const handle2FAVerification = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+      let userDoc = await getDoc(doc(db, 'users', user.uid));
 
-    setTimeout(() => {
-      if (useBackupCode ? twoFactorCode.length === 8 : twoFactorCode === '123456') {
-        console.log('2FA verified, redirecting to dashboard...');
-        setLoading(false);
-      } else {
-        setError('Invalid verification code');
-        setLoading(false);
+      if (!userDoc.exists()) {
+        await setDoc(doc(db, 'users', user.uid), {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || 'User',
+          photo_base64: user.photoURL || '',
+          role: 'student',
+          plan: 'free',
+          country: '',
+          bio: '',
+          expectations: '',
+          hasCompletedOnboarding: false,
+          hasSeenWelcomeBanner: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        userDoc = await getDoc(doc(db, 'users', user.uid));
       }
-    }, 1000);
+
+      const userData = userDoc.data()!;
+
+      const currentUser = {
+        uid: user.uid,
+        email: userData.email || user.email,
+        name: userData.name || user.displayName || 'User',
+        role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
+        plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
+        country: userData.country || '',
+        bio: userData.bio || '',
+        expectations: userData.expectations || '',
+        photoURL: userData.photo_base64 || user.photoURL || '',
+        hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+        hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+        onboardingCompletedAt: userData.onboardingCompletedAt,
+        welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+        createdAt: userData.createdAt || new Date().toISOString(),
+        updatedAt: userData.updatedAt || new Date().toISOString(),
+      };
+
+      const has2FA = await totpService.check2FAStatus(user.uid);
+
+      if (has2FA) {
+        setPendingUserId(user.uid);
+        setPendingUserData(currentUser);
+        setShow2FA(true);
+        setLoading(false);
+        await auth.signOut();
+        return;
+      }
+
+      setCurrentUser(currentUser);
+
+      await updateDoc(doc(db, 'users', user.uid), {
+        lastLogin: serverTimestamp()
+      });
+
+      await recordLoginActivity(user.uid, true);
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+
+      let errorMessage = 'Failed to sign in with Google';
+
+      if (err.code === 'auth/configuration-not-found' || err.code === 'auth/invalid-api-key') {
+        errorMessage = '🔧 Google Sign-In Coming Soon! This feature is currently being configured. Please use email/password login for now.';
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        errorMessage = 'Sign-in cancelled. Please try again.';
+      } else if (err.code === 'auth/popup-blocked') {
+        errorMessage = 'Pop-up blocked! Please allow pop-ups for this site in your browser settings and try again.';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        errorMessage = 'Domain not authorized. Please contact support.';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        errorMessage = '🔧 Google Sign-In Coming Soon! This sign-in method is being activated. Use email/password for now.';
+      } else if (err.message && !err.message.includes('Firebase')) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (showWaitlist) {
-    if (waitlistSuccess) {
-      return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-sky-50">
-          <div className="max-w-md w-full">
-            <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-8">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">You're on the list!</h2>
-                <p className="text-gray-600 mb-6">
-                  We'll notify you at <span className="font-semibold">{waitlistEmail}</span> when access becomes available.
-                </p>
-                <button
-                  onClick={() => {
-                    setShowWaitlist(false);
-                    setWaitlistSuccess(false);
-                    setWaitlistName('');
-                    setWaitlistEmail('');
-                    setWaitlistPhone('');
-                  }}
-                  className="w-full py-3 bg-gradient-to-r from-blue-600 to-sky-500 text-white rounded-xl font-bold hover:opacity-90 transition"
-                >
-                  Back to Login
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
+  // TODO: Re-enable 2FA with browser-compatible TOTP library
+  // const handleVerify2FA = async () => {
+  //   if (!twoFactorCode || twoFactorCode.length !== 6 || !pendingUserId) {
+  //     setError('Please enter a 6-digit code');
+  //     return;
+  //   }
+
+  //   setLoading(true);
+  //   setError('');
+
+  //   try {
+  //     const valid = await twoFactorService.verifyToken(pendingUserId, twoFactorCode);
+
+  //     if (valid) {
+  //       const userDoc = await getDoc(doc(db, 'users', pendingUserId));
+  //       const userData = userDoc.data()!;
+
+  //       const currentUser = {
+  //         uid: pendingUserId,
+  //         email: userData.email,
+  //         name: userData.name || 'User',
+  //         role: (userData.role || 'student') as 'student' | 'mentor' | 'governor',
+  //         plan: (userData.plan || 'free') as 'free' | 'pro' | 'vip',
+  //         country: userData.country || '',
+  //         bio: userData.bio || '',
+  //         expectations: userData.expectations || '',
+  //         photoURL: userData.photo_base64 || '',
+  //         hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+  //         hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+  //         onboardingCompletedAt: userData.onboardingCompletedAt,
+  //         welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+  //         createdAt: userData.createdAt || new Date().toISOString(),
+  //         updatedAt: userData.updatedAt || new Date().toISOString(),
+  //       };
+
+  //       setCurrentUser(currentUser);
+  //       await recordLoginActivity(pendingUserId, true);
+  //       navigate('/dashboard');
+  //     } else {
+  //       setError('Invalid verification code. Please try again.');
+  //     }
+  //   } catch (err: any) {
+  //     console.error('2FA verification error:', err);
+  //     setError('Verification failed. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const handle2FAVerification = async () => {
+    if (!pendingUserId || !twoFactorCode || !pendingUserData) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      let isValid = false;
+
+      if (useBackupCode) {
+        isValid = await totpService.verifyBackupCode(pendingUserId, twoFactorCode);
+        if (!isValid) {
+          setError('Invalid backup code. Please try again.');
+          setLoading(false);
+          return;
+        }
+      } else {
+        isValid = await totpService.verifyUserToken(pendingUserId, twoFactorCode);
+        if (!isValid) {
+          setError('Invalid verification code. Please try again.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      sessionStorage.removeItem('pending2FA');
+
+      await signInWithEmailAndPassword(auth, email, password);
+
+      setCurrentUser(pendingUserData);
+
+      await updateDoc(doc(db, 'users', pendingUserId), {
+        lastLogin: serverTimestamp()
+      });
+
+      await recordLoginActivity(pendingUserId, true);
+
+      sessionStorage.removeItem('pendingUserId');
+      sessionStorage.removeItem('pendingUserData');
+      setShow2FA(false);
+      setPendingUserId(null);
+      setPendingUserData(null);
+      setTwoFactorCode('');
+
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError('Verification failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
-
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-sky-50">
-        <div className="max-w-md w-full">
-          <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-8">
-            <div className="flex justify-center mb-6">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-500 rounded-2xl flex items-center justify-center shadow-xl">
-                <Plane className="w-10 h-10 text-white" />
-              </div>
-            </div>
-
-            <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
-              Join the Waitlist
-            </h1>
-            <p className="text-center text-gray-600 mb-8">
-              Be the first to know when we launch
-            </p>
-
-            <form onSubmit={handleWaitlistSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <UserPlus className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={waitlistName}
-                    onChange={(e) => setWaitlistName(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none bg-white"
-                    placeholder="John Doe"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="email"
-                    value={waitlistEmail}
-                    onChange={(e) => setWaitlistEmail(e.target.value)}
-                    required
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none bg-white"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-900 mb-2">
-                  Phone Number (Optional)
-                </label>
-                <div className="relative">
-                  <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                  </svg>
-                  <input
-                    type="tel"
-                    value={waitlistPhone}
-                    onChange={(e) => setWaitlistPhone(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none bg-white"
-                    placeholder="+1 (555) 000-0000"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-sky-500 text-white rounded-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                {loading ? 'Submitting...' : 'Join Waitlist'}
-              </button>
-            </form>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white/70 text-gray-500">Have an access code?</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleAccessCodeSubmit} className="mt-4">
-                <div className="relative">
-                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none bg-white"
-                    placeholder="Enter access code"
-                  />
-                </div>
-                {error && (
-                  <p className="text-sm text-red-600 mt-2">{error}</p>
-                )}
-                <button
-                  type="submit"
-                  className="w-full mt-3 py-3 border-2 border-gray-300 rounded-xl font-bold text-gray-700 hover:bg-gray-50 transition"
-                >
-                  Access Login
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-sky-50">
-      <div className="max-w-md w-full">
-        <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-8">
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-md w-full"
+      >
+        <div className="liquid-crystal-panel p-8">
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-sky-500 rounded-2xl flex items-center justify-center shadow-xl">
-              <Plane className="w-10 h-10 text-white" />
-            </div>
+            <img
+              src="/Crews (2).png"
+              alt="The Crew Academy"
+              className="h-24 w-auto"
+            />
           </div>
 
           <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
@@ -262,7 +396,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none bg-white"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="your.email@example.com"
                 />
               </div>
@@ -279,25 +413,33 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 outline-none bg-white"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="Enter your password"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-50 border-2 border-red-400/40 text-gray-900 px-4 py-3 text-sm rounded-xl">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="liquid-card-overlay bg-red-500/20 border-red-400/40 text-gray-900 px-4 py-3 text-sm"
+              >
                 {error}
-              </div>
+              </motion.div>
             )}
 
             {show2FA && (
-              <div className="border-2 border-red-500/30 rounded-xl p-5 bg-gradient-to-br from-red-50 to-white">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="border-2 border-[#D71920]/30 rounded-xl p-5 bg-gradient-to-br from-red-50 to-white"
+              >
                 <div className="flex items-center gap-3 mb-4">
                   {useBackupCode ? (
-                    <Key className="w-6 h-6 text-red-600" />
+                    <Key className="w-6 h-6 text-[#D71920]" />
                   ) : (
-                    <Shield className="w-6 h-6 text-red-600" />
+                    <Shield className="w-6 h-6 text-[#D71920]" />
                   )}
                   <div>
                     <h3 className="font-bold text-gray-900">Two-Factor Authentication</h3>
@@ -318,7 +460,7 @@ export default function LoginPage() {
                     }
                   }}
                   placeholder={useBackupCode ? 'ABC12345' : '000000'}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-mono text-xl text-center tracking-widest focus:border-red-500 outline-none mb-3"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-mono text-xl text-center tracking-widest focus:border-[#D71920] outline-none mb-3"
                   maxLength={useBackupCode ? 8 : 6}
                   autoFocus
                 />
@@ -330,7 +472,7 @@ export default function LoginPage() {
                     setTwoFactorCode('');
                     setError('');
                   }}
-                  className="w-full text-xs text-red-600 hover:underline mb-3"
+                  className="w-full text-xs text-[#D71920] hover:underline mb-3"
                 >
                   {useBackupCode ? 'Use authenticator code instead' : 'Use backup code instead'}
                 </button>
@@ -339,7 +481,14 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => {
+                      sessionStorage.removeItem('pending2FA');
+                      sessionStorage.removeItem('pending2FAEmail');
+                      sessionStorage.removeItem('pending2FAPassword');
+                      sessionStorage.removeItem('pendingUserId');
+                      sessionStorage.removeItem('pendingUserData');
                       setShow2FA(false);
+                      setPendingUserId(null);
+                      setPendingUserData(null);
                       setTwoFactorCode('');
                       setError('');
                       setUseBackupCode(false);
@@ -352,18 +501,18 @@ export default function LoginPage() {
                     type="button"
                     onClick={handle2FAVerification}
                     disabled={loading || (useBackupCode ? twoFactorCode.length !== 8 : twoFactorCode.length !== 6)}
-                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl text-sm font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl text-sm font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Verifying...' : 'Verify'}
                   </button>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             <button
               type="submit"
               disabled={loading || show2FA}
-              className="w-full py-3.5 bg-gradient-to-r from-blue-600 to-sky-500 text-white rounded-xl font-bold hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              className="w-full liquid-button-primary text-white py-3.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
@@ -375,7 +524,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white/70 text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
               </div>
             </div>
 
@@ -394,38 +543,32 @@ export default function LoginPage() {
               Sign in with Google
             </button>
 
-            <button
-              type="button"
-              onClick={() => alert('Biometric authentication would be triggered here')}
-              disabled={loading}
-              className="mt-3 w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-bold hover:from-purple-700 hover:to-purple-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            >
-              <Fingerprint className="w-5 h-5" />
-              Sign in with Face ID / Touch ID
-            </button>
-          </div>
-
-          <div className="mt-6 text-center space-y-2">
-            <p className="text-gray-600 text-sm">
-              Don't have an account?{' '}
+            {biometricAvailable && (
               <button
                 type="button"
-                onClick={() => setShowWaitlist(true)}
-                className="text-blue-600 font-bold hover:underline"
+                onClick={handleBiometricLogin}
+                disabled={loading || !email}
+                className="mt-3 w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-bold hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
-                Join Waitlist
+                <Fingerprint className="w-5 h-5" />
+                {loading ? 'Authenticating...' : 'Sign in with Face ID / Touch ID'}
               </button>
+            )}
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-gray-600 text-sm">
+              Don't have an account?{' '}
+              <Link
+                to="/register"
+                className="text-[#D71920] font-bold hover:underline"
+              >
+                Register
+              </Link>
             </p>
-            <button
-              type="button"
-              onClick={() => setShowWaitlist(true)}
-              className="text-gray-500 text-xs hover:text-gray-700 hover:underline"
-            >
-              Need an access code?
-            </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
